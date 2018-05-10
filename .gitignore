@@ -1,0 +1,16 @@
+*.sw[a-p]
+*.o
+*~
+*.chr
+*.chrgb
+*.pb16
+/obj/nes/*.s
+/obj/gb/*.s
+/zip.in
+*.nes.deb
+/nes/map.txt
+__pycache__/
+*.pyc
+
+# this is NES and Game Boy homebrew, not DSiWare
+*.DS_Store
