@@ -9,6 +9,11 @@
 /zip.in
 *.nes.deb
 /nes/map.txt
+/gameboy/gb240p.gb
+/gameboy/gb240p.map
+/gameboy/gb240p.sym
+/nes/240pee-bnrom.nes
+/nes/240pee.nes
 __pycache__/
 *.pyc
 
