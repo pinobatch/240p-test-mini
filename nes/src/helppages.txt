@@ -1,0 +1,763 @@
+== 240p Test Suite: Menu ==
+
+	PLUGE
+	Gradient color bars
+	SMPTE color bars
+	Color bars on gray
+	Color bleed
+	Grid
+	Linearity
+	Gray ramp
+	Solid color screen
+	IRE
+	Sharpness
+	Chroma crosstalk
+	CPU clock speed
+----
+	Overscan
+	Shadow sprite
+	Stopwatch
+	Manual lag test
+	Hill zone scroll test
+	Vertical scroll test
+	Grid scroll test
+	Full screen stripes
+	Backlight zone test
+	Zapper test
+	Sound test
+	Audio sync test
+	About
+	Credits
+
+== About ==
+
+The 240p Test Suite was
+designed with two goals in
+mind:
+
+1. Evaluate TV sets and
+   video processors for ability
+   to handle 240p signals.
+2. Turn a game console into
+   a test signal generator
+   to help in calibrating the
+   black, white, and color
+   levels of a display.
+
+The Nintendo Entertainment
+System (NES) can output 240
+picture lines in a progressive
+"double struck" mode. It does
+not support interlaced video,
+and its 52-color palette is
+closer to HSV than RGB.
+----
+Press Start in any test
+pattern to show help for
+that pattern.
+
+The test suite is also
+available for several other
+consoles. For more info, visit
+http://junkerhq.net/240p
+
+== PLUGE ==
+
+The PLUGE (picture line-up
+generation equipment)
+pattern is used to adjust
+the black level.
+
+The inner bars are a signal
+level slightly lower than
+standard black, which causes
+some TVs to distort or even
+lose sync. The outer bars
+are the darkest mix of
+colors the NES can show.
+
+You should adjust the TV's
+"brightness" control until the
+outer bars are clearly visible
+and inner bars are not.
+----
+A: Darken the entire screen
+  by 25% with emphasis filter
+Select: Switch outer bars
+  between gray and color
+
+The emphasis filter and gray
+outer bars may misbehave on
+NES consoles modded with
+a 2C03 or 2C05 RGB PPU
+taken from a Vs. System or
+PlayChoice 10 arcade board.
+
+== Gradient color bars ==
+
+This pattern allows you to
+calibrate the red, green, and
+blue colors on your TV.
+
+Use the TV's "contrast"
+control to adjust the white
+level such that four levels
+each of red, green, and blue
+and three levels of white
+are visible, and the lightest
+level of each color is
+distinct from white.
+
+A: Hide or show 16px grid
+
+== SMPTE color bars ==
+
+This approximation of SMPTE
+EG 1-1990 can be used to
+calibrate for approximate
+color levels.
+
+A: Toggle bars' brightness
+Select: Toggle 1 kHz tone
+
+With some TVs, you can turn
+on blue-only mode to confirm
+color balance. But because
+the NES's composite encoder
+does not attempt to produce
+accurate RGB hues, these
+colors will not be pure.
+
+The mini-PLUGE at bottom
+right causes some TVs
+to distort or lose sync.
+
+== Color bars on gray ==
+
+This pattern shows color
+bars on a gray background.
+Ideally, it would be used
+with color filters to adjust
+color balance. But as with
+SMPTE bars, the NES PPU's
+non-RGB model breaks the
+blue filter trick.
+
+A: Toggle bars' brightness
+Select: Toggle 1 kHz tone
+
+Based on Digital Video
+Essentials: HD Basics
+
+== Color bleed ==
+
+This pattern helps diagnose
+color bleed caused by
+incorrect color resampling.
+
+↑↓←→: Move the
+  pattern by one pixel
+Hold ↑↓←→: Move the
+  pattern every frame
+A: Switch among
+  horizontal, vertical,
+  and diagonal patterns
+Select: Show or hide
+  frame counter
+
+Concept by Konsolkongen
+
+== Grid ==
+
+This pattern uses the full
+resolution of the screen.
+You can use it to verify that
+the entire picture is visible,
+including the entire red
+border, with no distortion.
+
+A: Change between 256x224
+   and 256x240 pixel grids
+Select: Change between
+   black and gray background
+
+Many games designed for
+NTSC display may show
+artifacts outside the
+256x224 pixel area.
+
+== Linearity ==
+
+This pattern shows five
+circles at the pixel aspect
+ratio of the NES PPU. NTSC
+is 8:7; PAL is close to 11:8.
+
+You can use it to verify that
+a display or scaler has its
+horizontal to vertical size
+ratio set correctly or to
+verify the lack of barrel
+distortion on a CRT.
+
+The diameter of each circle
+should be the same in all
+directions, and the diameter
+of all four small circles
+should be the same.
+
+A: Hide or show a
+   square grid
+
+== Gray ramp ==
+
+This gray ramp should not
+have a red, green, or blue
+tint to it.
+
+Some cheaper LCDs can have
+different gamma curves for
+the different components.
+
+== Solid color screen ==
+
+Some displays and scalers
+have problems when changing
+between solid black and
+solid white or bright colors.
+Some cables produce audio
+buzzing while a white
+screen is displayed.
+
+←→: Change among solid
+  white, black, red, green,
+  and blue screens
+A on black screen: Switch
+  between black and below 
+  black (some TVs lose sync)
+A on white screen: Enter or
+  leave custom color mode
+↑↓: Change custom color
+  brightness
+←→: Change custom color hue
+
+== IRE ==
+
+This test shows a rectangle
+centered on the screen and
+displays its brightness as a
+percentage of standard white.
+
+Some TVs lose sync when
+brightness becomes negative.
+A good TV won't.
+
+←→: Change brightness
+A: Toggle emphasis
+
+Percentage values measured
+by lidnariq of NESdev BBS
+
+== Sharpness ==
+
+You should set the sharpness
+of your TV to a value that
+shows clean black and gray
+transitions without white
+ghost lines on the side.
+
+On modern TVs, the
+"sharpness" control performs
+edge enhancement, which
+is designed for live action
+sources received through RF.
+Some TVs have zero as
+no change and high as
+enhancement. Others have
+middle as no change, high
+as enhancement, and low
+as blurring.
+
+== Chroma crosstalk ==
+
+This pattern shows colored
+stripes arranged to exploit
+crosstalk between the luma
+and chroma of the composite
+video output.
+
+The 2C02 PPU's output stage
+takes shortcuts to save cost.
+Because it doesn't filter
+chroma before adding it to
+luma, diagonal stripes and
+checkerboard patterns often
+produce crosstalk artifacts.
+
+On an NTSC NES, the word
+"Pass" appears with flicker.
+On an NES modified to output
+RGB, the stripes won't spell
+anything.
+
+== CPU clock speed ==
+
+Kevin Horton's Hi-Def NES
+mod includes a feature to
+overclock the NES CPU to
+reduce slowdown in games.
+This test measures the CPU's
+clock rate using the length
+of a scanline as a time base.
+
+Though the NES has no
+real-time clock, a program
+can measure the clock rate
+relative to the PPU's roughly
+15.7 kHz horizontal retrace.
+This frequency cannot be
+changed without causing
+the display to lose color
+or even lose sync.
+----
+Then it uses NMI and sprite
+0 timing to measure cycles
+per frame and per scanline.
+It guesses the hsync rate
+based on whether the PPU
+is making 262 or 312 lines:
+
+  NTSC: 15745.80 Hz
+  PAL:   15602.18 Hz
+
+From this, it calculates
+CPU clock speed.
+It repeats this calculation
+every few frames, so if you
+change the CPU's speed
+while the test runs, the
+displayed value will update.
+
+== Overscan ==
+
+With this pattern you can
+discover how much of the
+picture edge your TV hides.
+
+Historically, CRT TVs
+have been calibrated to
+"overscan", or draw the
+picture slightly past the
+visible area, in case aging
+capacitors cause the picture
+to shrink over time. This
+continues into the modern
+era, as a lot of productions
+have unwanted information
+in this overscan area.
+
+↑↓←→: Choose an edge
+Hold A + ↑↓←→:
+  Move that edge
+----
+Move each edge inward until
+you see the white border,
+then go back one pixel. Or
+leave one white pixel visible
+and subtract 1. The result
+is the amount of overscan
+in pixels in each direction.
+
+The NES picture is 256x240
+pixels. The nominal 4:3 frame
+on NTSC is 280x240, including
+12 pixels of border at left
+and right. This border is not
+included in the displayed
+amounts.
+
+PAL NES border is always
+black. It covers 2 pixels
+of the left and right sides
+and 1 on the top.
+
+== Shadow sprite ==
+
+This test draws a shadow
+sprite on every other frame,
+flickering at 30 or 25 Hz.
+Many games use such a
+flicker effect to show
+transparency, such as
+during mercy invincibility.
+
+Some deinterlacers display
+drop shadows correctly but
+still interpret 240p as 480i.
+The striped sprite should
+make it clear if a processor
+is trying to deinterlace the
+picture.
+----
+↑↓←→: Move sprite
+A: Skip flicker frame or
+  change stripe direction
+A+↑: Change shadow type
+  (flicker or stripes)
+A+←→: Change background
+Select: Change sprite shape
+
+Whether still or moving,
+background detail must not
+be lost, and the shadow must
+not disappear. The flicker
+pattern must not have
+horizontal stripes.
+
+Portrait of Gus by
+  darryl.revok
+Hill zone by mikejmoffitt
+  & Damian Yerrick
+
+== Stopwatch ==
+
+This stopwatch helps you
+measure a TV's lag, detect
+dropped frames, or just
+count how long your spouse
+has been on the phone.
+
+A: Start/stop
+Select when stopped: Reset
+Select when running: Lap
+↑: Show ruler at left
+↓: Toggle inactive circles
+
+The clock face below helps
+determine the frame even
+when the numbers above are
+blurry.
+----
+Lag measurement
+
+Connect two displays at once.
+One is being tested, and the
+other (the reference) should
+be a CRT SDTV or a display
+with known lag. For example,
+connect a CRT to the RF out
+of a front-loading NES and
+your scaler to the AV out.
+
+Use a digital camera to take
+a picture of both screens at
+the same time. The picture
+will show the difference in
+image processing latency
+between them. For some
+consumer LCD TVs, this
+may exceed five frames.
+----
+Lag measurement
+
+The ruler helps measure
+individual scanlines of lag.
+Use a short exposure on your
+camera and divide scanlines
+by 15.7 to get milliseconds.
+
+When Kevin Horton's Hi-Def
+NES mod is enabled, the
+video out works differently:
+white for sprites and black
+for background. The frame
+counter and rulers are drawn
+as sprites to remain visible.
+----
+Dropped frames
+
+A scaler with a frame buffer
+may drop frames because the
+frame rate of the NTSC NES
+and Super NES (60.10 Hz) is
+faster than standard (59.94
+Hz).
+
+At 59.94 Hz, it drops one
+frame in 345: one per 5.75
+seconds or two per 11.5.
+At 60.00 Hz, it drops one
+frame in 607: one per 10.12
+seconds or two per 20.24.
+
+Hi-Def NES compensates for
+this by slowing down the
+CPU and PPU.
+
+== Manual lag test ==
+
+This helps quantify a
+display's processing lag by
+showing a changing pattern
+on the screen, optionally
+with audio.
+
+Press A when the moving
+reticle aligns with the still
+one to display the offset
+in frames from the actual
+intersection and whether it
+was early or late. After ten
+presses that are not early,
+their average is shown.
+----
+↑↓: Choose a setting
+←→: Change setting's value
+
+Settings include the direction
+of the moving reticle
+(horizontal, vertical, or both),
+whether to randomize timing
+of movement, and whether to
+beep when A is pressed or
+beep and flash when the
+reticles align.
+
+Results will be more accurate
+if you are skilled at rhythm
+games such as Konami's
+Dance Dance Revolution or
+Activision's Guitar Hero.
+
+== Hill zone scroll test ==
+
+This test shows a scrolling
+background with several
+parallax strips. It can be
+used to notice any drops
+in frame rate.
+
+↑↓: Change speed
+←→: Change direction
+A: Stop or start
+
+Hill zone by mikejmoffitt
+  & Damian Yerrick
+
+== Vertical scroll test ==
+
+This test shows a scrolling
+background. It can be used
+to measure cadence
+detection in a deinterlacer.
+
+↑↓: Change speed
+←→: Change direction
+A: Stop or start
+
+Map by Artemio Urbina
+Tiles by Damian Yerrick
+
+== Grid scroll test ==
+
+A grid is scrolled vertically
+or horizontally. This can be
+used to test linearity and
+how well the display copes
+with scrolling and frame rate.
+Some scalers may produce a
+still image at maximum speed.
+
+↑↓: Change speed
+A: Stop or start
+A + ↑↓←→: Change direction
+
+== Full screen stripes ==
+
+You should see a pattern of
+lines, each one pixel wide.
+
+↑↓←→: Move the
+  pattern by one pixel
+Hold ↑↓←→: Move the
+  pattern every frame
+A: Switch among
+  horizontal, vertical,
+  and diagonal patterns
+Select: Show or hide
+  frame counter
+
+While you hold Up, the lines
+should flicker. If holding
+Up makes a still image, your
+scaler is treating the signal
+as interlaced and either
+discarding every other frame
+or weaving them incorrectly.
+
+== Backlight zone test ==
+
+This test displays a small
+moving square, letting you
+check how a display's
+backlight works with small
+bright areas. Some LED-lit
+LCDs dim darker areas to
+make black areas darker,
+which causes problems with
+scenes such as starfields.
+
+↑↓←→: Move the square
+Select: Change its size among
+  1, 2, 4, or 8 pixels on a side
+A: Hide or show the square
+
+== Sound test: Frequency ==
+
+	8000 Hz
+	4000 Hz
+	2000 Hz
+	1000 Hz
+	500 Hz
+	250 Hz
+	125 Hz
+	62 Hz
+	31 Hz
+	1000 Hz (pulse)
+	Hiss noise
+	Buzz noise
+	Crowd (PCM)
+
+== Sound test ==
+
+Use this test to ensure that
+the audio output is working
+and that audio and video are
+synchronized.
+
+A: Play a sound and
+  flash the screen
+
+The NES CPU has two audio
+output pins. It produces two
+pulse (square) waves on
+one and triangle, noise, and
+sample playback on the other.
+
+Most options in the menu use
+the triangle wave because it
+is the purest built-in tone,
+though it has a prominent
+overtone 5 octaves up.
+----
+The CPU generates noise with
+a polynomial counter that
+can operate in two modes:
+hiss (32767 steps)
+or buzz (93 steps).
+On the earliest revisions
+of the CPU, hiss and buzz
+sound the same.
+
+Some people modify NES
+consoles to make fake stereo,
+with pulse on the left and
+everything else on the right.
+----
+The PCM (sampled sound)
+output is tested with a
+bytebeat composition,
+defined by evaluating a
+bitwise formula 8000 times
+a second and using it as
+sample values.
+
+// "Crowd" by Kragen
+// License: CC BY
+main(t) { for (;;t++) putchar(
+  ((t<<1)^
+   ((t<<1)+(t>>7)&t>>12))
+  | t>>(4-(1^7&(t>>19)))
+  | t>>7
+); }
+
+http://canonical.org
+  /~kragen/bytebeat
+
+== Audio sync test ==
+
+This test flashes the whole
+screen white for two frames
+along with a 1 kHz test tone
+when the dot hits the floor.
+
+You can verify the sync
+between audio and video
+with recording equipment
+or an oscilloscope.
+
+A: Start/stop the test
+
+== Zapper test ==
+
+This tests whether a Zapper
+light gun plugged into port
+2 will work with your TV.
+
+Arrows at the right side
+show where it's pointed (red)
+and how long the photodiode
+remains activated (gray).
+A red arrow significantly
+below where the barrel is
+pointed indicates scaler lag.
+
+Point barrel up and down:
+  Move arrows
+----
+The Zapper uses a 15.7 kHz
+resonator to tell a CRT
+SDTV's light from, say, a
+light bulb. Thus it won't see
+a high-definition CRT, whose
+horizontal sync rate is far
+higher, or an LCD that doesn't
+flicker in the first place.
+
+It is conjectured that the
+Zapper will see a 31 kHz CRT
+with every other line dark,
+such as a line doubler that
+draws "scanlines" between
+picture lines and has delay
+less than 5 lines (317 us).
+
+== 240p Test Suite ==
+
+Version 0.16 (2017-03-xx)
+Gray grid and Crowd
+
+Concept by Artemio Urbina
+  🐦 @Artemio
+Program by Damian Yerrick
+  🐦 @PinoBatch
+
+© 2011-2016 Artemio Urbina
+© 2015-2017 Damian Yerrick
+This is free software; see the
+source for copying conditions.
+There is NO warranty, not
+even for MERCHANTABILITY
+or FITNESS FOR A
+PARTICULAR PURPOSE.
+----
+You can help this project by
+running the test on authentic
+and clone NES consoles, both
+straight to the TV and with
+high-quality external scalers,
+and spreading the word about
+the project.
+
+Interested? Apply at
+http://goo.gl/XF8ef6

@@ -1,0 +1,165 @@
+0.16 (2017-03-xx)
+* Grid: Select toggles gray or black background (parity with
+  Genesis test 1.15)
+* Sound test: Added "Crowd", a bytebeat composition by Kragen
+  ported to NES by rainwarrior
+* paginate_help.py: Specify UTF-8 encoding for input file
+  (Python for Windows instead defaults to cp1252)
+* paginate_help.py: Fix NameError in error message formation
+* paginate_help.py: Helper to raise UnicodeEncodeError, whose
+  constructor argument order is undocumented outside interpreter
+  source code
+* makefile: Work around %Path% quirk in Python for Windows
+
+0.15 (2017-01-23)
+* Removed Famicom audio lag test after negative results by ccovell
+  and krom
+* Stopwatch: Clock face uses a blue active circle and pink inactive
+  circles for contrast (requested by rainwarrior)
+* Stopwatch: Down to show or hide inactive circles (requested by
+  rainwarrior)
+
+0.14 (2016-12-31)
+* Added chroma crosstalk test for NTSC
+* Added basic Zapper test based on Zap Ruder
+* Added audio lag test using Famicom microphone (caution: untested
+  on hardware)
+* PLUGE, SMPTE, Solid color screen, IRE: Help page warns about
+  super-black signal causing distortion (requested by rainwarrior)
+* Some help copyedits
+* Documented interbank call gate mechanism
+
+0.13 (2016-08-04)
+* Reorganized most compressed graphics into "files"
+* Moved compressed graphics files into banks 0 and 1
+* Made separate BNROM build, with graphics decompression code
+  behind interbank call gates
+* Expanded usable portion of ROM from 48K to 64K
+* "make clean" is more thorough
+* Sound test includes noise channel in hiss and buzz mode
+  (requested by rainwarrior)
+* Start on main menu always opens About (SNES parity;
+  reported by Artemio)
+
+0.12 (2016-07-26)
+* Manual lag test: Result screen background is black even if last
+  press is Marvelous (0.09 regression; reported by Quietust)
+* Stopwatch: Darkened blue inactive circles in clock face to
+  improve visibility on black-and-white TVs (requested by retrorgb)
+* Stopwatch: Draws frame number with sprites to remain visible
+  through composite out of Hi-Def NES (requested by retrorgb)
+* Stopwatch: Up to show scanline ruler (requested by retrorgb)
+* Grid: Fixed reversal of red and white colors
+* Help: Doesn't draw page numbers for 1-page documents
+
+0.11 (2016-07-16)
+* Refactored OAM upload and scrolling to top left to save code size
+* CPU clock speed: Rearranged alignment-sensitive code to save size
+* Stopwatch: Uses metasprite drawing routine from Shadow sprite
+* Hill zone scroll test: Left and Right both toggle direction
+* Added vertical scrolling test (parity with SNES test 1.03)
+
+0.10 (2016-07-13)
+* Fixed Gray ramp source address, which caused a black screen
+  (0.09 regression; reported by Artemio)
+* Linearity: Help mentions PAL PAR
+* Stills: Refactored check for help page to save code size
+* IRE: Treats Up as Right and Down as Left for convenience
+
+0.09 (2016-06-26)
+* CPU clock speed no longer changes "Dendy" in main menu
+  to "PAL" (reported by Eugene.S)
+* Manual lag: Audio on by default, and when enabled, beeps
+  for A Button presses and flashes when reticles align
+  (parity with SNES test 1.03)
+* Added Audio sync test: Press A to make the dot bounce and
+  beep when it hits the floor (parity with SNES test 1.03)
+* Gus blinks on the help pages
+
+0.08.2 (2015-12-25)
+* Includes a BNROM mapper hack produced by mirroring the fixed bank
+  into the top half of both 32K banks
+* making-carts.md: Mentions less rework needed for Konami "24" boards
+  (requested by FrankWDoom)
+
+0.08.1 (2015-12-04)
+* Mentions the TG16 port (reported by Artemio)
+* Mentions modifying the case for 32-pin EPROMs (reported by Ice Man)
+* Corrected pins 30/31 for 32-pin EPROMs (reported by Ice Man)
+
+0.08 (2015-11-26)
+* Shadow sprite: Restored Hepsie's colors (regression reported by
+  JRoatch)
+* CPU clock speed: Displays NMI scanline to distinguish a Dendy
+  famiclone from an overclocked PAL NES (requested by Ice Man)
+* CPU clock speed: Reads controller while drawing results to make
+  hotkeys on Hi-Def NES more responsive (requested by kevtris)
+* Added guide to making carts based on Ice Man's guide
+* Includes a Python program to split iNES ROMs into PRG and CHR
+
+0.07 (2015-11-25)
+* CPU clock speed: Help page mentions real time updates
+* Stopwatch: Help page mentions use as a dropped frames test
+* Hill zone scroll test (NTSC): Adjusted bottom split's timing
+
+0.06 (2015-11-20)
+* First attempt at a ceiling for the help screen background
+* Added CPU clock speed test for Hi-Def NES users
+  (requested by Ice Man)
+* Saves and restores position on main menu even if the user views
+  a help page or the Sound test submenu (requested by JRoatch)
+* SMPTE color bars, 601 color bars: Silences beep when closing
+  (reported by JRoatch)
+* Overscan: Uploads OAM before palette because some capture cards
+  (and presumably underscanning displays) capture the start of vblank
+  and can see the palette update rainbow streak (requested by thefox)
+* Overscan: Clarified meaning of leaving one white pixel
+  on the screen (requested by thefox)
+
+0.05 (2015-11-18)
+* Menu: Displays TV system name (NTSC, PAL, or Dendy) in corner
+* Made some tests' help pages more concise
+* Color bleed, Stopwatch, Full screen stripes:
+  Frame counter wraps at 50 instead of 60 on PAL NES and Dendy
+* Linearity: Added a dot at dead center
+* Linearity: Reduced the large circle to 224 pixels tall on NTSC
+  and 239 pixels tall on PAL
+* Linearity: Moved small circles 2 pixels away from the sides on PAL
+* IRE: Incorporates signal measurements by lidnariq
+* Overscan: Help page explains PAL border
+* Overscan: Redraws borders after returning from help page
+  (reported by thefox)
+* Hill zone scroll test: Corrected parallax strip height on PAL NES
+* Sound test, SMPTE color bars, 601 color bars:
+  Corrected frequency on PAL NES
+* Sound test: Corrected emphasis color on PAL NES and Dendy
+
+0.04 (2015-11-16)
+* IRE: Added emphasis and $2D/$3D grays
+* Shadow sprite: Added full functionality
+* Added Hill zone scroll test with Green Hill Zone-inspired
+  background by mikejmoffitt
+* Sound test: Added pulse beep (requested by mikejmoffitt)
+* Full README file
+
+0.03 (2015-11-05)
+* PLUGE: Added choice of gray ($2D) instead of color ($04+$0A)
+  outer bars (requested by lidnariq)
+* PLUGE: Added choice of gray emphasis (requested by lidnariq)
+* IRE: Added bottom level of black on below-black
+* Unified planned Drop shadow sprite and Striped sprite
+* Shadow sprite: Added an anime-style illustration of the mascot
+  by darryl.revok, replacing motoko.bmp
+
+0.02 (2015-10-28)
+* Added Solid color screen
+* Added Overscan
+* Added Stopwatch
+* Added Manual lag test
+* Addded Grid scroll test
+* Added Backlight zone test
+* Added Sound test
+* Weakened tsurime shape of mascot's eyelids
+
+0.01 (2015-10-23)
+* initial release

@@ -1,0 +1,632 @@
+;
+; Megaton: Manual lag test for 240p test suite
+; Copyright 2018 Damian Yerrick
+;
+; This program is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 2 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License along
+; with this program; if not, write to the Free Software Foundation, Inc.,
+; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+;
+include "src/gb.inc"
+include "src/global.inc"
+
+
+MAX_TESTS equ 10
+CHECKBOXTILE equ $02
+OFFONTILE equ $80
+CENTERPOS = 128
+LEFTWALL = 128-36
+RIGHTWALL = 128+36
+DIGITSPACE_TILE = $E0
+
+  rsset hTestState
+framecounts   rb 9
+lastrawlag    rb 1  ; in signed magnitude (7 set: early); overlaps framecounts
+
+num_tests     rb 1
+cursor_y      rb 1
+reticlepos    rb 1
+reticletarget rb 1
+reticledir    rb 1  ; 1: horizontal; 2: vertical; 3: both
+enableflags   rb 1
+
+
+section "megaton",ROM0,align[4]
+megatontiles_chr: incbin "obj/gb/megatontiles.chrgb16.pb16"
+sizeof_megaton_tiles = 320
+
+CROSSING_BEEP_FREQ = 2048-131
+A_PRESS_BEEP_FREQ = 2048-262
+
+; Megaton: Manual lag test
+activity_megaton::
+  xor a
+  ldh [num_tests],a
+  ldh [cursor_y],a
+  inc a
+  ldh [reticledir],a
+  ld a,$03
+  ldh [enableflags],a
+
+.restart:
+  call lcd_off
+  xor a
+  ld [help_bg_loaded],a
+
+  ; Clear the tilemap
+  ld h,a
+  ld de,_SCRN0
+  ld bc,32*18
+  call memset
+
+  ; Clear CHR used for previous lags (tiles $E0-$F3)
+  ld de,CHRRAM0+DIGITSPACE_TILE*16
+  ld bc,2*16*MAX_TESTS
+  call memset
+
+  ; Turn on audio
+  ld a,$80
+  ldh [rNR52],a  ; Bring audio circuit out of reset
+  ld a,$FF
+  ldh [rNR51],a  ; Set panning
+  ld a,$77
+  ldh [rNR50],a  ; Set master volume
+  xor a
+  ldh [rNR10],a  ; Disable sweep
+  ld a,$80
+  ldh [rNR11],a  ; Duty 50%
+  ldh [rNR21],a  ; Duty 50%
+  ld a,LOW(CROSSING_BEEP_FREQ)
+  ldh [rNR13],a  ; Frequency
+  ld a,LOW(A_PRESS_BEEP_FREQ)
+  ldh [rNR23],a  ; Frequency
+
+  ; Load CHR
+  ld de,megatontiles_chr
+  ld hl,CHRRAM0
+  ld b,sizeof_megaton_tiles/16
+  call pb16_unpack_block
+  ld de,CHRRAM1>>4
+  ld hl,megaton_labels
+  call vwfDrawLabels
+
+  ; Draw stationary reticle with its top left at (64, 48)
+  ld hl,_SCRN0+32*6+8
+  ld a,$04
+  call draw_still_reticle_piece
+  ld a,$05
+  call draw_still_reticle_piece
+  ld a,$0C
+  call draw_still_reticle_piece
+  ld a,$0D
+  call draw_still_reticle_piece
+
+  ; Place initial reticle at a constant position
+  ld a,LEFTWALL
+  ldh [reticlepos],a
+  ld a,RIGHTWALL
+  ldh [reticletarget],a
+
+  ; Draw space for digits in tilemap
+  ld a,DIGITSPACE_TILE
+  ld b,MAX_TESTS
+  ld hl,_SCRN0+32*1+1
+  ld de,30
+  .digitspaceloop:
+    ld [hl+],a
+    inc a
+    ld [hl+],a
+    inc a
+    add hl,de
+    dec b
+    jr nz,.digitspaceloop
+
+  ; Not using grade labels for two reasons:
+  ; 1. There's concern that they're misleading
+  ; 2. Not enough colors to display
+
+  ; Seed the RNG to nmis*257+256
+  ld a,[nmis]
+  ld c,a
+  inc a
+  ld b,a
+  call srand
+
+  ; Turn on rendering (blank now, run later)
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_8X16
+  ld [vblank_lcdc_value],a
+  ldh [rLCDC],a
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
+  ldh [rOBP0],a
+  ldh [rBGP],a
+
+  ; Draw previous results
+  ld b,0
+  .prevresultloop:
+    ld a,[num_tests]
+    cp b
+    jr z,.noprevresults
+    push bc
+    call draw_result_b
+    pop bc
+    inc b
+    jr .prevresultloop
+  .noprevresults:
+
+.loop:
+  ld b,helpsect_manual_lag_test
+  call read_pad_help_check
+  jp nz,.restart
+
+  ; Input handling
+  ld a,[new_keys]
+  bit PADB_B,a
+  jr z,.not_exit
+    ; Turn off audio and end test
+    xor a
+    ldh [rNR52],a
+    ret  
+  .not_exit:
+  call handle_cursor_move
+  ld a,[new_keys]
+  bit PADB_A,a
+  jr z,.not_A_press
+    call grade_press
+    ldh a,[num_tests]
+    cp MAX_TESTS
+    jp nc,activity_megaton_complete
+    ldh a,[enableflags]
+    bit 1,a
+    ld a,$F0
+    jr nz,.have_A_press_volume
+  .not_A_press:
+    xor a
+  .have_A_press_volume:
+  ldh [rNR22],a
+  ld a,$80|HIGH(A_PRESS_BEEP_FREQ)
+  ldh [rNR24],a
+
+  ; Draw moving sprites
+  call move_reticle
+  xor a
+  ld [oam_used],a
+
+  ldh a,[reticledir]
+  bit 0,a
+  jr z,.nohreticle
+    call draw_h_reticle
+  .nohreticle:
+
+  ldh a,[reticledir]
+  bit 1,a
+  jr z,.novreticle
+    call draw_v_reticle
+  .novreticle:
+  call lcd_clear_oam
+
+  call wait_vblank_irq
+  call run_dma
+
+  ; Draw checkbox for direction: horizontal
+  ldh a,[reticledir]
+  rra
+  ld b,CHECKBOXTILE>>1
+  rl b
+  ld hl,_SCRN0+32*15+9
+  ld [hl],b
+
+  ; Draw checkbox for direction: vertical
+  rra
+  ld a,CHECKBOXTILE>>1
+  rla
+  ld [_SCRN0+32*15+13],a
+
+  ; Draw checkbox for randomize
+  ld a,[enableflags]
+  ld hl,_SCRN0+32*16+9
+  rra
+  push af
+  call write_carry_boolean
+  pop af
+
+  ; Draw checkbox for audio
+  ld hl,_SCRN0+32*17+9
+  rra
+  call write_carry_boolean
+
+  ; Draw cursor
+  ld de,32
+  ld hl,_SCRN0+32*15+1
+  ldh a,[cursor_y]
+  ld c,a
+  inc c
+  ld b,3
+  .cursorloop:
+    xor a
+    dec c
+    jr nz,.cursoreq
+      inc a
+    .cursoreq:
+    ld [hl],a
+    add hl,de
+    dec b
+    jr nz,.cursorloop
+
+  ; If flashing enabled, and reticles overlap perfectly, flash
+  ldh a,[enableflags]
+  bit 1,a
+  jr z,.not_flash
+  ldh a,[reticlepos]
+  cp CENTERPOS
+  jr nz,.not_flash
+    ld a,$FF  ; all black
+    ld b,$F0  ; beep
+    jr .have_bgp
+  .not_flash:
+    ld a,%01101100
+    ld b,$00  ; silence
+  .have_bgp:
+  ldh [rBGP],a
+  ld a,b
+  ldh [rNR12],a
+  ld a,$80|HIGH(CROSSING_BEEP_FREQ)
+  ldh [rNR14],a
+  jp .loop
+
+activity_megaton_complete:
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01
+  ld [vblank_lcdc_value],a
+  
+  call vwfClearBuf
+  
+  ; Replace "Press A when reticles align"
+  ld hl,help_line_buffer
+  ld de,avglag_prolog
+  call stpcpy
+
+  ; Count the total frames
+  xor a
+  ld bc,MAX_TESTS*$100+low(framecounts)
+  .sumloop:
+    ld d,a
+    ld a,[$FF00+c]
+    add d
+    inc c
+    dec b
+    jr nz,.sumloop
+  call bcd8bit
+  cp $10
+  jr c,.no_tens
+    ld b,a
+    swap a
+    and $0F
+    or "0"
+    ld [hl+],a
+    ld a,b
+    and $0F
+  .no_tens:
+  or "0"
+  ld [hl+],a
+  ld a,"."
+  ld [hl+],a
+  ld a,c
+  or "0"
+  ld [hl+],a
+
+  ld de,avglag_epilog
+  call stpcpy
+  xor a
+  ld [hl],a
+
+  ld hl,help_line_buffer
+  ld b,a
+  call vwfPuts
+
+  ; Blank the area below the average
+  call wait_vblank_irq
+  xor a
+  ld hl,_SCRN0+32*15
+  ld c,32*2+20
+  call memset_tiny
+  ld hl,_SCRN0+32*14+1
+  ld a,$80
+  ld c,16
+  call memset_inc
+
+  ; Now blit the prepared tiles
+  ld hl,CHRRAM0+$80*16
+  ld c,16
+  call vwfPutBufHBlank
+
+  ldh [rNR52],a  ; turn off audio
+
+
+.loop:
+  call read_pad
+  call wait_vblank_irq
+  ld a,[new_keys]
+  and PADF_B|PADF_START
+  jr z,.loop
+  ret
+
+
+handle_cursor_move:
+  ld a,[new_keys]
+  ld b,a
+
+  ; Up/Down: Move cursor
+  ldh a,[cursor_y]
+  bit PADB_UP,b
+  jr z,.not_up
+    dec a
+  .not_up:
+  bit PADB_DOWN,b
+  jr z,.not_down
+    inc a
+  .not_down:
+  cp 3
+  jr nc,.not_writeback_cursor_y
+    ldh [cursor_y],a
+  .not_writeback_cursor_y:
+
+  ; Left/right: Change setting
+  ld a,[cursor_y]
+  bit PADB_LEFT,b
+  jr z,.not_decrease_setting
+    or a
+    jr nz,.xor_setting_a
+    ld c,2
+    jr .add_c_to_direction
+  .not_decrease_setting:
+  
+  bit PADB_RIGHT,b
+  jr z,.not_increase_setting
+    or a
+    jr nz,.xor_setting_a
+    ld c,1
+  .add_c_to_direction:
+    ldh a,[reticledir]
+    add c
+    cp 4
+    jr c,.not_dir_wrap
+      sub 3
+    .not_dir_wrap:
+    ldh [reticledir],a
+    jr .not_increase_setting
+  .xor_setting_a:
+    ld c,a
+    ldh a,[enableflags]
+    xor c
+    ldh [enableflags],a
+  .not_increase_setting:
+  ret
+
+grade_press:
+  ; Calculate absolute value of distance
+  ldh a,[reticlepos]
+  ld b,a
+  sub CENTERPOS
+  jr nc,.notNeg
+    cpl
+    inc a
+  .notNeg:
+  ; Regmap: A: absolute distance; B: actual position of reticle
+
+  ; If the absolute distance is nonzero, and the reticle and its
+  ; movement target are on opposite sides of CENTERPOS, the press
+  ; was early.
+  jr z,.not_early_or_late
+    ld d,a
+    ld a,[reticletarget]
+    xor b
+    and $80
+    or d
+  .not_early_or_late:
+  ld d,a
+
+  ldh a,[num_tests]
+  ld b,a
+  add low(framecounts)
+  ld c,a
+  ; Regmap:
+  ; B: number of tests already accepted; C: HRAM pointer to where
+  ; frame count will be written; D: absolute distance
+  ld a,d
+  ldh [lastrawlag],a
+  ld [$FF00+c],a
+  call draw_result_b
+
+  ; Accept this result if it was not early or way late (>25 frames)
+  ldh a,[lastrawlag]
+  bit 7,a
+  jr nz,.last_was_early
+  cp 26
+  jr nc,.last_was_early
+    ldh a,[num_tests]
+    inc a
+    ldh [num_tests],a
+  .last_was_early:
+  ret
+
+move_reticle:
+
+  ldh a,[reticlepos]
+  ld b,a
+  ldh a,[reticletarget]
+  ld c,a
+  cp b
+  sbc a  ; A: $FF if pos>target or $00 if pos<target
+  add a  ; A: $FE if pos>target or $00 if pos<target
+  inc a  ; A: $FF if pos>target or $01 if pos<target
+  add b
+  ld b,a
+
+  ; If reached goal, turn around
+  cp c
+  jr nz,.writeback
+
+    ; Choose a new position to seek
+    ld c,RIGHTWALL
+    bit 7,b
+    jr z,.already_on_right_side
+      ld c,LEFTWALL
+    .already_on_right_side:
+    ldh a,[enableflags]
+    rra  ; C=1 if randomize or 0 if not
+    jr nc,.writeback
+
+    push bc
+    call rand
+    pop bc
+
+    ; Map to -8..7 and add to random range
+    swap a
+    and $0F
+    sub 8
+    add c
+    ld c,a
+
+.writeback:
+  ld a,b
+  ldh [reticlepos],a
+  ld a,c
+  ldh [reticletarget],a
+  ret
+
+draw_still_reticle_piece:
+  ld b,4
+.loop:
+  ld [hl+],a
+  add 2
+  dec b
+  jr nz,.loop
+  ld de,28
+  add hl,de
+  ret
+
+draw_h_reticle:
+  ldh a,[reticlepos]
+  sub 56
+  ldh [Lspriterect_x],a
+  ld a,64
+  ldh [Lspriterect_y],a
+draw_sprite_reticle:
+  ld a,$04
+  ldh [Lspriterect_tile],a
+  xor a
+  ldh [Lspriterect_attr],a
+  ld a,2
+  ldh [Lspriterect_height],a
+  add a
+  ldh [Lspriterect_width],a
+  add a
+  ldh [Lspriterect_tilestride],a
+  add a
+  ldh [Lspriterect_rowht],a
+  jp draw_spriterect
+
+draw_v_reticle:
+  ldh a,[reticlepos]
+  sub 64
+  ldh [Lspriterect_y],a
+  ld a,72
+  ldh [Lspriterect_x],a
+  jr draw_sprite_reticle
+
+draw_result_b:
+;  ld b,b
+  push bc
+  call vwfClearBuf
+  pop bc
+  push bc
+
+  ; Retrieve the value
+  ld a,low(framecounts)
+  add b
+  ld c,a
+  ld a,[$FF00+C]
+
+  ; Bit 7: Early  
+  push af  ; Stack: raw value, which result
+  rla
+  jr nc,.not_early
+    ld a,"E"
+    ld b,0
+    call vwfPutTile
+  .not_early:
+  pop af
+  and $7F
+
+  ; Convert to decimal
+  call bcd8bit
+  ld b,a
+
+  ; Draw digits that exist
+  or a
+  jr z,.no_tens
+    push bc  ; Stack: tens and ones, index of result
+    ld a,b
+    and $0F
+    or "0"
+    ld b,6
+    call vwfPutTile
+    pop bc
+  .no_tens:
+  ld a,c
+  and $0F
+  or "0"
+  ld b,11
+  call vwfPutTile
+
+  ; Blit this tile to VRAM
+  pop bc
+  ld a,b
+  add a
+  add DIGITSPACE_TILE
+  ld l,a
+  ld h,high(CHRRAM0)>>4
+  add hl,hl
+  add hl,hl
+  add hl,hl
+  add hl,hl
+  ld c,2
+  jp vwfPutBufHBlank
+
+write_carry_boolean:
+  ld a,CHECKBOXTILE>>1
+  rla
+  ld [hl+],a
+  and $01
+  rla
+  or OFFONTILE
+  ld [hl+],a
+  inc a
+  ld [hl],a
+  ret
+
+megaton_labels:
+  ; These two labels must come first because they cause
+  ; text to be allocated with off at $80 and on at $82
+  db  83,128,"off",10
+  db  84,136,"on",10
+  db   8,112,"Press A when reticles align",10
+  db  20,120,"Direction",10
+  db  83,120,$85,$84,10   ; Left/Right
+  db 115,120,$86,$87,10   ; Up/Down
+  db  20,128,"Randomize",10
+  db  20,136,"Audio",0
+
+avglag_prolog:
+  db "Average lag: ",0
+avglag_epilog:
+  db " frames",0

@@ -1,0 +1,107 @@
+;
+; ROM header for Game Boy
+;
+; Copyright 2018 Damian Yerrick
+; 
+; This software is provided 'as-is', without any express or implied
+; warranty.  In no event will the authors be held liable for any damages
+; arising from the use of this software.
+; 
+; Permission is granted to anyone to use this software for any purpose,
+; including commercial applications, and to alter it and redistribute it
+; freely, subject to the following restrictions:
+; 
+; 1. The origin of this software must not be misrepresented; you must not
+;    claim that you wrote the original software. If you use this software
+;    in a product, an acknowledgment in the product documentation would be
+;    appreciated but is not required.
+; 2. Altered source versions must be plainly marked as such, and must not be
+;    misrepresented as being the original software.
+; 3. This notice may not be removed or altered from any source distribution.
+;
+include "src/gb.inc"
+
+; Instead of vectors, LR35902 has RSTs ("reset trampolines"?) spaced
+; 8 bytes apart.  There are eight for short encodings of CALL with
+; specific addresses ($C7, $CF, ..., $FF) and five for interrupt
+; service routines (ISR).  Fill them with JPs to the actual handlers.
+SECTION "rst00", ROM0[$0000]
+  ret
+SECTION "rst08", ROM0[$0008]
+  ret
+SECTION "rst10", ROM0[$0010]
+  ret
+SECTION "rst18", ROM0[$0018]
+  ret
+SECTION "rst20", ROM0[$0020]
+  ret
+SECTION "rst28", ROM0[$0028]
+  ret
+SECTION "rst30", ROM0[$0030]
+  ret
+SECTION "rst38", ROM0[$0038]
+  ret
+SECTION "rst40", ROM0[$0040]
+  jp vblank_handler
+SECTION "rst48", ROM0[$0048]
+  jp stat_handler
+SECTION "rst50", ROM0[$0050]
+  jp timer_handler
+SECTION "rst58", ROM0[$0058]
+  jp serial_handler
+SECTION "rst60", ROM0[$0060]
+  jp joypad_handler
+
+SECTION "header", ROM0[$0100]
+  nop
+  jp reset_handler
+
+  ; IPL uses this header to ensure D7-D0, A5-A0, and /RD are
+  ; connected before calling something in the game that might
+  ; corrupt battery-backed save RAM.
+  ; TODO: Figure out how much of this RGBFIX can fill in for me
+
+  ; magiccookiedata: spells "Nintendo" when deinterleaved to tiles
+  ; Top 4 scanlines
+  db $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83  ; Nint
+  db $00,$0C,$00,$0D,$00,$08,$11,$1F,$88,$89,$00,$0E  ; endo
+  ; Bottom 4 scanlines
+  db $DC,$CC,$6E,$E6,$DD,$DD,$D9,$99,$BB,$BB,$67,$63  ; Nint
+  db $6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E  ; endo
+
+  ; 11-character title
+  DB "144P TEST"
+  DS 2
+
+  ; Serial code (is ADME Doom or Animal Crossing?)
+  DS 4
+
+  ; Execution mode (GBC runs in GBC mode if bit 7 is true)
+  DB CART_COMPATIBLE_DMG
+
+  ; $0144: Developer ID
+  DB "OK"
+
+  ; SGB mode
+  DB SGB_SUPPORT
+
+  ; Mapper
+  DB CART_ROM
+
+  ; $0148: ceil(log2(ROM size / 32768))
+  DB $00
+  
+  ; log2(RAM size / 512)/2
+  DB $00
+
+  ; Region code
+  DB REGION_UE
+
+  ; Old hex developer ID: $33 means "see $0144"
+  DB $33
+  
+  ; ROM version number
+  DB $00
+
+  ; Leave space for header checksum to be filled in by rgbfix
+  DS 3

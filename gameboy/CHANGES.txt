@@ -1,0 +1,37 @@
+0.05 (future)
+* Fix Linearity corruption after closing help (0.04 regression)
+
+0.04 (2018-04-29)
+* Skip logo fadeout and SGB detection on Game Boy Color/Advance
+* Overscan: Start border thickness at 2 instead of temporary values
+  left in from testing
+* Vertical scroll: Fix a buffer overflow causing the test
+  to start paused
+* Grid test pattern no longer uses Sharpness help screen
+* Overscan: Draw bottom border with WX instead of LCDC
+  (requested by ISSOtm)
+* Stopwatch: Hide face with window instead of LCDC
+  (requested by ISSOtm)
+* Hide incomplete first frame with BGP and OBP0 instead of LCDC
+  (requested by ISSOtm)
+* Use de facto standard hardware.inc, with 'r' in front of all
+  port names (requested by ISSOtm)
+* No more tarbombing: Create zipfile with all files in an internal
+  folder (requested by calima)
+
+0.03 (2018-04-17)
+* Add Overscan, working around a mono hardware bug with WX=166
+* Add Audio sync, Manual lag, Sound test, and Motion blur
+* Help: When displaying the same page as last time, don't move
+  the window out and back in
+
+0.02 (2018-04-14)
+* Solid screen: Mention dead pixel test (requested by calima)
+* Compress most tile graphics with PB16, saving about 1.25K
+* Compress help text with DTE, saving about 3.5K
+* Add Shadow sprite, Hill zone scroll, and Vertical scroll tests
+* Add Stopwatch
+
+0.01 (2018-04-10)
+* initial release with Grid, Linearity, Gray ramp, Solid screen,
+  Sharpness, Grid scroll, Full screen stripes, About, Credits

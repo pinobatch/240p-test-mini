@@ -1,0 +1,353 @@
+;
+; Variable width font drawing for Game Boy
+; Copyright 2018 Damian Yerrick
+; 
+; This software is provided 'as-is', without any express or implied
+; warranty.  In no event will the authors be held liable for any damages
+; arising from the use of this software.
+; 
+; Permission is granted to anyone to use this software for any purpose,
+; including commercial applications, and to alter it and redistribute it
+; freely, subject to the following restrictions:
+; 
+; 1. The origin of this software must not be misrepresented; you must not
+;    claim that you wrote the original software. If you use this software
+;    in a product, an acknowledgment in the product documentation would be
+;    appreciated but is not required.
+; 2. Altered source versions must be plainly marked as such, and must not be
+;    misrepresented as being the original software.
+; 3. This notice may not be removed or altered from any source distribution.
+;
+include "src/hardware.inc"
+include "src/global.inc"
+
+Lshifterid set hLocals+0
+Lshiftermask set hLocals+1
+Ldstoffset set hLocals+2
+
+lineImgBufLen EQU 128  ; number of 1bpp planes
+
+; Align is a logarithm in rgbasm, unlike in ca65 where it's an actual
+; byte count
+section "lineImgBuf",wram0,align[8]
+lineImgBuf:: ds lineImgBufLen * 2
+
+CHAR_BIT EQU 8
+LOG_GLYPH_HEIGHT EQU 3
+GLYPH_HEIGHT EQU (1 << LOG_GLYPH_HEIGHT)
+GLYPH_HEIGHT_MINUS_1 EQU 7
+
+; Approximate timing for vwfPutTile:
+;
+; The glyph drawing itself is about 478 cycles for height 8
+; Per glyph: 46
+; call: 6, rot glyphid: 5, get dstoffset: 6, get bitmask: 12, 
+; get shift slide jump: 6, split glyphid: 8, final ret: 3
+; Per row: 53+(X%8) avg 56 or 12 if blank
+; read blank sliver: 7
+; read sliver: 6, shift sliver: 8+(X%8) avg 11, split sliver: 8,
+; left OR: 11, right OR: 15, row advance: 5
+;
+; vwfPuts thus runs at avg 519 cycles/character
+; load ch: 6, save and draw: 18+478 (or 3 for space),
+; add width: 12, buffer overflow test: 5
+;
+; Further work:
+; not drawing space (" ") at all
+; skipping shifting for $00 slivers
+
+section "vwfPutTile",ROM0,align[LOG_GLYPH_HEIGHT]
+ff_shr_x:: db $FF,$7F,$3F,$1F,$0F,$07,$03,$01
+
+; The second half of the routine comes before the first half to ease alignment
+vwfPutTile_shifter:
+  rept GLYPH_HEIGHT_MINUS_1
+    rrca
+  endr
+
+  ; Break it up into 2 bytes
+  ld c,a  ; C: all glyph bits
+  ldh a,[Lshiftermask]
+  and c
+  ld b,a  ; B: left half bits
+  xor c
+  ld c,a  ; C: right half bits
+
+  ; OR in the left byte
+  ld h,high(lineImgBuf)
+  ldh a,[Ldstoffset]
+  ld l,a
+  ld a,[hl]
+  or b
+  ld [hl],a
+
+  ; OR in the left
+  ld a,l
+  add GLYPH_HEIGHT
+  ld l,a
+  ld a,[hl]
+  or c
+  ld [hl],a
+  ld a,l
+  sub GLYPH_HEIGHT-1
+.have_new_dstoffset:
+  ldh [Ldstoffset],a
+
+  ; Advance to next row
+  and GLYPH_HEIGHT-1
+  jr nz, vwfPutTile_rowloop
+  ret
+
+  ; Special handling for blank slivers
+.sliver_is_blank:
+  ldh a,[Ldstoffset]
+  inc a
+  jr .have_new_dstoffset
+
+;;
+; Draws the tile for glyph A at horizontal position B
+vwfPutTile::
+
+  ; Rotate the glyph number for later source address calc
+  sub " "
+  rept LOG_GLYPH_HEIGHT
+    rlca
+  endr
+  ld d,a  ; D = rotated glyph number
+
+  ; Get the destination offset in line buffer
+  ld a,b
+  if LOG_GLYPH_HEIGHT > 3
+    rept LOG_GLYPH_HEIGHT-3
+      rlca
+    endr
+  endc
+  and $100-GLYPH_HEIGHT
+  ldh [Ldstoffset],a
+  
+  ; Get the mask of which bits go here and which to the next tile
+  xor b
+  ld e,a  ; E = horizontal offset within tile
+  ld bc,ff_shr_x
+  add c
+  ld c,a  ; BC = ff_shr_x+horizontal offset
+  ld a,[bc]
+  ldh [Lshiftermask],a
+
+  ; Calculate the address of the shift routine
+  ld a,low(vwfPutTile_shifter) + CHAR_BIT - 1
+  sub e
+  ldh [Lshifterid],a
+
+  ; Calculate glyph source address DE from rotated glyph number
+  ld a,d
+  and $100-GLYPH_HEIGHT  ; e.g. 8: %11111000
+  ld e,a  ; E = low byte
+  xor d
+  add high(vwfChrData)
+  ld d,a
+
+  ; Shift each row
+vwfPutTile_rowloop:
+  ; Read an 8x1 sliver of the glyph into B
+  ld a,[de]
+  inc e
+  or a
+  jr z,vwfPutTile_shifter.sliver_is_blank
+
+  ; Shift the sliver
+  ld b,a
+  ld h,high(vwfPutTile_shifter)
+  ldh a,[Lshifterid]
+  ld l,a
+  ld a,b
+  jp hl
+
+;;
+; Write glyphs for the 8-bit-encoded characters string at (hl) to
+; X position B in the VWF buffer
+; @return HL pointer to the first character not drawn
+vwfPuts::
+.chloop:
+  ; Load character, stopping at control character
+  ld a,[hl+]
+  cp 32
+  jr c,.decret
+
+  ; Save position, draw glyph, load position
+  jr z,.nodrawspace
+  ld c,a
+  push hl
+  push bc
+  call vwfPutTile
+  pop bc
+  pop hl
+  ld a,c
+.nodrawspace:
+  
+  ; Add up the width of the glyph
+  ld de,vwfChrWidths-32
+  add e
+  ld e,a
+  jr nc,.gwnowrap
+  inc d
+.gwnowrap:
+  ld a,[de]
+  add b
+  ld b,a
+
+  cp lineImgBufLen
+  jr c,.chloop
+  ret
+
+; Return points HL at the first undrawn character
+.decret:
+  dec hl
+  ret
+
+;;
+; Calculates the width of a string in pixels
+; @param HL
+; @return A: last char; B: width; HL points at end of string;
+; C unchanged; DE trashed
+vwfStrWidth::
+  ld b,0
+.loop:
+  ld a,[hl+]
+  cp 32
+  jr c,vwfPuts.decret
+  
+  ld de,vwfChrWidths-32
+  add e
+  ld e,a
+  jr nc,.gwnowrap
+  inc d
+.gwnowrap:
+  ld a,[de]
+  add b
+  ld b,a
+  jr .loop
+
+;;
+; Clears the line image.
+; Clobbers HL; C=0
+vwfClearBuf::
+  ld hl,lineImgBuf
+  ld c,lineImgBufLen/4
+  xor a
+.loop:
+  rept 4
+    ld [hl+],a
+  endr
+  dec c
+  jr nz,.loop
+  ret
+
+;;
+; Copies the VWF buffer to VRAM address HL using fg color 3
+; and bg color 0
+; @param HL destination address
+; @param C tile count (if using _lenC)
+; @param B $00 for FG color 0 or $FF for FG color 3
+; @return DE end of lineImgBuf; C=0; B unchanged
+vwfPutBuf03::
+  ld c,lineImgBufLen/8
+vwfPutBuf03_lenC::
+  sla c
+  ld de,lineImgBuf
+.loop:
+  rept 4
+    ld a,[de]
+    inc e
+    ld [hl+],a
+    and b
+    ld [hl+],a
+  endr
+  dec c
+  jr nz,.loop
+  ret
+
+;;
+; Copies the VWF line buffer to WRAM during hblank.
+;
+; Drawing a glyph with 2 nonblank rows and 6 blank rows takes about
+; 400 cycles.  The 112 pixel window can hold about 25 glyphs across,
+; totaling 13000 cycles or 88 scanlines to fill the buffer.
+; Copying it to VRAM using the most general loop for forced-blank
+; use at 4x unroll is 9 cycles/byte, completing 112 bytes in 1008.
+; But when OAM DMA is active, only 1140-176=964 cycles are available.
+; So most of this copying will be done during hblank, which has
+; about 69 cycles depending on exact scroll and sprite positions,
+; so long as the copy routine stays out of the way of the rSTAT IRQ.
+;
+; @param HL the address to start writing
+; @param C number of tiles to copy
+; clobbers all regs
+vwfPutBufHBlank::
+  ld de,lineImgBuf
+  .tileloop:
+
+    ; Read the first tile row and keep it in registers ready to
+    ; write as soon as possible
+    ld a,[de]
+    inc e
+    ld b,a
+
+    ; Wait for either vblank or the very start of hblank.
+    ; This takes several spinloops.
+
+    ; Skip lines around start of frame, as line 0 has no hblank
+    ; period before the draw time.  So if on line 153 or 0, wait
+    ; for line 1.
+.unsafe153:
+    ldh a,[rLY]
+    or a
+    jr z,.unsafe153
+    cp 153
+    jr z,.unsafe153
+    cp 144
+    jr nc,.safetime
+
+    ; The two lines above the split point are also tricky, as the
+    ; rSTAT IRQ handler can use enough cycles to overflow hblank.
+    ldh a,[rLYC]
+    push hl
+    push bc
+    sub 2
+    ld c,a
+    ld hl,rLY
+    .nonmiddle:
+      ld a,[HL]
+      sub c
+      cp 2
+      jr c,.nonmiddle
+    pop bc
+
+    ; Wait for mode 1 (vblank) or 3 (draw)
+    ld hl,rSTAT
+    .nonhblank:
+      bit 0,[HL]
+      jr z,.nonhblank
+
+    ; Wait for mode 0 (hblank) or 1 (vblank)
+    .nondraw:
+      bit 1,[HL]
+      jr nz,.nondraw
+    pop hl
+
+.safetime:
+    ; Now that we're in a safe time, copy the tile's first line
+    ld a,b
+    ld [hl+],a
+    inc l
+
+    ; Copy the rest of the lines
+    rept 7
+      ld a,[de]
+      ld [hl+],a
+      inc l
+      inc e
+    endr
+  dec c
+  jr nz,.tileloop
+  ret
