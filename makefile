@@ -1,18 +1,28 @@
 title := 240p-test-mini
 version := 0.16
 
-.PHONY: all dist zip clean
-all: nes/240pee.nes nes/240pee-bnrom.nes gameboy/gb240p.gb
+# Make $(MAKE) work correctly even when Make is installed inside
+# C:\Program Files
+ifneq ($(words $(MAKE)), 1)
+MAKE:="$(MAKE)"
+endif
+
+alltargets:=\
+  nes/240pee.nes nes/240pee-bnrom.nes gameboy/gb240p.gb
+
+.PHONY: all dist zip clean $(alltargets)
+all: $(alltargets)
 dist: zip
 zip: $(title)-$(version).zip
 
-# Recursive makes
+# 240pee-bnrom.nes depends on 240pee.nes so that parallel make (-j2)
+# doesn't try double-building compiling each file in both
 nes/240pee.nes:
-	cd nes && $(MAKE) 240pee.nes
-nes/240pee-bnrom.nes:
-	cd nes && $(MAKE) 240pee-bnrom.nes
+	$(MAKE) -C nes $(notdir $@)
+nes/240pee-bnrom.nes: nes/240pee.nes
+	$(MAKE) -C nes $(notdir $@)
 gameboy/gb240p.gb:
-	cd gameboy && $(MAKE) gb240p.gb
+	$(MAKE) -C gameboy $(notdir $@)
 
 # Packaging
 $(title)-$(version).zip: zip.in all makefile README.md
@@ -25,3 +35,6 @@ zip.in:
 	echo gameboy/gb240p.gb >> $@
 	echo $@ >> $@
 
+clean:
+	$(MAKE) -C nes clean
+	$(MAKE) -C gameboy clean 
