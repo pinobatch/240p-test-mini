@@ -11,6 +11,8 @@
 /nes/obj/nes/*.sav
 /gameboy/obj/gb/*.s
 /gameboy/obj/gb/*.nam
+/gba/obj/gba/*.h
+/gba/obj/gba/*.s
 /zip.in
 *.nes.deb
 /nes/map.txt
@@ -20,6 +22,9 @@
 /gameboy/gb240p.sym
 /nes/240pee-bnrom.nes
 /nes/240pee.nes
+/gba/240pee_mb.elf
+/gba/240pee_mb.gba
+/gba/.map
 __pycache__/
 *.pyc
 
