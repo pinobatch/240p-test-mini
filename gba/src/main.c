@@ -29,6 +29,7 @@ int main(void) {
 //	fputs("\x1b[5;9HHello World!\n", stdout);
 
   while (1) {
+    helpscreen(0, KEY_B|KEY_A);
     lame_boy_demo();
   }
 }

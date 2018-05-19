@@ -5,11 +5,11 @@
 #include <gba_sprites.h>
 #include <gba_systemcalls.h>
 
-// help
+// help.c
 #define HELP_LINE_LEN 48
-unsigned char help_line_buffer[HELP_LINE_LEN];
-unsigned char help_bg_loaded;
-
+extern unsigned char help_line_buffer[HELP_LINE_LEN];
+extern unsigned char help_bg_loaded;
+void helpscreen(unsigned int doc_num, unsigned int keymask);
 
 // placeholder.c
 void lame_boy_demo(void);
