@@ -29,7 +29,7 @@ OBJS := \
   placeholder stills overscan scrolltest \
   shadowsprite stopwatch soundtest audiosync backlight megaton \
   ppuclear vwfdraw undte rand \
-  bggfx_chr spritegfx_chr vwf7
+  helpbgtiles_chr helpsprites_chr bggfx_chr spritegfx_chr vwf7
 LIBS := -lgba
 
 BUILD		:= obj/gba
@@ -84,15 +84,13 @@ $(BUILD)/%.o: $(BUILD)/%.s
 # Image conversion
 
 $(BUILD)/bggfx_chr.s: tilesets/bggfx.png
-	$(GRIT) $< -gB4 -p! -o $(basename $@)
-$(BUILD)/decade_chr.s: tilesets/decade.png
-	$(GRIT) $< -gB4 -p! -o $(basename $@)
+	$(GRIT) $< -gB2 -p! -o $(basename $@)
 $(BUILD)/spritegfx_chr.s: tilesets/spritegfx.png
-	$(GRIT) $< -gB4 -Mw2 -Mh3 -pn16 -o $(basename $@)
+	$(GRIT) $< -gB4 -gzl -Mw2 -Mh3 -pn16 -o $(basename $@)
 $(BUILD)/helpbgtiles_chr.s: tilesets/helpbgtiles.png
-	$(GRIT) $< -gB4 -Mw2 -Mh3 -pn16 -o $(basename $@)
+	$(GRIT) $< -gB4 -gzl -pn16 -o $(basename $@)
 $(BUILD)/helpsprites_chr.s: tilesets/helpsprites.png
-	$(GRIT) $< -gB4 -Mw2 -Mh3 -pn16 -o $(basename $@)
+	$(GRIT) $< -gB4 -gzl -pn16 -o $(basename $@)
 $(BUILD)/vwf7.s: tools/vwfbuild.py tilesets/vwf7.png
 	$(PY) $^ $@
 $(BUILD)/%_chr.h: $(BUILD)/%_chr.s

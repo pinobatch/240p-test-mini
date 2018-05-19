@@ -1,9 +1,12 @@
 #include <gba_video.h>
 #include <gba_input.h>
+#include <gba_compression.h>
+#include <gba_dma.h>
 #include <string.h>
 #include "global.h"
 
-extern const unsigned int spritegfx_chrTiles[384];
+
+extern const unsigned char spritegfx_chrTiles[];
 extern const unsigned short spritegfx_chrPal[16];
 
 unsigned short player_x;
@@ -18,8 +21,8 @@ unsigned short player_facing = 0;
 #define RIGHT_WALL 208
 
 static void load_player(void) {
-  memcpy(SPR_VRAM(16), spritegfx_chrTiles, sizeof(spritegfx_chrTiles));
-  memcpy(OBJ_COLORS+0x00, spritegfx_chrPal, sizeof(spritegfx_chrPal));
+  LZ77UnCompVram(spritegfx_chrTiles, SPR_VRAM(16));
+  dmaCopy(spritegfx_chrPal, OBJ_COLORS+0x00, sizeof(spritegfx_chrPal));
   player_x = 56 << 8;
   player_dx = player_frame = player_facing = 0;
 }
@@ -99,8 +102,8 @@ static void draw_player_sprite(void) {
 
 // Still trying to see whether GritHub will cause me to not need
 // pilbmp2nes.py. <https://github.com/devkitPro/grit>
-extern const unsigned int bggfx_chrTiles[256];
-extern const unsigned int decade_chrTiles[184];
+// It's in Virtual Boy format because that decompresses easily
+extern const VBTILE bggfx_chrTiles[32];
 
 static const unsigned short bgcolors00[16] = {
   RGB5(25,25,31), RGB5(20,20, 0), RGB5(27,27, 0), RGB5(31,31, 0)
@@ -110,38 +113,37 @@ static const unsigned short bgcolors10[16] = {
 };
 
 static void put1block(unsigned int x, unsigned int y) {
-  BG[30][y][x]     = 12 | 0x0000;
-  BG[30][y][x+1]   = 13 | 0x0000;
-  BG[30][y+1][x]   = 14 | 0x0000;
-  BG[30][y+1][x+1] = 15 | 0x0000;
+  MAP[30][y][x]     = 12 | 0x0000;
+  MAP[30][y][x+1]   = 13 | 0x0000;
+  MAP[30][y+1][x]   = 14 | 0x0000;
+  MAP[30][y+1][x+1] = 15 | 0x0000;
 }
 
 static void draw_bg(void) {
   // Load tiles
-  memcpy(PATRAM4(0, 0), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+  BUP bgtilespec = {
+    .SrcNum=sizeof(bggfx_chrTiles), .SrcBitNum=2, .DestBitNum=4, 
+    .DestOffset=0, .DestOffset0_On=0
+  };
+  BitUnPack(bggfx_chrTiles, PATRAM4(0, 0), &bgtilespec);
 
-  // Draw background map
-  memset(MAP_BASE_ADR(30), 0, 32*20);
-  for (int x = 0; x < 30; ++x) {
-    BG[30][18][x] = 11 | 0x1000;  // Top row of floor
-  }
-  for (int x = 0; x < 30; ++x) {
-    BG[30][19][x] = 1 | 0x1000;  // Bottom row of floor
-  }
+  // Draw background map: sky, top row of floor, bottom row of floor
+  dma_memset16(MAP[30][0], 0x0000, 2*32*18);
+  dma_memset16(MAP[30][18], 11 | 0x1000, 2*30);
+  dma_memset16(MAP[30][19], 1 | 0x1000, 2*30);
   put1block(2, 14);
   put1block(2, 16);
   put1block(26, 14);
   put1block(26, 16);
   
   // sorry I was gone
-  //memcpy(PATRAM4(0, 32), decade_chrTiles, sizeof(decade_chrTiles));
-  loadMapRowMajor(&(BG[30][1][1]), 0x1000 | 32, 28, 1);
+  loadMapRowMajor(&(MAP[30][1][1]), 0x1000 | 32, 28, 1);
+  dma_memset16(PATRAM4(0, 32), 0x0000, 32*28);
   vwf8Puts(PATRAM4(0, 32), "In May 2018, Pino returned to the GBA scene.", 0, 1);
 
-
   // Load palette
-  memcpy(BG_COLORS+0x00, bgcolors00, sizeof(bgcolors00));
-  memcpy(BG_COLORS+0x10, bgcolors10, sizeof(bgcolors10));
+  dmaCopy(bgcolors00, BG_COLORS+0x00, sizeof(bgcolors00));
+  dmaCopy(bgcolors10, BG_COLORS+0x10, sizeof(bgcolors10));
 
   // Set up background regs (except DISPCNT)
   BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(30);
@@ -159,7 +161,7 @@ void lame_boy_demo() {
   do {
     scanKeys();
     move_player();
-    
+
     oam_used = 0;
     draw_player_sprite();
     ppu_clear_oam(oam_used);

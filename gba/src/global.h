@@ -15,12 +15,12 @@ unsigned char help_bg_loaded;
 void lame_boy_demo(void);
 
 // ppuclear.c
-typedef unsigned short GBATilemap[32][32];
-#define BG ((GBATilemap *)VRAM)
+typedef unsigned short VBTILE[16];
 extern unsigned char oam_used;
 extern OBJATTR SOAM[128];
 void ppu_clear_oam(size_t start);
 void ppu_copy_oam(void);
+void dma_memset16(void *s, unsigned int c, size_t n);
 
 // vwfdraw.c
 void loadMapRowMajor(unsigned short *dst, unsigned int tilenum,
