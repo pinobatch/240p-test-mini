@@ -25,7 +25,10 @@ include $(DEVKITARM)/gba_rules
 TARGET := 240pee_mb
 VERSION := wip
 OBJS := \
-  main placeholder ppuclear vwfdraw \
+  main help \
+  placeholder stills overscan scrolltest \
+  shadowsprite stopwatch soundtest audiosync backlight megaton \
+  ppuclear vwfdraw undte rand \
   bggfx_chr spritegfx_chr vwf7
 LIBS := -lgba
 
@@ -85,6 +88,10 @@ $(BUILD)/bggfx_chr.s: tilesets/bggfx.png
 $(BUILD)/decade_chr.s: tilesets/decade.png
 	$(GRIT) $< -gB4 -p! -o $(basename $@)
 $(BUILD)/spritegfx_chr.s: tilesets/spritegfx.png
+	$(GRIT) $< -gB4 -Mw2 -Mh3 -pn16 -o $(basename $@)
+$(BUILD)/helpbgtiles_chr.s: tilesets/helpbgtiles.png
+	$(GRIT) $< -gB4 -Mw2 -Mh3 -pn16 -o $(basename $@)
+$(BUILD)/helpsprites_chr.s: tilesets/helpsprites.png
 	$(GRIT) $< -gB4 -Mw2 -Mh3 -pn16 -o $(basename $@)
 $(BUILD)/vwf7.s: tools/vwfbuild.py tilesets/vwf7.png
 	$(PY) $^ $@

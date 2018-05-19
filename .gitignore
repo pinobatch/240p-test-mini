@@ -24,6 +24,7 @@
 /nes/240pee.nes
 /gba/240pee_mb.elf
 /gba/240pee_mb.gba
+/gba/240pee_mb.sav
 /gba/.map
 __pycache__/
 *.pyc

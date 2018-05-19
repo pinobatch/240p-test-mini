@@ -5,6 +5,12 @@
 #include <gba_sprites.h>
 #include <gba_systemcalls.h>
 
+// help
+#define HELP_LINE_LEN 48
+unsigned char help_line_buffer[HELP_LINE_LEN];
+unsigned char help_bg_loaded;
+
+
 // placeholder.c
 void lame_boy_demo(void);
 
