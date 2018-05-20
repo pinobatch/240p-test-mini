@@ -30,6 +30,7 @@ int main(void) {
 
   while (1) {
     helpscreen(0, KEY_B|KEY_A);
+    activity_linearity();
     lame_boy_demo();
   }
 }

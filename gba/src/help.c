@@ -12,6 +12,7 @@
 #define GL_DOWN 0x87
 
 #define WINDOW_WIDTH 16  // Width of window in tiles not including left border
+#define PAGE_MAX_LINES 15  // max lines of text in one page
 #define BACK_WALL_HT 14  // Height of back wall in tiles
 #define BGMAP 29
 #define FGMAP 30
@@ -20,6 +21,7 @@
 #define SHADOW_Y 17
 
 #define TILE_BACK_WALL 272
+#define TILE_FG_XPARENT 272
 #define TILE_FG_BLANK 273
 #define TILE_BACK_WALL_BOTTOM 274
 #define TILE_FG_CORNER1 275
@@ -27,9 +29,13 @@
 #define TILE_FG_DIVIDER 277
 #define TILE_FLOOR_TOP 278
 #define TILE_FG_CORNER2 279
-#define TILE_FLOOR_SHADOW 280
+#define TILE_FG_LEFT 283
+#define TILE_FLOOR_SHADOW 284
 
 #define CHARACTER_VRAM_BASE 956
+
+#define FG_BGCOLOR 6
+#define FG_FGCOLOR 2
 
 unsigned char help_line_buffer[HELP_LINE_LEN];
 unsigned char help_bg_loaded = 0;
@@ -47,11 +53,13 @@ C0-E1 (PT3#000-10F): VWF canvas (16 by 17 tiles)
 E2-E3 (110-11F): background tiles
 E8-EF (NT29): BG1 (back wall)
 F0-F7 (NT30): BG0 (VWF text)
-F8-FF (NT31): Blank so that 
+F8-FF (NT31): Blank to prevent scroll wrapping
 
 Sprite VRAM
 956-1019: Gus
 1020: Arrow
+
+The window
 
 */
 
@@ -67,7 +75,7 @@ void load_help_bg(void) {
   LZ77UnCompVram(helpsprites_chrTiles, SPR_VRAM(CHARACTER_VRAM_BASE));
 
   // Clear VWF canvas
-  dma_memset16(PATRAM4(3, 0), 0x0000, 32*16*17);
+  dma_memset16(PATRAM4(3, 0), 0x1111 * FG_BGCOLOR, 32*WINDOW_WIDTH*17);
 
   // Load background nametable
   dma_memset16(MAP[BGMAP][0], TILE_BACK_WALL, 64*(BACK_WALL_HT - 1));
@@ -82,9 +90,36 @@ void load_help_bg(void) {
     MAP[BGMAP][SHADOW_Y + 1][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0C03 - x;
   }
 
-  // Load window nametable
-  MAP[FGMAP][0][0] = MAP[FGMAP][20][0] = 280;
-  MAP[FGMAP][0][0] = MAP[FGMAP][19][0] = 281;
+  // Clear window nametable
+  dma_memset16(MAP[FGMAP], TILE_FG_BLANK, 32*21*2);
+  dma_memset16(MAP[FGMAP + 1], TILE_FG_XPARENT, 32*21*2);
+
+  // Left border
+  MAP[FGMAP][0][0] = TILE_FG_CORNER1;
+  MAP[FGMAP][1][0] = TILE_FG_CORNER2;
+  for (unsigned int i = 2; i < 19; ++i) {
+    MAP[FGMAP][i][0] = TILE_FG_LEFT;
+  }
+  MAP[FGMAP][19][0] = TILE_FG_CORNER2 + 0x0800;
+  MAP[FGMAP][20][0] = TILE_FG_CORNER1 + 0x0800;
+
+  // Divider lines
+  dma_memset16(&(MAP[FGMAP][2][1]), TILE_FG_DIVIDER, 16*2);
+  dma_memset16(&(MAP[FGMAP][18][1]), TILE_FG_DIVIDER, 16*2);
+  
+  // Make the frame
+  loadMapRowMajor(&(MAP[FGMAP][1][1]), 0*WINDOW_WIDTH,
+                  WINDOW_WIDTH, 1);
+  loadMapRowMajor(&(MAP[FGMAP][3][1]), 1*WINDOW_WIDTH,
+                  WINDOW_WIDTH, PAGE_MAX_LINES);
+  loadMapRowMajor(&(MAP[FGMAP][4+PAGE_MAX_LINES][1]), (PAGE_MAX_LINES + 1)*WINDOW_WIDTH,
+                  WINDOW_WIDTH, 1);
+
+  // Prove that the tile was loaded
+  vwf8Puts(PATRAM4(3, 0*WINDOW_WIDTH), "hello world", 0, FG_FGCOLOR);
+  vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+           "\x85 1/1 \x84  \x87\x86""A: Select  B: Exit",
+           0, FG_FGCOLOR);
 
   help_bg_loaded = 1;
 }
@@ -125,7 +160,7 @@ void helpscreen(unsigned int doc_num, unsigned int keymask) {
   BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(3)|SCREEN_BASE(BGMAP);
   BGCTRL[0] = BG_16_COLOR|BG_WID_64|BG_HT_32|CHAR_BASE(3)|SCREEN_BASE(FGMAP);
   BG_OFFSET[1].x = BG_OFFSET[1].y = 0;
-  BG_OFFSET[0].x = 512-228;
+  BG_OFFSET[0].x = (512 - 240) + (16 + 8 * WINDOW_WIDTH);
   BG_OFFSET[0].y = 4;
 
   // Freeze

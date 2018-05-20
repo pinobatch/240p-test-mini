@@ -11,6 +11,9 @@ extern unsigned char help_line_buffer[HELP_LINE_LEN];
 extern unsigned char help_bg_loaded;
 void helpscreen(unsigned int doc_num, unsigned int keymask);
 
+// stills.c
+void activity_linearity(void);
+
 // placeholder.c
 void lame_boy_demo(void);
 
