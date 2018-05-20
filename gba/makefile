@@ -29,7 +29,8 @@ OBJS := \
   placeholder stills overscan scrolltest \
   shadowsprite stopwatch soundtest audiosync backlight megaton \
   ppuclear vwfdraw undte rand \
-  helpbgtiles_chr helpsprites_chr bggfx_chr spritegfx_chr vwf7
+  helpbgtiles_chr helpsprites_chr vwf7 \
+  bggfx_chr spritegfx_chr linearity_chr
 LIBS := -lgba
 
 BUILD		:= obj/gba
@@ -91,6 +92,8 @@ $(BUILD)/helpbgtiles_chr.s: tilesets/helpbgtiles.png
 	$(GRIT) $< -gB4 -gzl -pn16 -o $(basename $@)
 $(BUILD)/helpsprites_chr.s: tilesets/helpsprites.png
 	$(GRIT) $< -gB4 -gzl -pn16 -o $(basename $@)
+$(BUILD)/linearity_chr.s: tilesets/linearity.png
+	$(GRIT) $< -p! -gB2 -mRtpf -mLs -mzr -o $(basename $@)
 $(BUILD)/vwf7.s: tools/vwfbuild.py tilesets/vwf7.png
 	$(PY) $^ $@
 $(BUILD)/%_chr.h: $(BUILD)/%_chr.s
