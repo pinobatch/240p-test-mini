@@ -23,7 +23,7 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-SECTION "rom_bg", ROM0
+SECTION "rom_lame_boy_bg", ROM0
 
 ; game loop
 
@@ -69,9 +69,17 @@ lame_boy_demo::
 
   ; Set palettes
   ld a, %01101100
-  call set_bgp
+  ldh [rBGP],a
   ld a, %00011110
-  call set_obp0
+  ldh [rOBP0],a
+
+  ld hl,lameboybgpalette_gbc
+  ld bc,(lameboyobjpalette_gbc-lameboybgpalette_gbc) * 256 + low(rBCPS)
+  ld a,$80
+  call set_gbc_palette
+  ld bc,(lameboyobjpalette_gbc_end-lameboyobjpalette_gbc) * 256 + low(rOCPS)
+  ld a,$80
+  call set_gbc_palette
 
   ; Show vblank counter
   ld hl,_SCRN0
@@ -136,6 +144,27 @@ draw_bg:
   ld de,_SCRN0+32*17
   ld bc,20
   call memset
+
+  ; On GBC, draw sky and floor attributes
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_gbc_attrs
+    ldh [rVBK],a
+
+    ; Palette 0: Sky and floor
+    ld h,0
+    ld de,_SCRN0
+    ld bc,32*18
+    call memset
+
+    ; Replace first tile (sky) with a blank one
+    xor a
+    ldh [rVBK],a
+    ld hl,CHRRAM2
+    ld c,16
+    call memset_tiny
+  .not_gbc_attrs:
+
 
   ld hl,_SCRN0+32*12+1
   call bg_draw_one_block
@@ -251,7 +280,20 @@ bg_draw_one_block:
   ld [hl+],a
   inc a
   ld [hl-],a
-  inc a
+
+  ; If GBC, set the attributes as well
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_gbc
+    ldh [rVBK],a
+    ld [hl+],a
+    ld [hl-],a
+    res 5,l
+    ld [hl+],a
+    ld [hl-],a
+    xor a
+    ldh [rVBK],a
+  .not_gbc:
   ret
 
 ;;
@@ -280,7 +322,7 @@ player_frame_sub: ds 1
 player_frame: ds 1
 player_facing: ds 1
 
-SECTION "rom_player", ROM0
+SECTION "rom_lame_boy_player", ROM0
 
 ; Player movement ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -490,14 +532,33 @@ draw_player_sprite:
   ld a,[player_x]
   add a,8  ; Game Boy sprites start at X=8
   ldh [Lspriterect_x],a
+
   ld a,[player_facing]
   ldh [Lspriterect_attr],a
+  ld c,a  ; save for flip detection
   ; The eight frames start at $10, $12, ..., $1E, where
   ; 0 is still and 1-7 are scooting.
   ld a,[player_frame]
   add a
   add PLAYER_TILE_BASE
   ldh [Lspriterect_tile],a
+
+  ; Frame 7 is special: its hotspot is 1 unit forward.  Find which
+  ; direction "forward" is.
+  cp PLAYER_TILE_BASE + 7 * 2
+  jr c,.not_frame_7
+  ld b,b
+  ld b,1
+  bit OAMB_XFLIP,c
+  jr z,.f7_not_flipped
+  ld b,low(-1)
+.f7_not_flipped:
+  ldh a,[Lspriterect_x]
+  add b
+  ldh [Lspriterect_x],a
+.not_frame_7:
+
+  .no_adjust_hotspot:
   jp draw_spriterect
 
 draw_spriterect::
@@ -523,20 +584,6 @@ Lx_add                 rb 1
   ldh [Lspriterect_x],a
   ld a,b
   ldh [Lx_add],a
-
-  ; Frame 7 is special: its hotspot is 1 unit forward.  Find which
-  ; direction "forward" is.
-  cp PLAYER_TILE_BASE + 7 * 2
-  jr c,.not_frame_7
-  ld b,1
-  bit 5,c
-  jr z,.f7_not_flipped
-  ld b,low(-1)
-.f7_not_flipped:
-  ldh a,[Lspriterect_x]
-  add b
-  ldh [Lspriterect_x],a
-.not_frame_7:
 
   ld h,high(SOAM)
   ld a,[oam_used]
@@ -595,8 +642,25 @@ Lx_add                 rb 1
   ld [oam_used],a
   ret
 
+lameboybgpalette_gbc:
+  drgb $8fa1ff  ; 0: Sky and floor
+  drgb $342800
+  drgb $366d00
+  drgb $55c753
+  drgb $8fa1ff  ; 1: Push blocks
+  drgb $6D5C00
+  drgb $BDAC2C
+  drgb $E4DCA8
+lameboyobjpalette_gbc:
+  drgb $000000
+  drgb $342800
+  drgb $BD3C30
+  drgb $FFCFCA
+lameboyobjpalette_gbc_end:
+
 ; CHR resources ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "placeholderchr",ROMX
 bggfx_chr: incbin "obj/gb/bggfx.chrgb.pb16"
 spritegfx_chr: incbin "obj/gb/spritegfx.chrgb.pb16"
+
