@@ -89,6 +89,14 @@ activity_overscan::
   call lcd_clear_oam
   call run_dma
 
+  ; Hide BG and OBJ until ready
+  xor a
+  call set_bgp
+  call set_obp0
+  call set_obp1
+  dec a
+  ldh [rLYC],a  ; disable BG
+
   ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR01|OBJ_ON
   ld [vblank_lcdc_value],a
   ld [stat_lcdc_value],a
@@ -97,12 +105,6 @@ activity_overscan::
   ld [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
-
-  xor a
-  ldh [rBGP],a   ; Hide BG and OBJ until ready
-  ldh [rOBP0],a
-  dec a
-  ldh [rLYC],a  
 
 .loop:
   ld b,helpsect_overscan
@@ -232,9 +234,9 @@ activity_overscan::
   ldh [rLYC],a
 
   ldh a,[cur_palette]
-  ldh [rBGP],a
+  call set_bgp
   cpl
-  ldh [rOBP0],a
+  call set_obp0
 
   jp .loop
 

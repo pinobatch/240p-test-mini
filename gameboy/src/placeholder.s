@@ -43,13 +43,13 @@ lame_boy_demo::
   ; Can turn on LCD at any time.  Only on->off transitions must
   ; happen in vblank.  But because GB asserts no vblank IRQ in
   ; forced blanking, set palette to white until shadow OAM is valid.
+  xor a
+  call set_bgp
+  call set_obp0
+  call set_obp1
   ld a,LCDCF_ON|OBJ_ON|BG_NT0|BG_CHR21
   ldh [rLCDC],a
   ld [vblank_lcdc_value],a
-  xor a
-  ld [rBGP],a
-  ld [rOBP0],a
-  ld [rOBP1],a
 
 .loop:
   ld b,helpsect_lame_boy
@@ -70,9 +70,9 @@ lame_boy_demo::
 
   ; Set palettes
   ld a, %01101100
-  ldh [rBGP],a
+  call set_bgp
   ld a, %00011110
-  ldh [rOBP0],a
+  call set_obp0
 
   ; Show vblank counter
   ld hl,_SCRN0

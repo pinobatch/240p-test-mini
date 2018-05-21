@@ -142,13 +142,14 @@ activity_megaton::
   call srand
 
   ; Turn on rendering (blank now, run later)
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
+  call set_bgp
+  call set_obp0
+  call set_obp1
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_8X16
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
-  ldh [rOBP0],a
-  ldh [rBGP],a
 
   ; Draw previous results
   ld b,0
@@ -276,7 +277,9 @@ activity_megaton::
     ld a,%01101100
     ld b,$00  ; silence
   .have_bgp:
-  ldh [rBGP],a
+  push bc
+  call set_bgp
+  pop bc
   ld a,b
   ldh [rNR12],a
   ld a,$80|HIGH(CROSSING_BEEP_FREQ)

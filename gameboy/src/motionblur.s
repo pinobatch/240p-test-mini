@@ -120,13 +120,13 @@ activity_motion_blur::
     jr nz,.rectrowloop
 
   ; Turn on rendering (no sprites)
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
+  ld a,%01010101  ; Palette all gray until calculated
+  call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
-  ld a,%01010101  ; rBGP all gray until calculated
-  ldh [rBGP],a
 
 .loop:
   ld b,helpsect_motion_blur
@@ -145,7 +145,7 @@ activity_motion_blur::
 
   ; Set bg palette
   ldh a,[bgp_value]
-  ldh [rBGP],a
+  call set_bgp
 
   ; Blit help map
   ld bc,$0206  ; size

@@ -163,8 +163,8 @@ soundtest_de_hl:
 
 wait30frames:
   ld a,%10111101
-  ldh [rBGP],a
-  ldh [rOBP0],a
+  call set_bgp
+  call set_obp0
   ld b,30
   .frameloop:
     call wait_vblank_irq

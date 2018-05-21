@@ -123,14 +123,14 @@ activity_gray_ramp::
   ; Row 19
   call oneblanktilerow
 
-  ; Turn on rendering (no sprites)
-  ld a,LCDCF_ON|BG_NT0|BG_CHR21
-  ld [vblank_lcdc_value],a
-  ldh [rLCDC],a
+  ; Turn on rendering (no sprites so final palette can be loaded now)
   ld a,255
   ldh [rLYC],a  ; disable lyc irq
   ld a,%00011011
-  ldh [rBGP],a
+  call set_bgp
+  ld a,LCDCF_ON|BG_NT0|BG_CHR21
+  ld [vblank_lcdc_value],a
+  ldh [rLCDC],a
 
   ; Now just wait for a B press.  Fortunately, we don't have
   ; to deal with half B presses or parallel universes here.
@@ -213,19 +213,20 @@ activity_linearity::
     dec c
     jr nz,.gridtileloop
 
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
+  call set_bgp
   ldh a,[curlcdc]
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
-  ldh a,[curpalette]
-  ldh [rBGP],a
 
 .loop:
   ld b,helpsect_linearity
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
+  ldh a,[curpalette]
+  call set_bgp
 
   ; Process input
   ld a,[new_keys]
@@ -236,7 +237,6 @@ activity_linearity::
     ldh a,[curpalette]
     cpl
     ldh [curpalette],a
-    ldh [rBGP],a
   .not_select:
 
   bit PADB_A,b
@@ -307,19 +307,20 @@ activity_sharpness::
   ld de,_SCRN0
   call load_full_nam
 
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
+  call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
-  ldh a,[curpalette]
-  ldh [rBGP],a
 
 .loop:
   ld b,helpsect_sharpness
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
+  ldh a,[curpalette]
+  call set_bgp
 
   ; Process input
   ld a,[new_keys]
@@ -330,7 +331,6 @@ activity_sharpness::
     ldh a,[curpalette]
     cpl
     ldh [curpalette],a
-    ldh [rBGP],a
   .not_select:
 
   bit PADB_B,b
@@ -356,19 +356,20 @@ activity_solid_screen::
   ld h,0
   call memset
 
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
+  call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
-  ldh a,[curpalette]
-  ldh [rBGP],a
 
 .loop:
   ld b,helpsect_solid_screen
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
+  ldh a,[curpalette]
+  call set_bgp
 
   ; Process input
   ld a,[new_keys]
@@ -388,7 +389,6 @@ activity_solid_screen::
   .have_new_curpalette:
     and $03
     ldh [curpalette],a
-    ldh [rBGP],a
   .not_right:
 
   bit PADB_B,b
@@ -431,19 +431,20 @@ activity_cps_grid::
   ld b,c  ; bottom red row
   call cps_grid_two_rows
 
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
+  call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
-  ldh a,[curpalette]
-  ldh [rBGP],a
 
 .loop:
   ld b,helpsect_grid
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
+  ldh a,[curpalette]
+  call set_bgp
 
   ; Process input
   ld a,[new_keys]
@@ -454,7 +455,6 @@ activity_cps_grid::
     ldh a,[curpalette]
     cpl
     ldh [curpalette],a
-    ldh [rBGP],a
   .not_select:
 
   bit PADB_B,b
@@ -571,13 +571,13 @@ activity_full_stripes::
   call memset_inc
 
   ; Turn on LCD
-  ld a,LCDCF_ON|BG_NT0|BG_CHR01
-  ld [vblank_lcdc_value],a
-  ldh [rLCDC],a
   ld a,255
   ldh [rLYC],a  ; disable lyc irq
   ld a,%00000011
-  ldh [rBGP],a
+  call set_bgp
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01
+  ld [vblank_lcdc_value],a
+  ldh [rLCDC],a
 
 .loop:
   ld b,helpsect_full_screen_stripes

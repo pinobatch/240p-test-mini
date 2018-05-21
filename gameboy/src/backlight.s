@@ -64,14 +64,16 @@ activity_backlight_zone::
   ld b,4
   call pb16_unpack_block
 
+  ; Blank screen
+  xor a
+  call set_bgp
+  call set_obp0
+  call set_obp1
+  dec a
+  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21|OBJ_ON
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  xor a
-  ldh [rBGP],a   ; blank screen (GB)
-  ldh [rOBP0],a
-  dec a
-  ldh [rLYC],a  ; disable lyc irq
 
 .loop:
   ld b,helpsect_backlight_zone_test
@@ -187,9 +189,9 @@ activity_backlight_zone::
   call wait_vblank_irq
   call run_dma
   ldh a,[curpalette]
-  ldh [rBGP],a
+  call set_bgp
   cpl
-  ldh [rOBP0],a
+  call set_obp0
 
   jp .loop
 

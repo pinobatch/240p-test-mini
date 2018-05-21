@@ -300,8 +300,9 @@ helpscreen::
   ld a,[wnd_x]
   ldh [rWX],a
   ld a,%01101100
-  ldh [rBGP],a
-  ldh [rOBP0],a
+  call set_bgp
+  ld a,%01101100
+  call set_obp0
   jp .loop
 
 ; VRAM preparation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -479,9 +480,12 @@ help_load_bg:
   ; Turn on LCD, but keep palette blank until the main loop
   ; has prepared this frame's sprite display list
   xor a
-  ldh [rBGP],a
-  ldh [rOBP0],a
-  ldh [rOBP1],a
+  call set_bgp
+  xor a
+  call set_obp0
+  xor a
+  call set_obp1
+
   ld a,LCDCF_ON|BG_CHR01|OBJ_8X16|BG_NT0|WINDOW_NT1
   ldh [rLCDC],a
   ld [vblank_lcdc_value],a

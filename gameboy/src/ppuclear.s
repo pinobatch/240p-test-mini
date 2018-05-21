@@ -27,9 +27,9 @@ section "irqvars",HRAM
 vblank_lcdc_value:: ds 1
 stat_lcdc_value:: ds 1
 
-; The display list at $DE00-$DE9F gets DMA'd to OAM after every frame
+; The display list at $CE00-$CE9F gets DMA'd to OAM after every frame
 ; in which sprites moved.  Also called "shadow OAM".
-section "ram_ppuclear",WRAM0[$DE00]
+section "ram_ppuclear",WRAM0[$CE00]
 SOAM:: ds 160
 nmis:: ds 1
 oam_used:: ds 1  ; How much of the display list is used
@@ -143,3 +143,65 @@ stat_handler::
   ldh [rLCDC],a
   pop af
   reti
+
+;;
+; Emulates mono palette feature on Game Boy Color.
+; Call this only during blanking.
+set_obp1::
+  ldh [rOBP1],a
+  ld bc,$8400 + low(rOCPS)
+  jr set_gbc_mono_palette
+
+;;
+; Emulates mono palette feature on Game Boy Color.
+; Call this only during blanking.
+set_obp0::
+  ldh [rOBP0],a
+  ld bc,$8000 + low(rOCPS)
+  jr set_gbc_mono_palette
+
+;;
+; Emulates mono palette feature on Game Boy Color.
+; Call this only during blanking.
+set_bgp::
+  ldh [rBGP],a
+  ld bc,$8000 + low(rBCPS)
+
+;; Emulates
+; @param A BGP or OBP0 value
+; @param B offset into palette memory (0, 4, 8, 12, ..., 28) plus $80
+; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
+; @return AEHL clobbered, B=0, C increased by 1, D unchanged
+set_gbc_mono_palette::
+  rlca
+  ld e,a
+  ld a,b  ; Regmap now: E=BGP<<1, A=palette offset, C=address port
+  ld [$FF00+c],a
+  inc c   ; ad
+  ld b,4
+  ld hl,gbmonopalette
+  ; Regmap now: B=count of remaining colors, C=data port address,
+  ;   E=BGP value rlc 1, HL=pointer to start ofpalette
+  loop:
+    ld a,l
+    xor e
+    and %11111001
+    xor e
+    ld l,a  ; now L points to this color so stuff it into the palette
+    ld a,[hl+]
+    ld [$FF00+c],a
+    ld a,[hl]
+    ld [$FF00+c],a
+    rrc e  ; move to next bitfield of BGP
+    rrc e
+    dec b
+    jr nz,loop
+
+  ; Restore BGP value
+  ld a,e
+  rrca
+  ret
+
+section "GBMONOPALETTE", ROM0, ALIGN[3]
+gbmonopalette::
+  dw 31*33, 21*33, 11*33, 0*33

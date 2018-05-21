@@ -141,6 +141,9 @@ activity_stopwatch::
   call run_dma
 
   ; Turn on rendering
+  ld a,%11100100
+  call set_bgp
+  call set_obp0
   ld a,7
   ldh [rWX],a
   ld a,40      ; BG below inactive circles can be toggled by showing
@@ -150,9 +153,6 @@ activity_stopwatch::
   ld a,LCDCF_ON|BG_NT0|BG_CHR21|OBJ_ON|WINDOW_NT1
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,%11100100
-  ldh [rBGP],a
-  ldh [rOBP0],a
 
 .loop:
   ld b,helpsect_stopwatch

@@ -63,9 +63,8 @@ obj/gb/index.txt: makefile
 
 objlisto = $(foreach o,$(objlist),obj/gb/$(o).o)
 
-# -d: DMG (no bankable WRAM; expand WRAM0 to 8K; no bankable VRAM)
 $(title).gb: $(objlisto)
-	rgblink -d -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
+	rgblink -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
 	rgbfix -p0 -v $@
 
 obj/gb/%.o: obj/gb/%-dedent.s src/gb.inc src/hardware.inc src/global.inc

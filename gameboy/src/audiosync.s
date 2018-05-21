@@ -76,14 +76,15 @@ activity_audiosync::
   ldh [rNR11],a  ; Duty 50%
 
   ; Turn on rendering (no sprites)
+  xor a
+  call set_bgp
+  call set_obp0
+  call set_obp1
+  ld a,$FF
+  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_ON
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  xor a
-  ldh [rBGP],a
-  ldh [rOBP0],a
-  dec a
-  ldh [rLYC],a  ; disable lyc irq
 
 .loop:
   ld b,helpsect_audio_sync_test
@@ -152,8 +153,8 @@ activity_audiosync::
   cp 120
   sbc a  ; A=$00 during beep or $FF during test
   and %00011011
-  ldh [rBGP],a
-  ldh [rOBP0],a
+  call set_bgp
+  call set_obp0
 
   jp .loop
   ret

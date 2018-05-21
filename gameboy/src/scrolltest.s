@@ -95,13 +95,13 @@ activity_grid_scroll::
   ld b,1
   call pb16_unpack_block
 
+  xor a
+  call set_bgp  ; blank the palette
+  ld a,$FF
+  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  xor a
-  ldh [rBGP],a  ; blank the palette
-  ld a,$FF
-  ldh [rLYC],a  ; disable lyc irq
 
 .loop:
   ld b,helpsect_grid_scroll_test
@@ -171,7 +171,7 @@ activity_grid_scroll::
   call move_by_speed
   call wait_vblank_irq
   ldh a,[curpalette]
-  ldh [rBGP],a
+  call set_bgp
   ldh a,[cur_y]
   ldh [rSCY],a
   ldh a,[cur_x]
@@ -185,10 +185,10 @@ activity_hillzone_scroll::
 .restart:
   call load_hillzone_bg
 
+  ld a,%11100100
+  call set_bgp
   ld a,[vblank_lcdc_value]
   ldh [rLCDC],a
-  ld a,%11100100
-  ld [rBGP],a
 .loop:
   ld b,helpsect_hill_zone_scroll_test
   call read_pad_help_check
@@ -234,7 +234,7 @@ activity_kiki_scroll::
   rra
   ldh [rSCY],a
   ld a,%11100100
-  ldh [rBGP],a
+  call set_bgp
 
   jp .loop
 
@@ -407,14 +407,14 @@ load_hillzone_bg::
   ld [stat_lcdc_value],a
 
   ; Enable rSTAT IRQ on rLY=rLYC but put it on hold
+  xor a
+  call set_bgp
+  ld a,255
+  ldh [rLYC],a  ; disable lyc irq
   ld a,STAT_LYCIRQ
   ld [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
-  xor a
-  ldh [rBGP],a
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
 
   ; Expect at start: vblank_lcdc_value copied to rLCDC, and
   ; %11100100 written to rBGP
@@ -600,13 +600,13 @@ load_kiki_bg:
     dec b
     jp nz,.bitunpack_rowloop
 
-  ; Set up palette
+  ; Set up blank palette until sprites are active
+  xor a
+  call set_bgp
+  dec a
+  ldh [rLYC],a
   ld a,LCDCF_ON|BG_CHR21|BG_NT0
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,0
-  ldh [rBGP],a
-  ld a,255
-  ldh [rLYC],a
   ; Expects palette %11100100 during action
   ret

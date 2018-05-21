@@ -86,14 +86,16 @@ activity_shadow_sprite::
 
   call load_bg
 
-  ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR21|OBJ_8X16
-  ld [vblank_lcdc_value],a
-  ld [stat_lcdc_value],a
-  ldh [rLCDC],a
   xor a
   ldh [rSCX],a
   dec a
   ldh [rLYC],a  ; disable lyc irq until something needs it
+  call set_obp0
+  call set_obp1
+  ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR21|OBJ_8X16
+  ld [vblank_lcdc_value],a
+  ld [stat_lcdc_value],a
+  ldh [rLCDC],a
   
 .loop:
   ld b,helpsect_shadow_sprite
@@ -214,7 +216,6 @@ activity_shadow_sprite::
     jp .restart
   .a_done:
 
-
   ; Draw sprite
   xor a
   ld [oam_used],a
@@ -223,6 +224,12 @@ activity_shadow_sprite::
 
   call wait_vblank_irq
   call run_dma
+  ld a,%11100100  ; background palette
+  call set_bgp
+  ld a,%00101100  ; palette for top half of Hepsie
+  call set_obp0
+  ld a,%00011100  ; palette for bottom half of Hepsie
+  call set_obp1
 
   ; Move window
   ldh a,[wy_countdown]
@@ -272,13 +279,6 @@ activity_shadow_sprite::
     add hl,hl
     call set_hillzone_scroll_pos
   .not_ghz_scroll:
-
-  ld a,%11100100  ; background palette
-  ldh [rBGP],a
-  ld a,%00101100  ; palette for top half of Hepsie
-  ldh [rOBP0],a
-  ld a,%00011100  ; palette for bottom half of Hepsie
-  ldh [rOBP1],a
 
   jp .loop
 
@@ -529,8 +529,7 @@ load_gus_portrait:
   ld bc,13*256+18
   call load_nam
   ld a,%11100100
-  ldh [rBGP],a
-  ret
+  jp set_bgp
 
 load_horizontal_stripes:
   ld a,$FF
@@ -554,5 +553,4 @@ load_shadow_sprite_bg_stripes:
   call memset
 
   ld a,%11100100
-  ldh [rBGP],a
-  ret
+  jp set_bgp
