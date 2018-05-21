@@ -71,6 +71,16 @@ gridtile_pb16:
   db %11111111
 kikimap:
   incbin "obj/gb/kikimap.chr1"
+kikibgpalette_gbc:
+  drgb $FFFFAA  ; 0: orange (sand)
+  drgb $FFAA55
+  drgb $AA5500
+  drgb $550000
+  drgb $FFFF80  ; 1: green (floor tiles)
+  drgb $A8FF33
+  drgb $408000
+  drgb $000000
+kikibgpalette_gbc_end:
 
 activity_grid_scroll::
   call init_grid_scroll_vars
@@ -231,8 +241,6 @@ activity_kiki_scroll::
   ldh a,[cur_x]
   rra
   ldh [rSCY],a
-  ld a,%11100100
-  call set_bgp
 
   jp .loop
 
@@ -594,11 +602,42 @@ load_kiki_bg:
     dec b
     jp nz,.bitunpack_rowloop
 
-  ; Set up blank palette until sprites are active
-  xor a
-  call set_bgp
-  dec a
+  ; Disable raster interrupt and set palette
+  ld a,$FF
   ldh [rLYC],a
+  ld a,%11100100
+  ldh [rBGP],a
+
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_gbc
+
+    ld hl,kikibgpalette_gbc
+    ld bc,(kikibgpalette_gbc_end-kikibgpalette_gbc) * 256 + low(rBCPS)
+    ld a,$80
+    call set_gbc_palette
+
+    ; Set tiles 2-4 to use secondary palette
+	ld hl,_SCRN0
+	ld bc,$0100+low(rVBK)
+	.attrloop:
+	  ld a,[hl]
+	  sub 2
+	  cp 3  ; CF=1 if alternate palette else 0
+	  ld a,0
+	  rla   ; A=1 if alternate palette else 0
+	  ld d,a
+	  ld a,b
+	  ld [$FF00+c],a
+	  ld a,d
+	  ld [hl+],a
+	  xor a
+	  ld [$FF00+c],a
+	  ld a,h
+	  cp high(_SCRN1)
+	  jr c,.attrloop
+  .not_gbc:
+
   ld a,LCDCF_ON|BG_CHR21|BG_NT0
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
