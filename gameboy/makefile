@@ -21,23 +21,24 @@ objlist = header init \
   megaton stopwatch overscan soundtest audiosync \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd
 
-EMU := mgba-qt
-DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/bgb/bgb.exe
 
 ifdef COMSPEC
+  ifndef GBEMU
+    GBEMU := start ""
+  endif
   PY := py -3
 else
+  ifndef GBEMU
+    GBEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/bgb/bgb.exe
+  endif
   PY := python3
 endif
 
 .SUFFIXES:
-.PHONY: run debug all dist zip
+.PHONY: run all dist zip
 
 run: $(title).gb
-	$(EMU) $<
-debug: $(title).gb
-	$(DEBUGEMU) $<
-
+	$(GBEMU) $<
 all: $(title).gb
 
 clean:
