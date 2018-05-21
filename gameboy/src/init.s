@@ -155,25 +155,44 @@ reset_handler::
 ;;
 ; Writes BC bytes of value H starting at DE.
 memset::
+  ; Negate BC
+  ld a,b
+  cpl
+  ld b,a
+  ld a,c
+  cpl
+  ld c,a
+  inc bc
+memset_neg_bc::
   ld a, h
+.loop:
   ld [de],a
   inc de
-  dec bc
-  ld a, b
-  or c
-  jr nz, memset
+  inc c
+  jr nz,.loop
+  inc b
+  jr nz,.loop
   ret
 
 ;;
 ; Copies BC bytes from HL to DE.
 memcpy::
+  ; Negate BC
+  ld a,b
+  cpl
+  ld b,a
+  ld a,c
+  cpl
+  ld c,a
+  inc bc
+memcpy_neg_bc::
   ld a, [hl+]
   ld [de],a
   inc de
-  dec bc
-  ld a, b
-  or c
-  jr nz, memcpy
+  inc c
+  jr nz,memcpy_neg_bc
+  inc b
+  jr nz,memcpy_neg_bc
   ret
 
 ;;
