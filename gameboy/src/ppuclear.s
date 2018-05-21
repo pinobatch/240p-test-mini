@@ -149,7 +149,7 @@ stat_handler::
 ; Call this only during blanking.
 set_obp1::
   ldh [rOBP1],a
-  ld bc,$8400 + low(rOCPS)
+  ld bc,$8800 + low(rOCPS)
   jr set_gbc_mono_palette
 
 ;;
@@ -169,7 +169,7 @@ set_bgp::
 
 ;; Emulates
 ; @param A BGP or OBP0 value
-; @param B offset into palette memory (0, 4, 8, 12, ..., 28) plus $80
+; @param B offset into palette memory (0, 8, 16, ..., 56) plus $80
 ; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
 ; @return AEHL clobbered, B=0, C increased by 1, D unchanged
 set_gbc_mono_palette::
@@ -181,7 +181,7 @@ set_gbc_mono_palette::
   ld b,4
   ld hl,gbmonopalette
   ; Regmap now: B=count of remaining colors, C=data port address,
-  ;   E=BGP value rlc 1, HL=pointer to start ofpalette
+  ;   E=BGP value rlc 1, HL=pointer to start of palette
   loop:
     ld a,l
     xor e
@@ -190,7 +190,7 @@ set_gbc_mono_palette::
     ld l,a  ; now L points to this color so stuff it into the palette
     ld a,[hl+]
     ld [$FF00+c],a
-    ld a,[hl]
+    ld a,[hl-]
     ld [$FF00+c],a
     rrc e  ; move to next bitfield of BGP
     rrc e
@@ -204,4 +204,7 @@ set_gbc_mono_palette::
 
 section "GBMONOPALETTE", ROM0, ALIGN[3]
 gbmonopalette::
-  dw 31*33, 21*33, 11*33, 0*33
+  drgb $E8F840
+  drgb $90C040
+  drgb $408040
+  drgb $004040

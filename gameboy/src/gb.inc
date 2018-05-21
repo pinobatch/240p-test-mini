@@ -147,4 +147,13 @@ rMBC1MODE = $6000
 MBC1_BIG_ROM   EQU $00
 MBC1_BIG_RAM   EQU $01
 
+; Palette ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+; Syntax: drgb $FF9966 for color #FF9966
+; Divides each hex tuplet by 8 and rounds down. 
+drgb: macro
+  dw (\1 & $F80000) >> 19 | (\1 & $00F800) >> 6 | (\1 & $0000F8) << 7
+  endm
+
   ENDC

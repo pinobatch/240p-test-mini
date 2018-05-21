@@ -34,6 +34,19 @@ jp_hl::
 section "main", ROM0
 
 main::
+  ; Clear GBC high VRAM if necessary
+  ld a,[initial_a]
+  cp $11
+  jr nz,.no_clear_high_nametables
+    ldh [rVBK],a
+	ld h,$00
+	ld de,$9800
+	ld bc,$0800
+	call memset
+    xor a
+	ldh [rVBK],a
+  .no_clear_high_nametables:
+  
   ; Avoid uninitialized read warnings for nmis and cur_keys
   xor a
   ld [nmis],a

@@ -77,7 +77,7 @@ SECTION "header", ROM0[$0100]
   DS 4
 
   ; Execution mode (GBC runs in GBC mode if bit 7 is true)
-  DB CART_COMPATIBLE_DMG
+  DB CART_COMPATIBLE_DMG_GBC
 
   ; $0144: Developer ID
   DB "OK"
