@@ -71,9 +71,7 @@ activity_motion_blur::
   ld a,3
   ldh [on_shade],a
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ; Clear tilemaps to $0A
   ld h,$0A

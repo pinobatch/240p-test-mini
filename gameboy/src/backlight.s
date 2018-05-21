@@ -42,12 +42,10 @@ activity_backlight_zone::
   ldh [curpalette],a
   
 .restart:
-  call lcd_off
-  xor a
-  ldh [held_keys],a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ; Clear nametable
+  ldh [held_keys],a
   ld h,a
   ld de,_SCRN0
   ld bc,32*18

@@ -51,9 +51,7 @@ add_hl_12:
 
 activity_gray_ramp::
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
   ld hl,CHRRAM2
   ld c,16
   call memset_tiny
@@ -160,9 +158,7 @@ activity_linearity::
   ldh [curlcdc],a
 
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
   
   ld de,linearity_chr
   ld hl,CHRRAM2
@@ -294,9 +290,7 @@ activity_sharpness::
   ldh [curpalette],a
 
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ld hl,CHRRAM2
   ld de,sharpness_chr
@@ -345,11 +339,10 @@ activity_solid_screen::
   ldh [curpalette],a
 
 .restart:
-  call lcd_off
+  call clear_gbc_attr
   ld hl,CHRRAM2
   ld c,16
   xor a
-  ld [help_bg_loaded],a
   call memset_tiny
   ld de,_SCRN0
   ld bc,32*18
@@ -408,9 +401,7 @@ activity_cps_grid::
   ldh [curpalette],a
 
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ld hl,CHRRAM2
   ld de,cps_grid_chr
@@ -543,9 +534,7 @@ activity_full_stripes::
   ldh [curpalette],a
   ld [curframe_bcd],a
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ; Blow away the tilemap, including one more row to show and hide
   ; the frame number

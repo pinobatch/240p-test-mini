@@ -19,13 +19,13 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-WHITE_TILE EQU $80
+WALL_TILE EQU $80
 ARROW_SPRITE_TILE EQU $80
 WINDOW_TL_TILE EQU $82
 WINDOW_LEFT_TILE EQU $85
 WINDOW_BL_TILE EQU $83
 WINDOW_HLINE_TILE EQU $84
-WALL_TILE  EQU $8A
+WHITE_TILE EQU $8A
 WALLBOTTOM_TILE EQU $8B
 FLOORTOP_TILE EQU $90
 FLOOR_TILE EQU $91
@@ -59,7 +59,77 @@ help_height: ds 1
 
 section "helptiles",ROM0,align[5]
 helptiles: incbin "obj/gb/helptiles.chrgb16.pb16"
-sizeof_helptiles = 672
+sizeof_helptiles equ 672
+helptiles_gbc: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
+sizeof_helptiles_gbc equ 960
+helpattrmap_gbc:
+  db $21,$23,$23,$03,$03,$01
+  db $21,$23,$23,$03,$03,$01
+  db $21,$24,$24,$04,$04,$01
+  db $21,$24,$24,$04,$04,$01
+  db $25,$25,$25,$05,$05,$05
+  db $25,$25,$25,$05,$05,$05
+  db $25,$25,$25,$05,$05,$05
+  db $26,$25,$25,$05,$05,$06
+  db $27,$24,$25,$05,$04,$07
+  db $27,$27,$26,$06,$07,$07
+  db $22,$27,$27,$07,$07,$02
+  db $22,$22,$22,$02,$02,$02
+
+helpbgpalette_gbc::
+  ; Palette 0: Window
+  drgb $99FF99
+  drgb $776600
+  drgb $FFFFFF
+  drgb $000000
+  ; Palette 1: Back wall
+  drgb $99FF99
+  drgb $000000
+  drgb $335533
+  drgb $66AA66
+  ; Palette 2: Floor
+  drgb $776600
+  drgb $000000
+  drgb $282000
+  drgb $504000
+  ; Palette 3: Gus's cap in front of wall
+  drgb $99FF99
+  drgb $000000
+  drgb $222280
+  drgb $4444FF
+  ; Palette 4: Gus's skin in front of wall
+  drgb $99FF99
+  drgb $000000
+  drgb $aa8877
+  drgb $ffbbaa
+  ; Palette 5: Gus's shirt in front of wall
+  drgb $99FF99
+  drgb $000000
+  drgb $AAAA55
+  drgb $FFFF99
+  ; Palette 6: Gus's skin and shirt
+  drgb $FFFF99
+  drgb $000000
+  drgb $aa8877
+  drgb $ffbbaa
+  ; Palette 7: Gus's skin in front of floor
+  drgb $776600
+  drgb $000000
+  drgb $aa8877
+  drgb $ffbbaa
+helpbgpalette_gbc_end:
+helpobjpalette_gbc:
+  ; Palette 0: Vest and arrow
+  drgb $FF00FF
+  drgb $AA5500
+  drgb $AA8877
+  drgb $000000
+  ; Palette 1: Bottom of sack
+  drgb $FF00FF
+  drgb $131F7F
+  drgb $B2B2B2
+  drgb $FFFFFF
+helpobjpalette_gbc_end:
 
 section "helpcode",ROM0
 
@@ -299,10 +369,6 @@ helpscreen::
   call run_dma
   ld a,[wnd_x]
   ldh [rWX],a
-  ld a,%01101100
-  call set_bgp
-  ld a,%01101100
-  call set_obp0
   jp .loop
 
 ; VRAM preparation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -314,12 +380,18 @@ help_load_bg:
 
   ; Load tiles used by menu
   ld de,helptiles
-  ld hl,CHRRAM1
   ld b,sizeof_helptiles/16
+  ld a,[initial_a]
+  cp $11
+  jr nz,.notgbc1
+    ld de,helptiles_gbc
+    ld b,sizeof_helptiles_gbc/16
+  .notgbc1:
+  ld hl,CHRRAM1
   call pb16_unpack_block
 
   ; Set default window scroll position
-  ld a,167 - (WINDOW_WIDTH + 1) * 8
+  ld a,167
   ld [wnd_x],a
   ldh [rWX],a
   xor a
@@ -327,15 +399,17 @@ help_load_bg:
   ldh [rSCX],a
   ldh [rSCY],a
 
-  ; Clear area of pattern table to be used by VWF
-  ld h,0
-  ld de,CHRRAM0
-  ld bc,2048
-  call memset
-  ld h,0
-  ld de,CHRRAM2
-  ld bc,2048
-  call memset
+  ; Clear VWF canvas in pattern table
+  ld e,0
+  ld a,[initial_a]
+  cp $11
+  jr nz,.notgbc2
+    dec e
+  .notgbc2:
+  ld hl,CHRRAM0
+  call clear_canvas
+  ld hl,CHRRAM2
+  call clear_canvas
 
   ; Background map: Draw back wall
   ld a,20
@@ -372,18 +446,6 @@ help_load_bg:
     and $1F
     jr nz,.bgcolloop
     
-  ; Background map: Cut out area for left half of character
-  ld hl,_SCRN0+32*(CHARACTER_Y+4)+0
-  ld c,8
-  ld a,WHITE_TILE
-  call .whitecol
-  ld hl,_SCRN0+32*CHARACTER_Y+1
-  ld c,12
-  call .solidcol
-  ld hl,_SCRN0+32*CHARACTER_Y+2
-  ld c,12
-  call .solidcol
-
   ; Background map: Draw right half of character
   ld hl,_SCRN0+32*CHARACTER_Y+3
   ld a,$86
@@ -397,18 +459,6 @@ help_load_bg:
   ld a,$96
   ld c,8/2
   call .righthalfcol
-
-  ; Load static sprites
-  ld hl,SOAM
-  ld bc,($86*256) + 12/2
-  ld de,(CHARACTER_Y*8+16)*256+16+8
-  call .objcol
-  ld bc,($88*256) + 12/2
-  ld de,(CHARACTER_Y*8+16)*256+8+8
-  call .objcol
-  ld bc,($96*256) + 8/2
-  ld de,(CHARACTER_Y*8+16+32)*256+0+8
-  call .objcol
 
   ; Window map: Divider column at left
   ld hl,_SCRN1
@@ -476,15 +526,17 @@ help_load_bg:
   call .draw_wnd_hbar
   ld hl,_SCRN1+16*32+1
   call .draw_wnd_hbar
-
-  ; Turn on LCD, but keep palette blank until the main loop
-  ; has prepared this frame's sprite display list
-  xor a
-  call set_bgp
-  xor a
-  call set_obp0
-  xor a
-  call set_obp1
+  
+  ld a,[initial_a]
+  cp $11
+  jr nz,.notgbcfinal
+    call .load_gbc_only
+    jr .donegbcfinal
+  .notgbcfinal:
+    call .load_mono_only
+  .donegbcfinal:
+  call lcd_clear_oam
+  call run_dma
 
   ld a,LCDCF_ON|BG_CHR01|OBJ_8X16|BG_NT0|WINDOW_NT1
   ldh [rLCDC],a
@@ -497,6 +549,158 @@ help_load_bg:
   ld [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
+  ret
+
+.load_mono_only:
+  ; Background map: Cut out area for left half of character
+  ; so that it can be drawn with flipped tiles
+  ld hl,_SCRN0+32*(CHARACTER_Y+4)+0
+  ld c,8
+  ld a,WHITE_TILE
+  call .whitecol
+  ld hl,_SCRN0+32*CHARACTER_Y+1
+  ld c,12
+  call .solidcol
+  ld hl,_SCRN0+32*CHARACTER_Y+2
+  ld c,12
+  call .solidcol
+
+  ; Load static sprites
+  ld a,OAMF_XFLIP
+  ldh [Lspriterect_attr],a
+  ld hl,SOAM
+  ld bc,($86*256) + 12/2
+  ld de,(CHARACTER_Y*8+16)*256+16+8
+  call .objcol
+  ld bc,($88*256) + 12/2
+  ld de,(CHARACTER_Y*8+16)*256+8+8
+  call .objcol
+  ld bc,($96*256) + 8/2
+  ld de,(CHARACTER_Y*8+16+32)*256+0+8
+  call .objcol
+  ld a,l
+  ld [oam_used],a
+
+  ; Load palette
+  ld a,%01101100
+  call set_bgp
+  ld a,%01101100
+  call set_obp0
+
+  ret
+
+.load_gbc_only:
+  ; Fill BG attribute with back wall palette number
+  ld a,1
+  ldh [rVBK],a
+
+  ld de,_SCRN0
+  ld bc,32*WALL_HEIGHT
+  ld h,1  ; back wall palette
+  call memset
+  ld bc,32*(18 - WALL_HEIGHT)
+  ld h,2  ; floor palette
+  call memset
+
+  ; Fill window attribute
+  ld de,_SCRN1
+  ld bc,32*18
+  ld h,0
+  call memset
+
+  ; Draw palette and flipping for character
+  ld de,_SCRN0+32*CHARACTER_Y+0
+  ld bc,6*256+12
+  ld hl,helpattrmap_gbc
+  call load_nam
+
+  ; Return to plane 0
+  xor a
+  ldh [rVBK],a
+
+  ; Background map: Draw left half of character
+  ld hl,_SCRN0+32*CHARACTER_Y+2
+  ld a,$86
+  ld c,12/2
+  call .righthalfcol
+  ld hl,_SCRN0+32*CHARACTER_Y+1
+  ld a,$88
+  ld c,12/2
+  call .righthalfcol
+  ld hl,_SCRN0+32*(CHARACTER_Y+4)+0
+  ld a,$96
+  ld c,8/2
+  call .righthalfcol
+
+  ; TODO: Draw sprite overlay
+  ld hl,SOAM
+  
+  ; Vest left half
+  ld a,OAMF_XFLIP|0
+  ldh [Lspriterect_attr],a
+  ld bc,($AA*256) + 6/2
+  ld de,(CHARACTER_Y*8+40)*256+16+8
+  call .objcol
+  ld bc,($AC*256) + 6/2
+  ld de,(CHARACTER_Y*8+40)*256+8+8
+  call .objcol
+
+  ; Vest right half
+  xor a
+  ldh [Lspriterect_attr],a
+  ld bc,($AA*256) + 6/2
+  ld de,(CHARACTER_Y*8+40)*256+24+8
+  call .objcol
+  ld bc,($AC*256) + 6/2
+  ld de,(CHARACTER_Y*8+40)*256+32+8
+  call .objcol
+
+  ; Bottom
+  ld a,CHARACTER_Y*8+90
+  ld [hl+],a
+  ld a,8+8
+  ld [hl+],a
+  ld a,$AE
+  ld [hl+],a
+  ld a,OAMF_XFLIP|1
+  ld [hl+],a
+  ld a,CHARACTER_Y*8+90
+  ld [hl+],a
+  ld a,16+8
+  ld [hl+],a
+  ld a,$B4
+  ld [hl+],a
+  ld a,OAMF_XFLIP|1
+  ld [hl+],a
+  ld a,CHARACTER_Y*8+90
+  ld [hl+],a
+  ld a,24+8
+  ld [hl+],a
+  ld a,$B4
+  ld [hl+],a
+  ld a,1
+  ld [hl+],a
+  ld a,CHARACTER_Y*8+90
+  ld [hl+],a
+  ld a,32+8
+  ld [hl+],a
+  ld a,$AE
+  ld [hl+],a
+  ld a,1
+  ld [hl+],a
+
+  ld a,l
+  ld [oam_used],a
+
+  ; Load palette
+  ld hl,helpbgpalette_gbc
+  ld bc,(helpobjpalette_gbc-helpbgpalette_gbc) * 256 + low(rBCPS)
+  ld a,$80
+  call set_gbc_palette
+  ld bc,(helpobjpalette_gbc_end-helpobjpalette_gbc) * 256 + low(rOCPS)
+  ld a,$80
+  call set_gbc_palette
+
   ret
 
 .draw_wnd_hbar:
@@ -543,10 +747,27 @@ help_load_bg:
   ld [hl+],a
   add 6
   ld b,a
-  ld a,(1<<BOAM_HFLIP)
+  ldh a,[Lspriterect_attr]
   ld [hl+],a
   dec c
   jr nz,.objcol
+  ret
+
+;;
+; Clear 2048 bytes of VWF canvas to plane1 = 0, plane1 = E
+; @param HL starting address
+clear_canvas:
+  ld bc,-1024
+  xor a
+  .loop:
+    ld [hl+],a
+    xor e
+    ld [hl+],a
+    xor e
+    inc c
+    jr nz,.loop
+    inc b
+    jr nz,.loop
   ret
 
 ; Window movement ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

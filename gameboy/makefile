@@ -79,7 +79,8 @@ obj/gb/%-dedent.s: src/%.s
 # Files that will be included with incbin
 
 obj/gb/placeholder.o: obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16
-obj/gb/help.o: obj/gb/helptiles.chrgb16.pb16
+obj/gb/help.o: \
+  obj/gb/helptiles.chrgb16.pb16 obj/gb/helptiles-gbc.chrgb16.pb16
 obj/gb/stills.o: obj/gb/grayramp.chrgb obj/gb/cps_grid.chrgb.pb16 \
   obj/gb/linearity.u.chrgb.pb16 obj/gb/linearity.nam \
   obj/gb/sharpness.u.chrgb.pb16 obj/gb/sharpness.nam 

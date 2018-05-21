@@ -163,14 +163,27 @@ soundtest_de_hl:
 
 wait30frames:
   ld a,%10111101
-  call set_bgp
-  call set_obp0
+  ldh [rBGP],a
+  ldh [rOBP0],a
+  ld a,$84
+  ldh [rBCPS],a
+  ld a,$18
+  ldh [rBCPD],a
+  xor a
+  ldh [rBCPD],a
+
   ld b,30
   .frameloop:
     call wait_vblank_irq
     dec b
     jr nz,.frameloop
-  ret
+  ld a,%01101100
+  ldh [rBGP],a
+  ldh [rOBP0],a
+  ld hl,helpbgpalette_gbc
+  ld bc,(8) * 256 + low(rBCPS)
+  ld a,$80
+  jp set_gbc_palette
 
 PULSE_1K = 2048-131
 

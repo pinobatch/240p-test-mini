@@ -29,9 +29,7 @@ PULSE_1K = 2048-131
 
 activity_audiosync::
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
   ldh [unpaused],a
   ldh [rSCX],a
   ldh [rSCY],a

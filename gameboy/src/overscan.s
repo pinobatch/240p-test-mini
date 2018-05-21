@@ -57,9 +57,7 @@ activity_overscan::
   ld a, %00010011
   ldh [cur_palette],a
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
   ld [oam_used],a
   ldh [rWY],a
 

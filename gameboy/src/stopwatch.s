@@ -74,9 +74,7 @@ activity_stopwatch::
   ldh [seconds_bcd],a
   ldh [hide_face],a
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ; Load background tiles
   ld a,bank(stopwatchface_chr)

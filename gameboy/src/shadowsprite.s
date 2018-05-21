@@ -67,9 +67,7 @@ activity_shadow_sprite::
   ldh [wy_countdown],a
 
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
   ldh [held_keys],a
 
   call load_frame_type_names
@@ -424,7 +422,7 @@ draw_shadow_sprite:
   ld a,1
   ldh [Lspriterect_height],a
   ldh a,[cur_facing]
-  set BOAM_BGP1,a
+  or 1|OAMF_PAL1
   ldh [Lspriterect_attr],a
   call draw_spriterect
 

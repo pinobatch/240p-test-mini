@@ -167,7 +167,8 @@ set_bgp::
   ldh [rBGP],a
   ld bc,$8000 + low(rBCPS)
 
-;; Emulates
+;;
+; Emulates xmono palette setting on Game Boy Color.
 ; @param A BGP or OBP0 value
 ; @param B offset into palette memory (0, 8, 16, ..., 56) plus $80
 ; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
@@ -200,6 +201,44 @@ set_gbc_mono_palette::
   ; Restore BGP value
   ld a,e
   rrca
+  ret
+
+;;
+; Loads native GBC palette data.
+; @param A offset into palette memory (0, 8, 16, ..., 56) plus $80
+; @param B number of bytes to copy: 8 times number of colors
+; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
+; @param HL data source
+; @return HL at end, C increased by 1, B = 0, DE unchanged
+set_gbc_palette::
+  ld [$FF00+c],a
+  inc c
+  .loop:
+    ld a,[hl+]
+    ld [$FF00+c],a
+    dec b
+    jr nz,.loop
+  ret
+
+;;
+; Turns off rendering, marks help page as needing to be reloaded,
+; and clears the attribute plane of the GBC tilemaps.
+; @return A=0
+clear_gbc_attr::
+  call lcd_off
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_gbc
+  ldh [rVBK],a
+  ld h,0
+  ld de,_SCRN0
+  ld bc,2048
+  call memset
+  xor a
+  ldh [rVBK],a
+.not_gbc:
+  xor a
+  ld [help_bg_loaded],a
   ret
 
 section "GBMONOPALETTE", ROM0, ALIGN[3]

@@ -58,9 +58,7 @@ activity_megaton::
   ldh [enableflags],a
 
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ; Clear the tilemap
   ld h,a

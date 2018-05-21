@@ -79,9 +79,7 @@ activity_grid_scroll::
   ld a,PADF_RIGHT
   ld [cur_dir],a
 .restart:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ; Blow away the tilemap
   ld h,a
@@ -382,9 +380,7 @@ set_hillzone_scroll_pos::
 ; Load scrolling backgrounds ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 load_hillzone_bg::
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ld a,bank(hillzone_nam)
   ld [rMBC1BANK1],a
@@ -428,9 +424,7 @@ Lpathbits rb 2
 Ltiletotopleft rb 1
 
 load_kiki_bg:
-  call lcd_off
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ld a,bank(kikitiles_chr)
   ld [rMBC1BANK1],a

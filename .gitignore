@@ -3,6 +3,7 @@
 *~
 *.chr
 *.chrgb
+*.chrgb16
 *.chr1
 *.pb16
 *.pb53

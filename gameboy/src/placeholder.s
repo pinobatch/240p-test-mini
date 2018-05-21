@@ -28,8 +28,7 @@ SECTION "rom_bg", ROM0
 ; game loop
 
 lame_boy_demo::
-  xor a
-  ld [help_bg_loaded],a
+  call clear_gbc_attr
 
   ld a,bank(bggfx_chr)
   ld [rMBC1BANK1],a
