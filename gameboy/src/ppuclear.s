@@ -206,7 +206,7 @@ set_gbc_mono_palette::
 ;;
 ; Loads native GBC palette data.
 ; @param A offset into palette memory (0, 8, 16, ..., 56) plus $80
-; @param B number of bytes to copy: 8 times number of colors
+; @param B number of bytes to copy: 8 times number of subpalettes
 ; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
 ; @param HL data source
 ; @return HL at end, C increased by 1, B = 0, DE unchanged

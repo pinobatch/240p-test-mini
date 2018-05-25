@@ -20,11 +20,6 @@
 ;
 section "bcd",ROM0
 
-;;
-; Converts an 8-bit value to decimal.
-; @param A a valie
-; @return A: hundreds and tens digits; C: ones digit;
-; DEHL: unchanged
 bcd8bit_iter: macro
   cp \1
   jr c,.nope\@
@@ -34,7 +29,10 @@ bcd8bit_iter: macro
   endm
 
 ;;
-; Converts in with lowest digit in C and high digits in A
+; Converts an 8-bit value to decimal.
+; @param A the value
+; @return A: hundreds and tens digits; C: ones digit;
+; DEHL: unchanged
 bcd8bit::
   bcd8bit_iter 200
   bcd8bit_iter 100
