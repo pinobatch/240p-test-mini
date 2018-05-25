@@ -53,6 +53,16 @@ sizeof_hepsie_chr = 16*3*4
 shadow_reticle_chr:
   incbin "obj/gb/shadow_reticle.chrgb16.pb16"
 sizeof_shadow_reticle_chr = 16*4*4
+hepsie_palette_gbc:
+  drgb $FF00FF
+  drgb $000000
+  drgb $00FF00  ; skirt
+  drgb $FFFF00
+  drgb $FF00FF
+  drgb $000000
+  drgb $FF00DD  ; cape
+  drgb $FFAA55
+hepsie_palette_gbc_end:
 
 activity_shadow_sprite::
   ld a,72
@@ -224,10 +234,15 @@ activity_shadow_sprite::
   call run_dma
   ld a,%11100100  ; background palette
   call set_bgp
-  ld a,%00101100  ; palette for top half of Hepsie
-  call set_obp0
-  ld a,%00011100  ; palette for bottom half of Hepsie
-  call set_obp1
+
+  ld a,%00101100  ; palette for bottom half of Hepsie
+  ldh [rOBP0],a
+  ld a,%00011100  ; palette for top half of Hepsie
+  ldh [rOBP1],a
+  ld a,$80
+  ld bc,(hepsie_palette_gbc_end - hepsie_palette_gbc) * 256 + LOW(rOCPS)
+  ld hl,hepsie_palette_gbc
+  call set_gbc_palette
 
   ; Move window
   ldh a,[wy_countdown]
