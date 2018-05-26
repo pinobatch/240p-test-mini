@@ -4,4 +4,4 @@ ffffff 0b7bff 0752aa 000000
 ffffff fffe7b c67b0b 000000
 ffffff ffd9b3 c67b0b 000000
 ffffff ffd9b3 b2b2b2 666666
-c67b0b ffd9b3 aa9177 000000
+ffd9b3 c67b0b aa9177 000000

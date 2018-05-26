@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
+import sys
+import argparse
 from PIL import Image, ImageChops
+from pilbmp2nes import pilbmp2chr, formatTilePlanar
+
+# Image processing ##################################################
 
 def quantizetopalette(silf, palette, dither=False):
     """Convert an RGB or L mode image to use a given P image's palette.
@@ -62,13 +67,13 @@ def colorround(im, palettes, tilesize, subpalsize):
             for t in range(0, im.size[1], blockh)
             for l in range(0, im.size[0], blockw)
         ]
+        # diff is the overall color difference for each color area
+        # of this image, using weights 2, 4, 3 per
+        # https://en.wikipedia.org/w/index.php?title=Color_difference&oldid=840435351
         diff = [
             sum(2*r*r+4*g*g+3*b*b for (r, g, b) in tile.getdata())
             for tile in diff
         ]
-        # diff is the overall color difference for each color area
-        # of this image, using weights 2, 4, 3 per
-        # https://en.wikipedia.org/w/index.php?title=Color_difference&oldid=840435351
         trials.append((imp, diff))
 
     # Find the attribute with the smallest difference
@@ -95,6 +100,46 @@ def colorround(im, palettes, tilesize, subpalsize):
         imfinal.paste(onetile, tilerect)
     return imfinal, attrs
 
+def formatTileGB(im):
+    return formatTilePlanar(im, "0,1")
+
+def get_bitreverse():
+    """Get a lookup table for horizontal flipping."""
+    br = bytearray([0x00, 0x80, 0x40, 0xC0])
+    for v in range(6):
+        bit = 0x20 >> v
+        br.extend(x | bit for x in br)
+    return br
+
+bitreverse = get_bitreverse()
+
+def hflipGB(tile):
+    br = bitreverse
+    return bytes(br[b] for b in tile)
+
+def vflipGB(tile):
+    br = bitreverse
+
+def flipuniq(it):
+    tiles = []
+    tile2id = {}
+    tilemap = []
+    for tile in it:
+        if tile not in tile2id:
+            tilenum = len(tiles)
+            hf = hflipGB(tile)
+            vf = vflipGB(tile)
+            vhf = vflipGB(hf)
+            tile2id[vhf] = tilenum | 0x6000
+            tile2id[vf] = tilenum | 0x4000
+            tile2id[hf] = tilenum | 0x2000
+            tile2id[tile] = tilenum
+            tiles.append(tile)
+        tilemap.append(tile2id[tile])
+    return tiles, tilemap
+
+# Input parsing #####################################################
+
 def hextotuple(color):
     if color.startswith('#'):
         color = color[1:]
@@ -107,21 +152,45 @@ def hextotuple(color):
         return tuple(int(color[i:i + 2], 16) for i in (0, 2, 4))
     raise ValueError("%s is not a 3- or 6-digit hex value" % color)
 
-def main():
-    palette_filename = "../docs/Gus-portrait-GBC.pal.txt"
-    imfilename = "../docs/Gus-portrait-GBC.png"
-    im = Image.open(imfilename)
-    if im.mode != 'RGB':
-        im = im.convert('RGB')
-    with open(palette_filename, "r") as infp:
+def parse_argv(argv):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("image")
+    parser.add_argument("paltxtfile")
+    parser.add_argument("outtiles")
+    parser.add_argument("outmap")
+    parser.add_argument("outattr")
+    parser.add_argument("outpalette")
+    parser.add_argument("--preview")
+    return parser.parse_args(argv[1:])
+
+def main(argv=None):
+    args = parse_argv(argv or sys.argv)
+
+    # Read palette spec file
+    with open(args.paltxtfile, "r") as infp:
         lines = [l.split("//", 1)[0].strip() for l in infp]
     palettes = [
         [hextotuple(c) for c in l.split()]
         for l in lines
         if l
     ]
+
+    im = Image.open(args.image)
     imfinal, attrs = colorround(im, palettes, (8, 8), 4)
-    imfinal.save("imfinal.png")
+    if args.preview:
+        imfinal.save(args.preview)
+    gbformat = lambda im: formatTilePlanar(im, "0,1")
+    tiles = pilbmp2chr(imfinal, formatTile=formatTileGB)
+    utiles, tilemap = flipuniq(tiles)
+    print("%d tiles, %d unique" % (len(tiles), len(utiles)))
 
 if __name__=='__main__':
-    main()
+    is_IDLE = 'idlelib.run' in sys.modules or 'idlelib.__main__' in sys.modules
+    if is_IDLE:
+        main("""
+gbcnamtool.py ../tilesets/Gus-portrait-GBC.png ../tilesets/Gus-portrait-GBC.pal.txt
+out_tiles.chr out_map.bin out_attr.bin out_palette.bin
+--preview imfinal.png
+""".split())
+    else:
+        main()
