@@ -19,6 +19,7 @@ objlist = header init \
   main help helppages.hlp placeholder \
   stills shadowsprite backlight scrolltest motionblur \
   megaton stopwatch overscan soundtest audiosync \
+  Gus_portrait_GBC \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd
 
 
@@ -125,6 +126,10 @@ obj/gb/%.nam: obj/gb/%.u.chrgb
 	touch $@
 
 %.pb16: tools/pb16.py %
+	$(PY) $^ $@
+
+obj/gb/Gus_portrait_GBC.s: tools/gbcnamtool.py \
+  tilesets/Gus_portrait-GBC.png tilesets/Gus_portrait-GBC.pal.txt
 	$(PY) $^ $@
 
 # Help me!

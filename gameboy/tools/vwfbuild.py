@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import with_statement
 from PIL import Image
-import array
 
 def rgbasm_bytearray(s):
     s = ['  db ' + ','.join("%3d" % ch for ch in s[i:i + 16])

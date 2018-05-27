@@ -232,8 +232,6 @@ activity_shadow_sprite::
 
   call wait_vblank_irq
   call run_dma
-  ld a,%11100100  ; background palette
-  call set_bgp
 
   ld a,%00101100  ; palette for bottom half of Hepsie
   ldh [rOBP0],a
@@ -519,11 +517,19 @@ load_bg:
 
 shadow_sprite_bg_loaders:
   dw load_gus_portrait
-  dw load_hillzone_bg
+  dw load_hillzone_bg_1
   dw load_horizontal_stripes
   dw load_diagonal_stripes
 
+load_hillzone_bg_1:
+  call load_hillzone_bg
+  ld a,%11100100
+  jp set_bgp
+
 load_gus_portrait:
+  ld a,[initial_a]
+  cp $11
+  jr z,load_gus_portrait_gbc
 
   ; Load Gus portrait for background
   ld a,bank(portrait_chr)
@@ -544,11 +550,52 @@ load_gus_portrait:
   ld a,%11100100
   jp set_bgp
 
+load_gus_portrait_gbc:
+  ; Load Gus portrait for background
+  ld a,bank(Gus_portrait_GBC_pb16)
+  ld [rMBC1BANK1],a
+
+  ld de,Gus_portrait_GBC_pb16
+  ld hl,CHRRAM2
+  ld b,Gus_portrait_GBC_utiles
+  call pb16_unpack_block
+
+  ; Prepare plane 1
+  ld a,1
+  ldh [rVBK],a
+  ld h,0
+  ld de,_SCRN0
+  ld bc,32*18
+  call memset
+  ld hl,Gus_portrait_GBC_attr
+  ld de,_SCRN0+4
+  ld bc,13*256+18
+  call load_nam
+
+  ; Prepare plane 0
+  xor a
+  ldh [rVBK],a
+  ld h,a
+  ld de,_SCRN0
+  ld bc,32*18
+  call memset
+  ld hl,Gus_portrait_GBC_map
+  ld de,_SCRN0+4
+  ld bc,13*256+18
+  call load_nam
+  
+  ld hl,Gus_portrait_GBC_pal
+  ld a,$80
+  ld bc,(Gus_portrait_GBC_pal_end-Gus_portrait_GBC_pal)*256+low(rBCPS)
+  jp set_gbc_palette
+
 load_horizontal_stripes:
+  call clear_gbc_attr
   ld a,$FF
   jr load_shadow_sprite_bg_stripes
 
 load_diagonal_stripes:
+  call clear_gbc_attr
   ld a,$55
 load_shadow_sprite_bg_stripes:
   ld hl,CHRRAM2
