@@ -147,16 +147,16 @@ check gray levels.
 A: Start/stop the test
 ----
 The STN display in the
-original Game Boy has
-a fairly slow response,
+original Game Boy and
+Game Boy Pocket has a
+fairly slow response,
 causing fast-moving
 things to appear blurry.
-Pocket is a bit faster.
-
 Game Boy Color's TFT
 dramatically improves
-response time. It also
-has an interlace-like
+response time.
+All Game Boy displays
+have an interlace-like
 effect, drawing even
 or odd lines darker
 in alternate frames.
@@ -167,7 +167,7 @@ Passive matrix LCDs in
 Game Boy and Game Boy
 Pocket have artifacts.
 Because there's no
-transistor to shut out
+transistor to block
 crosstalk from other
 lines of pixels, the image
 on each line leaks a

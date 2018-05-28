@@ -23,7 +23,6 @@ include "src/global.inc"
 ; This motion blur test also replaces 100 IRE.
 
   rsset hTestState
-cursor_y     rb 1  ; 0-5; see wndmap for what each row controls
 back_shade   rb 1  ; 0-3
 on_time      rb 1  ; 1-20
 on_shade     rb 1  ; 0-3
@@ -32,7 +31,7 @@ off_shade    rb 1  ; 0-3
 is_stripes   rb 1  ; 0: colors 2 and 3 both on or off; 1: one on, other off
 is_running   rb 1  ; $00: off; $80: in off time; $80: in on time
 frames_left  rb 1  ; until toggle bit 0
-bgp_value    rb 1
+bgp_value    rb 8
 
 section "motionblur",ROM0
 motionblurtiles_chr:
@@ -54,8 +53,11 @@ wndmap:
   db $0A,$0A,$0A,$13,$14,$15  ;     shade
   db $18,$19,$1A,$1B,$0A,$0A  ; Stripes
 
-row_high_low:  ; high and low values for each row
+row_high_low:  ; high+1 and low values for each row, monochrome
   dw $0400,$1501,$0400,$1501,$0400,$0200
+
+row_high_low_gbc:  ; high+1 and low values for each row, GBC
+  dw $2000,$1501,$2000,$1501,$2000,$0200
 
 activity_motion_blur::
   xor a
@@ -63,13 +65,24 @@ activity_motion_blur::
   ldh [is_running],a
   ldh [is_stripes],a
   ldh [off_shade],a
-  ldh [cursor_y],a
+  ld [help_cursor_y],a
   inc a
-  ldh [back_shade],a   ; = 1
-  ldh [off_time],a
+  ldh [off_time],a     ; = 1
   ldh [on_time],a
+
+  ; Calculate starting on and back shades: 1 and 3 for DMG,
+  ; 15 and 31 for GBC
+  ld a,[initial_a]
+  cp $11
   ld a,3
+  jr nz,.is_dmg_shade
+    ld a,31
+  .is_dmg_shade:
+  ld b,a
   ldh [on_shade],a
+  and a
+  rra
+  ldh [back_shade],a   ; = 1
 .restart:
   call clear_gbc_attr
 
@@ -143,7 +156,15 @@ activity_motion_blur::
 
   ; Set bg palette
   ldh a,[bgp_value]
-  call set_bgp
+  ldh [rBGP],a
+  ld a,[initial_a]
+  cp $11
+  jr nz,.no_write_gbc_palette
+    ld hl,bgp_value
+    ld bc,$0800|low(rBCPS)
+    ld a,$80
+    call set_gbc_palette
+  .no_write_gbc_palette:
 
   ; Blit help map
   ld bc,$0206  ; size
@@ -153,7 +174,7 @@ activity_motion_blur::
 
   ; Draw cursor
   ld hl,_SCRN0+32*11+5
-  ldh a,[cursor_y]
+  ld a,[help_cursor_y]
   inc a
   ld c,a
   ld b,6
@@ -183,7 +204,7 @@ motionblur_handle_presses:
   jr c,.no_cursor_control
 
   ; Up/Down: Choose a row
-  ldh a,[cursor_y]
+  ld a,[help_cursor_y]
   bit PADB_UP,b
   jr z,.no_cursor_up
     dec a
@@ -196,15 +217,22 @@ motionblur_handle_presses:
   ; Write back only if within range
   cp 6
   jr nc,.no_writeback_cursor_y
-    ldh [cursor_y],a
+    ld [help_cursor_y],a
   .no_writeback_cursor_y:
 
   ; Fetch value and lower/upper bounds for this row
-  ldh a,[cursor_y]
+  ld a,[help_cursor_y]
   add low(back_shade)
   ld c,a  ; C points to HRAM for row B
-  ldh a,[cursor_y]
+
+  ; Ranges differ between mono and GBC
   ld de,row_high_low
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_gbc_ranges
+    ld de,row_high_low_gbc
+  .not_gbc_ranges:
+  ld a,[help_cursor_y]
   call de_index_a  ; Valid values are L <= x < H
   ld a,[$FF00+c]
 
@@ -295,15 +323,13 @@ motionblur_calc_bgp:
 
   ; Fetch the on and off shades
   ldh a,[off_shade]
-  swap a
   ld e,a
   ldh a,[on_shade]
-  swap a
   ld d,a
   ldh a,[back_shade]
   ld b,a
   ld c,a
-  ; Now b=c=back shade, d=on shade<<4, e=off shade<<4
+  ; Now b=c=back shade, d=on shade, e=off shade
 
   ; If current step (bit 0) is off, swap the two
   ldh a,[is_running]
@@ -313,7 +339,7 @@ motionblur_calc_bgp:
     ld d,e
     ld e,a
   .no_swap:
-  ; b=c=back shade, d=current frame shade<<4, e=other frame shade<<4
+  ; b=c=back shade, d=current frame shade, e=other frame shade
 
   ; If stripes are off, use the current frame shade for both rows
   ldh a,[is_stripes]
@@ -321,28 +347,80 @@ motionblur_calc_bgp:
   jr c,.no_destripe
     ld e,d
   .no_destripe:
-  ; b=c=back shade, d=even rows shade<<4, e=odd rows shade<<4
+  ; b=c=back shade, d=even rows shade, e=odd rows shade
 
-  ; If running are off, use the front shade with the maximum contrast
+  ld a,[initial_a]
+  cp $11
+  jr z,.is_gbc
+
+    ; If not running, use the front shade with the maximum contrast
+    ldh a,[is_running]
+    rl a
+    jr c,.is_running_mono
+      ld c,0
+      bit 1,b
+      jr nz,.is_running_mono
+      ld c,3
+    .is_running_mono:
+    ; b=back shade, c=front shade,
+    ; d=even rows shade, e=odd rows shade
+
+    ; Combine the four shades
+    swap d
+    swap e
+    ld a,c
+    or e  ; A = odd rows shade << 4 | front shade
+    add a
+    add a  ; A = odd rows shade << 6 | front shade << 2
+    or b
+    or d
+    ; A = odd rows shade << 6 | even rows shade << 4
+    ;     | front shade << 2 | back shade
+    ldh [bgp_value],a
+    ret
+  .is_gbc:
+
+  ; If not running, use the front shade with the maximum contrast
   ldh a,[is_running]
   rl a
-  jr c,.is_running
+  jr c,.is_running_gbc
     ld c,0
-    bit 1,b
-    jr nz,.is_running
-    ld c,3
-  .is_running:
+    bit 4,b
+    jr nz,.is_running_gbc
+    ld c,31
+  .is_running_gbc:
   ; b=back shade, c=front shade,
-  ; d=even rows shade<<4, e=odd rows shade<<4
+  ; d=even rows shade, e=odd rows shade
 
-  ; Combine the four shades
-  ld a,c
-  or e  ; A = odd rows shade << 4 | front shade
+  push de
+  ld e,c
+  ld d,b
+  ld c,low(bgp_value)
+  call .twoshades
+  pop de
+.twoshades:
+  push de
+  ld a,d
+  call .oneshade
+  pop de
+  ld a,e
+.oneshade:
+  ld e,a
   add a
-  add a  ; A = odd rows shade << 6 | front shade << 2
-  or b
-  or d
-  ; A = odd rows shade << 6 | even rows shade << 4
-  ;     | front shade << 2 | back shade
-  ldh [bgp_value],a
+  add a
+  ld d,a     ; DE = $0401 * gray
+  add a
+  ld l,a
+  ld h,0     ; HL = $0008 * gray
+  add hl,hl
+  add hl,hl  ; HL = $0020 * gray
+  add hl,de
+  ; write to 
+  ld a,l
+  ld [$FF00+c],a
+  inc c
+  ld a,h
+  ld [$FF00+c],a
+  inc c
   ret
+  
