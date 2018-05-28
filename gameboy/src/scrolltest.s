@@ -44,7 +44,7 @@ KT_SHADOW_UL_L equ $0A
 section "scrolltestgfx",ROMX
 hillzone_chr:
   incbin "obj/gb/greenhillzone.u.chrgb.pb16"
-sizeof_hillzone_chr = 1744
+sizeof_hillzone_chr = 1648
 hillzone_nam:
   incbin "obj/gb/greenhillzone.nam.pb16"
 kikitiles_chr:
