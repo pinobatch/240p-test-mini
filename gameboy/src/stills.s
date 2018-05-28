@@ -139,29 +139,29 @@ load_gray_ramp_gbc:
   ld b,0
   .palloop:
     ; calculate 01237654
-	ld a,b
-	bit 2,a
-	jr z,.notdesc
-	  xor $03
-	.notdesc:
+    ld a,b
+    bit 2,a
+    jr z,.notdesc
+      xor $03
+    .notdesc:
 
     ; calculate $401*a
-	ld e,a
-	ld l,a
-	add a
-	add a
-	ld d,a
+    ld e,a
+    ld l,a
+    add a
+    add a
+    ld d,a
 
-	; add $20*b
-	ld h,0
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	add hl,hl
-	add hl,de
+    ; add $20*b
+    ld h,0
+    add hl,hl
+    add hl,hl
+    add hl,hl
+    add hl,hl
+    add hl,hl
+    add hl,de
 
-	; and write to the VCE
+    ; and write to the VCE
     ld a,l
     ld [rBCPD],a
     ld [rOCPD],a
@@ -169,8 +169,8 @@ load_gray_ramp_gbc:
     ld [rBCPD],a
     ld [rOCPD],a
     inc b
-	ld a,b
-	cp 32
+    ld a,b
+    cp 32
     jr nz,.palloop
 
   ; Fill map plane 0
@@ -214,28 +214,31 @@ load_gray_ramp_gbc:
   xor a
   ldh [rVBK],a
 
-  ; TODO: Fill OAM with solid tile $04 at various positions
+  ; Because each vertical stripe is 5 pixels wide, the change from
+  ; e.g. palette 0 to 1 occurs in the middle of a tile.  This would
+  ; cause attribute clash.  So fill the gap with sprites using
+  ; solid tile $04.
   ; B: x, C: y; D: attr counter; E: attr xor
-  ld b,b
   ld hl,SOAM
   ld bc,24*256+24
   ld de,$0081
   .filloamloop:
     ld a,b
-    ld [hl+],a
+    ld [hl+],a  ; write Y
     ld a,c
-    ld [hl+],a
+    ld [hl+],a  ; write X
     add 40
     ld c,a
     ld a,$04
-    ld [hl+],a
+    ld [hl+],a  ; write tile number
     ld a,d
     xor e
-    ld [hl+],a
+    ld [hl+],a  ; write attribute
     ld a,d
     add 2
     cp 8
     jr c,.have_new_oam_attr
+      ; Prepare for next row
       ld a,16
       add b
       cp 24+128
@@ -280,15 +283,14 @@ onegbcgrayrampattrrow:
 activity_gray_ramp::
 .restart:
   call clear_gbc_attr
-  dec a
-  ldh [rLYC],a  ; disable lyc irq
-  xor a
   ld [oam_used],a
   call lcd_clear_oam
   xor a
   ld hl,CHRRAM0
   ld c,16
   call memset_tiny
+  dec a
+  ldh [rLYC],a  ; disable lyc irq
 
   ld a,[initial_a]
   cp $11
