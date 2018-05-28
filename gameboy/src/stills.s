@@ -36,26 +36,27 @@ curframe_bcd: ds 1
 section "grayramp",ROM0,align[2]
 grayramp_chr:
   incbin "obj/gb/grayramp.chrgb"
+grayramp_chr_gbc:
+  db %00111111
+  dw `00000111
+  db %11111111
+  db %00111111
+  dw `11222223
+  db %11111111
+  db %00111111
+  dw `33330000
+  db %11111111
+  db %00111111
+  dw `33333333
+  db %11111111
+  db %11111111
+  db %11111111
 grayramp_bottomhalfmap:
   db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
+grayramp_attrmap_gbc:
+  db $00,$00,$00,$21,$21,$02,$02,$02,$23,$23,$04,$04,$04,$25,$25,$06,$06,$06,$27,$27
 
-oneblanktilerow:
-  xor a
-oneconsttilerow:
-  ld c,20
-  call memset_tiny
-add_hl_12:
-  ld de,12
-  add hl,de
-  ret
-
-activity_gray_ramp::
-.restart:
-  call clear_gbc_attr
-  ld hl,CHRRAM2
-  ld c,16
-  call memset_tiny
-
+load_gray_ramp_mono:
   ; Tiles 1-24 are compressed: 2 rows (4 bytes) are written 4 times
   ld de,grayramp_chr
   ld a,25
@@ -120,13 +121,187 @@ activity_gray_ramp::
     jr nz,.bottomhalfrowloop
   ; Row 19
   call oneblanktilerow
-
-  ; Turn on rendering (no sprites so final palette can be loaded now)
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
   ld a,%00011011
-  call set_bgp
-  ld a,LCDCF_ON|BG_NT0|BG_CHR21
+  jp set_bgp
+
+load_gray_ramp_gbc:
+
+  ; Tiles 1-3 are a cycle of the gray ramp, and tile 4-5 is solid
+  ; to fill in half of the color 0 tile
+  ld b,7
+  ld de,grayramp_chr_gbc
+  call pb16_unpack_block
+
+  ; Set gray ramp palette
+  ld a,$80
+  ldh [rBCPS],a
+  ldh [rOCPS],a
+  ld b,0
+  .palloop:
+    ; calculate 01237654
+	ld a,b
+	bit 2,a
+	jr z,.notdesc
+	  xor $03
+	.notdesc:
+
+    ; calculate $401*a
+	ld e,a
+	ld l,a
+	add a
+	add a
+	ld d,a
+
+	; add $20*b
+	ld h,0
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,de
+
+	; and write to the VCE
+    ld a,l
+    ld [rBCPD],a
+    ld [rOCPD],a
+    ld a,h
+    ld [rBCPD],a
+    ld [rOCPD],a
+    inc b
+	ld a,b
+	cp 32
+    jr nz,.palloop
+
+  ; Fill map plane 0
+  ld hl,_SCRN0
+  call oneblanktilerow
+  ld b,16  ; Fill with 12321 pattern
+  ld a,1
+  .tilerowloop:
+    ld c,4
+    .tilequarterloop:
+      ld [hl+],a
+      inc a
+      ld [hl+],a
+      inc a
+      ld [hl+],a
+      dec a
+      ld [hl+],a
+      dec a
+      ld [hl+],a
+      dec c
+      jr nz,.tilequarterloop
+    call add_hl_12
+    dec b
+    jr nz,.tilerowloop
+  call oneblanktilerow
+
+  ; Fill map plane 1
+  ld a,1
+  ldh [rVBK],a
+  ld hl,_SCRN0+32
+  ld bc,8*256
+  .topattrs:
+    call onegbcgrayrampattrrow
+    dec b
+    jr nz,.topattrs
+  ld bc,8*256+$07
+  .bottomattrs:
+    call onegbcgrayrampattrrow
+    dec b
+    jr nz,.bottomattrs
+  xor a
+  ldh [rVBK],a
+
+  ; TODO: Fill OAM with solid tile $04 at various positions
+  ; B: x, C: y; D: attr counter; E: attr xor
+  ld b,b
+  ld hl,SOAM
+  ld bc,24*256+24
+  ld de,$0081
+  .filloamloop:
+    ld a,b
+    ld [hl+],a
+    ld a,c
+    ld [hl+],a
+    add 40
+    ld c,a
+    ld a,$04
+    ld [hl+],a
+    ld a,d
+    xor e
+    ld [hl+],a
+    ld a,d
+    add 2
+    cp 8
+    jr c,.have_new_oam_attr
+      ld a,16
+      add b
+      cp 24+128
+      jr nc,.filloamdone
+      ld b,a
+      cp 24+64
+      jr nz,.oamnothalfway
+        ld e,$A6
+      .oamnothalfway:
+      ld c,24
+      xor a
+      
+    .have_new_oam_attr:
+    ld d,a
+    jr .filloamloop
+  .filloamdone:
+  ret
+
+oneblanktilerow:
+  xor a
+oneconsttilerow:
+  ld c,20
+  call memset_tiny
+add_hl_12:
+  ld de,12
+  add hl,de
+  ret
+onegbcgrayrampattrrow:
+  ld de,grayramp_attrmap_gbc
+  push bc
+  ld b,20
+  .loop:
+    ld a,[de]
+    inc de
+    xor c
+    ld [hl+],a
+    dec b
+    jr nz,.loop
+  pop bc
+  jr add_hl_12
+
+activity_gray_ramp::
+.restart:
+  call clear_gbc_attr
+  dec a
+  ldh [rLYC],a  ; disable lyc irq
+  xor a
+  ld [oam_used],a
+  call lcd_clear_oam
+  xor a
+  ld hl,CHRRAM0
+  ld c,16
+  call memset_tiny
+
+  ld a,[initial_a]
+  cp $11
+  jr z,.load_gbc
+    call load_gray_ramp_mono
+    jr .load_done
+  .load_gbc:
+    call load_gray_ramp_gbc
+  .load_done:
+
+  ; Turn on rendering
+  call run_dma
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_8X16
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
 
