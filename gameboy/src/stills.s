@@ -571,6 +571,17 @@ activity_solid_screen::
 section "cps_grid",ROM0,align[4]
 cps_grid_chr:
   incbin "obj/gb/cps_grid.chrgb.pb16"
+cps_grid_gbc_palette0:
+  drgb $FFFFFF
+  drgb $FF00FF
+  drgb $FF0000
+  drgb $000000
+cps_grid_gbc_palette1:
+  drgb $000000
+  drgb $FF00FF
+  drgb $FF0000
+  drgb $FFFFFF
+
 sizeof_cps_grid_chr = 128
 
 activity_cps_grid::
@@ -611,8 +622,21 @@ activity_cps_grid::
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
+
+  ; Set GB palette
   ldh a,[curpalette]
-  call set_bgp
+  ldh [rBGP],a
+
+  ; Set GBC palette
+  and %00001000
+  ld e,a
+  ld d,0
+  ld hl,cps_grid_gbc_palette0
+  add hl,de
+  ld bc,8*256+low(rBCPS)
+  ld a,$80
+  call set_gbc_palette
+  
 
   ; Process input
   ld a,[new_keys]
