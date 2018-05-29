@@ -47,6 +47,33 @@ hillzone_chr:
 sizeof_hillzone_chr = 1648
 hillzone_nam:
   incbin "obj/gb/greenhillzone.nam.pb16"
+hillzone_palette_gbc:
+  drgb $FFFFFF  ; Clouds, water
+  drgb $8FA1FF
+  drgb $D1D8FF
+  drgb $FF00FF
+  drgb $8FA1FF  ; Mountain peaks and near squares
+  drgb $BDAC2C
+  drgb $6D5C00
+  drgb $342800
+  drgb $C5FC00  ; Grass and sky
+  drgb $85BC00
+  drgb $077704
+  drgb $8FA1FF
+  drgb $C5FC00  ; Grass and dirt
+  drgb $85BC00
+  drgb $077704
+  drgb $342800
+  drgb $FFFFFF  ; Far shore (brown parts)
+  drgb $8FA1FF
+  drgb $6D5C00
+  drgb $342800
+  drgb $FFFFFF  ; Far shore (green parts)
+  drgb $8FA1FF
+  drgb $077704
+  drgb $342800
+hillzone_palette_gbc_end:
+
 kikitiles_chr:
   incbin "obj/gb/kikitiles.chrgb"
 
@@ -193,8 +220,6 @@ activity_hillzone_scroll::
 .restart:
   call load_hillzone_bg
 
-  ld a,%11100100
-  call set_bgp
   ld a,[vblank_lcdc_value]
   ldh [rLCDC],a
 .loop:
@@ -350,7 +375,8 @@ move_by_speed:
 
 ;;
 ; Draws the scroll strips for hill zone between 0 and 2048
-; 0-15 12.5% speed, 16-111 25% speed, 112-143 100% speed
+; 0-15 12.5% speed, 16-111 25% speed, 112-143 100% speed.
+; Also changes BGP so that GB and GBC can use one set of tiles.
 ; @param HL scroll distance
 set_hillzone_scroll_pos::
   add hl,hl
@@ -360,20 +386,24 @@ set_hillzone_scroll_pos::
   add hl,hl
   ld a,h
   ldh [rSCX],a
+  ld a,%01010000
+  ldh [rBGP],a
 
   ; uses HALT until IRQ, not
   add hl,hl
-  ld a,16
+  ld bc,16*256 + %11100100
   di
   call .waitandwrite
   add hl,hl
   add hl,hl
-  ld a,112
+  ld bc,112*256 + %01100100
+  call .waitandwrite
+  ld bc,120*256 + %11100100
   call .waitandwrite
   reti
 
 .waitandwrite:
-  ld b,a
+  ld a,b
   dec a
   ldh [rLYC],a
 .wwloop:
@@ -382,7 +412,9 @@ set_hillzone_scroll_pos::
   cp b
   jr nz,.wwloop
   ld a,h
-  ld [rSCX],a
+  ldh [rSCX],a
+  ld a,c
+  ldh [rBGP],a
   ret
 
 ; Load scrolling backgrounds ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -410,9 +442,90 @@ load_hillzone_bg::
   ld [vblank_lcdc_value],a
   ld [stat_lcdc_value],a
 
-  ; Enable rSTAT IRQ on rLY=rLYC but put it on hold
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_gbc_attrs
+  ld a,1
+  ldh [rVBK],a
+
+  ; Set up approximate attribute table (to be refined later)
+  ld hl,_SCRN0
+  ld de,.attrstrips
+.attrloop1:
+  ld a,[de]
+  inc de
+  or a
+  jr z,.attrloop1end
+  ld c,a
+  ld a,[de]
+  inc de
+  call memset_tiny
+  jr .attrloop1
+.attrstrips:
+  db 32*2,0  ; sky
+  db 32*5,1  ; peaks
+  db 32*2,3  ; foliage
+  db 32*2,4  ; far shore
+  db 32*3,0  ; water
+  db 32*1,2  ; grass and sky
+  db 32*1,3  ; grass and dirt
+  db 32*2,1  ; squares
+  db 0       ; separator
+
+  ; Top of waterfall
+  dw _SCRN0+7*32+16
+  db 8,0
+  dw _SCRN0+8*32+16
+  db 8,0
+  dw _SCRN0+9*32+8
+  ; Bushes near shore
+  db 4,3
+  dw _SCRN0+10*32+8
+  db 4,5
+  dw _SCRN0+9*32+26
+  db 4,3
+  dw _SCRN0+10*32+26
+  db 4,5
+  ; Near low grass
+  dw _SCRN0+16*32+3
+  db 5,3
+  dw _SCRN0+16*32+15
+  db 3,3
+  dw _SCRN0+16*32+23
+  db 7,3
+  dw $0000   ; Terminator  
+.attrloop1end:
+
+  ; Correct areas not matching the rest of the horizontal strip
+.attrloop2:
+  ld a,[de]
+  inc de
+  ld l,a
+  ld a,[de]
+  inc de
+  ld h,a
+  or l
+  jr z,.attrloop2end
+  ld a,[de]
+  inc de
+  ld c,a
+  ld a,[de]
+  inc de
+  call memset_tiny
+  jr .attrloop2
+.attrloop2end:
+
   xor a
-  call set_bgp
+  ldh [rVBK],a  ; close attribute plane
+  ld hl,hillzone_palette_gbc
+  ld bc,(hillzone_palette_gbc_end-hillzone_palette_gbc) * 256 + low(rBCPS)
+  ld a,$80
+  call set_gbc_palette
+.not_gbc_attrs:
+
+  xor a
+  ldh [rBGP],a
+  ; Enable rSTAT IRQ on rLY=rLYC but put it on hold
   ld a,255
   ldh [rLYC],a  ; disable lyc irq
   ld a,STAT_LYCIRQ
@@ -420,8 +533,6 @@ load_hillzone_bg::
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
 
-  ; Expect at start: vblank_lcdc_value copied to rLCDC, and
-  ; %11100100 written to rBGP
   ret
 
 ; Kiki's tilemap is compressed. Hard.

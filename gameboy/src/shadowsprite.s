@@ -517,14 +517,9 @@ load_bg:
 
 shadow_sprite_bg_loaders:
   dw load_gus_portrait
-  dw load_hillzone_bg_1
+  dw load_hillzone_bg
   dw load_horizontal_stripes
   dw load_diagonal_stripes
-
-load_hillzone_bg_1:
-  call load_hillzone_bg
-  ld a,%11100100
-  jp set_bgp
 
 load_gus_portrait:
   ld a,[initial_a]
