@@ -636,7 +636,7 @@ help_load_bg:
   ld hl,SOAM
   
   ; Vest left half
-  ld a,OAMF_XFLIP|0
+  ld a,OAMF_XFLIP|OAMF_PRI|0
   ldh [Lspriterect_attr],a
   ld bc,($AA*256) + 6/2
   ld de,(CHARACTER_Y*8+40)*256+16+8
@@ -646,7 +646,7 @@ help_load_bg:
   call .objcol
 
   ; Vest right half
-  xor a
+  ld a,OAMF_PRI|0
   ldh [Lspriterect_attr],a
   ld bc,($AA*256) + 6/2
   ld de,(CHARACTER_Y*8+40)*256+24+8
@@ -662,7 +662,7 @@ help_load_bg:
   ld [hl+],a
   ld a,$AE
   ld [hl+],a
-  ld a,OAMF_XFLIP|1
+  ld a,OAMF_PRI|OAMF_XFLIP|1
   ld [hl+],a
   ld a,CHARACTER_Y*8+90
   ld [hl+],a
@@ -670,7 +670,7 @@ help_load_bg:
   ld [hl+],a
   ld a,$B4
   ld [hl+],a
-  ld a,OAMF_XFLIP|1
+  ld a,OAMF_PRI|OAMF_XFLIP|1
   ld [hl+],a
   ld a,CHARACTER_Y*8+90
   ld [hl+],a
@@ -678,7 +678,7 @@ help_load_bg:
   ld [hl+],a
   ld a,$B4
   ld [hl+],a
-  ld a,1
+  ld a,OAMF_PRI|1
   ld [hl+],a
   ld a,CHARACTER_Y*8+90
   ld [hl+],a
@@ -686,7 +686,7 @@ help_load_bg:
   ld [hl+],a
   ld a,$AE
   ld [hl+],a
-  ld a,1
+  ld a,OAMF_PRI|1
   ld [hl+],a
 
   ld a,l
