@@ -244,7 +244,8 @@ drop shadows OK but
 still interpret 240p as
 480i. The striped sprite
 should make attempted
-deinterlacing clear.
+deinterlacing easy
+to spot.
 ----
 Some handhelds' LCD
 driver circuits use a
@@ -560,9 +561,8 @@ generator.
 
 == 144p Test Suite ==
 
-Ver. 0.04 (2018-04-29)
-No more BG disabling
-in LCDC
+Ver. 0.05 (2018-05-30)
+GBC enhancement
 
 © 2011-2016
   Artemio Urbina

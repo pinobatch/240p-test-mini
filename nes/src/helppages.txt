@@ -31,9 +31,8 @@
 
 == About ==
 
-The 240p Test Suite was
-designed with two goals in
-mind:
+The 240p Test Suite has
+two goals:
 
 1. Evaluate TV sets and
    video processors for ability
@@ -169,12 +168,12 @@ Concept by Konsolkongen
 
 == Grid ==
 
-This pattern uses the full
-resolution of the screen.
-You can use it to verify that
-the entire picture is visible,
-including the entire red
-border, with no distortion.
+This pattern uses the
+screen's full resolution.
+Use it to verify that the
+entire picture is visible,
+including the red border,
+with no distortion.
 
 A: Change between 256x224
    and 256x240 pixel grids
@@ -193,12 +192,12 @@ circles at the pixel aspect
 ratio of the NES PPU. NTSC
 is 8:7; PAL is close to 11:8.
 
-You can use it to verify that
-a display or scaler has its
-horizontal to vertical size
-ratio set correctly or to
+Use it to verify the
+horizontal to vertical
+size ratio setting of your
+display or scaler or to
 verify the lack of barrel
-distortion on a CRT.
+distortion of a CRT.
 
 The diameter of each circle
 should be the same in all
@@ -222,9 +221,11 @@ the different components.
 == Solid color screen ==
 
 Some displays and scalers
-have problems when changing
-between solid black and
-solid white or bright colors.
+have problems with sudden
+changes between solid black
+and solid white or bright
+colors.  Other displays may
+have dead or damaged pixels.
 Some cables produce audio
 buzzing while a white
 screen is displayed.
@@ -237,9 +238,8 @@ A on black screen: Switch
   black (some TVs lose sync)
 A on white screen: Enter or
   leave custom color mode
-↑↓: Change custom color
-  brightness
-←→: Change custom color hue
+↑↓: Change custom brightness
+←→: Change custom hue
 
 == IRE ==
 
@@ -260,23 +260,23 @@ by lidnariq of NESdev BBS
 
 == Sharpness ==
 
-You should set the sharpness
-of your TV to a value that
-shows clean black and gray
+Set the sharpness of your
+TV to a value that shows
+clean black and gray
 transitions without white
 ghost lines on the side.
 
-On modern TVs, the
-"sharpness" control performs
-edge enhancement, which
-is designed for live action
-sources received through RF.
-Some TVs have zero as
+Modern TVs' "sharpness"
+control performs edge
+enhancement, which is
+designed for live action
+SDTV or VHS sources.
+Most TVs have zero as
 no change and high as
-enhancement. Others have
-middle as no change, high
-as enhancement, and low
-as blurring.
+enhancement. A few have
+middle as no change,
+high as enhancement,
+and low as blurring.
 
 == Chroma crosstalk ==
 
@@ -363,7 +363,7 @@ Hold A + ↑↓←→:
 Move each edge inward until
 you see the white border,
 then go back one pixel. Or
-leave one white pixel visible
+leave one border pixel visible
 and subtract 1. The result
 is the amount of overscan
 in pixels in each direction.
@@ -372,9 +372,9 @@ The NES picture is 256x240
 pixels. The nominal 4:3 frame
 on NTSC is 280x240, including
 12 pixels of border at left
-and right. This border is not
-included in the displayed
-amounts.
+and right. The displayed
+amounts do not include this
+side border.
 
 PAL NES border is always
 black. It covers 2 pixels
@@ -395,9 +395,8 @@ Some deinterlacers display
 drop shadows correctly but
 still interpret 240p as 480i.
 The striped sprite should
-make it clear if a processor
-is trying to deinterlace the
-picture.
+make attempted deinterlacing
+easy to spot.
 ----
 ↑↓←→: Move sprite
 A: Skip flicker frame or
@@ -440,31 +439,31 @@ blurry.
 ----
 Lag measurement
 
-Connect two displays at once.
-One is being tested, and the
-other (the reference) should
-be a CRT SDTV or a display
-with known lag. For example,
+To measure lag, get a digital
+camera and connect two
+displays at once. One is
+being tested, and the other
+(the reference) should be a
+CRT SDTV or a display with
+known lag. For example,
 connect a CRT to the RF out
 of a front-loading NES and
 your scaler to the AV out.
 
-Use a digital camera to take
-a picture of both screens at
-the same time. The picture
+Then photograph both screens
+at once. The picture
 will show the difference in
 image processing latency
-between them. For some
-consumer LCD TVs, this
-may exceed five frames.
+between them. Some consumer
+LCD TVs exceed five frames.
 ----
 Lag measurement
 
-The ruler helps measure
-individual scanlines of lag.
-Use a short exposure on your
-camera and divide scanlines
-by 15.7 to get milliseconds.
+The ruler helps count
+scanlines of lag. Use a
+short exposure on your
+camera and divide lines by
+15.7 to get milliseconds.
 
 When Kevin Horton's Hi-Def
 NES mod is enabled, the
@@ -503,13 +502,13 @@ on the screen, optionally
 with audio.
 
 Press A when the moving
-reticle aligns with the still
-one to display the offset
-in frames from the actual
+and still reticles align
+to display the offset in
+frames from the actual
 intersection and whether it
 was early or late. After ten
-presses that are not early,
-their average is shown.
+non-early presses, their
+average is shown.
 ----
 ↑↓: Choose a setting
 ←→: Change setting's value
@@ -523,15 +522,9 @@ beep when A is pressed or
 beep and flash when the
 reticles align.
 
-Results will be more accurate
-if you are skilled at rhythm
-games such as Konami's
-Dance Dance Revolution or
-Activision's Guitar Hero.
-
 == Hill zone scroll test ==
 
-This test shows a scrolling
+This shows a scrolling
 background with several
 parallax strips. It can be
 used to notice any drops
@@ -546,9 +539,9 @@ Hill zone by mikejmoffitt
 
 == Vertical scroll test ==
 
-This test shows a scrolling
-background. It can be used
-to measure cadence
+This shows a scrolling
+background. It can be
+used to measure cadence
 detection in a deinterlacer.
 
 ↑↓: Change speed
@@ -599,13 +592,13 @@ or weaving them incorrectly.
 
 This test displays a small
 moving square, letting you
-check how a display's
-backlight works with small
-bright areas. Some LED-lit
-LCDs dim darker areas to
-make black areas darker,
-which causes problems with
-scenes such as starfields.
+check how a display works
+with small bright areas.
+Some LED-lit LCDs dim
+darker areas to make black
+areas darker, which causes
+problems with scenes such
+as starfields and credits.
 
 ↑↓←→: Move the square
 Select: Change its size among
@@ -630,8 +623,8 @@ A: Hide or show the square
 
 == Sound test ==
 
-Use this test to ensure that
-the audio output is working
+Use this test to ensure
+that the audio output works
 and that audio and video are
 synchronized.
 
