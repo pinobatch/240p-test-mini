@@ -32,7 +32,7 @@ bcd8bit_iter: macro
 ; Converts an 8-bit value to decimal.
 ; @param A the value
 ; @return A: hundreds and tens digits; C: ones digit;
-; DEHL: unchanged
+; DEHL: unchanged; Z set if number is less than 10
 bcd8bit::
   bcd8bit_iter 200
   bcd8bit_iter 100

@@ -526,24 +526,52 @@ activity_solid_screen::
   ldh [customred],a
   ldh [customgreen],a
   ldh [customblue],a
+  ld a,$80
+  ldh [curscry],a
 
 .restart:
   call clear_gbc_attr
+  
+  ; Tile 0: Blank screen in color 0
+  ; Tiles 1-0
   ld hl,CHRRAM2
   ld c,16
   xor a
   call memset_tiny
+  dec a
+  ld c,9*16
+  call memset_tiny
+
+  ; Clear tilemap, leaving space for (GBC-only) VWF canvas for RGB
   ld de,_SCRN0
   ld bc,32*18
   ld h,0
   call memset
 
+  ; Create VWF canvas at X=160-176
+  ld a,1
+  ld hl,_SCRN0+32*1+20
+  ld c,3  ;  3 rows tall
+  ld de,32-3
+.canvasinitrowloop:
+  ld b,3
+.canvasinitcellloop:
+  ld [hl+],a
+  inc a
+  dec b
+  jr nz,.canvasinitcellloop
+  add hl,de
+  dec c
+  jr nz,.canvasinitrowloop
+
   ld a,255
   ldh [rLYC],a  ; disable lyc irq
+  ld a,%11000000
   call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
+  ld a,32
 
 .loop:
   ld b,helpsect_solid_screen
@@ -556,7 +584,21 @@ activity_solid_screen::
   ldh [rBGP],a
   or a
   jr nz,.set_bcpd_not_custom
-    ld hl,$7FFF
+    ld h,a     ; H = 0
+    ldh a,[customgreen]
+	add a,a
+	add a,a
+	add a,a
+	ld l,a
+	add hl,hl
+	add hl,hl  ; HL = G * 32
+    ldh a,[customred]
+	ld e,a             ; E = R
+	ldh a,[customblue]
+	add a
+	add a              ; A = B * 4
+	ld d,a             ; DE = R+B*1024
+	add hl,de
     jr .have_gbc_color_hl
   .set_bcpd_not_custom:
     ld de,solid_screen_constants-2
@@ -569,45 +611,178 @@ activity_solid_screen::
   ld a,h
   ldh [rBCPD],a
 
+  ; $80: Scroll to x=32 away from RGB control
+  ; $00: Scroll to x=0 with RGB control
+  ldh a,[curscry]
+  and $80
+  xor $80
+  rra
+  rra
+  ldh [rSCX],a
+
   ; Choose among 5 palettes on GBC or 4 on GB
+  ld a,[new_keys]
+  bit PADB_B,a
+  ret nz  ; quit now if exit
+  ld b,a
   ld c,4
   ld a,[initial_a]
   cp $11
   jr nz,.not_5_palettes
-    inc c
+    ; A on white screen on GBC only: Toggle custom mode
+    bit PADB_A,b
+    jr z,.not_toggle_custom
+    ldh a,[curpalette]
+    or a
+    jr nz,.not_toggle_custom
+      ldh a,[curscry]
+      xor $80
+      ldh [curscry],a
+    .not_toggle_custom:
+    ld c,5
   .not_5_palettes:
 
   ; Process input
-  ld a,[new_keys]
+  ldh a,[curscry]
+  rla
+  jr c,.not_custom_control
+
+    ; Autorepeat for left and right keys
+	ld b,PADF_LEFT|PADF_RIGHT
+	call autorepeat
+	ld a,[new_keys]
+	ld b,a
+    ldh a,[curscry]
+
+    ; At this point: A is which row is selected, and B
+    bit PADB_DOWN,b
+    jr z,.not_custom_next_row
+      inc a
+      cp 3
+      jr c,.not_custom_next_row
+      dec a
+    .not_custom_next_row:
+
+    bit PADB_UP,b
+    jr z,.not_custom_prev_row
+      dec a
+      cp 3
+      jr c,.not_custom_prev_row
+      inc a
+    .not_custom_prev_row:
+    ldh [curscry],a
+
+    add low(customred)
+    ld c,a
+    ld a,[$FF00+c]
+    bit PADB_RIGHT,b
+    jr z,.not_custom_increase
+      inc a
+      cp 32
+      jr c,.not_custom_increase
+      dec a
+    .not_custom_increase:
+
+    bit PADB_LEFT,b
+    jr z,.not_custom_decrease
+      dec a
+      cp 32
+      jr c,.not_custom_decrease
+      inc a
+    .not_custom_decrease:
+    ld [$FF00+c],a
+
+    call solid_update_rgb
+    jr .input_done
+  .not_custom_control:
+    bit PADB_LEFT,b
+    jr z,.not_left
+      ldh a,[curpalette]
+      or a
+      jr nz,.notwrapprev
+        ld a,c
+      .notwrapprev:
+      dec a
+      jr .have_new_curpalette
+    .not_left:
+
+    bit PADB_RIGHT,b
+    jr z,.not_right
+      ldh a,[curpalette]
+      inc a
+      cp c
+      jr c,.notwrapnext
+        xor a
+      .notwrapnext:
+    .have_new_curpalette:
+      ldh [curpalette],a
+    .not_right:
+  .input_done:
+
+  jp .loop
+
+solid_update_rgb:
+  ; Draw labels for Red, Green, and Blue
+  call vwfClearBuf
+  ld a,"R"
+  ld b,6+24*0
+  call vwfPutTile
+  ld a,"G"
+  ld b,6+24*1
+  call vwfPutTile
+  ld a,"B"
+  ld b,6+24*2
+  call vwfPutTile
+
+  ; Draw cursor
+  ldh a,[curscry]
   ld b,a
+  add a  ; A=component*2
+  add b  ; A=component*3
+  add a  ; A=component*6
+  add a  ; A=component*12
+  scf
+  adc a  ; A=component*24+1
+  ld b,a
+  ld a,">"
+  call vwfPutTile
 
-  bit PADB_LEFT,b
-  jr z,.not_left
-    ldh a,[curpalette]
-    or a
-    jr nz,.notwrapprev
-	  ld a,c
-    .notwrapprev:
-    dec a
-    jr .have_new_curpalette
-  .not_left:
+  ; Draw red, green, and blue values
+  ld de,19 * 256 + low(customred)
+.componentloop:
+  push de
+  ld c,e
+  ld a,[$FF00+c]
+  call bcd8bit  ; A: tens; C: ones
+  jr z,.lessthanten
+    push bc
+    add "0"
+    ld l,a
+    ld a,d
+    sub 5
+    ld b,a  ; B:x, L: ascii, stack: ones digit, Y and hramptr
+	ld a,l
+    call vwfPutTile
+    pop bc   ; Restore ones
+    pop de   ; Restore Y and hramptr
+    push de
+  .lessthanten:
+  ld a,c
+  add "0"
+  ld b,d
+  call vwfPutTile
+  pop de
+  inc e
+  ld a,24
+  add d
+  ld d,a
+  cp 24*3
+  jr c,.componentloop
 
-  bit PADB_RIGHT,b
-  jr z,.not_right
-    ldh a,[curpalette]
-	inc a
-    cp c
-    jr c,.notwrapnext
-      xor a
-    .notwrapnext:
-  .have_new_curpalette:
-    ldh [curpalette],a
-  .not_right:
-
-  bit PADB_B,b
-  jr z,.loop
-  ret
-
+  ; Push tiles to VRAM during blanking  
+  ld hl,CHRRAM2+1*16
+  ld c,9
+  jp vwfPutBufHBlank
 
 ; CPS style grid ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

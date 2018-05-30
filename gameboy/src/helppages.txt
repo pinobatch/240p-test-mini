@@ -131,7 +131,7 @@ dead or damaged pixels.
 ←→: Change gray level
   or color
 A on white: Toggle RGB
-  control (GBC only)
+  input box (GBC only)
 ↑↓←→: Change RGB value
 
 == Motion blur ==
