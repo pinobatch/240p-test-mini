@@ -129,6 +129,10 @@ Other displays may have
 dead or damaged pixels.
 
 ←→: Change gray level
+  or color
+A on white: Toggle RGB
+  control (GBC only)
+↑↓←→: Change RGB value
 
 == Motion blur ==
 

@@ -27,6 +27,9 @@ curpalette rb 1
 curtileid rb 1
 curscry rb 1
 curlcdc rb 1
+customred   rb 1
+customgreen rb 1
+customblue  rb 1
 
 section "stillswram", WRAM0
 curframe_bcd: ds 1
@@ -511,9 +514,18 @@ activity_sharpness::
 ; Solid screen ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "solid_screen",ROM0
+solid_screen_constants:
+  drgb $000000
+  drgb $FF0000
+  drgb $00FF00
+  drgb $0000FF
 activity_solid_screen::
   xor a
   ldh [curpalette],a
+  ld a,31
+  ldh [customred],a
+  ldh [customgreen],a
+  ldh [customblue],a
 
 .restart:
   call clear_gbc_attr
@@ -538,8 +550,32 @@ activity_solid_screen::
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
+
+  ; Write color to both GB and GBC palette ports
   ldh a,[curpalette]
-  call set_bgp
+  ldh [rBGP],a
+  or a
+  jr nz,.set_bcpd_not_custom
+    ld hl,$7FFF
+    jr .have_gbc_color_hl
+  .set_bcpd_not_custom:
+    ld de,solid_screen_constants-2
+    call de_index_a
+  .have_gbc_color_hl:
+  ld a,$80
+  ldh [rBCPS],a
+  ld a,l
+  ldh [rBCPD],a
+  ld a,h
+  ldh [rBCPD],a
+
+  ; Choose among 5 palettes on GBC or 4 on GB
+  ld c,4
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_5_palettes
+    inc c
+  .not_5_palettes:
 
   ; Process input
   ld a,[new_keys]
@@ -548,16 +584,23 @@ activity_solid_screen::
   bit PADB_LEFT,b
   jr z,.not_left
     ldh a,[curpalette]
-    inc a
+    or a
+    jr nz,.notwrapprev
+	  ld a,c
+    .notwrapprev:
+    dec a
     jr .have_new_curpalette
   .not_left:
 
   bit PADB_RIGHT,b
   jr z,.not_right
     ldh a,[curpalette]
-    dec a
+	inc a
+    cp c
+    jr c,.notwrapnext
+      xor a
+    .notwrapnext:
   .have_new_curpalette:
-    and $03
     ldh [curpalette],a
   .not_right:
 
