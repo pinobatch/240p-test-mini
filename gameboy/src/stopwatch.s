@@ -21,6 +21,13 @@ include "src/global.inc"
 
 ; Stopwatch: Lag test
 
+section "stopwatchchrlo",ROM0
+; This is temporarily moved into ROM0 while
+; writing the GBC-exclusive tests' help
+stopwatchdigits_chr:
+  incbin "obj/gb/stopwatchdigits.chrgb.pb16"
+sizeof_stopwatchdigits_chr = 1024
+
 section "stopwatchchr",ROMX
 stopwatchface_chr:
   incbin "obj/gb/stopwatchface.u.chrgb.pb16"
@@ -31,10 +38,6 @@ stopwatchface_nam:
 stopwatchhand_chr:
   incbin "obj/gb/stopwatchhand.chrgb.pb16"
 sizeof_stopwatchhand_chr = 1536
-
-stopwatchdigits_chr:
-  incbin "obj/gb/stopwatchdigits.chrgb.pb16"
-sizeof_stopwatchdigits_chr = 1024
 
 ; X, Y coordinates of 1,1
 sw_hand_xy:

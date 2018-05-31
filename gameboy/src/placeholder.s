@@ -547,7 +547,6 @@ draw_player_sprite:
   ; direction "forward" is.
   cp PLAYER_TILE_BASE + 7 * 2
   jr c,.not_frame_7
-  ld b,b
   ld b,1
   bit OAMB_XFLIP,c
   jr z,.f7_not_flipped

@@ -433,8 +433,7 @@ each one pixel wide.
 
 ↑↓←→: Move the
   pattern by one pixel
-Hold ↑↓←→: Move the
-  pattern every frame
+Hold: Move every frame
 A: Switch among
   horizontal, vertical,
   and diagonal patterns
@@ -558,6 +557,114 @@ S: 00 for handheld or
 rand: Results from port
 of cc65's random number
 generator.
+
+== Color tests: Menu ==
+
+PLUGE
+Gradient color bars
+SMPTE color bars
+Color bars on gray
+Color bleed
+
+== Color tests ==
+
+These tests require
+Game Boy Color.
+They do not work on
+original Game Boy,
+Super Game Boy, or
+Game Boy Pocket.
+
+== PLUGE ==
+
+The PLUGE (picture
+line-up generation
+equipment) pattern is
+used to adjust the TV's
+"brightness" or black
+level. Adjust it until
+the outer bar is barely
+visible.
+
+A: Toggle levels between
+  NTSC and NTSC-J
+----
+GBC's 32 shades should
+correspond to signal
+level steps of about
+3.2 IRE. This would put
+shade 0 at NTSC-J black
+(0 IRE), and shade 2
+should be close to
+NTSC's 7.5 IRE setup.
+
+NTSC: shades 3 and 0
+  on background 2
+NTSC-J: shades 1 and 0.5
+  on background 0
+
+== Gradient color bars ==
+
+This pattern lets you
+calibrate red, green,
+and blue colors on
+your TV. Increase the
+"contrast" until C and
+E in the white ramp
+look the same, then
+decrease it slowly until
+you can tell them apart.
+
+A: Toggle grid
+
+== SMPTE color bars ==
+
+Use this pattern to
+calibrate for NTSC
+levels regarding
+contrast, brightness,
+and colors. With some
+displays, you can use
+blue-only mode to
+confirm color balance.
+Based on SMPTE
+EG 1-1990
+
+A: Toggle brightness
+  (75% or 100%)
+Select: Play 1 kHz tone
+
+== Color bars on gray ==
+
+This pattern shows
+color bars on a gray
+background. Use it with
+color filters to adjust
+color balance.
+
+A: Toggle brightness
+  (75% or 100%)
+Select: Play 1 kHz tone
+
+Based on Digital Video
+Essentials: HD Basics
+
+== Color bleed ==
+
+This pattern helps
+diagnose color bleed
+caused by incorrect
+color resampling.
+Concept by Konsolkongen
+
+↑↓←→: Move the
+  pattern by one pixel
+Hold: Move every frame
+A: Switch among
+  horizontal, vertical,
+  and diagonal patterns
+Select: Show or hide
+  frame counter
 
 == 144p Test Suite ==
 
