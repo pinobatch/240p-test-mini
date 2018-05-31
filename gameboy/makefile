@@ -55,8 +55,14 @@ zip: $(title)-$(version).zip
 # mention only files on which the ROM doesn't itself depend.
 $(title)-$(version).zip: zip.in $(title).gb \
   README.md CHANGES.txt obj/gb/index.txt
-	tools/zipup.py $< $(title)-$(version) -o $@
+	$(PY) tools/zipup.py $< $(title)-$(version) -o $@
 	-advzip -z3 $@
+
+# Build zip.in from the list of files in the Git tree
+zip.in: makefile
+	git ls-files | grep -e "^[^.]" > $@
+	echo $(title).gb >> $@
+	echo zip.in >> $@
 
 obj/gb/index.txt: makefile
 	echo "Files produced by build tools go here. (This file's existence forces the unzip tool to create this folder.)" > $@

@@ -1,5 +1,8 @@
-0.05 (future)
+0.05 (2018-05-30)
 * Fix Linearity corruption after closing help (0.04 regression)
+* Add GBC enhancement for menu/help, Grid, Gray ramp, Solid screen,
+  Motion blur, Shadow sprite, Scroll test, Vertical scroll test, and
+  Lame boy demo (requested by calima)
 
 0.04 (2018-04-29)
 * Skip logo fadeout and SGB detection on Game Boy Color/Advance

@@ -15,6 +15,9 @@
 /gba/obj/gba/*.h
 /gba/obj/gba/*.s
 /zip.in
+/nes/zip.in
+/gameboy/zip.in
+/gba/zip.in
 *.nes.deb
 /nes/map.txt
 /nes/bnmap.txt
