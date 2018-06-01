@@ -13,7 +13,7 @@
 title:=gb240p
 version:=0.05
 
-# Space-separated list of asm files without .s extension
+# Space-separated list of asm files without .z80 extension
 # (use a backslash to continue on the next line)
 objlist = header init \
   main help helppages.hlp placeholder \
@@ -43,7 +43,7 @@ run: $(title).gb
 all: $(title).gb
 
 clean:
-	-rm obj/gb/*.s obj/gb/*.o obj/gb/*.pb16
+	-rm obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
 	-rm obj/gb/*.chrgb obj/gb/*.chrgb16 obj/gb/*.nam obj/gb/*.chr1
 
 # Packaging
@@ -75,13 +75,13 @@ $(title).gb: $(objlisto)
 	rgblink -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
 	rgbfix -p0 -v $@
 
-obj/gb/%.o: obj/gb/%-dedent.s src/gb.inc src/hardware.inc src/global.inc
+obj/gb/%.o: obj/gb/%-dedent.z80 src/gb.inc src/hardware.inc src/global.inc
 	rgbasm -o $@ $<
 
-obj/gb/%.o: obj/gb/%.s
+obj/gb/%.o: obj/gb/%.z80
 	rgbasm -o $@ $<
 
-obj/gb/%-dedent.s: src/%.s
+obj/gb/%-dedent.z80: src/%.z80
 	$(PY) tools/bgrdedent.py -o $@ $<
 
 # Files that will be included with incbin
@@ -122,7 +122,7 @@ obj/gb/%.chrgb16: tilesets/%.png
 obj/gb/kikimap.chr1: tilesets/kikimap.png
 	$(PY) tools/pilbmp2nes.py --planes "0" -H 32 $< $@
 
-obj/gb/vwf7.s: tools/vwfbuild.py tilesets/vwf7.png
+obj/gb/vwf7.z80: tools/vwfbuild.py tilesets/vwf7.png
 	$(PY) $^ $@
 
 obj/gb/%.u.chrgb: obj/gb/%.chrgb
@@ -134,11 +134,11 @@ obj/gb/%.nam: obj/gb/%.u.chrgb
 %.pb16: tools/pb16.py %
 	$(PY) $^ $@
 
-obj/gb/Gus_portrait_GBC.s: tools/gbcnamtool.py \
+obj/gb/Gus_portrait_GBC.z80: tools/gbcnamtool.py \
   tilesets/Gus_portrait-GBC.png tilesets/Gus_portrait-GBC.pal.txt
 	$(PY) $^ $@
 
 # Help me!
-obj/gb/%.hlp.s: tools/paginate_help.py src/%.txt
+obj/gb/%.hlp.z80: tools/paginate_help.py src/%.txt
 	$(PY) $^ > $@
 

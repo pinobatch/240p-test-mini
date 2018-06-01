@@ -10,7 +10,7 @@
 *.sb53
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
-/gameboy/obj/gb/*.s
+/gameboy/obj/gb/*.z80
 /gameboy/obj/gb/*.nam
 /gba/obj/gba/*.h
 /gba/obj/gba/*.s

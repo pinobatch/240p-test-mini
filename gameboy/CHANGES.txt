@@ -1,3 +1,9 @@
+0.06 (future)
+* Add help text for forthcoming GBC-exclusive tests (PLUGE,
+  Gradient color bars, SMPTE bars, Color bars on gray, Color bleed)
+* LR35902 assembly source files use .z80 extension for more
+  convenient syntax highlighting
+
 0.05 (2018-05-30)
 * Fix Linearity corruption after closing help (0.04 regression)
 * Add GBC enhancement for menu/help, Grid, Gray ramp, Solid screen,
