@@ -33,7 +33,7 @@ stopwatchface_chr:
   incbin "obj/gb/stopwatchface.u.chrgb.pb16"
 sizeof_stopwatchface_chr = 1296
 stopwatchface_nam:
-  incbin "obj/gb/stopwatchface.nam"
+  incbin "obj/gb/stopwatchface.nam.pb16"
 
 stopwatchhand_chr:
   incbin "obj/gb/stopwatchhand.chrgb.pb16"
@@ -95,10 +95,10 @@ activity_stopwatch::
   ld de,_SCRN1
   ld bc,32*18
   call memset
-  ld hl,stopwatchface_nam
-  ld de,_SCRN0+5*32+4
+  ld de,stopwatchface_nam
+  ld hl,_SCRN0+5*32+4
   ld bc,12*256+13
-  call load_nam
+  call load_pb16_nam
 
   ; Load other tiles used by activity
   ld de,stopwatchdigits_chr

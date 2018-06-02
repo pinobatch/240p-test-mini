@@ -34,6 +34,7 @@ SOAM:: ds 160
 nmis:: ds 1
 oam_used:: ds 1  ; How much of the display list is used
 
+
 SECTION "rom_ppuclear", ROM0
 
 ;;
@@ -239,6 +240,35 @@ clear_gbc_attr::
 .not_gbc:
   xor a
   ld [help_bg_loaded],a
+  ret
+
+load_full_nam::
+  ld bc,256*20+18
+;;
+; Copies a B column by C row tilemap from HL to screen at DE.
+load_nam::
+  push bc
+  push de
+  .byteloop:
+    ld a,[hl+]
+    ld [de],a
+    inc de
+    dec b
+    jr nz,.byteloop
+
+  ; Move to next screen row
+  pop de
+  ld a,32
+  add e
+  ld e,a
+  jr nc,.no_inc_d
+    inc d
+  .no_inc_d:
+
+  ; Restore width; do more rows remain?
+  pop bc
+  dec c
+  jr nz,load_nam
   ret
 
 section "GBMONOPALETTE", ROM0, ALIGN[3]

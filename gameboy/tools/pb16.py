@@ -40,7 +40,7 @@ def pb16(data):
                 unco.append(prev[1])
             elif len(unco) % 1:
                 unco.append(unco[-2])
-            unco.extend(c[-2:]*(8 - len(unco)))
+            unco.extend(unco[-2:]*(8 - len(unco)))
 
         packet = bytearray(1)
         for i, value in enumerate(unco):

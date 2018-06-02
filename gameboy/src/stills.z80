@@ -328,7 +328,7 @@ section "linearity",ROM0
 linearity_chr:
   incbin "obj/gb/linearity.u.chrgb.pb16"
 linearity_nam:
-  incbin "obj/gb/linearity.nam"
+  incbin "obj/gb/linearity.nam.pb16"
 sizeof_linearity_chr = 1232
 
 activity_linearity::
@@ -345,9 +345,9 @@ activity_linearity::
   ld b,sizeof_linearity_chr/16
   call pb16_unpack_block
 
-  ld hl,linearity_nam
-  ld de,_SCRN0
-  call load_full_nam
+  ld hl,_SCRN0
+  ld de,linearity_nam
+  call load_full_pb16_nam
 
   ; Form full grid, copying already loaded tiles from CHRRAM2
   ; (default) to CHRRAM0 (nondefault)
@@ -428,42 +428,33 @@ activity_linearity::
   ret
 
 
-load_full_nam::
-  ld bc,256*20+18
-;;
-; Copies a B column by C row tilemap from HL to screen at DE.
-load_nam::
-  push bc
-  push de
-  .byteloop:
-    ld a,[hl+]
-    ld [de],a
-    inc de
-    dec b
-    jr nz,.byteloop
-
-  ; Move to next screen row
-  pop de
-  ld a,32
-  add e
-  ld e,a
-  jr nc,.no_inc_d
-    inc d
-  .no_inc_d:
-
-  ; Restore width; do more rows remain?
-  pop bc
-  dec c
-  jr nz,load_nam
-  ret
-
 ; Sharpness ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 section "sharpness",ROM0,align[4]
 sharpness_chr:
   incbin "obj/gb/sharpness.u.chrgb.pb16"
 sharpness_nam:
-  incbin "obj/gb/sharpness.nam"
+  incbin "obj/gb/sharpness.nam.pb16"
 sizeof_sharpness_chr = 1632
+
+;;
+; Loads a PB16-compressed 20x18-tile nametable to VRAM, using the
+; last 384 bytes of nametable 0 as a temporary buffer.
+; @param DE source
+; @param HL destination (usually _SCRN0 or _SCRN1)
+; @param B width (load_full_pb16_nam forces 20)
+; @param C height (load_full_pb16_nam forces 18)
+load_full_pb16_nam::
+  ld bc,20*256+18
+load_pb16_nam::
+  push bc
+  push hl
+  ld hl,_SCRN0+640
+  ld b,368/16
+  call pb16_unpack_block
+  pop de
+  pop bc
+  ld hl,_SCRN0+640
+  jp load_nam
 
 activity_sharpness::
   ld a,%00011011
@@ -476,10 +467,9 @@ activity_sharpness::
   ld de,sharpness_chr
   ld b,sizeof_sharpness_chr/16
   call pb16_unpack_block
-
-  ld hl,sharpness_nam
-  ld de,_SCRN0
-  call load_full_nam
+  ld hl,_SCRN0
+  ld de,sharpness_nam
+  call load_full_pb16_nam
 
   ld a,255
   ldh [rLYC],a  ; disable lyc irq

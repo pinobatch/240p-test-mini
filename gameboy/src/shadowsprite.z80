@@ -43,7 +43,7 @@ section "gus_portrait",ROMX
 portrait_chr:
   incbin "obj/gb/Gus_portrait.u.chrgb.pb16"
 portrait_nam:
-  incbin "obj/gb/Gus_portrait.nam"
+  incbin "obj/gb/Gus_portrait.nam.pb16"
 sizeof_portrait_chr = 2048
 
 section "shadow_sprite",ROM0,align[4]
@@ -538,10 +538,10 @@ load_gus_portrait:
   ld de,_SCRN0
   ld bc,32*18
   call memset
-  ld hl,portrait_nam
-  ld de,_SCRN0+4
+  ld de,portrait_nam
+  ld hl,_SCRN0+4
   ld bc,13*256+18
-  call load_nam
+  call load_pb16_nam
   ld a,%11100100
   jp set_bgp
 

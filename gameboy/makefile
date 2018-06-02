@@ -90,18 +90,18 @@ obj/gb/placeholder.o: obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16
 obj/gb/help.o: \
   obj/gb/helptiles.chrgb16.pb16 obj/gb/helptiles-gbc.chrgb16.pb16
 obj/gb/stills.o: obj/gb/grayramp.chrgb obj/gb/cps_grid.chrgb.pb16 \
-  obj/gb/linearity.u.chrgb.pb16 obj/gb/linearity.nam \
-  obj/gb/sharpness.u.chrgb.pb16 obj/gb/sharpness.nam 
+  obj/gb/linearity.u.chrgb.pb16 obj/gb/linearity.nam.pb16 \
+  obj/gb/sharpness.u.chrgb.pb16 obj/gb/sharpness.nam.pb16 
 obj/gb/shadowsprite.o: \
   obj/gb/hepsie.chrgb16.pb16 obj/gb/shadow_reticle.chrgb16.pb16 \
-  obj/gb/Gus_portrait.u.chrgb.pb16 obj/gb/Gus_portrait.nam
+  obj/gb/Gus_portrait.u.chrgb.pb16 obj/gb/Gus_portrait.nam.pb16
 obj/gb/backlight.o: obj/gb/backlightzone.chrgb.pb16
 obj/gb/scrolltest.o: \
   obj/gb/kikimap.chr1 obj/gb/kikitiles.chrgb \
   obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16
 obj/gb/megaton.o: obj/gb/megatontiles.chrgb16.pb16
 obj/gb/stopwatch.o: \
-  obj/gb/stopwatchface.u.chrgb.pb16 obj/gb/stopwatchface.nam \
+  obj/gb/stopwatchface.u.chrgb.pb16 obj/gb/stopwatchface.nam.pb16 \
   obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16
 obj/gb/overscan.o: obj/gb/overscan.chrgb.pb16
 obj/gb/motionblur.o: obj/gb/motionblurtiles.chrgb.pb16
