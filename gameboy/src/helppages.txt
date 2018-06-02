@@ -318,9 +318,8 @@ your scaler to AV out.
 ----
 Then photograph both
 screens at once.
-The picture will show
-the difference in
-image processing
+The picture will show the
+difference in processing
 latency between them.
 Some consumer LCD TVs
 exceed five frames.
@@ -334,15 +333,14 @@ camera and divide lines by
 Tests on Super Game Boy
 should be repeated
 several times because
-the SGB drops a LOT
-of frames. It runs the
-GB at 61.18 Hz but
-itself outputs video
-at 60.10 Hz, dropping
-one every 57 frames.
-A scaler in turn drops
-one in every 345 or 607
-frames depending on
+SGB drops a lot of
+frames. It runs the GB
+at 61.18 Hz but itself
+outputs video at 60.10
+Hz, dropping one frame
+in 57. A scaler in turn
+drops one frame in 345
+or 607 depending on
 59.94 or 60.00 Hz output.
 
 == Manual lag test ==

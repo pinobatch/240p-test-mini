@@ -450,8 +450,8 @@ connect a CRT to the RF out
 of a front-loading NES and
 your scaler to the AV out.
 
-Then photograph both screens
-at once. The picture
+Then photograph both
+screens at once. The picture
 will show the difference in
 image processing latency
 between them. Some consumer
