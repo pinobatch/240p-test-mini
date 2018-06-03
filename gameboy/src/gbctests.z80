@@ -5,6 +5,7 @@ include "src/global.inc"
 curhelpsect rb 1
 curpalette rb 1
 curvolume rb 1
+cur_lcdc rb 1
 
 ; Game Boy Color tests menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 section "gbctestmenu", ROM0
@@ -76,10 +77,205 @@ activity_pluge:
 ; Gradient color bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "gradientbars", ROM0
+gradient_objpalette:
+  drgb $000000
+  drgb $080000
+  drgb $100000
+  drgb $180000
+  drgb $000000
+  drgb $000800
+  drgb $001000
+  drgb $001800
+  drgb $000000
+  drgb $000008
+  drgb $000010
+  drgb $000018
+  drgb $000000
+  drgb $080808
+  drgb $101010
+  drgb $181818
+
+gradient_labels:
+  db  32,  8,"0",10
+  db  48,  8,"2",10
+  db  64,  8,"4",10
+  db  80,  8,"6",10
+  db  96,  8,"8",10
+  db 112,  8,"A",10
+  db 128,  8,"C",10
+  db 144,  8,"E",10
+  db   4, 16,"Red",10
+  db   4, 48,"Green",10
+  db   4, 80,"Blue",10
+  db   4,112,"White",0
+
 activity_gradient_bars:
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01|LCDCF_OBJON
+  ldh [cur_lcdc],a
+.restart:
+  call clear_gbc_attr
+
+  ; Load tiles and map
+  ld hl,CHRRAM0
+  ld de,gradientcolorbartiles_chr
+  ld b,5
+  call pb16_unpack_block
+  ld hl,_SCRN0
+  ld de,gradient_rowmap
+  call smpte_load_map
+  ld hl,_SCRN1
+  ld de,gradient_rowmap
+  call smpte_load_map
+  call gradient_load_oam
+  ld de,(CHRRAM0 >> 4)|$04
+  ld hl,gradient_labels
+  call vwfDrawLabels
+  
+  ; Add grid to map
+  ld hl,_SCRN1
+  ld bc,65536-32*18
+  .addgridloop:
+    ld a,[hl]
+    or a
+    jr nz,.addgridnz
+      ld a,$03  ; grid tile
+    .addgridnz:
+    ld [hl+],a
+    inc c
+    jr nz,.addgridloop
+    inc b
+    jr nz,.addgridloop
+
+  ld a,IEF_LCDC|IEF_VBLANK
+  ldh [rIE],a
+  ld a,STATF_LYC
+  ldh [rSTAT],a
+  ld a,8
+  ldh [rLYC],a
+
+  ld a,%11110111
+  call set_bgp
+  ld hl,gradient_objpalette
+  ld bc,32*256+low(rOCPS)
+  ld a,$80
+  call set_gbc_palette
+
+  ldh a,[cur_lcdc]
+  ld [vblank_lcdc_value],a
+  ld [stat_lcdc_value],a
+  ldh [rLCDC],a
+
+.loop:
   ld b,helpsect_gradient_color_bars
-  jp helpscreen
+  call read_pad_help_check
+  jr nz,.restart
+
+  ld a,[new_keys]
+  ld b,a
+  bit PADB_B,b
+  ret nz
+  bit PADB_A,b
+  jr z,.not_toggle_grid
+    ldh a,[cur_lcdc]
+    xor LCDCF_BG9C00
+    ldh [cur_lcdc],a
+    ld [vblank_lcdc_value],a
+    ld [stat_lcdc_value],a
+  .not_toggle_grid:
+
+  call wait_vblank_irq
+  ld a,[nmis]
+  ld a,8
+  ld de,%000000000000001
+  call gradient_push_palette
+  ld a,40
+  ld de,%000000000100000
+  call gradient_push_palette
+  ld a,72
+  ld de,%000010000000000
+  call gradient_push_palette
+  ld a,104
+  ld de,%000010000100001
+  call gradient_push_palette
+  jr .loop
+
+gradient_load_oam:
+  ld hl,SOAM
+  ld de,$18FF
+  call .threepair
+  call .threepair
+  call .threepair
+  call .threepair
+  ld a,l
+  ld [oam_used],a
+  call lcd_clear_oam
+  jp run_dma
+.threepair:
+  ld a,d
+  add 8
+  ld d,a
+  inc e
+  call .onepair
+  call .onepair
+.onepair:
+  ld a,d    ; y position
+  ld [hl+],a
+  ld a,32+8 ; x position
+  ld [hl+],a
+  ld a,$01  ; tile number
+  ld [hl+],a
+  ld a,e    ; attribute
+  ld [hl+],a
+  ld a,d
+  ld [hl+],a
+  add 8
+  ld d,a
+  ld a,40+8
+  ld [hl+],a
+  ld a,$02
+  ld [hl+],a
+  ld a,e    
+  ld [hl+],a
+  ret
+
+gradient_push_palette:
+  ; Prepare to wait for scanline A
+  di
+  ld b,a
+  ldh [rLYC],a
+  ld a,STATF_LYC
+  ldh [rSTAT],a
+
+  ; Construct initial color
+  ld h,d
+  ld l,e
+  add hl,hl
+  add hl,hl
+  ld bc,7*256+low(rBCPD)
+  ld a,$88
+  ldh [rBCPS],a  ; seek in palette memory
+
+  halt  ; Wait for LY=LYC
+  
+  ; Now get ready to wait for hblank interrupts
+  ld a,STATF_MODE00
+  ldh [rSTAT],a
+  .lineloop:
+    xor a
+    ldh [rIF],a
+    halt
+    rept 4
+      ld a,l
+      ld [$FF00+c],a
+      ld a,h
+      ld [$FF00+c],a
+      add hl,de
+    endr
+    dec b
+    jr nz,.lineloop
+  ld a,STATF_LYC
+  ldh [rSTAT],a
+  reti
 
 ; SMPTE color bars & Color bars on gray ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -140,15 +336,17 @@ smpte_rowdata:
   db $43,$43,$43,$47,$42,$42,$42,$41,$41,$41, $48,$40,$40,$40,$51,$50,$52,$50,$50,$50  ; SMPTE3
   db $10,$10,$14,$11,$11,$15,$12,$12,$16,$13, $83,$86,$82,$82,$85,$81,$81,$84,$80,$80  ; SMPTE1 flipped
 
+  db $00,$00,$00,$00,$02,$02,$11,$12,$21,$22, $31,$32,$41,$42,$51,$52,$61,$62,$71,$72  ; gradient
+
 smpte_rowmap:
   db $B1,$22,$53,$00
 ongray_rowmap:
   db $30,$41,$40,$44,$30,$00
-
+gradient_rowmap:
+  db $20,$35,$10,$35,$10,$35,$10,$35,$10,$00
 ;;
 ; @param DE
 smpte_load_map:
-  ld hl,_SCRN0
 .rowgrploop:
   ld a,[de]  ; A: which row
   inc de
@@ -208,7 +406,7 @@ smpte_load_map:
     dec b
     jr nz,.rowloop
   pop de
-  jp .rowgrploop
+  jr .rowgrploop
 
 activity_barsongray:
   ld a,helpsect_color_bars_on_gray
@@ -239,6 +437,7 @@ smpte_bars_engine:
   jr z,.not_load_alternate
     ld de,ongray_rowmap
   .not_load_alternate:
+  ld hl,_SCRN0
   call smpte_load_map
 
   ld a,$80

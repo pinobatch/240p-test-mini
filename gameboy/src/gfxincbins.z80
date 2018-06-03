@@ -134,7 +134,11 @@ bggfx_chr::
 spritegfx_chr::
   incbin "obj/gb/spritegfx.chrgb.pb16"
 
-; SMPTE bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; GBC exclusive tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "gradientbars_gfx1",ROM0
+gradientcolorbartiles_chr::
+  incbin "obj/gb/gradientcolorbartiles.chrgb.pb16"
 
 section "smptebars_gfx1",ROM0
 smptetiles_chr::
