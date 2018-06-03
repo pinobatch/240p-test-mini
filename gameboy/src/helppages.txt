@@ -558,8 +558,8 @@ S: 00 for handheld or
 
 NYA:PLUGE
 NYA:Gradient color bars
-WIP:SMPTE color bars
-WIP:Color bars on gray
+SMPTE color bars
+Color bars on gray
 Color bleed
 
 == Color tests ==

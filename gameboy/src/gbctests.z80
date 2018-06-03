@@ -4,6 +4,7 @@ include "src/global.inc"
   rsset hTestState
 curhelpsect rb 1
 curpalette rb 1
+curvolume rb 1
 
 ; Game Boy Color tests menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 section "gbctestmenu", ROM0
@@ -81,6 +82,10 @@ activity_gradient_bars:
   jp helpscreen
 
 ; SMPTE color bars & Color bars on gray ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; There's no wave channel period that is exactly 1 kHz, but there's
+; a 500 Hz.  So load the wave RAM with two sine cycles and play that.
+HALF_KHZ equ 2048-131
 
 section "smptebars", ROM0
 smpte_palette_dark:
@@ -214,6 +219,7 @@ smpte_bars_engine:
   ldh [curhelpsect],a
   xor a
   ldh [curpalette],a
+  ldh [curvolume],a
 
 .restart:
   call clear_gbc_attr
@@ -235,6 +241,22 @@ smpte_bars_engine:
   .not_load_alternate:
   call smpte_load_map
 
+  ld a,$80
+  ldh [rNR52],a  ; Bring audio circuit out of reset
+  ld a,$FF
+  ldh [rNR51],a  ; Set panning
+  ld a,$77
+  ldh [rNR50],a  ; Set master volume
+  ld hl,waveram_sin2x
+  call load_waveram
+  ldh a,[curvolume]
+  ldh [rNR32],a
+  ld a,low(HALF_KHZ)
+  ldh [rNR33],a
+  ld a,high(HALF_KHZ)
+  or $80
+  ldh [rNR34],a
+
   ld a,$FF
   ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
@@ -245,11 +267,44 @@ smpte_bars_engine:
   ld b,a
   call read_pad_help_check
   jr nz,.restart
-  call wait_vblank_irq
+
   ld a,[new_keys]
-  bit PADB_B,a
-  jr z,.loop
-  ret
+  ld b,a
+  bit PADB_B,b
+  jr z,.no_quit
+    xor a
+    ld [rNR52],a  ; stop audio circuit
+    ret
+  .no_quit:
+  bit PADB_A,b
+  jr z,.notogglepalette
+    ldh a,[curpalette]
+    cpl
+    ldh [curpalette],a
+  .notogglepalette:
+  bit PADB_SELECT,b
+  jr z,.notogglevol
+    ldh a,[curvolume]
+    xor $20
+    ldh [curvolume],a
+  .notogglevol:
+
+  call wait_vblank_irq
+
+  ; Load palette and tiles
+  ld hl,smpte_palette_dark
+  ldh a,[curpalette]
+  or a
+  jr z,.notloadlight
+    ld hl,smpte_palette_light
+  .notloadlight:
+  ld a,$80
+  ld bc,(4*8)*256+low(rBCPS)
+  call set_gbc_palette
+  ldh a,[curvolume]
+  ldh [rNR32],a
+
+  jr .loop
 
 ; Color bleed test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

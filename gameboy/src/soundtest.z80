@@ -24,7 +24,7 @@ section "soundtest",ROM0,align[4]
 
 waveram_sinx:
   db $8a,$bc,$de,$ff,$ff,$ed,$cb,$a8,$75,$43,$21,$00,$00,$12,$34,$57
-waveram_sin2x:
+waveram_sin2x::
   db $9c,$ef,$fe,$c9,$63,$10,$01,$36,$9c,$ef,$fe,$c9,$63,$10,$01,$36
 waveram_sin4x:
   db $bf,$fb,$40,$04,$bf,$fb,$40,$04,$bf,$fb,$40,$04,$bf,$fb,$40,$04
@@ -136,19 +136,7 @@ soundtest_de_period:
 ; @param de wave frequency
 ; @param hl pointer to wave ram data
 soundtest_de_hl:
-  xor a
-  ldh [rNR30],a  ; unlock waveram
-  ld c,low(_AUD3WAVERAM)
-  ld b,16
-  .waveloop:
-    ld a,[hl+]
-    ld [$FF00+c],a
-    inc c
-    dec b
-    jr nz,.waveloop
-
-  ld a,$80
-  ldh [rNR30],a  ; lock waveram
+  call load_waveram
   ld a,$20
   ldh [rNR32],a  ; 100% volume
   ld a,e
@@ -159,6 +147,23 @@ soundtest_de_hl:
   call wait30frames
   xor a
   ldh [rNR32],a  ; clear volume
+  ret
+
+;;
+; Copies 16 bytes from HL to waveram
+load_waveram::
+  xor a
+  ldh [rNR30],a  ; unlock waveram
+  ld c,low(_AUD3WAVERAM)
+  ld b,16
+  .waveloop:
+    ld a,[hl+]
+    ld [$FF00+c],a
+    inc c
+    dec b
+    jr nz,.waveloop
+  ld a,$80
+  ldh [rNR30],a  ; lock waveram
   ret
 
 wait30frames:
