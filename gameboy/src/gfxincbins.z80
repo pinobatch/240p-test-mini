@@ -62,7 +62,7 @@ stopwatchhand_chr::
 sizeof_stopwatchhand_chr equ 1536
 global sizeof_stopwatchhand_chr
 
-section "stopwatch_gfx0",ROM0
+;section "stopwatch_gfx0",ROM0
 ; This is sometimes temporarily moved into ROM0 while
 ; writing the GBC-exclusive tests' help
 stopwatchdigits_chr::

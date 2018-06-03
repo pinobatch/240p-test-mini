@@ -527,6 +527,7 @@ load_gus_portrait_gbc:
   ld a,bank(Gus_portrait_GBC_iu)
   ld [rMBC1BANK1],a
 
+  ld b,b
   ; Prepare plane 1
   ld a,1
   ldh [rVBK],a
@@ -536,13 +537,14 @@ load_gus_portrait_gbc:
   call memset
   ld hl,_SCRN0+640
   ld de,Gus_portrait_GBC_attr
-  ld c,15
+  ld b,15
   call pb16_unpack_block
   ld hl,_SCRN0+640
   ld de,_SCRN0+4
   ld bc,13*256+18
   call load_nam
 
+  ld b,b
   ; Prepare plane 0
   xor a
   ldh [rVBK],a
@@ -558,6 +560,7 @@ load_gus_portrait_gbc:
   ld bc,13*256+18
   call load_nam
   
+  ld b,b
   ld hl,Gus_portrait_GBC_pal
   ld a,$80
   ld bc,(Gus_portrait_GBC_pal_end-Gus_portrait_GBC_pal)*256+low(rBCPS)

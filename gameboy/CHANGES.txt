@@ -1,8 +1,14 @@
 0.06 (future)
 * Add help text for forthcoming GBC-exclusive tests (PLUGE,
   Gradient color bars, SMPTE bars, Color bars on gray, Color bleed)
+* Add Color bleed test
 * LR35902 assembly source files use .z80 extension for more
   convenient syntax highlighting
+* Backlight zone background is black, not green
+* Motion blur, Overscan, and Lame boy demo share 0-9 tiles
+* Better compression for tile maps using many tiles only once
+* Lame boy demo no longer shows RNG test
+* Eliminate some unnecessary ROM byte alignment
 
 0.05 (2018-05-30)
 * Fix Linearity corruption after closing help (0.04 regression)

@@ -1,8 +1,8 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-section "gbctests_main", ROM0
-
+; Game Boy Color tests menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+section "gbctestmenu", ROM0
 activity_about_gbc_tests:
   ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
   ld b,helpsect_color_tests
@@ -54,12 +54,49 @@ activity_gbc_tests_menu::
   jr .loop
 
 color_handlers:
-  dw lame_boy_demo
-  dw lame_boy_demo
-  dw lame_boy_demo
-  dw lame_boy_demo
+  dw activity_pluge
+  dw activity_gradient_bars
+  dw activity_smpte_bars
+  dw activity_barsongray
   dw activity_color_bleed
 
+; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "pluge", ROM0
+activity_pluge:
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_pluge
+  jp helpscreen
+
+; Gradient color bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "gradientbars", ROM0
+activity_gradient_bars:
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_gradient_color_bars
+  jp helpscreen
+
+; SMPTE color bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "smptebars", ROM0
+activity_smpte_bars:
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_smpte_color_bars
+  jp helpscreen
+
+; Color bars on gray ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "barsongray", ROM0
+activity_barsongray:
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_color_bars_on_gray
+  jp helpscreen
+
+; Color bleed test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; This shares code with Full screen stripes in stills.z80.
+
+section "colorbleed", ROM0
 color_bleed_palette:
   drgb $000000
   drgb $FFFFFF
@@ -124,7 +161,6 @@ load_color_bleed::
   ldh [rVBK],a
   
   ; Load palette
-  
   ld a,$80
   ld bc,(color_bleed_palette_end-color_bleed_palette)*256+low(rBCPS)
   ld hl,color_bleed_palette
