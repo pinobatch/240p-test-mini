@@ -664,8 +664,8 @@ Select: Show or hide
 
 == 144p Test Suite ==
 
-Ver. 0.05 (2018-05-30)
-GBC enhancement
+Ver. 0.06 (2018-06-03)
+Add GBC exclusive tests
 
 © 2011-2016
   Artemio Urbina

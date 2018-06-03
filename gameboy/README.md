@@ -1,7 +1,7 @@
 144p Test Suite
 ===============
-This ROM represents an attempt to port parts of Artemio Urbina's 240p
-Test Suite to the Game Boy, as a way of learning the Game Boy CPU.
+This ROM is a port of Artemio Urbina's 240p Test Suite to the
+Game Boy, as a way of learning the Game Boy CPU.
 
 Build requirements: RGBDS, Python 3, Pillow, and GNU Make
 
@@ -23,21 +23,20 @@ data, the [cartridges sold by Catskull] are limited to 32 KiB.
 Fortunately, the graphics for several tests are smaller than on a
 240p platform, which makes the menu, Linearity, Sharpness, Drop
 Shadow, and Scroll Test smaller.  I managed to make some tests' help
-text more concise.  In addition, several tests do not apply at all to
-a monochrome Game Boy, allowing leaving out their help and graphics.
+text more concise.  Easily readable VRAM helps, as does the LR35902
+CPU's better code density for anything that doesn't use structs or
+parallel arrays.
 
-* PLUGE, Color Bars, SMPTE Color Bars, Color Bars w/ Gray Ref,
-  Color Bleed Check, Mode 7: Omitted because they don't apply
-* 100 IRE: Subsumed into Motion blur
+* 100 IRE: Extended into Motion blur.
 * Linearity: Only one pixel aspect ratio (square) instead of 2 (NTSC
   and PAL), and square pixels allow calculating the grid at runtime.
-* White & RGB Screen: No custom color control
-* Sound Test: No "Crowd" because GB doesn't support PCM
-* Alternate 240p/480i: SGB and GB Player offer no access to the
-  underlying systems' interlace modes except through SGB JUMP
+* Sound Test: No "Crowd" because GB PCM is limited to 4 bits.
+* Alternate 240p/480i: SGB and GB Player offer no control over
+  the host systems' interlace modes except through SGB JUMP.
 
-Super Game Boy and Game Boy Color enhancements are currently omitted
-due to lack of ROM space and more importantly lack of time.
+Though Game Boy Color enhancements just barely fit into 32 KiB,
+Super Game Boy enhancements are omitted due to lack of ROM space
+and more importantly lack of time.
 
 [cartridges sold by Catskull]: https://catskullelectronics.com/32kcart
 

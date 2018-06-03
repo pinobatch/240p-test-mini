@@ -1,7 +1,6 @@
-0.06 (future)
-* Add help text for forthcoming GBC-exclusive tests (PLUGE,
-  Gradient color bars, SMPTE bars, Color bars on gray, Color bleed)
-* Add Color bleed test
+0.06 (2018-06-03)
+* Add GBC-exclusive tests (PLUGE, Gradient color bars, SMPTE bars,
+  Color bars on gray, Color bleed)
 * LR35902 assembly source files use .z80 extension for more
   convenient syntax highlighting
 * Backlight zone background is black, not green
