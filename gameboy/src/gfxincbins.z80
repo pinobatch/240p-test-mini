@@ -133,3 +133,9 @@ bggfx_chr::
   incbin "obj/gb/bggfx.chrgb.pb16"
 spritegfx_chr::
   incbin "obj/gb/spritegfx.chrgb.pb16"
+
+; SMPTE bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "smptebars_gfx1",ROM0
+smptetiles_chr::
+  incbin "obj/gb/smptetiles.chrgb.pb16"

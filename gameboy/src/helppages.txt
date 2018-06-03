@@ -558,15 +558,16 @@ S: 00 for handheld or
 
 NYA:PLUGE
 NYA:Gradient color bars
-NYA:SMPTE color bars
-NYA:Color bars on gray
+WIP:SMPTE color bars
+WIP:Color bars on gray
 Color bleed
 
 == Color tests ==
 
-These tests require
-Game Boy Color.
-They do not work on
+These patterns measure
+color balance.  They
+require Game Boy Color
+and do not work on
 original Game Boy,
 Super Game Boy, or
 Game Boy Pocket.

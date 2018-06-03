@@ -1,6 +1,10 @@
 include "src/gb.inc"
 include "src/global.inc"
 
+  rsset hTestState
+curhelpsect rb 1
+curpalette rb 1
+
 ; Game Boy Color tests menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 section "gbctestmenu", ROM0
 activity_about_gbc_tests:
@@ -76,21 +80,176 @@ activity_gradient_bars:
   ld b,helpsect_gradient_color_bars
   jp helpscreen
 
-; SMPTE color bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; SMPTE color bars & Color bars on gray ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "smptebars", ROM0
-activity_smpte_bars:
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
-  ld b,helpsect_smpte_color_bars
-  jp helpscreen
+smpte_palette_dark:
+  drgb $C0C0C0  ; white-green
+  drgb $C0C010
+  drgb $10C0C0
+  drgb $10C010
+  drgb $1010C0  ; blue-green
+  drgb $C01010
+  drgb $C010C0
+  drgb $10C010
+  drgb $C0C0C0  ; row 2: nonblue colors replaced with black
+  drgb $101010
+  drgb $10C0C0
+  drgb $101010
+  drgb $1010C0
+  drgb $101010
+  drgb $C010C0
+  drgb $101010
 
-; Color bars on gray ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  drgb $101010
+  drgb $300068  ; purple (Q)
+  drgb $FFFFFF  ; bright white
+  drgb $002050  ; blue (I)
+  drgb $101010  ; shade2 (black)
+  drgb $080808  ; shade1
+  drgb $181818  ; shade3
+  drgb $FF00FF
 
-section "barsongray", ROM0
+smpte_palette_light:
+  drgb $FFFFFF  ; white-green
+  drgb $FFFF10
+  drgb $10FFFF
+  drgb $10FF10
+  drgb $1010FF  ; blue-green
+  drgb $FF1010
+  drgb $FF10FF
+  drgb $10FF10
+  drgb $FFFFFF  ; row 2: nonblue colors replaced with black
+  drgb $101010
+  drgb $10FFFF
+  drgb $101010
+  drgb $1010FF
+  drgb $101010
+  drgb $FF10FF
+  drgb $101010
+
+smpte_rowdata:
+  db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00, $00,$00,$00,$00,$00,$00,$00,$00,$00,$00  ; gray
+  db $00,$00,$04,$01,$01,$05,$02,$02,$06,$03, $93,$96,$92,$92,$95,$91,$91,$94,$90,$90  ; SMPTE1
+  db $30,$30,$34,$31,$31,$35,$32,$32,$36,$33, $a3,$a6,$a2,$a2,$a5,$a1,$a1,$a4,$a0,$a0  ; SMPTE2
+  db $43,$43,$43,$47,$42,$42,$42,$41,$41,$41, $48,$40,$40,$40,$51,$50,$52,$50,$50,$50  ; SMPTE3
+  db $10,$10,$14,$11,$11,$15,$12,$12,$16,$13, $83,$86,$82,$82,$85,$81,$81,$84,$80,$80  ; SMPTE1 flipped
+
+smpte_rowmap:
+  db $B1,$22,$53,$00
+ongray_rowmap:
+  db $30,$41,$40,$44,$30,$00
+
+;;
+; @param DE
+smpte_load_map:
+  ld hl,_SCRN0
+.rowgrploop:
+  ld a,[de]  ; A: which row
+  inc de
+  or a
+  ret z
+  push de
+  push af  ; Stack: height, rowmap pos
+
+  ; Set DE to smpte_rowdata[A & 0x0F]
+  and $0F
+  ld e,a
+  add a  ; row*2
+  add a  ; row*4
+  add e  ; row*5
+  add a  ; row*10
+  add a  ; row*20
+  ld de,smpte_rowdata
+  add e
+  ld e,a
+  jr nc,.rowdata_no_wrap
+    inc d
+  .rowdata_no_wrap:
+  pop af  ; Stack: rowmap pos
+  swap a
+  and $0F
+  ld b,a   ; B: height of this segment in rows; DE: src; HL: dst
+  ld c,20
+  .rowloop:
+    push de
+    push bc   ; Stack: height, rowdata start, rowmap pos
+    .byteloop:
+      ; Copy the tile number
+      ld a,[de]  ; A[3:0]: tilenumber
+      and $0F
+      ld [hl],a
+
+      ; Copy the attribute
+      ld a,1
+      ldh [rVBK],a
+      ld a,[de]  ; A[7]: hflip; A[6:4]: palette
+      swap a
+      and $0F
+      bit 3,a
+      jr z,.nb3
+        xor %00101000
+      .nb3:
+      ld [hl+],a
+      xor a
+      ldh [rVBK],a
+      inc de
+      dec c
+      jr nz,.byteloop
+    ld de,12
+    add hl,de
+    pop bc
+    pop de  ; Stack: rowmap pos
+    dec b
+    jr nz,.rowloop
+  pop de
+  jp .rowgrploop
+
 activity_barsongray:
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
-  ld b,helpsect_color_bars_on_gray
-  jp helpscreen
+  ld a,helpsect_color_bars_on_gray
+  jr smpte_bars_engine
+activity_smpte_bars:
+  ld a,helpsect_smpte_color_bars
+smpte_bars_engine:
+  ldh [curhelpsect],a
+  xor a
+  ldh [curpalette],a
+
+.restart:
+  call clear_gbc_attr
+
+  ; Load palette and tiles
+  ld a,$80
+  ld bc,(6*8)*256+low(rBCPS)
+  ld hl,smpte_palette_dark
+  call set_gbc_palette
+  ld hl,CHRRAM0
+  ld de,smptetiles_chr
+  ld b,9
+  call pb16_unpack_block
+  ld de,smpte_rowmap
+  ldh a,[curhelpsect]
+  cp helpsect_smpte_color_bars
+  jr z,.not_load_alternate
+    ld de,ongray_rowmap
+  .not_load_alternate:
+  call smpte_load_map
+
+  ld a,$FF
+  ldh [rLYC],a  ; disable lyc irq
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01
+  ld [vblank_lcdc_value],a
+  ldh [rLCDC],a
+.loop:
+  ldh a,[curhelpsect]
+  ld b,a
+  call read_pad_help_check
+  jr nz,.restart
+  call wait_vblank_irq
+  ld a,[new_keys]
+  bit PADB_B,a
+  jr z,.loop
+  ret
 
 ; Color bleed test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
