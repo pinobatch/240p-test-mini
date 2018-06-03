@@ -39,27 +39,7 @@ wy_countdown rb 1
 ; The 4 backgrounds of shadow sprite are
 ; Gus, GHZ, stripes-H, stripes-diag
 
-section "gus_portrait",ROMX
-portrait_iu:
-  incbin "obj/gb/Gus_portrait.iu"
-
-section "shadow_sprite",ROM0,align[4]
-hepsie_chr:
-  incbin "obj/gb/hepsie.chrgb16.pb16"
-sizeof_hepsie_chr = 16*3*4
-shadow_reticle_chr:
-  incbin "obj/gb/shadow_reticle.chrgb16.pb16"
-sizeof_shadow_reticle_chr = 16*4*4
-hepsie_palette_gbc:
-  drgb $FF00FF
-  drgb $000000
-  drgb $00FF00  ; skirt
-  drgb $FFFF00
-  drgb $FF00FF
-  drgb $000000
-  drgb $FF00DD  ; cape
-  drgb $FFAA55
-hepsie_palette_gbc_end:
+section "shadowsprite",ROM0
 
 activity_shadow_sprite::
   ld a,72

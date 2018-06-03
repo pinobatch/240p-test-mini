@@ -21,7 +21,7 @@ objlist = header init \
   megaton stopwatch overscan soundtest audiosync gbctests \
   Gus_portrait_GBC \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
-  singletons
+  singletons gfxincbins
 
 ifdef COMSPEC
   ifndef GBEMU
@@ -87,25 +87,21 @@ obj/gb/%-dedent.z80: src/%.z80
 
 # Files that will be included with incbin
 
-obj/gb/placeholder.o: obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16
-obj/gb/help.o: \
-  obj/gb/helptiles.chrgb16.pb16 obj/gb/helptiles-gbc.chrgb16.pb16
-obj/gb/stills.o: obj/gb/grayramp.chrgb obj/gb/cps_grid.chrgb.pb16 \
-  obj/gb/linearity.iu obj/gb/sharpness.iu
-obj/gb/shadowsprite.o: \
+obj/gb/gfxincbins.o: \
+  obj/gb/helptiles.chrgb16.pb16 obj/gb/helptiles-gbc.chrgb16.pb16 \
   obj/gb/hepsie.chrgb16.pb16 obj/gb/shadow_reticle.chrgb16.pb16 \
-  obj/gb/Gus_portrait.iu
-obj/gb/backlight.o: obj/gb/backlightzone.chrgb.pb16
-obj/gb/scrolltest.o: \
+  obj/gb/Gus_portrait.iu \
+  obj/gb/backlightzone.chrgb.pb16 \
+  obj/gb/grayramp.chrgb obj/gb/cps_grid.chrgb.pb16 \
+  obj/gb/linearity.iu obj/gb/sharpness.iu \
+  obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16 \
   obj/gb/kikimap.chr1 obj/gb/kikitiles.chrgb \
-  obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16
-obj/gb/megaton.o: obj/gb/megatontiles.chrgb16.pb16
-obj/gb/stopwatch.o: \
+  obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16 \
+  obj/gb/overscan.chrgb.pb16 \
+  obj/gb/megatontiles.chrgb16.pb16 \
+  obj/gb/motionblurtiles.chrgb.pb16 \
   obj/gb/stopwatchface.iu \
   obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16
-obj/gb/overscan.o: obj/gb/overscan.chrgb.pb16
-obj/gb/motionblur.o: obj/gb/motionblurtiles.chrgb.pb16
-
 
 # Graphics conversion
 

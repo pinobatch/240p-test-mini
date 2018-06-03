@@ -41,12 +41,7 @@ KT_SHADOW_U_L equ $08
 KT_SHADOW_UL_U equ $09
 KT_SHADOW_UL_L equ $0A
 
-section "scrolltestgfx",ROMX
-hillzone_chr:
-  incbin "obj/gb/greenhillzone.u.chrgb.pb16"
-sizeof_hillzone_chr = 1648
-hillzone_nam:
-  incbin "obj/gb/greenhillzone.nam.pb16"
+section "scrolltest_pal1",ROMX
 hillzone_palette_gbc:
   drgb $FFFFFF  ; Clouds, water
   drgb $8FA1FF
@@ -74,9 +69,6 @@ hillzone_palette_gbc:
   drgb $342800
 hillzone_palette_gbc_end:
 
-kikitiles_chr:
-  incbin "obj/gb/kikitiles.chrgb"
-
 section "kikimtbelow",ROM0,align[5]
 mt_below:
   db KT_SAND0,      KT_SAND0,    KT_WALL,     KT_SAND0
@@ -96,8 +88,6 @@ gridtile_pb16:
   db %10000001
   db %11111101
   db %11111111
-kikimap:
-  incbin "obj/gb/kikimap.chr1"
 kikibgpalette_gbc:
   drgb $FFFFAA  ; 0: orange (sand)
   drgb $FFAA55

@@ -21,34 +21,6 @@ include "src/global.inc"
 
 ; Stopwatch: Lag test
 
-section "stopwatchchrlo",ROM0
-; This is temporarily moved into ROM0 while
-; writing the GBC-exclusive tests' help
-stopwatchdigits_chr:
-  incbin "obj/gb/stopwatchdigits.chrgb.pb16"
-sizeof_stopwatchdigits_chr = 1024
-
-section "stopwatchchr",ROMX
-stopwatchface_iu:
-  incbin "obj/gb/stopwatchface.iu"
-stopwatchhand_chr:
-  incbin "obj/gb/stopwatchhand.chrgb.pb16"
-sizeof_stopwatchhand_chr = 1536
-
-; X, Y coordinates of 1,1
-sw_hand_xy:
-  db  76, 58
-  db  98, 65
-  db 112, 84
-  db 112,108
-  db  98,127
-  db  76,134
-  db  54,127
-  db  40,108
-  db  40, 84
-  db  54, 65
-
-
   rsset hTestState
 hours       rb 1
 minutes_bcd rb 1
@@ -62,6 +34,19 @@ is_ruler    rb 1
 hide_face   rb 1
 
 section "stopwatch",ROM0
+; X, Y coordinates of each position of the frames hand
+sw_hand_xy:
+  db  76, 58
+  db  98, 65
+  db 112, 84
+  db 112,108
+  db  98,127
+  db  76,134
+  db  54,127
+  db  40,108
+  db  40, 84
+  db  54, 65
+
 activity_stopwatch::
   xor a
   ldh [is_running],a

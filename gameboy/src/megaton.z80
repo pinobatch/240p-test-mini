@@ -39,13 +39,10 @@ reticletarget rb 1
 reticledir    rb 1  ; 1: horizontal; 2: vertical; 3: both
 enableflags   rb 1
 
-
-section "megaton",ROM0,align[4]
-megatontiles_chr: incbin "obj/gb/megatontiles.chrgb16.pb16"
-sizeof_megaton_tiles = 320
-
 CROSSING_BEEP_FREQ = 2048-131
 A_PRESS_BEEP_FREQ = 2048-262
+
+section "megaton",ROM0
 
 ; Megaton: Manual lag test
 activity_megaton::

@@ -23,9 +23,18 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-SECTION "rom_lame_boy_bg", ROM0
+SHOW_RNG equ 1
 
-; game loop
+
+  rsset hTestState
+player_xsub      rb 1
+player_x         rb 1
+player_dxsub     rb 1
+player_frame_sub rb 1
+player_frame     rb 1
+player_facing    rb 1
+
+section "lameboy", ROM0
 
 lame_boy_demo::
   call clear_gbc_attr
@@ -35,7 +44,7 @@ lame_boy_demo::
 
   ; This part doesn't use rSTAT IRQ
   ld a,IEF_VBLANK
-  ldh [rIE],a  ; enable rSTAT IRQ
+  ldh [rIE],a  ; enable vblank, disable stat
   call draw_bg
   call load_player_cels
 
@@ -183,12 +192,6 @@ draw_bg:
   inc a
   cp $70
   jr nz,.vwffill1
-  ld hl,_SCRN0+32*1+4
-.vwffill2:
-  ld [hl+],a
-  inc a
-  cp $80
-  jr nz,.vwffill2
 
   ; Write initial A and B values and result of Super Game Boy test
   ld hl,help_line_buffer
@@ -225,6 +228,19 @@ draw_bg:
   ld hl,CHRRAM2+$60*16
   ld b,$00
   call vwfPutBuf03
+
+; This was used for debugging the RNG. It need not be included
+; in production.
+  if SHOW_RNG
+
+  ; Make the window on the tilemap
+  ld a,$70
+  ld hl,_SCRN0+32*1+4
+.vwffill2:
+  ld [hl+],a
+  inc a
+  cp $80
+  jr nz,.vwffill2
 
   ; Write random numbers
   ld bc,1
@@ -266,6 +282,7 @@ draw_bg:
   ld hl,CHRRAM2+$70*16
   ld b,$00
   call vwfPutBuf03
+  endc
 
   ; Expects palette %01101100
   ret
@@ -313,16 +330,6 @@ putnibble::
   add "0"
   ld [hl+],a
   ret
-
-SECTION "ram_player", WRAM0
-player_xsub: ds 1
-player_x: ds 1
-player_dxsub: ds 1
-player_frame_sub: ds 1
-player_frame: ds 1
-player_facing: ds 1
-
-SECTION "rom_lame_boy_player", ROM0
 
 ; Player movement ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -656,10 +663,4 @@ lameboyobjpalette_gbc:
   drgb $BD3C30
   drgb $FFCFCA
 lameboyobjpalette_gbc_end:
-
-; CHR resources ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section "placeholderchr",ROMX
-bggfx_chr: incbin "obj/gb/bggfx.chrgb.pb16"
-spritegfx_chr: incbin "obj/gb/spritegfx.chrgb.pb16"
 

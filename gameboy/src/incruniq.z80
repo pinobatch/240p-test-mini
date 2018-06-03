@@ -1,6 +1,6 @@
 include "src/hardware.inc"
 
-SECTION "rom_singletons", ROM0
+SECTION "incruniq", ROM0
 
 ;;
 ; Unpacks an IU file at DE to tiles at HL and map at _SCRN0+640.

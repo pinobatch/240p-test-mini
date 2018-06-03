@@ -27,10 +27,7 @@ held_keys rb 1
 is_hidden rb 1
 cursize rb 1
 
-section "backlight",ROM0,align[4]
-backlight_chr:
-  incbin "obj/gb/backlightzone.chrgb.pb16"
-
+section "backlight",ROM0
 activity_backlight_zone::
   ld a,88
   ldh [xpos],a

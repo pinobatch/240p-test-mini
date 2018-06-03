@@ -37,29 +37,7 @@ curframe_bcd:: ds 1
 
 ; Gray ramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "grayramp",ROM0,align[2]
-grayramp_chr:
-  incbin "obj/gb/grayramp.chrgb"
-grayramp_chr_gbc:
-  db %00111111
-  dw `00000111
-  db %11111111
-  db %00111111
-  dw `11222223
-  db %11111111
-  db %00111111
-  dw `33330000
-  db %11111111
-  db %00111111
-  dw `33333333
-  db %11111111
-  db %11111111
-  db %11111111
-grayramp_bottomhalfmap:
-  db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
-grayramp_attrmap_gbc:
-  db $00,$00,$00,$21,$21,$02,$02,$02,$23,$23,$04,$04,$04,$25,$25,$06,$06,$06,$27,$27
-
+section "grayramp",ROM0
 load_gray_ramp_mono:
   ; Tiles 1-24 are compressed: 2 rows (4 bytes) are written 4 times
   ld de,grayramp_chr
@@ -326,10 +304,6 @@ activity_gray_ramp::
 ; Linearity ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "linearity",ROM0
-linearity_iu:
-  incbin "obj/gb/linearity.iu"
-sizeof_linearity_chr = 1232
-
 activity_linearity::
   ld a,%00011011
   ldh [curpalette],a
@@ -426,9 +400,7 @@ activity_linearity::
 
 
 ; Sharpness ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-section "sharpness",ROM0,align[4]
-sharpness_iu:
-  incbin "obj/gb/sharpness.iu"
+section "sharpness",ROM0
 
   if 0
 ;;
@@ -498,7 +470,7 @@ activity_sharpness::
 
 ; Solid screen ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "solid_screen",ROM0
+section "solidscreen",ROM0
 solid_screen_constants:
   drgb $000000
   drgb $FF0000
@@ -771,9 +743,7 @@ solid_update_rgb:
 
 ; CPS style grid ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "cps_grid",ROM0,align[4]
-cps_grid_chr:
-  incbin "obj/gb/cps_grid.chrgb.pb16"
+section "cpsgrid",ROM0
 cps_grid_gbc_palette0:
   drgb $FFFFFF
   drgb $FF00FF
@@ -784,8 +754,6 @@ cps_grid_gbc_palette1:
   drgb $FF00FF
   drgb $FF0000
   drgb $FFFFFF
-
-sizeof_cps_grid_chr = 128
 
 activity_cps_grid::
   ld a,%00011011
@@ -839,7 +807,6 @@ activity_cps_grid::
   ld bc,8*256+low(rBCPS)
   ld a,$80
   call set_gbc_palette
-  
 
   ; Process input
   ld a,[new_keys]
@@ -895,7 +862,7 @@ cps_grid_one_row:
 
 ; Full screen stripes ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "full_stripes",ROM0,align[3]
+section "fullstripes",ROM0,align[3]
 bleed_types:
   db %00000000  ; horizontal
   db %11111111  ; horizontal xor

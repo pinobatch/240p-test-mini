@@ -43,7 +43,7 @@ GL_LEFT EQU $85
 GL_UP EQU $86
 GL_DOWN EQU $87
 
-section "helpvars",WRAM0
+section "help_vars",WRAM0
 help_line_buffer:: ds 32
 wnd_x: ds 1
 wnd_progress: ds 1
@@ -57,11 +57,7 @@ help_show_cursor: ds 1
 help_cursor_y:: ds 1
 help_height: ds 1
 
-section "helptiles",ROM0,align[5]
-helptiles: incbin "obj/gb/helptiles.chrgb16.pb16"
-sizeof_helptiles equ 672
-helptiles_gbc: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
-sizeof_helptiles_gbc equ 960
+section "help_map0",ROM0
 helpattrmap_gbc:
   db $21,$23,$23,$03,$03,$01
   db $21,$23,$23,$03,$03,$01
@@ -131,7 +127,16 @@ helpobjpalette_gbc:
   drgb $FFFFFF
 helpobjpalette_gbc_end:
 
-section "helpcode",ROM0
+updowna_msg:  db $86,$87,"A: Go",0
+b_exit_msg:   db 82, "B: Exit",0
+gb_msg:       db 96, "GB",0
+sgb_msg:      db 90, "SGB",0
+gbp_msg:      db 90, "GBP",0
+sgb2_msg:     db 85, "SGB2",0
+gbc_msg:      db 90, "GBC",0
+gba_msg:      db 90, "GBA",0
+
+section "help",ROM0
 
 ;;
 ; Clears several variables belonging to the help system.
@@ -1113,19 +1118,4 @@ de_index_a::
   ld h,[hl]
   ld l,a
   ret
-
-
-; Text loading engine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Usually text is changed while the window is scrolled off.
-
-section "helptext",ROM0,align[1]
-
-updowna_msg:  db $86,$87,"A: Go",0
-b_exit_msg:   db 82, "B: Exit",0
-gb_msg:       db 96, "GB",0
-sgb_msg:      db 90, "SGB",0
-gbp_msg:      db 90, "GBP",0
-sgb2_msg:     db 85, "SGB2",0
-gbc_msg:      db 90, "GBC",0
-gba_msg:      db 90, "GBA",0
 

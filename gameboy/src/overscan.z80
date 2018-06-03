@@ -40,11 +40,6 @@ cur_side      rb 1
 cur_palette   rb 1
 
 section "overscan",ROM0
-overscan_chr:
-  incbin "obj/gb/overscan.chrgb.pb16"
-
-
-
 activity_overscan::
   xor a
   ld a,2

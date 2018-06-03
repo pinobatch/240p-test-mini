@@ -33,11 +33,7 @@ is_running   rb 1  ; $00: off; $80: in off time; $80: in on time
 frames_left  rb 1  ; until toggle bit 0
 bgp_value    rb 8
 
-section "motionblur",ROM0
-motionblurtiles_chr:
-  incbin "obj/gb/motionblurtiles.chrgb.pb16"
-sizeof_motionblurtiles_chr equ 208
-
+section "motionblur_map0",ROM0
 wndtxt:
   db   0,"Back shade",10
   db  48,"time",10
@@ -59,6 +55,7 @@ row_high_low:  ; high+1 and low values for each row, monochrome
 row_high_low_gbc:  ; high+1 and low values for each row, GBC
   dw $2000,$1501,$2000,$1501,$2000,$0200
 
+section "motionblur",ROM0
 activity_motion_blur::
   xor a
   ldh [frames_left],a  ; = 0
@@ -70,8 +67,8 @@ activity_motion_blur::
   ldh [off_time],a     ; = 1
   ldh [on_time],a
 
-  ; Calculate starting on and back shades: 1 and 3 for DMG,
-  ; 15 and 31 for GBC
+  ; Calculate starting on and back shades: 3 and 1 for DMG,
+  ; 31 and 15 for GBC
   ld a,[initial_a]
   cp $11
   ld a,3
@@ -82,7 +79,7 @@ activity_motion_blur::
   ldh [on_shade],a
   and a
   rra
-  ldh [back_shade],a   ; = 1
+  ldh [back_shade],a 
 .restart:
   call clear_gbc_attr
 

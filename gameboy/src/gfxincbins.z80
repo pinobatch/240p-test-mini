@@ -1,0 +1,148 @@
+include "src/gb.inc"
+
+; Help ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "helptiles",ROM0,align[5]
+helptiles:: incbin "obj/gb/helptiles.chrgb16.pb16"
+sizeof_helptiles equ 672
+global sizeof_helptiles
+helptiles_gbc:: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
+sizeof_helptiles_gbc equ 960
+global sizeof_helptiles_gbc
+
+; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "grayramp_gfx0",ROM0
+grayramp_chr::
+  incbin "obj/gb/grayramp.chrgb"
+grayramp_bottomhalfmap::
+  db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
+
+grayramp_chr_gbc::
+  db %00111111
+  dw `00000111
+  db %11111111
+  db %00111111
+  dw `11222223
+  db %11111111
+  db %00111111
+  dw `33330000
+  db %11111111
+  db %00111111
+  dw `33333333
+  db %11111111
+  db %11111111
+  db %11111111
+grayramp_attrmap_gbc::
+  db $00,$00,$00,$21,$21,$02,$02,$02,$23,$23,$04,$04,$04,$25,$25,$06,$06,$06,$27,$27
+
+section "linearity_gfx0",ROM0
+linearity_iu::
+  incbin "obj/gb/linearity.iu"
+sizeof_linearity_chr equ 1232
+global sizeof_linearity_chr
+
+section "sharpness_gfx0",ROM0
+sharpness_iu::
+  incbin "obj/gb/sharpness.iu"
+
+section "cpsgrid_gfx0",ROM0
+cps_grid_chr::
+  incbin "obj/gb/cps_grid.chrgb.pb16"
+sizeof_cps_grid_chr equ 128
+global sizeof_cps_grid_chr
+
+; Motion blur ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "motionblur_gfx0",ROM0
+motionblurtiles_chr::
+  incbin "obj/gb/motionblurtiles.chrgb.pb16"
+sizeof_motionblurtiles_chr equ 208
+global sizeof_motionblurtiles_chr
+
+; Overscan ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "overscan_gfx0",ROM0
+overscan_chr::
+  incbin "obj/gb/overscan.chrgb.pb16"
+
+; Stopwatch (Lag test) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "stopwatch_gfx0",ROM0
+; This is temporarily moved into ROM0 while
+; writing the GBC-exclusive tests' help
+stopwatchdigits_chr::
+  incbin "obj/gb/stopwatchdigits.chrgb.pb16"
+sizeof_stopwatchdigits_chr equ 1024
+global sizeof_stopwatchdigits_chr
+
+section "stopwatch_gfx1",ROMX
+stopwatchface_iu::
+  incbin "obj/gb/stopwatchface.iu"
+stopwatchhand_chr::
+  incbin "obj/gb/stopwatchhand.chrgb.pb16"
+sizeof_stopwatchhand_chr equ 1536
+global sizeof_stopwatchhand_chr
+
+; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "megaton_gfx0",ROM0
+megatontiles_chr:: incbin "obj/gb/megatontiles.chrgb16.pb16"
+sizeof_megaton_tiles equ 320
+global sizeof_megaton_tiles
+
+; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "shadowsprite_gfx0",ROM0
+hepsie_chr::
+  incbin "obj/gb/hepsie.chrgb16.pb16"
+sizeof_hepsie_chr equ 16*3*4
+global sizeof_hepsie_chr
+shadow_reticle_chr::
+  incbin "obj/gb/shadow_reticle.chrgb16.pb16"
+sizeof_shadow_reticle_chr equ 16*4*4
+global sizeof_shadow_reticle_chr
+hepsie_palette_gbc::
+  drgb $FF00FF
+  drgb $000000
+  drgb $00FF00  ; skirt
+  drgb $FFFF00
+  drgb $FF00FF
+  drgb $000000
+  drgb $FF00DD  ; cape
+  drgb $FFAA55
+hepsie_palette_gbc_end::
+
+section "shadowsprite_gfx1",ROMX
+portrait_iu::
+  incbin "obj/gb/Gus_portrait.iu"
+
+; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "scrolltest_gfx1",ROMX
+hillzone_chr::
+  incbin "obj/gb/greenhillzone.u.chrgb.pb16"
+sizeof_hillzone_chr equ 1648
+global sizeof_hillzone_chr
+hillzone_nam::
+  incbin "obj/gb/greenhillzone.nam.pb16"
+kikitiles_chr::
+  incbin "obj/gb/kikitiles.chrgb"
+
+section "scrolltest_gfx0",ROM0
+kikimap::
+  incbin "obj/gb/kikimap.chr1"
+
+; Backlight zone ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "backlight_gfx0",ROM0
+backlight_chr::
+  incbin "obj/gb/backlightzone.chrgb.pb16"
+
+; Lame boy demo ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "lameboy_gfx1",ROMX
+bggfx_chr::
+  incbin "obj/gb/bggfx.chrgb.pb16"
+spritegfx_chr::
+  incbin "obj/gb/spritegfx.chrgb.pb16"
