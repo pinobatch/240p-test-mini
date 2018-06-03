@@ -272,8 +272,16 @@ load_nam::
   ret
 
 section "GBMONOPALETTE", ROM0, ALIGN[3]
+GBMONO_GREEN equ 0
 gbmonopalette::
+  if GBMONO_GREEN
   drgb $E8F840
   drgb $90C040
   drgb $408040
   drgb $004040
+  else
+  drgb $F8F8F8
+  drgb $A8A8A8
+  drgb $585858
+  drgb $000000
+  endc
