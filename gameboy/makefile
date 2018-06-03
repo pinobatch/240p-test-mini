@@ -139,7 +139,7 @@ obj/gb/%.nam: obj/gb/%.u.chrgb
 
 obj/gb/Gus_portrait_GBC.z80: tools/gbcnamtool.py \
   tilesets/Gus_portrait-GBC.png tilesets/Gus_portrait-GBC.pal.txt
-	$(PY) $^ $@
+	$(PY) $^ --incruniq --pb16-attrs $@
 
 # Help me!
 obj/gb/%.hlp.z80: tools/paginate_help.py src/%.txt

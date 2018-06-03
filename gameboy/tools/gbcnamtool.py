@@ -197,6 +197,10 @@ def parse_argv(argv):
                         "default: generate from image file name")
     parser.add_argument("--bank", default="ROMX",
                         help="RGBDS memory area (ROMX or ROM0)")
+    parser.add_argument("--incruniq", action="store_true",
+                        help="Store tiles+map as IU file")
+    parser.add_argument("--pb16-attrs", action="store_true",
+                        help="Compress attributes")
     parser.add_argument("--preview")
     return parser.parse_args(argv[1:])
 
@@ -220,8 +224,15 @@ def main(argv=None):
     tiles = pilbmp2chr(imfinal, formatTile=formatTileGB)
     utiles, tilemap = flipuniq(tiles)
     assert len(tilemap) == len(attrs)
-    tilemap_lo = bytearray(t & 0xFF for t in tilemap)
     tilemap_hi = bytearray((t >> 8) | c for t, c in zip(tilemap, attrs))
+    tilemap_lo = bytearray(t & 0xFF for t in tilemap)
+
+    # If singleton optimization was requested, perform it
+    if args.incruniq:
+        import incruniq
+        tiles = [utiles[x] for x in tilemap_lo]
+        utiles, firstsingleton, tilemap_lo = incruniq.incruniq(tiles)
+
     ctiles = b"".join(pb16.pb16(b"".join(utiles)))
     print("%d tiles, %d unique, %d pb16 bytes"
           % (len(tiles), len(utiles), len(ctiles)), file=sys.stderr)
@@ -234,10 +245,28 @@ def main(argv=None):
         '%s_pal::' % outsymbolname,
         "\n".join(subpalette_to_asm(row) for row in palettes),
         '%s_pal_end::' % outsymbolname,
-        '%s_pb16::' % outsymbolname,
-        rgbasm_bytearray(ctiles),
-        '%s_map::' % outsymbolname,
-        rgbasm_bytearray(tilemap_lo),
+    ]
+    if incruniq:
+        nampb16size = -(-len(tilemap_lo) // 16)
+        ctilemap = b"".join(pb16.pb16(tilemap_lo))
+        lines.extend([
+            '%s_iu::' % outsymbolname,
+            "  db %d  ; tile count" % len(utiles),
+            rgbasm_bytearray(ctiles),
+            "  db %d  ; map data size / 16" % nampb16size,
+            "  db %d  ; first singleton tile" % firstsingleton,
+            rgbasm_bytearray(ctilemap),
+        ])
+    else:
+        lines.extend([
+            '%s_pb16::' % outsymbolname,
+            rgbasm_bytearray(ctiles),
+            '%s_map::' % outsymbolname,
+            rgbasm_bytearray(tilemap_lo),
+        ])
+    if args.pb16_attrs:
+        tilemap_hi = b"".join(pb16.pb16(tilemap_hi))
+    lines.extend([
         '%s_attr::' % outsymbolname,
         rgbasm_bytearray(tilemap_hi),
         '%s_width equ %d' % (outsymbolname, im.size[0] // 8),
@@ -246,7 +275,7 @@ def main(argv=None):
         'global %s_width, %s_height, %s_utiles'
         % (outsymbolname, outsymbolname, outsymbolname),
         ""
-    ]
+    ])
     lines = "\n".join(lines)
     if args.outasm == '-':
         sys.stdout.write(lines)

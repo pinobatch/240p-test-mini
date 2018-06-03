@@ -544,13 +544,8 @@ load_gus_portrait:
 
 load_gus_portrait_gbc:
   ; Load Gus portrait for background
-  ld a,bank(Gus_portrait_GBC_pb16)
+  ld a,bank(Gus_portrait_GBC_iu)
   ld [rMBC1BANK1],a
-
-  ld de,Gus_portrait_GBC_pb16
-  ld hl,CHRRAM2
-  ld b,Gus_portrait_GBC_utiles
-  call pb16_unpack_block
 
   ; Prepare plane 1
   ld a,1
@@ -559,7 +554,11 @@ load_gus_portrait_gbc:
   ld de,_SCRN0
   ld bc,32*18
   call memset
-  ld hl,Gus_portrait_GBC_attr
+  ld hl,_SCRN0+640
+  ld de,Gus_portrait_GBC_attr
+  ld c,15
+  call pb16_unpack_block
+  ld hl,_SCRN0+640
   ld de,_SCRN0+4
   ld bc,13*256+18
   call load_nam
@@ -571,8 +570,11 @@ load_gus_portrait_gbc:
   ld de,_SCRN0
   ld bc,32*18
   call memset
-  ld hl,Gus_portrait_GBC_map
-  ld de,_SCRN0+4
+  ld de,Gus_portrait_GBC_iu
+  ld hl,CHRRAM2
+  call unpack_iu_file
+  ld hl,_SCRN0+640
+  ld de,_SCRN0+0*32+4
   ld bc,13*256+18
   call load_nam
   
