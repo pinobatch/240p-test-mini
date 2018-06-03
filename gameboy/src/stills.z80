@@ -30,9 +30,10 @@ curlcdc rb 1
 customred   rb 1
 customgreen rb 1
 customblue  rb 1
+bleed_help_page rb 1
 
 section "stillswram", WRAM0
-curframe_bcd: ds 1
+curframe_bcd:: ds 1
 
 ; Gray ramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -931,48 +932,69 @@ load_bleed_frame_a:
   ret
 
 activity_full_stripes::
+  ld a,helpsect_full_screen_stripes
+full_stripes_common::
+  ldh [bleed_help_page],a
   xor a
   ldh [curtileid],a
   ldh [curscry],a
   ldh [curpalette],a
   ld [curframe_bcd],a
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01|LCDCF_WIN9C00
+  ldh [curlcdc],a
 .restart:
   call clear_gbc_attr
 
-  ; Blow away the tilemap, including one more row to show and hide
-  ; the frame number
-  ld de,_SCRN0
-  ld bc,32*19
-  ld h,16
-  call memset
-
-  ; Hide background until ready
+  ; Hide background (tile 16) until ready
   ld hl,CHRRAM0+256
   xor a
   ld c,16
   call memset_tiny
 
-  ; Make VWF window for frame number at X=0
+  ; Make VWF window for frame number at (0, 0) on window
   ld hl,CHRRAM0
-  ld c,96
+  ld c,112  ; 6 tiles window, 1 tile blank (for color bleed)
   ; A is still 0
   call memset_tiny
-  ld hl,_SCRN0+32*18+14
+  ld hl,_SCRN1
   ld c,6
   ; A is still 0
   call memset_inc
 
-  ; Turn on LCD
-  ld a,255
+  ld a,$FF
   ldh [rLYC],a  ; disable lyc irq
-  ld a,%00000011
-  call set_bgp
-  ld a,LCDCF_ON|BG_NT0|BG_CHR01
+
+  ; Position the window
+  ld a,167-48
+  ldh [rWX],a
+  ld a,144-8
+  ldh [rWY],a
+
+  ldh a,[bleed_help_page]
+  cp helpsect_color_bleed
+  jr z,.is_color_bleed
+    ; Loading specific to "Full screen stripes"
+
+    ; Blow away the tilemap
+    ld de,_SCRN0
+    ld bc,32*18
+    ld h,16
+    call memset
+    ld a,%00000011
+    call set_bgp
+    jr .specific_loading_done
+  .is_color_bleed:
+    call load_color_bleed
+  .specific_loading_done:
+
+  ; Turn on LCD
+  ldh a,[curlcdc]
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:
-  ld b,helpsect_full_screen_stripes
+  ldh a,[bleed_help_page]
+  ld b,a
   call read_pad_help_check
   jr nz,.restart
 
@@ -1013,9 +1035,10 @@ activity_full_stripes::
 
   bit PADB_SELECT,b
   jr z,.not_select
-    ldh a,[curscry]
-    xor $08
-    ldh [curscry],a
+    ldh a,[curlcdc]
+    xor LCDCF_WINON
+    ldh [curlcdc],a
+    ld [vblank_lcdc_value],a
   .not_select:
 
   call wait_vblank_irq
@@ -1024,8 +1047,6 @@ activity_full_stripes::
   ld a,[curtileid]
   ld de,CHRRAM0+256
   call load_bleed_frame_a
-  ld a,[curscry]
-  ldh [rSCY],a
   call update_bcd_frame_counter
   jr .loop
 

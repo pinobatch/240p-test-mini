@@ -1,0 +1,131 @@
+include "src/gb.inc"
+include "src/global.inc"
+
+section "gbctests_main", ROM0
+
+activity_about_gbc_tests:
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_color_tests
+  jp helpscreen
+
+;;
+; Ensures that the machine is color before 
+activity_gbc_tests_menu::
+  ld a,[initial_a]
+  cp $11
+  jr nz,activity_about_gbc_tests
+
+.loop:
+  ld a,PADF_A|PADF_B|PADF_START|PADF_DOWN|PADF_UP|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_color_tests_menu
+  call helpscreen
+
+  ; B to return to the main menu
+  ld hl,new_keys
+  bit PADB_B,[hl]
+  ret nz
+
+  ; Save menu selection and get the index into the handler list
+  ld a,[help_wanted_page]
+  ld c,a
+  ld a,[help_cursor_y]
+  ld b,a
+  push bc
+
+  ; Start does About instead of what is selected
+  bit PADB_START,[hl]
+  jr z,.not_start
+    call activity_about_gbc_tests
+    jr .skip_activity
+  .not_start:
+
+  ; Get the handler for this activity
+  ld de,color_handlers
+  call de_index_a
+  call jp_hl
+.skip_activity:
+
+  ; Restore menu selection
+  pop bc
+  ld a,b
+  ld [help_cursor_y],a
+  ld a,c
+  ld [help_wanted_page],a
+  jr .loop
+
+color_handlers:
+  dw lame_boy_demo
+  dw lame_boy_demo
+  dw lame_boy_demo
+  dw lame_boy_demo
+  dw activity_color_bleed
+
+color_bleed_palette:
+  drgb $000000
+  drgb $FFFFFF
+  drgb $000000
+  drgb $000000
+  drgb $000000
+  drgb $FF0000
+  drgb $000000
+  drgb $000000
+  drgb $000000
+  drgb $00FF00
+  drgb $000000
+  drgb $000000
+  drgb $000000
+  drgb $0000FF
+  drgb $000000
+  drgb $000000
+color_bleed_palette_end:
+
+activity_color_bleed::
+  ld a,helpsect_color_bleed
+  jp full_stripes_common
+
+load_color_bleed::
+  ; Load plane 0
+  ld hl,_SCRN0
+  ld a,$06  ; blank tile
+  ld c,32*2+2
+  call memset_tiny
+  ld b,4
+  .p0rowgrploop:
+    ld d,3
+    .p0rowloop:
+      ld a,$10  ; pattern tile
+      ld c,16
+      call memset_tiny
+      ld a,$06  ; blank tile
+      ld c,16
+      call memset_tiny
+      dec d
+      jr nz,.p0rowloop
+    ld c,32  ; blank row
+    call memset_tiny
+    dec b
+    jr nz,.p0rowgrploop
+
+  ; Load attributes
+  ld a,1
+  ldh [rVBK],a
+  ld hl,_SCRN0
+  ld c,6*32
+  call memset_tiny
+  inc a
+  ld c,4*32
+  call memset_tiny
+  inc a
+  ld c,4*32
+  call memset_tiny
+  xor a
+  ld c,4*32
+  call memset_tiny
+  ldh [rVBK],a
+  
+  ; Load palette
+  
+  ld a,$80
+  ld bc,(color_bleed_palette_end-color_bleed_palette)*256+low(rBCPS)
+  ld hl,color_bleed_palette
+  jp set_gbc_palette

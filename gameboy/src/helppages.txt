@@ -1,5 +1,6 @@
 == 144p Test Suite: Menu ==
 
+Color tests
 Grid
 Linearity
 Gray ramp
@@ -558,10 +559,10 @@ generator.
 
 == Color tests: Menu ==
 
-PLUGE
-Gradient color bars
-SMPTE color bars
-Color bars on gray
+NYA:PLUGE
+NYA:Gradient color bars
+NYA:SMPTE color bars
+NYA:Color bars on gray
 Color bleed
 
 == Color tests ==

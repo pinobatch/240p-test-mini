@@ -109,8 +109,10 @@ main::
   jr .loop
 
 page_one_handlers:
-  ; PLUGE, Color bars, Color bleed, and 100 IRE aren't
-  ; so relevant without SGB or GBC.
+  ; PLUGE, Color bars, and Color bleed aren't relevant without SGB or
+  ; GBC, and there isn't near enough room to support SGB.
+  dw activity_gbc_tests_menu
+  
   dw activity_cps_grid
   dw activity_linearity
   dw activity_gray_ramp
