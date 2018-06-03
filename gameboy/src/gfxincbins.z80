@@ -52,29 +52,7 @@ cps_grid_chr::
 sizeof_cps_grid_chr equ 128
 global sizeof_cps_grid_chr
 
-; Motion blur ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section "motionblur_gfx0",ROM0
-motionblurtiles_chr::
-  incbin "obj/gb/motionblurtiles.chrgb.pb16"
-sizeof_motionblurtiles_chr equ 208
-global sizeof_motionblurtiles_chr
-
-; Overscan ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section "overscan_gfx0",ROM0
-overscan_chr::
-  incbin "obj/gb/overscan.chrgb.pb16"
-
 ; Stopwatch (Lag test) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section "stopwatch_gfx0",ROM0
-; This is temporarily moved into ROM0 while
-; writing the GBC-exclusive tests' help
-stopwatchdigits_chr::
-  incbin "obj/gb/stopwatchdigits.chrgb.pb16"
-sizeof_stopwatchdigits_chr equ 1024
-global sizeof_stopwatchdigits_chr
 
 section "stopwatch_gfx1",ROMX
 stopwatchface_iu::
@@ -83,6 +61,14 @@ stopwatchhand_chr::
   incbin "obj/gb/stopwatchhand.chrgb.pb16"
 sizeof_stopwatchhand_chr equ 1536
 global sizeof_stopwatchhand_chr
+
+section "stopwatch_gfx0",ROM0
+; This is sometimes temporarily moved into ROM0 while
+; writing the GBC-exclusive tests' help
+stopwatchdigits_chr::
+  incbin "obj/gb/stopwatchdigits.chrgb.pb16"
+sizeof_stopwatchdigits_chr equ 1024
+global sizeof_stopwatchdigits_chr
 
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -140,6 +126,7 @@ backlight_chr::
   incbin "obj/gb/backlightzone.chrgb.pb16"
 
 ; Lame boy demo ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Tiles also used by overscan and motion blur
 
 section "lameboy_gfx1",ROMX
 bggfx_chr::

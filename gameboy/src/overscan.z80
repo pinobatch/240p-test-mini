@@ -57,18 +57,18 @@ activity_overscan::
   ldh [rWY],a
 
   ld hl,CHRRAM0
-  ld de,overscan_chr
-  ld b,16
+  ld de,bggfx_chr
+  ld b,32
   call pb16_unpack_block
 
   ; Blank both tilemaps
   ld de,_SCRN0
-  ld h,10
+  ld h,$04
   ld bc,2048
   call memset
 
   ; Make a screen-sized area in the primary tilemap that isn't blank
-  ld a,11
+  ld a,$03
   ld b,18
   ld de,12
   ld hl,_SCRN0
@@ -233,6 +233,11 @@ activity_overscan::
 
   jp .loop
 
+TILE_P equ $06
+TILE_X equ $07
+TILE_RARROW equ $08
+TILE_RBORDER equ $03
+
 overscan_draw_sides:
   ld h,high(SOAM)
   ld a,[oam_used]
@@ -270,6 +275,7 @@ overscan_draw_sides:
   inc l
   ld [hl],d
   inc l
+  or $10
   ld [hl+],a
   xor a
   ld [hl+],a
@@ -278,6 +284,8 @@ overscan_draw_sides:
   ld a,c
   or a
   jr z,.no_tens
+    or $10
+    ld c,a
 
     ld [hl],e
     inc l
@@ -299,7 +307,7 @@ overscan_draw_sides:
   ld a,d
   sub 8
   ld [hl+],a
-  ld a,12  ; 'p' tile
+  ld a,TILE_P
   ld [hl+],a
   xor a
   ld [hl+],a
@@ -308,7 +316,7 @@ overscan_draw_sides:
   inc l
   ld [hl],d
   inc l
-  ld a,13
+  ld a,TILE_X
   ld [hl+],a
   xor a
   ld [hl+],a
@@ -377,7 +385,7 @@ overscan_draw_arrow:
   ; Left or right arrow
   ld a,b
   srl a
-  add 14
+  add TILE_RARROW
   ld [hl+],a
   ld a,1<<BOAM_HFLIP|1<<BOAM_VFLIP
   ld [hl+],a
@@ -397,7 +405,7 @@ overscan_draw_arrow:
   ld [hl+],a
   ld a,b
   srl a
-  add 14
+  add TILE_RARROW
   ld [hl+],a
   xor a
   ld [hl+],a
@@ -418,7 +426,7 @@ overscan_draw_rborder:
   ld c,a
 
   ld a,16
-  ld de,$0B00
+  ld de,TILE_RBORDER * $100 + $00  ; Tile and attribute
 .loop:
   ld [hl+],a
   ld [hl],c
