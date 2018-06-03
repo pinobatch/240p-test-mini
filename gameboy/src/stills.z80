@@ -325,10 +325,8 @@ activity_gray_ramp::
 ; Linearity ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "linearity",ROM0
-linearity_chr:
-  incbin "obj/gb/linearity.u.chrgb.pb16"
-linearity_nam:
-  incbin "obj/gb/linearity.nam.pb16"
+linearity_iu:
+  incbin "obj/gb/linearity.iu"
 sizeof_linearity_chr = 1232
 
 activity_linearity::
@@ -340,14 +338,12 @@ activity_linearity::
 .restart:
   call clear_gbc_attr
   
-  ld de,linearity_chr
+  ld de,linearity_iu
   ld hl,CHRRAM2
-  ld b,sizeof_linearity_chr/16
-  call pb16_unpack_block
-
-  ld hl,_SCRN0
-  ld de,linearity_nam
-  call load_full_pb16_nam
+  call unpack_iu_file
+  ld hl,_SCRN0+640
+  ld de,_SCRN0
+  call load_full_nam
 
   ; Form full grid, copying already loaded tiles from CHRRAM2
   ; (default) to CHRRAM0 (nondefault)
@@ -430,12 +426,10 @@ activity_linearity::
 
 ; Sharpness ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 section "sharpness",ROM0,align[4]
-sharpness_chr:
-  incbin "obj/gb/sharpness.u.chrgb.pb16"
-sharpness_nam:
-  incbin "obj/gb/sharpness.nam.pb16"
-sizeof_sharpness_chr = 1632
+sharpness_iu:
+  incbin "obj/gb/sharpness.iu"
 
+  if 0
 ;;
 ; Loads a PB16-compressed 20x18-tile nametable to VRAM, using the
 ; last 384 bytes of nametable 0 as a temporary buffer.
@@ -455,6 +449,7 @@ load_pb16_nam::
   pop bc
   ld hl,_SCRN0+640
   jp load_nam
+  endc
 
 activity_sharpness::
   ld a,%00011011
@@ -463,13 +458,12 @@ activity_sharpness::
 .restart:
   call clear_gbc_attr
 
+  ld de,sharpness_iu
   ld hl,CHRRAM2
-  ld de,sharpness_chr
-  ld b,sizeof_sharpness_chr/16
-  call pb16_unpack_block
-  ld hl,_SCRN0
-  ld de,sharpness_nam
-  call load_full_pb16_nam
+  call unpack_iu_file
+  ld hl,_SCRN0+640
+  ld de,_SCRN0
+  call load_full_nam
 
   ld a,255
   ldh [rLYC],a  ; disable lyc irq

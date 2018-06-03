@@ -40,11 +40,8 @@ wy_countdown rb 1
 ; Gus, GHZ, stripes-H, stripes-diag
 
 section "gus_portrait",ROMX
-portrait_chr:
-  incbin "obj/gb/Gus_portrait.u.chrgb.pb16"
-portrait_nam:
-  incbin "obj/gb/Gus_portrait.nam.pb16"
-sizeof_portrait_chr = 2048
+portrait_iu:
+  incbin "obj/gb/Gus_portrait.iu"
 
 section "shadow_sprite",ROM0,align[4]
 hepsie_chr:
@@ -527,21 +524,21 @@ load_gus_portrait:
   jr z,load_gus_portrait_gbc
 
   ; Load Gus portrait for background
-  ld a,bank(portrait_chr)
-  ld [rMBC1BANK1],a
-
-  ld de,portrait_chr
-  ld hl,CHRRAM2
-  ld b,sizeof_portrait_chr/16
-  call pb16_unpack_block
   ld h,0
   ld de,_SCRN0
   ld bc,32*18
   call memset
-  ld de,portrait_nam
-  ld hl,_SCRN0+4
+
+  ld a,bank(portrait_iu)
+  ld [rMBC1BANK1],a
+  ld de,portrait_iu
+  ld hl,CHRRAM2
+  call unpack_iu_file
+  ld hl,_SCRN0+640
+  ld de,_SCRN0+0*32+4
   ld bc,13*256+18
-  call load_pb16_nam
+  call load_nam
+
   ld a,%11100100
   jp set_bgp
 

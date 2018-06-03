@@ -29,12 +29,8 @@ stopwatchdigits_chr:
 sizeof_stopwatchdigits_chr = 1024
 
 section "stopwatchchr",ROMX
-stopwatchface_chr:
-  incbin "obj/gb/stopwatchface.u.chrgb.pb16"
-sizeof_stopwatchface_chr = 1296
-stopwatchface_nam:
-  incbin "obj/gb/stopwatchface.nam.pb16"
-
+stopwatchface_iu:
+  incbin "obj/gb/stopwatchface.iu"
 stopwatchhand_chr:
   incbin "obj/gb/stopwatchhand.chrgb.pb16"
 sizeof_stopwatchhand_chr = 1536
@@ -80,12 +76,8 @@ activity_stopwatch::
   call clear_gbc_attr
 
   ; Load background tiles
-  ld a,bank(stopwatchface_chr)
+  ld a,bank(stopwatchface_iu)
   ld [rMBC1BANK1],a
-  ld de,stopwatchface_chr
-  ld hl,CHRRAM2
-  ld b,sizeof_stopwatchface_chr/16
-  call pb16_unpack_block
 
   ; Load background tilemap
   ld h,0
@@ -95,10 +87,14 @@ activity_stopwatch::
   ld de,_SCRN1
   ld bc,32*18
   call memset
-  ld de,stopwatchface_nam
-  ld hl,_SCRN0+5*32+4
+
+  ld de,stopwatchface_iu
+  ld hl,CHRRAM2
+  call unpack_iu_file
+  ld hl,_SCRN0+640
+  ld de,_SCRN0+5*32+4
   ld bc,12*256+13
-  call load_pb16_nam
+  call load_nam
 
   ; Load other tiles used by activity
   ld de,stopwatchdigits_chr

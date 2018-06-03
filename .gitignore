@@ -12,6 +12,7 @@
 /nes/obj/nes/*.sav
 /gameboy/obj/gb/*.z80
 /gameboy/obj/gb/*.nam
+/gameboy/obj/gb/*.iu
 /gba/obj/gba/*.h
 /gba/obj/gba/*.s
 /zip.in

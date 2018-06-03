@@ -1,0 +1,61 @@
+include "src/hardware.inc"
+
+SECTION "rom_singletons", ROM0
+
+;;
+; Unpacks an IU file at DE to tiles at HL and map at _SCRN0+640.
+unpack_iu_file::
+  ld a,[de]  ; Fetch tile count
+  inc de
+  ld b,a
+  call pb16_unpack_block
+
+  ld a,[de]  ; Fetch length of compressed nametable
+  inc de
+  ld b,a
+  ld a,[de]  ; Fetch first singleton tile number
+  inc de
+  ld c,a
+  ld hl,_SCRN0+640
+  push bc
+  call pb16_unpack_block
+
+  pop bc  ; B: length of block; C: first singleton tile number
+  ld d,c
+  ld l,b  ; convert length to bytes
+  ld h,0
+  add hl,hl
+  add hl,hl
+  add hl,hl
+  add hl,hl
+  ld b,h
+  ld c,l
+
+  ld hl,_SCRN0+640
+
+;;
+; Translates $FF to unique values increasing by 1.
+; @param HL start of buffer
+; @param D starting value
+; @param BC length of buffer in bytes
+unpack_singletons::
+  ld a,b
+  cpl
+  ld b,a
+  ld a,c
+  cpl
+  ld c,a
+  inc bc
+.loop:
+  ld a,[hl]
+  cp $FF
+  jr nz,.not_increment
+    ld a,d
+    inc d
+  .not_increment:
+  ld [hl+],a
+  inc c
+  jr nz,.loop
+  inc b
+  jr nz,.loop
+  ret
