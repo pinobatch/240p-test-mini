@@ -100,7 +100,8 @@ obj/gb/gfxincbins.o: \
   obj/gb/megatontiles.chrgb16.pb16 \
   obj/gb/stopwatchface.iu \
   obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16 \
-  obj/gb/smptetiles.chrgb.pb16 obj/gb/gradientcolorbartiles.chrgb.pb16 \
+  obj/gb/smptetiles.chrgb.pb16 obj/gb/plugetiles.chrgb.pb16 \
+  obj/gb/gradientcolorbartiles.chrgb.pb16
 
 # Graphics conversion
 

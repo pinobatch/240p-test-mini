@@ -136,10 +136,14 @@ spritegfx_chr::
 
 ; GBC exclusive tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "gradientbars_gfx1",ROM0
+section "pluge_gfx0",ROM0
+plugetiles_chr::
+  incbin "obj/gb/plugetiles.chrgb.pb16"
+
+section "gradientbars_gfx0",ROM0
 gradientcolorbartiles_chr::
   incbin "obj/gb/gradientcolorbartiles.chrgb.pb16"
 
-section "smptebars_gfx1",ROM0
+section "smptebars_gfx0",ROM0
 smptetiles_chr::
   incbin "obj/gb/smptetiles.chrgb.pb16"

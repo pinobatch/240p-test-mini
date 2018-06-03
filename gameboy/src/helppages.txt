@@ -556,7 +556,7 @@ S: 00 for handheld or
 
 == Color tests: Menu ==
 
-NYA:PLUGE
+PLUGE
 Gradient color bars
 SMPTE color bars
 Color bars on gray
