@@ -23,8 +23,11 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-SHOW_RNG equ 1
-
+; Manual lag test (megaton) uses a linear congruential generator to
+; generate random timing of the reticle's motion.  I tested the LCG
+; inside this activity because at the time, it was easiest to get the
+; output on the screen.  Removing the RNG test saves 79 bytes.
+SHOW_RNG equ 0
 
   rsset hTestState
 player_xsub      rb 1
