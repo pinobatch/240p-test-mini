@@ -91,7 +91,6 @@ activity_pluge:
 .restart:
   call clear_gbc_attr
 
-  ld b,b
   ; Load tiles and map
   ld hl,CHRRAM0
   ld de,plugetiles_chr

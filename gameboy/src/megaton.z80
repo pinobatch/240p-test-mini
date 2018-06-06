@@ -352,6 +352,8 @@ activity_megaton_complete:
 .loop:
   call read_pad
   call wait_vblank_irq
+  ld a,%01101100
+  call set_bgp
   ld a,[new_keys]
   and PADF_B|PADF_START
   jr z,.loop
