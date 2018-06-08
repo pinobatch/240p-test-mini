@@ -31,11 +31,11 @@ void activity_linearity(void) {
   dma_memset16(MAP[PFOVERLAY], 0x01, 32*20*2);
   REG_DISPCNT = 0;
 
-  unsigned int new_keys;
-  do {
+  while (1) {
     scanKeys();
-    new_keys = keysDown();
+    unsigned int new_keys = keysDown();
     if (new_keys & KEY_START) {
+      REG_BLDCNT = 0;
       // TODO: Break for help screen
     }
     if (new_keys & KEY_SELECT) {
@@ -43,6 +43,10 @@ void activity_linearity(void) {
     }
     if (new_keys & KEY_A) {
       lcdc_value ^= BG0_ON;
+    }
+    if (new_keys & KEY_B) {
+      REG_BLDCNT = 0;
+      return;
     }
 
     // TODO: Change this to use blending so that the grid can mix better
@@ -53,7 +57,9 @@ void activity_linearity(void) {
     BG_OFFSET[1].y = 8;
     dmaCopy(inverted ? invgray4pal : gray4pal, BG_COLORS+0x00, sizeof(gray4pal));
     REG_DISPCNT = lcdc_value;
-  } while (!(new_keys & KEY_B));
+    REG_BLDCNT = 0x2241;  // sub is bg1 and backdrop; main is bg0; function is alpha blend
+    REG_BLDALPHA = 0x040C;  // alpha levels: 4/16*sub + 12/16*main
+  }
 }
 
 void activity_sharpness(void) {

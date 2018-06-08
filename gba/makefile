@@ -64,7 +64,7 @@ LDFLAGS	:=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
 # Grit comes from GritHub, https://github.com/devkitPro/grit
 GRIT := $(DEVKITARM)/bin/grit
 PY := py -3
-EMU := start
+EMU := start ""
 
 # targets begin
 .PHONY: run all clean dist zip
