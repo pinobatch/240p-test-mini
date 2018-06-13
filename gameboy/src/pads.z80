@@ -99,8 +99,9 @@ autorepeat::
   ret z
   ld c,a  ; C: Currently held
 
-  ; If any keys were pressed, set the eligible keys among them
-  ; as the autorepeating set
+  ; If any keys were newly pressed, set the eligible keys among them
+  ; as the autorepeating set.  For example, changing from Up to
+  ; Up+Right sets Right as the new autorepeating set.
   ld a,[new_keys]
   ld d,a  ; D: new_keys
   or a
@@ -195,7 +196,7 @@ sgb_send:
   ld a,$10
   bit 0,d
   jr nz,.bitIs0
-  ld a,$20
+  add a,a
 .bitIs0:
   ldh [rP1],a
   ld a,$30

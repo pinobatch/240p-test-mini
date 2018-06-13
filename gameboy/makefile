@@ -21,7 +21,7 @@ objlist = header init \
   megaton stopwatch overscan soundtest audiosync gbctests \
   Gus_portrait_GBC \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
-  singletons gfxincbins
+  incruniq gfxincbins
 
 ifdef COMSPEC
   ifndef GBEMU

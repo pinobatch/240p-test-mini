@@ -113,23 +113,32 @@ read_pads_once:
 ; player, ORing result into the player's new_keys.
 ; @param X which player to calculate autorepeat for
 .proc autorepeat
+  ; If no keys are held, skip all autorepeat processing
   lda cur_keys,x
   beq no_das
+
+  ; If any keys were newly pressed, set the eligible keys among them
+  ; as the autorepeating set.  For example, changing from Up to
+  ; Up+Right sets Right as the new autorepeating set.
+  ; (Quirk: Going from 0 to Up+Right in one frame sets Up+Right
+  ; as the autorepeating set.)
   lda new_keys,x
   beq no_restart_das
   sta das_keys,x
   lda #DAS_DELAY
-  sta das_timer,x
-  bne no_das
+  bne have_das_timer
 no_restart_das:
+
+  ; If time has expired, merge in the autorepeating set
   dec das_timer,x
   bne no_das
-  lda #DAS_SPEED
-  sta das_timer,x
   lda das_keys,x
   and cur_keys,x
   ora new_keys,x
   sta new_keys,x
+  lda #DAS_SPEED
+have_das_timer:
+  sta das_timer,x
 no_das:
   rts
 .endproc
