@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
-import json, sys, re
+import json, sys, os
 from vwfbuild import ca65_bytearray
+
+# Find common tools
+commontoolspath = os.path.normpath(os.path.join(
+    os.path.dirname(sys.argv[0]), "..", "..", "common", "tools"
+))
+sys.path.append(commontoolspath)
+from parsepages import lines_to_docs
 
 # Character encoding ################################################
 
@@ -94,74 +101,6 @@ def encode_240ptxt(s, errors='strict'):
         )
     return bytes(out)
 
-# Converting lines to documents #####################################
-
-MAXPAGELEN = 20
-nonalnumRE = re.compile("[^0-9a-zA-Z]+")
-
-def lines_to_docs(filename, lines, wrap=None):
-    # docs[docnum] = (title, labelname, docpages)
-    # docpages[pagenum][linenum] = line text
-    docs, secttitles = [], {}
-    for linenum, line in enumerate(lines):
-        if line.startswith('==') and line.endswith('=='):
-            # New section
-            secttitle = line.strip('=').strip()
-            normtitle = nonalnumRE.sub('_', secttitle.lower()).strip('_')
-            try:
-                oldsection = secttitles[normtitle]
-            except KeyError:
-                pass
-            else:
-                oldsecttitle, oldlinenum = oldsection
-                raise ValueError("%s:%d: %s was already defined on line %d"
-                                 % (filename, linenum + 1,
-                                    oldsecttitle, oldlinenum))
-            secttitles[normtitle] = (secttitle, linenum)
-            docs.append((secttitle, normtitle, [[]]))
-            continue
-        docpages = docs[-1][-1] if docs else None
-        doclastpage = docpages[-1] if docpages else None
-        
-        line_rstrip = line.rstrip()
-        if line_rstrip == '':
-            # Blank line; append only if following a nonblank line
-            if doclastpage and doclastpage[-1]:
-                doclastpage.append('')
-            continue
-        if doclastpage is None:
-            raise IndexError("%s:%d: nonblank line with no open document"
-                             % (filename, linenum + 1))
-        if line.startswith('----') and line.rstrip('-') == '':
-            # Page break
-            if doclastpage:
-                docpages.append([])
-            continue
-
-        # Ordinary text
-        doclastpage.extend(wrap(line_rstrip) if wrap else [line_rstrip])
-        if len(doclastpage) > MAXPAGELEN:
-            raise IndexError("%s:%d: exceeds page length of %d lines"
-                             % (filename, linenum + 1, MAXPAGELEN))
-
-    for doc in docs:
-        pages = doc[-1]
-
-        # Remove trailing blank lines
-        for page in pages:
-            while page and not page[-1]: del page[-1]
-
-        # Remove blank pages
-        for i in range(len(pages) - 1, -1, -1):
-            if not pages[i]: del pages[i]
-
-    # Remove blank docs entirely
-    for i in range(len(docs) - 1, -1, -1):
-        if not docs[i][-1]:
-            del docs[i]
-
-    return docs
-
 def ca65_escape_bytes(blo):
     """Encode an iterable of ints in 0-255, mostly ASCII, for ca65 .byte statement"""
     runs = []
@@ -237,8 +176,7 @@ def main(argv=None):
     filename = argv[1]
     with open(filename, 'r', encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
-    docs = lines_to_docs(filename, lines)
-##    print(json.dumps(docs, indent=2))
+    docs = lines_to_docs(filename, lines, maxpagelen=20)
     print(render_help(docs))
 
 if __name__=='__main__':
