@@ -147,17 +147,14 @@ detect_sgb::
   ld a,[rP1]
   and $03
   xor $03
-  jr nz, .isSGB
+  jr z, .haveSGB ; a = 0
 
-  ; Not SGB
-;  xor a  ; set by previous xor
+.isSGB:
+  ld a, 1
 .haveSGB:
   ld [is_sgb],a
   ld hl,sgb_packet_oneplayer
   jp sgb_send
-.isSGB:
-  ld a,1
-  jr .haveSGB
 
 SIZEOF_SGB_PACKET EQU 16
 CHAR_BIT EQU 8
@@ -196,7 +193,7 @@ sgb_send:
   ld a,$10
   bit 0,d
   jr nz,.bitIs0
-  add a,a
+  add a,a ; ld a,$20
 .bitIs0:
   ldh [rP1],a
   ld a,$30
