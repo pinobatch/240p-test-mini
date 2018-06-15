@@ -94,7 +94,7 @@ $(BUILD)/helpsprites_chr.s: tilesets/helpsprites.png
 	$(GRIT) $< -gB4 -gzl -pn16 -o $(basename $@)
 $(BUILD)/linearity_chr.s: tilesets/linearity.png
 	$(GRIT) $< -p! -gB2 -mRtpf -mLs -mzr -o $(basename $@)
-$(BUILD)/vwf7.s: tools/vwfbuild.py tilesets/vwf7.png
+$(BUILD)/vwf7.s: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 	$(PY) $^ $@
 $(BUILD)/%_chr.h: $(BUILD)/%_chr.s
 	touch $@

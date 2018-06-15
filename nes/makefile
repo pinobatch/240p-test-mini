@@ -28,6 +28,7 @@ CFLAGS65 =
 objdir = obj/nes
 srcdir = src
 imgdir = tilesets
+cimgdir = ../common/tilesets
 
 #EMU := "/C/Program Files/Nintendulator/Nintendulator.exe"
 EMU := fceux
@@ -133,7 +134,7 @@ $(objdir)/gus_bg.sav: $(imgdir)/gus_bg.png
 	$(PY) tools/savtool.py --palette 0f0820180f1a202a0f060f160f0f1424 $< $@
 $(objdir)/lag_clock_face.sav: $(imgdir)/lag_clock_face.png
 	$(PY) tools/savtool.py --palette 20100f24203626242026162420210124 $< $@
-$(objdir)/vwf7.s: $(imgdir)/vwf7.png
+$(objdir)/vwf7.s: $(cimgdir)/vwf7_cp240p.png
 	$(PY) tools/vwfbuild.py $< $@
 $(objdir)/gus_portrait.sav: $(imgdir)/gus_portrait.png
 	$(PY) tools/savtool.py --palette 0F2012370F2028100F2027370F122810 $< $@

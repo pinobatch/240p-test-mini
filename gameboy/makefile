@@ -118,7 +118,7 @@ obj/gb/%.chrgb16: tilesets/%.png
 obj/gb/kikimap.chr1: tilesets/kikimap.png
 	$(PY) tools/pilbmp2nes.py --planes "0" -H 32 $< $@
 
-obj/gb/vwf7.z80: tools/vwfbuild.py tilesets/vwf7.png
+obj/gb/vwf7.z80: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 	$(PY) $^ $@
 
 obj/gb/%.iu: obj/gb/%.chrgb
