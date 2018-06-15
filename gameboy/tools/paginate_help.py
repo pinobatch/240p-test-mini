@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import json, sys, re, os
 from vwfbuild import rgbasm_bytearray
-from chrencoding import decode_240ptxt, encode_240ptxt
 
 # Find common tools
 commontoolspath = os.path.normpath(os.path.join(
@@ -9,6 +8,7 @@ commontoolspath = os.path.normpath(os.path.join(
 ))
 sys.path.append(commontoolspath)
 from dte import dte_compress
+import cp144p  # registers encoding "cp144p" used by GB and GBA suites
 
 # Converting lines to documents #####################################
 
@@ -121,14 +121,14 @@ section "helppages",ROMX
     lines.append('helptitles::')
     lines.extend('  dw helptitle_%s' % doc[1] for doc in docs)
     lines.extend('helptitle_%s: db %s,0'
-                 % (doc[1], rgbasm_escape_bytes(encode_240ptxt(doc[0])))
+                 % (doc[1], rgbasm_escape_bytes(doc[0].encode("cp144p")))
                  for doc in docs)
 
     cumul_pages = [0]
     allpages = []
     for doc in docs:
         for page in doc[-1]:
-            page = [encode_240ptxt(line) for line in page]
+            page = [line.encode("cp144p") for line in page]
             allpages.append(b"\x0A".join(page) + b"\x00")
         assert len(allpages) == cumul_pages[-1] + len(doc[-1])
         cumul_pages.append(len(allpages))

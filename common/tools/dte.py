@@ -2,7 +2,6 @@
 from __future__ import with_statement, division, print_function, unicode_literals
 from collections import defaultdict
 import sys, heapq
-from chrencoding import decode_240ptxt, encode_240ptxt
 
 dte_problem_definition = """
 Byte pair encoding, dual tile encoding, or digram coding is a static
@@ -222,6 +221,7 @@ def dte_uncompress(line, replacements, mincodeunit=128):
     return bytes(outbuf), maxstack
 
 def dte_tests():
+    import cp144p
     inputdatas = [
         "The fat cat sat on the mat.",
         'boooooobies booooooobies',
@@ -230,12 +230,12 @@ def dte_tests():
     with open("../src/helppages.txt", "r") as infp:
         inputdatas.append(infp.read())
     for text in inputdatas:
-        lines = [encode_240ptxt(text)]
+        lines = [text.encode("cp144p")]
         ctxt, replacements, pairfreqs = dte_compress(lines)
         print("compressed %d chaacters to %d bytes and %d replacements"
               % (len(text), len(ctxt[0]), len(replacements)))
         dtxt, stkd = dte_uncompress(ctxt[0], replacements)
-        outtxt = decode_240ptxt(dtxt)
+        outtxt = dtxt.decode("cp144p")
         print("decompressed to %d characters with %d stack depth"
               % (len(dtxt), stkd))
         assert outtxt == text
