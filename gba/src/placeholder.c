@@ -9,6 +9,8 @@
 extern const unsigned char spritegfx_chrTiles[];
 extern const unsigned short spritegfx_chrPal[16];
 
+extern const unsigned char helpsect_lame_boy[];
+
 unsigned short player_x;
 signed short player_dx;
 unsigned short player_frame;
@@ -24,7 +26,6 @@ unsigned short player_facing = 0;
 
 static void load_player(void) {
   LZ77UnCompVram(spritegfx_chrTiles, SPR_VRAM(16));
-  dmaCopy(spritegfx_chrPal, OBJ_COLORS+0x00, sizeof(spritegfx_chrPal));
   player_x = 56 << 8;
   player_dx = player_frame = player_facing = 0;
 }
@@ -140,14 +141,6 @@ static void draw_bg(void) {
   loadMapRowMajor(&(MAP[PFMAP][1][1]), 0x1000 | 32, 28, 1);
   dma_memset16(PATRAM4(0, 32), 0x0000, 32*28);
   vwf8Puts(PATRAM4(0, 32), "In May 2018, Pino returned to the GBA scene.", 0, 1);
-
-  // Load palette
-  dmaCopy(bgcolors00, BG_COLORS+0x00, sizeof(bgcolors00));
-  dmaCopy(bgcolors10, BG_COLORS+0x10, sizeof(bgcolors10));
-
-  // Set up background regs (except DISPCNT)
-  BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-  BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
 }
 
 void lame_boy_demo() {
@@ -159,14 +152,20 @@ void lame_boy_demo() {
 
   // Freeze
   do {
-    read_pad();
+    read_pad_help_check(helpsect_lame_boy);
     move_player();
 
     oam_used = 0;
     draw_player_sprite();
     ppu_clear_oam(oam_used);
+
     VBlankIntrWait();
     REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    dmaCopy(bgcolors00, BG_COLORS+0x00, sizeof(bgcolors00));
+    dmaCopy(bgcolors10, BG_COLORS+0x10, sizeof(bgcolors10));
+    dmaCopy(spritegfx_chrPal, OBJ_COLORS+0x00, sizeof(spritegfx_chrPal));
     ppu_copy_oam();
   } while (!(new_keys & KEY_B));
 }

@@ -49,7 +49,7 @@ unsigned char help_height;
 // Set this to 0 for no cursor and no indent or the indent depth
 // for cursor and indent
 unsigned char help_show_cursor;
-signed char wnd_progress;
+signed char help_wnd_progress;
 
 
 /* VRAM map
@@ -133,7 +133,7 @@ static void load_help_bg(void) {
   help_bg_loaded = 1;
   help_height = 0;
   help_cur_page = -1;  // Request the wanted page
-  wnd_progress = 0;  // Schedule inward transition
+  help_wnd_progress = 0;  // Schedule inward transition
 }
 
 static void help_draw_character() {
@@ -248,16 +248,16 @@ static const unsigned short bg0_x_sequence[] = {
 static unsigned int help_move_window(void) {
   // If a transition is at its peak, and another transition is
   // requested, shortcut its retraction to the locked position
-  if (wnd_progress == bg0_x_sequence_peak
+  if (help_wnd_progress == bg0_x_sequence_peak
       && help_cur_page != help_wanted_page) {
-    wnd_progress = -(signed int)bg0_x_sequence_peak;
+    help_wnd_progress = -(signed int)bg0_x_sequence_peak;
   }
 
   // Clock the sequence forward one step
-  if (wnd_progress < (signed int)bg0_x_sequence_last) {
-    ++wnd_progress;
+  if (help_wnd_progress < (signed int)bg0_x_sequence_last) {
+    ++help_wnd_progress;
   }
-  unsigned int x = bg0_x_sequence[wnd_progress < 0 ? -wnd_progress : wnd_progress];
+  unsigned int x = bg0_x_sequence[help_wnd_progress < 0 ? -help_wnd_progress : help_wnd_progress];
   return x;
 }
 
@@ -280,7 +280,9 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
     // If changing pages while BG CHR and map are loaded,
     // schedule an out-load-in sequence and hide the cursor
     if (help_cur_page != help_wanted_page) {
-      wnd_progress = -(signed int)bg0_x_sequence_last;
+      if (help_wnd_progress != 0) {
+        help_wnd_progress = -(signed int)bg0_x_sequence_last;
+      }
       help_show_cursor = 0;
     }
   }
@@ -330,12 +332,12 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
     } else {
       // If the showing and wanted pages differ, and a transition
       // isn't running, start one
-      if (wnd_progress >= (signed int)bg0_x_sequence_last) {
-        wnd_progress = -(signed int)bg0_x_sequence_last;
+      if (help_wnd_progress >= (signed int)bg0_x_sequence_last) {
+        help_wnd_progress = -(signed int)bg0_x_sequence_last;
       }
     }
 
-    if (wnd_progress == 0) {
+    if (help_wnd_progress == 0) {
       help_show_cursor = (keymask & KEY_UP) ? 6 : 0;
       help_draw_page(doc_num, help_show_cursor, keymask);
     }
@@ -352,4 +354,22 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
     BG_OFFSET[0].x = wx;
     ppu_copy_oam();
   }
+}
+
+/**
+ * Polls the controller and displays a help document if Start
+ * was pressed.
+ * @param pg an extern helpsect_ value
+ * @return 1 if pressed, 0 if not
+ */
+unsigned int read_pad_help_check(const void *pg) {
+  read_pad();
+  if (!(new_keys & KEY_START)) return 0;
+
+  REG_BLDCNT = 0;
+  help_wnd_progress = 0;
+  helpscreen((unsigned int)pg, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  new_keys = 0;
+  help_wnd_progress = 0;
+  return 1;
 }

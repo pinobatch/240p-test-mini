@@ -5,6 +5,19 @@
 #include <gba_systemcalls.h>
 #include "global.h"
 
+extern const unsigned char helpsect_pluge[];
+extern const unsigned char helpsect_smpte_color_bars[];
+extern const unsigned char helpsect_color_bars_on_gray[];
+extern const unsigned char helpsect_color_bleed[];
+extern const unsigned char helpsect_grid[];
+extern const unsigned char helpsect_linearity[];
+extern const unsigned char helpsect_gray_ramp[];
+extern const unsigned char helpsect_sharpness[];
+extern const unsigned char helpsect_solid_screen[];
+extern const unsigned char helpsect_sharpness[];
+extern const unsigned char helpsect_full_screen_stripes[];
+
+
 #define PFMAP 23
 #define PFOVERLAY 22
 
@@ -32,11 +45,7 @@ void activity_linearity(void) {
   REG_DISPCNT = 0;
 
   while (1) {
-    read_pad();
-    if (new_keys & KEY_START) {
-      REG_BLDCNT = 0;
-      // TODO: Break for help screen
-    }
+    read_pad_help_check(helpsect_linearity);
     if (new_keys & KEY_SELECT) {
       inverted = !inverted;
     }
@@ -65,10 +74,6 @@ void activity_sharpness(void) {
   
 }
 
-void activity_ire(void) {
-  
-}
-
 static void do_bars(void) {
   
 }
@@ -93,7 +98,7 @@ void activity_cps_grid(void) {
   
 }
 
-void do_full_stripes(void) {
+static void do_full_stripes(void) {
   
 }
 
@@ -108,4 +113,3 @@ void activity_color_bleed(void) {
 void activity_solid_color(void) {
   
 }
-

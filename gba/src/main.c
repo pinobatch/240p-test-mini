@@ -7,10 +7,10 @@
 #include "global.h"
 
 // Attempt to import a helpsect ID
-extern unsigned char helpsect_160p_test_suite_menu[];
-extern unsigned char helpsect_160p_test_suite[];
-extern unsigned char helpsect_about[];
-extern unsigned char helpsect_160p_test_suite[];
+extern const unsigned char helpsect_160p_test_suite_menu[];
+extern const unsigned char helpsect_160p_test_suite[];
+extern const unsigned char helpsect_about[];
+extern const unsigned char helpsect_160p_test_suite[];
 
 #define DOC_MENU ((unsigned int)helpsect_160p_test_suite_menu)
 #define DOC_CREDITS ((unsigned int)helpsect_160p_test_suite)
@@ -33,29 +33,29 @@ void activity_credits(void);
 
 static const activity_func page_one_handlers[] = {
   lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
+  lame_boy_demo,  // activity_gc_bars,
+  lame_boy_demo,  // activity_smpte,
+  lame_boy_demo,  // activity_601bars,
+  lame_boy_demo,  // activity_color_bleed,
+  lame_boy_demo,  // activity_cps_grid,
   activity_linearity,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
+  lame_boy_demo,  // activity_gray_ramp,
+  lame_boy_demo,  // activity_solid_screen,
+  lame_boy_demo,  // activity_motion_blur,
+  lame_boy_demo,  // activity_sharpness,
+  lame_boy_demo,  // activity_overscan,
 };
 static const activity_func page_two_handlers[] = {
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
-  lame_boy_demo,  // activity_pluge,
+  lame_boy_demo,  // activity_shadow_sprite,
+  lame_boy_demo,  // activity_stopwatch,
+  lame_boy_demo,  // activity_megaton,
+  lame_boy_demo,  // activity_hill_zone_scroll_test,
+  lame_boy_demo,  // activity_kiki_scroll_test,
+  lame_boy_demo,  // activity_grid_scroll,
+  lame_boy_demo,  // activity_full_screen_stripes,
+  lame_boy_demo,  // activity_backlight_zone,
+  lame_boy_demo,  // activity_sound_test,
+  lame_boy_demo,  // activity_audio_sync,
   lame_boy_demo,
   activity_about,
   activity_credits,
@@ -86,9 +86,6 @@ int main(void) {
     }
     help_cursor_y = last_y;
     help_wanted_page = last_page;
-    
-//    activity_linearity();
-//    lame_boy_demo();
   }
 }
 
