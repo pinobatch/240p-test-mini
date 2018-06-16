@@ -28,7 +28,7 @@ OBJS := \
   main help \
   placeholder stills overscan scrolltest \
   shadowsprite stopwatch soundtest audiosync backlight megaton \
-  ppuclear vwfdraw undte rand \
+  ppuclear vwfdraw undte rand posprintf \
   helpbgtiles_chr helpsprites_chr helppages vwf7 \
   bggfx_chr spritegfx_chr linearity_chr
 LIBS := -lgba
@@ -77,6 +77,9 @@ all: $(TARGET).gba
 $(TARGET).elf: $(OFILES)
 
 $(BUILD)/%.o: $(SOURCES)/%.c $(SOURCES)/global.h
+	$(CC) $(CFLAGS) -g -c $< -o $@
+
+$(BUILD)/%.o: $(SOURCES)/%.S
 	$(CC) $(CFLAGS) -g -c $< -o $@
 
 $(BUILD)/%.o: $(BUILD)/%.s

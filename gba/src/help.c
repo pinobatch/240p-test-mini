@@ -3,6 +3,7 @@
 #include <gba_dma.h>
 #include <gba_input.h>
 #include "global.h"
+#include "posprintf.h"
 
 // Code units
 #define LF 0x0A
@@ -37,7 +38,7 @@
 #define FG_BGCOLOR 6
 #define FG_FGCOLOR 2
 
-unsigned char help_line_buffer[HELP_LINE_LEN];
+char help_line_buffer[HELP_LINE_LEN];
 unsigned char help_bg_loaded = 0;
 unsigned char help_wanted_page = 0;
 unsigned char help_cur_page = (unsigned char)-1;
@@ -68,9 +69,9 @@ extern const unsigned short helpbgtiles_chrPal[16];
 extern const unsigned char helpsprites_chrTiles[];
 extern const unsigned short helpsprites_chrPal[16];
 
-extern const unsigned char *const helppages[];
-extern const unsigned char *const helptitles[];
-extern const unsigned int help_cumul_pages[];
+extern const char *const helppages[];
+extern const char *const helptitles[];
+extern const unsigned char help_cumul_pages[];
 extern const void *HELP_NUM_PAGES;
 extern const void *HELP_NUM_SECTS;
 
@@ -121,12 +122,6 @@ void load_help_bg(void) {
   loadMapRowMajor(&(MAP[FGMAP][4+PAGE_MAX_LINES][1]), (PAGE_MAX_LINES + 1)*WINDOW_WIDTH,
                   WINDOW_WIDTH, 1);
 
-  // Prove that the tile was loaded
-  vwf8Puts(PATRAM4(3, 0*WINDOW_WIDTH), helptitles[0], 0, FG_FGCOLOR);
-  vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
-           "\x85 1/1 \x84  \x87\x86""A: Select  B: Exit",
-           0, FG_FGCOLOR);
-
   help_bg_loaded = 1;
 }
 
@@ -157,6 +152,15 @@ void helpscreen(unsigned int doc_num, unsigned int keymask) {
     load_help_bg();
     REG_DISPCNT = 0;
   }
+
+  // Prove that the tile was loaded
+  vwf8Puts(PATRAM4(3, 0*WINDOW_WIDTH), helptitles[0], 0, FG_FGCOLOR);
+  posprintf(help_line_buffer, "\x85 %d/%d \x84  \x87\x86""A: Select  B: Exit",
+            help_wanted_page - help_cumul_pages[doc_num] + 1, 
+            help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num]);
+  vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+           help_line_buffer, 0, FG_FGCOLOR);
+
   // Load palette
   VBlankIntrWait();
   dmaCopy(helpbgtiles_chrPal, BG_COLORS+0x00, sizeof(helpbgtiles_chrPal));
