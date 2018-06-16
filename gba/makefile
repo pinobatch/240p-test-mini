@@ -29,7 +29,7 @@ OBJS := \
   placeholder stills overscan scrolltest \
   shadowsprite stopwatch soundtest audiosync backlight megaton \
   ppuclear vwfdraw undte rand \
-  helpbgtiles_chr helpsprites_chr vwf7 \
+  helpbgtiles_chr helpsprites_chr helppages vwf7 \
   bggfx_chr spritegfx_chr linearity_chr
 LIBS := -lgba
 
@@ -81,6 +81,11 @@ $(BUILD)/%.o: $(SOURCES)/%.c $(SOURCES)/global.h
 
 $(BUILD)/%.o: $(BUILD)/%.s
 	$(AS) $< -o $@
+
+# Help conversion
+
+$(BUILD)/helppages.s: tools/paginate_help.py $(SOURCES)/helppages.txt
+	$(PY) $^ > $@
 
 # Image conversion
 

@@ -43,7 +43,7 @@ char *undte_src(char *dst, const char *src, const char **srcend) {
       }
 
       // code_is_pair
-      unsigned char *pair = dte_replacements[ctoprint - DTE_MIN_CODEUNIT];
+      const unsigned char *pair = dte_replacements[ctoprint - DTE_MIN_CODEUNIT];
       if (dtedepth < DTE_STACK_SIZE) {
         dtestack[dtedepth++] = pair[1];
       }

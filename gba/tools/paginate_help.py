@@ -10,22 +10,6 @@ sys.path.append(commontoolspath)
 from parsepages import lines_to_docs
 import cp144p
 
-def ca65_escape_bytes(blo):
-    """Encode an iterable of ints in 0-255, mostly ASCII, for ca65 .byte statement"""
-    runs = []
-    for c in blo:
-        if 32 <= c <= 126 and c != 34:
-            if runs and isinstance(runs[-1], bytearray):
-                runs[-1].append(c)
-            else:
-                runs.append(bytearray([c]))
-        else:
-            runs.append(c)
-    return ','.join('"%s"' % r.decode('ascii')
-                    if isinstance(r, bytearray)
-                    else '%d' % r
-                    for r in runs)
-
 def render_help(docs):
     lines = ["""
 @ Help data generated with paginate_help.py - do not edit
@@ -38,8 +22,8 @@ def render_help(docs):
                  for i, doc in enumerate(docs))
     lines.extend('helpsect_%s = %d' % (doc[1], i)
                  for i, doc in enumerate(docs))
-    lines.extend('helptitle_%s: .byte %s,0'
-                 % (doc[1], ca65_escape_bytes(doc[0].encode("cp144p")))
+    lines.extend('helptitle_%s:\n%s\n  .byte 0'
+                 % (doc[1], ca65_bytearray(doc[0].encode("cp144p")))
                  for doc in docs)
 
     cumul_pages = [0]
@@ -51,8 +35,7 @@ def render_help(docs):
             for i in range(len(page) - 1):
                 page[i].append(10)  # newline
             page[-1].append(0)
-            lines.extend("  .byte %s" % ca65_escape_bytes(line)
-                         for line in page)
+            lines.extend(ca65_bytearray(line) for line in page)
             pagenum += 1
         assert pagenum == cumul_pages[-1] + len(doc[-1])
         cumul_pages.append(pagenum)

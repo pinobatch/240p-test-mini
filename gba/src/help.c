@@ -68,6 +68,12 @@ extern const unsigned short helpbgtiles_chrPal[16];
 extern const unsigned char helpsprites_chrTiles[];
 extern const unsigned short helpsprites_chrPal[16];
 
+extern const unsigned char *const helppages[];
+extern const unsigned char *const helptitles[];
+extern const unsigned int help_cumul_pages[];
+extern const void *HELP_NUM_PAGES;
+extern const void *HELP_NUM_SECTS;
+
 void load_help_bg(void) {
 
   // Load pattern table
@@ -116,7 +122,7 @@ void load_help_bg(void) {
                   WINDOW_WIDTH, 1);
 
   // Prove that the tile was loaded
-  vwf8Puts(PATRAM4(3, 0*WINDOW_WIDTH), "hello world", 0, FG_FGCOLOR);
+  vwf8Puts(PATRAM4(3, 0*WINDOW_WIDTH), helptitles[0], 0, FG_FGCOLOR);
   vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
            "\x85 1/1 \x84  \x87\x86""A: Select  B: Exit",
            0, FG_FGCOLOR);
