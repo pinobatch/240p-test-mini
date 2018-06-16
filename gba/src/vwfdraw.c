@@ -97,6 +97,9 @@ void vwf8PutTile(uint32_t *dst, unsigned int glyphnum,
   }
 }
 
+/**
+ * @return the number of the terminating control character
+ */
 const char *vwf8Puts(uint32_t *restrict dst, const char *restrict s,
                      unsigned int x, unsigned int color) {
   while (x < 240) {

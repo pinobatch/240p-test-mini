@@ -34,6 +34,7 @@
 #define TILE_FLOOR_SHADOW 284
 
 #define CHARACTER_VRAM_BASE 956
+#define ARROW_TILE 1020
 
 #define FG_BGCOLOR 6
 #define FG_FGCOLOR 2
@@ -43,6 +44,7 @@ unsigned char help_bg_loaded = 0;
 unsigned char help_wanted_page = 0;
 unsigned char help_cur_page = (unsigned char)-1;
 unsigned char help_cursor_y = 0;
+unsigned char help_page_lines = 0;
 
 /* VRAM map
 
@@ -75,7 +77,7 @@ extern const unsigned char help_cumul_pages[];
 extern const void *HELP_NUM_PAGES;
 extern const void *HELP_NUM_SECTS;
 
-void load_help_bg(void) {
+static void load_help_bg(void) {
 
   // Load pattern table
   LZ77UnCompVram(helpbgtiles_chrTiles, PATRAM4(3, 272));
@@ -123,9 +125,10 @@ void load_help_bg(void) {
                   WINDOW_WIDTH, 1);
 
   help_bg_loaded = 1;
+  help_page_lines = 0;
 }
 
-static void draw_character() {
+static void help_draw_character() {
   unsigned int ou = oam_used;
   for (unsigned int i = 0; i < 2; ++i) {
     unsigned int a0 = (18 + i * 64) | OBJ_16_COLOR | ATTR0_TALL;
@@ -144,8 +147,37 @@ static void draw_character() {
   oam_used = ou;
 }
 
+static void help_draw_cursor() {
+  unsigned int ou = oam_used;
+  SOAM[ou].attr0 = (20 + help_cursor_y * 8) | OBJ_16_COLOR | ATTR0_SQUARE;
+  SOAM[ou].attr1 = (240 - (12 + 8 * WINDOW_WIDTH)) | ATTR1_SIZE_8;
+  SOAM[ou].attr2 = ARROW_TILE  | ATTR2_PALETTE(0);
+  oam_used = ou + 1;
+}
+
+static void help_draw_page(unsigned int left) {
+  unsigned int y = 0;
+  const char *src = helppages[help_wanted_page];
+  
+  while (y < PAGE_MAX_LINES) {
+    unsigned long *dst = PATRAM4(3, (y + 1)*WINDOW_WIDTH);
+    ++y;
+    dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+    src = vwf8Puts(dst, src, left, FG_FGCOLOR);
+    if (!*src) break;
+    ++src;
+  }
+  for (unsigned int clear_y = y; clear_y < help_page_lines; ++clear_y) {
+    unsigned long *dst = PATRAM4(3, (clear_y + 1)*WINDOW_WIDTH);
+    dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+  }
+  help_page_lines = y;
+}
+
 void helpscreen(unsigned int doc_num, unsigned int keymask) {
-  unsigned int new_keys;
+  // Set this to 0 for no cursor and no indent or the indent depth
+  // for cursor and indent
+  unsigned int cursor_visible = 0;
 
   REG_DISPCNT = LCDC_OFF;
   if (!help_bg_loaded) {
@@ -160,6 +192,8 @@ void helpscreen(unsigned int doc_num, unsigned int keymask) {
             help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num]);
   vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
            help_line_buffer, 0, FG_FGCOLOR);
+  cursor_visible = (keymask & KEY_UP) ? 6 : 0;
+  help_draw_page(cursor_visible);
 
   // Load palette
   VBlankIntrWait();
@@ -172,19 +206,28 @@ void helpscreen(unsigned int doc_num, unsigned int keymask) {
   BG_OFFSET[1].x = BG_OFFSET[1].y = 0;
   BG_OFFSET[0].x = (512 - 240) + (16 + 8 * WINDOW_WIDTH);
   BG_OFFSET[0].y = 4;
-
+  
   // Freeze
+  setRepeat(12, 3);
+  keysDownRepeat();
   do {
-    scanKeys();
-    new_keys = keysDown();
-
-//    move_player();
+    read_pad();
+    new_keys &= keymask;
+    autorepeat(KEY_UP|KEY_DOWN);
+    
+    if ((new_keys & KEY_UP) && (help_cursor_y > 0)) {
+      --help_cursor_y;
+    }
+    if ((new_keys & KEY_DOWN) && (help_cursor_y + 1 < help_page_lines)) {
+      ++help_cursor_y;
+    }
 
     oam_used = 0;
-    draw_character();
+    help_draw_character();
+    if (cursor_visible) help_draw_cursor();
     ppu_clear_oam(oam_used);
     VBlankIntrWait();
     REG_DISPCNT = MODE_0 | BG1_ON | BG0_ON | OBJ_1D_MAP | OBJ_ON;
     ppu_copy_oam();
-  } while (!(new_keys & KEY_B));
+  } while (!(new_keys & (KEY_B | KEY_A | KEY_START)));
 }

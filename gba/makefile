@@ -28,7 +28,7 @@ OBJS := \
   main help \
   placeholder stills overscan scrolltest \
   shadowsprite stopwatch soundtest audiosync backlight megaton \
-  ppuclear vwfdraw undte rand posprintf \
+  pads ppuclear vwfdraw undte rand posprintf \
   helpbgtiles_chr helpsprites_chr helppages vwf7 \
   bggfx_chr spritegfx_chr linearity_chr
 LIBS := -lgba

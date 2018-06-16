@@ -30,8 +30,6 @@ static void load_player(void) {
 }
 
 static void move_player(void) {
-  unsigned int cur_keys = keysHeld();
-
   // Acceleration and braking while moving right
   if (player_dx >= 0) {
     if (cur_keys & KEY_RIGHT) {
@@ -153,8 +151,6 @@ static void draw_bg(void) {
 }
 
 void lame_boy_demo() {
-  unsigned int new_keys;
-
   // Forced blanking
   REG_DISPCNT = LCDC_OFF;
   draw_bg();
@@ -163,8 +159,7 @@ void lame_boy_demo() {
 
   // Freeze
   do {
-    scanKeys();
-    new_keys = keysDown();
+    read_pad();
     move_player();
 
     oam_used = 0;

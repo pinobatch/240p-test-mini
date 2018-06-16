@@ -32,8 +32,7 @@ void activity_linearity(void) {
   REG_DISPCNT = 0;
 
   while (1) {
-    scanKeys();
-    unsigned int new_keys = keysDown();
+    read_pad();
     if (new_keys & KEY_START) {
       REG_BLDCNT = 0;
       // TODO: Break for help screen

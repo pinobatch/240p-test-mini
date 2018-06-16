@@ -14,6 +14,11 @@ void helpscreen(unsigned int doc_num, unsigned int keymask);
 // stills.c
 void activity_linearity(void);
 
+// pads.c
+extern unsigned short cur_keys, new_keys, das_keys, das_timer;
+unsigned int read_pad(void);
+unsigned int autorepeat(unsigned int allowed_keys);
+
 // placeholder.c
 void lame_boy_demo(void);
 
