@@ -1,0 +1,635 @@
+== 160p Test Suite: Menu ==
+
+NYAPLUGE
+NYAGradient color bars
+NYASMPTE color bars
+NYAColor bars on gray
+NYAColor bleed
+NYAGrid
+Linearity
+NYAGray ramp
+NYASolid screen
+NYAMotion blur
+NYASharpness
+NYAOverscan
+----
+NYAShadow sprite
+NYAStopwatch
+NYAManual lag test
+NYAHill zone scroll
+NYAVertical scroll
+NYAGrid scroll
+NYAFull screen stripes
+NYABacklight zone
+NYASound test
+NYAAudio sync
+Lame boy
+About
+Credits
+
+
+== About ==
+
+The 240p Test Suite
+has two goals:
+
+1. Evaluate TV sets and
+   video processors for
+   ability to handle retro
+   console video signals.
+2. Turn a game console
+   into a test signal
+   generator to help in
+   calibrating the black,
+   white, and color levels
+   of a display.
+----
+The Game Boy Advance outputs
+a progressive video signal
+with 144 lines of picture.
+It has a TFT panel with 32
+levels per RGB channel and
+a reputation for crushing
+black levels.
+----
+Press Start in any test
+pattern to show help for
+that pattern.
+
+The test suite is also
+available for several
+other consoles.
+For more info, visit
+http://junkerhq.net/240p
+
+== Grid ==
+
+This grid uses the
+screen's full resolution.
+Use it to verify that
+the entire picture is
+visible, including the
+shaded border, with
+no distortion.
+
+Select: Invert grays
+
+== Linearity ==
+
+This pattern shows five
+circles at the square
+pixel aspect ratio of
+the GBA screen.  The
+circles should have the
+same diameter in all
+directions.
+
+Use it to verify the
+horizontal to vertical
+size ratio setting of your
+display or scaler or to
+verify the lack of barrel
+distortion of a CRT.
+----
+A: Hide or show a
+   square grid
+Select: Invert grays
+
+== Gray ramp ==
+
+Use this pattern to
+check color balance.
+This gray ramp should
+not have a red, green,
+or blue tint to it.
+
+Cheap color LCDs may
+have different gamma
+curves per component.
+
+== Solid screen ==
+
+Some displays and
+scalers have problems
+with sudden changes
+between deep black
+and a white screen.
+Other displays may have
+dead or damaged pixels.
+
+←→: Change gray level
+  or color
+A on white: Toggle RGB
+  input box
+↑↓←→: Change RGB value
+
+== Motion blur ==
+
+This tests how quickly
+an LCD reacts to
+changes in gray level
+by toggling a square
+between two shades.
+Use it with a high-speed
+camcorder, or set the
+shades the same to
+check gray levels.
+
+↑↓: Choose a setting
+←→: Change its value
+A: Start/stop the test
+----
+Like the Game Boy Color,
+the Game Boy Advance has
+a TFT display with a
+decent response time.
+All Game Boy displays
+have an interlace-like
+effect, drawing even
+or odd lines darker
+in alternate frames.
+
+== Sharpness ==
+
+Set the sharpness of
+your TV to a value that
+shows clean black and
+gray transitions without
+white ghost lines on
+the side.
+
+Select: Invert grays
+----
+Modern TVs' "sharpness"
+control performs edge
+enhancement, which is
+designed for live action
+SDTV or VHS sources.
+Most TVs have zero as
+no change and high as
+enhancement. A few have
+middle as no change,
+high as enhancement,
+and low as blurring.
+
+== Overscan ==
+
+With this pattern you
+can discover how much
+of the picture edge your
+GBA's lens hides.
+
+The LCD is slightly
+recessed in the chassis.
+This can block light from
+reaching the screen's
+edges depending on the
+angle of the light source.
+----
+↑↓←→: Choose an edge
+Hold A + ↑↓←→:
+  Move that edge
+
+Move each edge inward
+until you see the border,
+then go back one pixel.
+Or leave one border pixel
+visible and subtract 1.
+The result is the amount
+of overscan in pixels in
+each direction.
+
+== Shadow sprite ==
+
+This test draws a shadow
+sprite on every other
+frame, flickering at
+30 Hz. Many games use
+such flicker to show
+transparency.
+
+Some deinterlacers show
+drop shadows OK but
+still interpret 240p as
+480i. The striped sprite
+should make attempted
+deinterlacing easy
+to spot.
+----
+Some handhelds' LCD
+driver circuits use a
+technique similar to
+interlacing to improve
+pixel response times.
+
+↑↓←→: Move sprite
+A: Skip flicker frame
+  or rotate stripes
+A+↑: Change shadow type
+  (flicker or stripes)
+A+←→: Change background
+Select: Change shape
+----
+Whether still or moving,
+background detail must
+not be lost, and the
+shadow must not
+disappear. The flicker
+pattern must not have
+horizontal stripes.
+
+Portrait of Gus by
+  darryl.revok
+Hill zone by mikejmoffitt
+  & Damian Yerrick
+
+== Stopwatch ==
+
+This stopwatch helps
+you measure a TV's lag,
+detect dropped frames,
+or just count how long
+your spouse has been
+on the phone.
+
+A: Start/stop
+Select stopped: Reset
+Select running: Lap
+↑: Show ruler at left
+↓: Toggle inactive
+   circles
+----
+The clock face below
+helps determine the
+frame even when the
+numbers above are
+blurry.
+
+The stopwatch assumes
+60 Hz. This means it
+runs slightly slow
+(1 part in 219).
+----
+To measure lag, get
+a digital camera and
+connect two displays to
+one GameCube. One is
+being tested, and the
+other (the reference)
+should be a CRT SDTV or
+a display with known lag.
+For example, connect
+a CRT and your scaler
+using a cable with both
+composite and S-Video out.
+----
+Then photograph both
+screens at once.
+The picture will show the
+difference in processing
+latency between them.
+Some consumer LCD TVs
+exceed five frames.
+
+The ruler helps count
+scanlines of lag. Use a
+short exposure on your
+camera and divide lines by
+15.7 to get milliseconds.
+
+== Manual lag test ==
+
+This helps quantify a
+display's processing lag
+by showing a changing
+pattern on the screen,
+optionally with audio.
+
+Press A when the moving
+and still reticles align
+to display the offset in
+frames from the actual
+intersection and whether
+it was early or late. After
+ten non-early presses,
+their average is shown.
+----
+↑↓: Choose a setting
+←→: Change its value
+
+Settings include the
+direction of the moving
+reticle (horizontal,
+vertical, or both),
+whether to randomize
+timing of movement, and
+whether to beep when A
+is pressed or beep and
+flash when the reticles
+align.
+
+== Hill zone scroll test ==
+
+This shows a scrolling
+background with several
+parallax strips. It can
+be used to notice any
+drops in frame rate.
+
+↑↓: Change speed
+←→: Change direction
+A: Stop or start
+
+Hill zone by mikejmoffitt
+  & Damian Yerrick
+
+== Vertical scroll test ==
+
+This test shows a
+scrolling background.
+Use it to measure
+cadence detection in a
+deinterlacer or test
+hypotheses about
+handheld "interlacing".
+
+↑↓: Change speed
+←→: Change direction
+A: Stop or start
+
+Map by Artemio Urbina
+Tiles by Damian Yerrick
+
+== Grid scroll test ==
+
+A grid scrolls vertically
+or horizontally. This can
+be used to test linearity
+and how well the display
+copes with scrolling and
+frame rate. Some scalers
+may produce a still image
+at maximum speed.
+
+↑↓: Change speed
+A: Stop or start
+A + ↑↓←→:
+  Change direction
+Select: Invert grays
+
+== Full screen stripes ==
+
+You should see a
+pattern of lines,
+each one pixel wide.
+
+↑↓←→: Move the
+  pattern by one pixel
+Hold: Move every frame
+A: Switch among
+  horizontal, vertical,
+  and checkerboard
+Select: Show or hide
+  frame counter
+----
+While you hold Up, the
+lines should flicker.
+If holding Up makes a
+still image, your scaler
+is treating the signal
+as interlaced and either
+discarding every other
+frame or weaving them
+incorrectly.
+If holding Up makes
+a solid gray image,
+you're probably seeing
+slow LCD response time.
+
+== Backlight zone test ==
+
+This test displays a
+small moving square,
+letting you check how
+a display works with
+small bright areas.
+Some LED-lit LCDs dim
+dark areas to make
+blacks darker, which
+causes problems with
+scenes such as
+starfields and credits.
+----
+↑↓←→: Move the square
+A: Hide or show the
+  square
+A+↑↓: Change its size
+  among 1, 2, 4, or 8
+  pixels on a side
+Select: Invert grays
+
+== Sound test: Frequency ==
+
+8000 Hz
+4000 Hz
+2000 Hz
+1000 Hz
+500 Hz
+250 Hz
+125 Hz
+62 Hz
+1000 Hz left
+1000 Hz right
+1000 Hz (pulse)
+Hiss noise
+Buzz noise
+
+== Sound test ==
+
+Use this test to ensure
+that the audio output
+works and that audio and
+video are synchronized.
+
+A: Play a sound and
+  flash the screen
+
+The Game Boy has stereo
+audio output. Each voice
+(pulse 1, pulse 2,
+wavetable, and noise)
+can be panned hard left,
+center, or hard right.
+----
+Most options in the menu
+use the wavetable with
+an approximate sine wave.
+It has a prominent
+overtone 5 octaves up.
+
+The CPU generates noise
+with a polynomial counter
+that can operate in two
+modes: hiss (32767 steps)
+or buzz (127 steps).
+
+== Audio sync test ==
+
+This test flashes the
+whole screen for two
+frames along with a
+1 kHz test tone when
+the dot hits the floor.
+
+You can verify the sync
+between audio and video
+with recording equipment
+or an oscilloscope.
+
+A: Start/stop the test
+
+== Lame boy ==
+
+This test served as a
+placeholder in early
+versions of 144p Test
+Suite for tests that had
+not yet been ported to
+Game Boy. It's still cute.
+
+←→: Move
+----
+Counter counts frames
+in hex and decimal.
+A, B: Register values
+  at power on, used to
+  determine machine model
+S: 00 for handheld or
+  01 for Super Game Boy
+
+== PLUGE ==
+
+The PLUGE (picture
+line-up generation
+equipment) pattern is
+used to adjust the TV's
+"brightness" or black
+level. Adjust it until
+the outer bar is barely
+visible.
+
+A: Toggle levels between
+  NTSC and NTSC-J
+----
+GBC's 32 shades should
+correspond to signal
+level steps of about
+3.2 IRE. This would put
+shade 0 at NTSC-J black
+(0 IRE), and shade 2
+should be close to
+NTSC's 7.5 IRE setup.
+
+NTSC: shades 3 and 0
+  on background 2
+NTSC-J: shades 1 and 0.5
+  on background 0
+
+== Gradient color bars ==
+
+This pattern lets you
+calibrate red, green,
+and blue colors on
+your TV. Increase the
+"contrast" until C and
+E in the white ramp
+look the same, then
+decrease it slowly until
+you can tell them apart.
+
+A: Toggle grid
+
+== SMPTE color bars ==
+
+Use this pattern to
+calibrate for NTSC
+levels regarding
+contrast, brightness,
+and colors. With some
+displays, you can use
+blue-only mode to
+confirm color balance.
+Based on SMPTE
+EG 1-1990
+
+A: Toggle brightness
+  (75% or 100%)
+Select: Play 1 kHz tone
+
+== Color bars on gray ==
+
+This pattern shows
+color bars on a gray
+background. Use it with
+color filters to adjust
+color balance.
+Based on Digital Video
+Essentials: HD Basics
+
+A: Toggle brightness
+  (75% or 100%)
+Select: Play 1 kHz tone
+
+== Color bleed ==
+
+This pattern helps
+diagnose color bleed
+caused by incorrect
+color resampling.
+Concept by Konsolkongen
+
+↑↓←→: Move the
+  pattern by one pixel
+Hold: Move every frame
+A: Switch among
+  horizontal, vertical,
+  and checkerboard
+Select: Show or hide
+  frame counter
+
+== 160p Test Suite ==
+
+Ver. 0.00
+We're just getting started
+
+© 2011-2016
+  Artemio Urbina
+© 2015-2018
+  Damian Yerrick
+This is free software; see
+the source for copying
+conditions. The program
+is provided AS IS with NO
+warranty whatsoever.
+----
+Concept: Artemio Urbina
+  🐦 @Artemio
+Program: Damian Yerrick
+  🐦 @PinoBatch
+
+Special thanks:
+  Shmups Forum
+  gbadev.org
+
+----
+You can help:
+- Run tests on authentic
+  GBA and Nintendo DS
+  handhelds and clones
+- Run tests on GameCube
+  with Game Boy Player,
+  both straight to the TV
+  and with high-quality
+  external scalers
+- Spread the word about
+  the project
