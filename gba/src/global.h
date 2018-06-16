@@ -11,7 +11,7 @@
 // help.c
 #define HELP_LINE_LEN 48
 extern char help_line_buffer[HELP_LINE_LEN];
-extern unsigned char help_bg_loaded;
+extern unsigned char help_bg_loaded, help_wanted_page, help_cursor_y;
 unsigned int helpscreen(unsigned int doc_num, unsigned int keymask);
 
 // stills.c

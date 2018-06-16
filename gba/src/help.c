@@ -166,6 +166,10 @@ static void help_draw_cursor(unsigned int objx) {
 }
 
 static void help_draw_page(unsigned int doc_num, unsigned int left, unsigned int keymask) {
+  // Draw document title
+  dma_memset16(PATRAM4(3, 0), FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+  vwf8Puts(PATRAM4(3, 0), helptitles[doc_num], 0, FG_FGCOLOR);
+
   // Look up the address of the start of this page's text
   help_cur_page = help_wanted_page;
   const char *src = helppages[help_wanted_page];
@@ -249,12 +253,11 @@ static unsigned int help_move_window(void) {
     wnd_progress = -(signed int)bg0_x_sequence_peak;
   }
 
-  unsigned int x = bg0_x_sequence[wnd_progress < 0 ? -wnd_progress : wnd_progress];
-
   // Clock the sequence forward one step
   if (wnd_progress < (signed int)bg0_x_sequence_last) {
     ++wnd_progress;
   }
+  unsigned int x = bg0_x_sequence[wnd_progress < 0 ? -wnd_progress : wnd_progress];
   return x;
 }
 
@@ -281,10 +284,6 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
       help_show_cursor = 0;
     }
   }
-
-  // Draw document title
-  dma_memset16(PATRAM4(3, 0), FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
-  vwf8Puts(PATRAM4(3, 0), helptitles[doc_num], 0, FG_FGCOLOR);
 
   // Load palette
   VBlankIntrWait();
@@ -336,12 +335,13 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
       }
     }
 
-    // If fully offscreen, decide whether to hide or show the cursor
     if (wnd_progress == 0) {
       help_show_cursor = (keymask & KEY_UP) ? 6 : 0;
       help_draw_page(doc_num, help_show_cursor, keymask);
     }
+
     unsigned int wx = help_move_window();
+    // If fully offscreen, decide whether to hide or show the cursor
 
     oam_used = 0;
     help_draw_character();
