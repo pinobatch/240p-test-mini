@@ -44,7 +44,6 @@ On the other hand, we denounce with righteous indignation and dislike men who ar
 --M. T. Cicero, "Extremes of Good and Evil", tr. H. Rackham"""
 
 MINFREQ = 3
-DTE_MIN_CODEUNIT = 136
 
 def olcount(haystack, needle):
     """Count times the 2-character needle appears in haystack, including overlaps."""
@@ -103,7 +102,7 @@ def dte_count_changes(s, pairfrom, pairto):
             newpairfreqs[bytes([pairfrom[1], nextsym[0]])] -= 1
     return newpairfreqs
 
-def dte_newsymbol(lines, replacements, pairfreqs, compctrl=False):
+def dte_newsymbol(lines, replacements, pairfreqs, compctrl=False, mincodeunit=128):
     """Find the biggest pair frequency and turn it into a new symbol."""
 
     # I don't know how to move elements around in the heap, so instead,
@@ -130,7 +129,7 @@ def dte_newsymbol(lines, replacements, pairfreqs, compctrl=False):
         raise
 
     # Allocate new symbol
-    newsym = DTE_MIN_CODEUNIT + len(replacements)
+    newsym = mincodeunit + len(replacements)
     replacements.append(strpair)
 
     # Update pair frequencies
@@ -142,11 +141,11 @@ def dte_newsymbol(lines, replacements, pairfreqs, compctrl=False):
 
     return False
 
-def dte_compress(lines, compctrl=False, checkfreqs=True):
+def dte_compress(lines, compctrl=False, checkfreqs=True, mincodeunit=128):
     """Compress a set of byte strings with DTE.
 
 lines -- a list of byte strings to compress, where no code unit
-    is greater than DTE_MIN_CODEUNIT
+    is greater than mincodeunit
 compctrl -- if False, exclude control characters ('\x00'-'\x1F')
 from compression; if True, compress them as any other
 
@@ -165,7 +164,7 @@ from compression; if True, compress them as any other
     replacements = []
     lastmaxpairs = 0
     done = False
-    while len(replacements) < 256 - DTE_MIN_CODEUNIT and not done:
+    while len(replacements) < 256 - mincodeunit and not done:
         if checkfreqs:
             inputdata = b'\xff'.join(lines)
             numfailed = 0
@@ -180,7 +179,7 @@ from compression; if True, compress them as any other
                 if replacements:
                     print("Last replacement was %s with \\x%02x"
                           % (repr(replacements[-1]),
-                          len(replacements) + DTE_MIN_CODEUNIT - 1),
+                          len(replacements) + mincodeunit - 1),
                           file=sys.stderr)
                 assert False
 
@@ -188,11 +187,12 @@ from compression; if True, compress them as any other
 ##        print("text:%5d bytes; dict:%4d bytes; pairs:%5d"
 ##              % (curinputlen, 2 * len(replacements), len(pairfreqs)),
 ##              file=sys.stderr)
-        done = dte_newsymbol(lines, replacements, pairfreqs)
+        done = dte_newsymbol(lines, replacements, pairfreqs,
+                             mincodeunit=mincodeunit)
         if done:
             break
 
-        newsymbol = bytes([len(replacements) + DTE_MIN_CODEUNIT - 1])
+        newsymbol = bytes([len(replacements) + mincodeunit - 1])
         for i in range(len(lines)):
             lines[i] = lines[i].replace(replacements[-1], newsymbol)
         if len(pairfreqs) >= lastmaxpairs * 2:
@@ -203,7 +203,7 @@ from compression; if True, compress them as any other
 
     return lines, replacements, pairfreqs
 
-def dte_uncompress(line, replacements):
+def dte_uncompress(line, replacements, mincodeunit=128):
     outbuf = bytearray()
     s = []
     maxstack = 0
@@ -212,8 +212,8 @@ def dte_uncompress(line, replacements):
         while s:
             maxstack = max(len(s), maxstack)
             c = s.pop()
-            if 0 <= c - DTE_MIN_CODEUNIT < len(replacements):
-                repl = replacements[c - DTE_MIN_CODEUNIT]
+            if 0 <= c - mincodeunit < len(replacements):
+                repl = replacements[c - mincodeunit]
                 s.extend(reversed(repl))
 ##                print("%02x: %s" % (c, repr(repl)), file=sys.stderr)
 ##                print(repr(s), file=sys.stderr)

@@ -1,19 +1,36 @@
 #!/usr/bin/env python3
-import json, sys, re
+import json, sys, re, os
 from vwfbuild import rgbasm_bytearray
 from chrencoding import decode_240ptxt, encode_240ptxt
+
+# Find common tools
+commontoolspath = os.path.normpath(os.path.join(
+    os.path.dirname(sys.argv[0]), "..", "..", "common", "tools"
+))
+sys.path.append(commontoolspath)
 from dte import dte_compress
 
 # Converting lines to documents #####################################
 
-MAXPAGELEN = 14
 nonalnumRE = re.compile("[^0-9a-zA-Z]+")
 
-def lines_to_docs(filename, lines, wrap=None):
+def lines_to_docs(filename, lines, wrap=None, maxpagelen=16):
+    """Convert a list of lines to a list of documents.
+
+filename -- source of list of lines for use in error messages
+lines -- a list of lines of the following form
+    "== section title ==": start of document
+    "----": page separator
+    Other: text on page.  Leading, trailing, and consecutive
+    blank lines will be removed.
+wrap -- a function performing word wrap on long lines (optional)
+maxpagelen -- raise an exception if text lines per page exceeds this
+"""
     # docs[docnum] = (title, labelname, docpages)
     # docpages[pagenum][linenum] = line text
     docs, secttitles = [], {}
     for linenum, line in enumerate(lines):
+        line = line.rstrip()
         if line.startswith('==') and line.endswith('=='):
             # New section
             secttitle = line.strip('=').strip()
@@ -50,9 +67,9 @@ def lines_to_docs(filename, lines, wrap=None):
 
         # Ordinary text
         doclastpage.extend(wrap(line_rstrip) if wrap else [line_rstrip])
-        if len(doclastpage) > MAXPAGELEN:
+        if len(doclastpage) > maxpagelen:
             raise IndexError("%s:%d: exceeds page length of %d lines"
-                             % (filename, linenum + 1, MAXPAGELEN))
+                             % (filename, linenum + 1, maxpagelen))
 
     for doc in docs:
         pages = doc[-1]
@@ -71,6 +88,8 @@ def lines_to_docs(filename, lines, wrap=None):
             del docs[i]
 
     return docs
+
+# Encoding for RGBDS assembler ######################################
 
 def rgbasm_escape_bytes(blo):
     """Encode an iterable of ints in 0-255, mostly ASCII, for rgbasm db statement"""
@@ -114,9 +133,9 @@ section "helppages",ROMX
         assert len(allpages) == cumul_pages[-1] + len(doc[-1])
         cumul_pages.append(len(allpages))
 
-    # Experimental: DTE compression
+    # DTE compression
     dtepages = list(allpages)
-    dtepages, replacements, pairfreqs = dte_compress(dtepages)
+    dtepages, replacements, pairfreqs = dte_compress(dtepages, mincodeunit=136)
     print("compressed help from %d bytes to %d bytes"
           % (sum(len(x) for x in allpages),
              2 * len(replacements) + sum(len(x) for x in dtepages)),
@@ -152,7 +171,7 @@ def main(argv=None):
     filename = argv[1]
     with open(filename, 'r', encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
-    docs = lines_to_docs(filename, lines)
+    docs = lines_to_docs(filename, lines, maxpagelen=14)
     print(render_help(docs))
 
 if __name__=='__main__':
