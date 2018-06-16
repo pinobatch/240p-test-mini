@@ -30,13 +30,13 @@ dtestack: ds DTE_STACK_SIZE
 section "undte",ROM0
 
 ;;
-; Decompresses DTE text from HL to DE.
+; Decompresses digram tree encoded (DTE) text from HL to DE.
 ; Stops at the first code unit less than MIN_PRINTABLE.
 ; @param HL source address
 ; @param DE destination address
-; @return HL after a control character in src;
-; DE at a control character in dst;
-; A = ending control character
+; @return HL after a low code unit in src;
+; DE at a low code unit in dst;
+; A = ending low code unit
 undte_line::
   ld bc,dtestack
 
