@@ -1,3 +1,6 @@
+0.17 (future)
+* Begin to unify help conversion tooling with GB and GBA
+
 0.16 (2017-03-xx)
 * Grid: Select toggles gray or black background (parity with
   Genesis test 1.15)

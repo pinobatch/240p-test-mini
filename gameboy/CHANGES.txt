@@ -1,3 +1,10 @@
+0.07 (future)
+* Fix all-black result screen if final press was 0 lag
+  (reported by Great Hierophant)
+* ISSOtm golfed SGB detection by 3 bytes
+* Remove unused last 8 glyphs of font
+* Begin to unify help conversion tooling with NES and GBA
+
 0.06 (2018-06-03)
 * Add GBC-exclusive tests (PLUGE, Gradient color bars, SMPTE bars,
   Color bars on gray, Color bleed)
