@@ -224,8 +224,7 @@ helpscreen::
   jr nz,.bg_already_loaded
     call help_load_bg
 
-    ; Invalidate the current page, which schedules
-    ; loading the wanted page
+    ; Request the wanted page by invalidating the current page
     ld a,$FF
     ld [help_cur_page],a
 
@@ -320,7 +319,7 @@ helpscreen::
     ret
 
   ; If the showing and wanted pages differ, and a transition
-  ; isn't already started, start one
+  ; isn't running, start one
   .not_on_wanted_page:
     ld hl,wnd_progress
     ld a,[hl]
@@ -953,7 +952,7 @@ help_draw_multiline:
   ld a,b
   ld [help_height],a
 
-  ; Clear lines used by this page but not the last one
+  ; Clear lines used by the previous page but not this one
   ; C = height of last page; B = height of this page
   push bc
   call vwfClearBuf

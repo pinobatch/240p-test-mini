@@ -20,6 +20,7 @@
 #define BLANKMAP 31  // This map is kept blank to suppress text background wrapping
 #define SHADOW_X 2
 #define SHADOW_Y 17
+#define WXBASE ((512 - 240) + (16 + 8 * WINDOW_WIDTH))
 
 #define TILE_BACK_WALL 272
 #define TILE_FG_XPARENT 272
@@ -40,11 +41,16 @@
 #define FG_FGCOLOR 2
 
 char help_line_buffer[HELP_LINE_LEN];
-unsigned char help_bg_loaded = 0;
-unsigned char help_wanted_page = 0;
 unsigned char help_cur_page = (unsigned char)-1;
-unsigned char help_cursor_y = 0;
-unsigned char help_page_lines = 0;
+unsigned char help_bg_loaded;
+unsigned char help_wanted_page;
+unsigned char help_cursor_y;
+unsigned char help_height;
+// Set this to 0 for no cursor and no indent or the indent depth
+// for cursor and indent
+unsigned char help_show_cursor;
+signed char wnd_progress;
+
 
 /* VRAM map
 
@@ -125,7 +131,9 @@ static void load_help_bg(void) {
                   WINDOW_WIDTH, 1);
 
   help_bg_loaded = 1;
-  help_page_lines = 0;
+  help_height = 0;
+  help_cur_page = -1;  // Request the wanted page
+  wnd_progress = 0;  // Schedule inward transition
 }
 
 static void help_draw_character() {
@@ -147,53 +155,136 @@ static void help_draw_character() {
   oam_used = ou;
 }
 
-static void help_draw_cursor() {
+static void help_draw_cursor(unsigned int objx) {
+  if (objx >= 240) return;
+
   unsigned int ou = oam_used;
   SOAM[ou].attr0 = (20 + help_cursor_y * 8) | OBJ_16_COLOR | ATTR0_SQUARE;
-  SOAM[ou].attr1 = (240 - (12 + 8 * WINDOW_WIDTH)) | ATTR1_SIZE_8;
+  SOAM[ou].attr1 = objx | ATTR1_SIZE_8;
   SOAM[ou].attr2 = ARROW_TILE  | ATTR2_PALETTE(0);
   oam_used = ou + 1;
 }
 
-static void help_draw_page(unsigned int left) {
-  unsigned int y = 0;
+static void help_draw_page(unsigned int doc_num, unsigned int left, unsigned int keymask) {
+  // Look up the address of the start of this page's text
+  help_cur_page = help_wanted_page;
   const char *src = helppages[help_wanted_page];
-  
+  unsigned int y = 0;
+
+  // Draw lines of text to the screen
   while (y < PAGE_MAX_LINES) {
     unsigned long *dst = PATRAM4(3, (y + 1)*WINDOW_WIDTH);
     ++y;
     dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
     src = vwf8Puts(dst, src, left, FG_FGCOLOR);
+
+    // Break on NUL terminator or skip others
     if (!*src) break;
     ++src;
   }
-  for (unsigned int clear_y = y; clear_y < help_page_lines; ++clear_y) {
+
+  // Clear unused lines that had been used
+  for (unsigned int clear_y = y; clear_y < help_height; ++clear_y) {
     unsigned long *dst = PATRAM4(3, (clear_y + 1)*WINDOW_WIDTH);
     dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
   }
-  help_page_lines = y;
-}
 
-void helpscreen(unsigned int doc_num, unsigned int keymask) {
-  // Set this to 0 for no cursor and no indent or the indent depth
-  // for cursor and indent
-  unsigned int cursor_visible = 0;
-
-  REG_DISPCNT = LCDC_OFF;
-  if (!help_bg_loaded) {
-    load_help_bg();
-    REG_DISPCNT = 0;
+  // Save how many lines are used and move the cursor up if needed
+  help_height = y;
+  if (help_cursor_y >= y) {
+    help_cursor_y = y - 1;
   }
 
-  // Prove that the tile was loaded
-  vwf8Puts(PATRAM4(3, 0*WINDOW_WIDTH), helptitles[0], 0, FG_FGCOLOR);
-  posprintf(help_line_buffer, "\x85 %d/%d \x84  \x87\x86""A: Select  B: Exit",
-            help_wanted_page - help_cumul_pages[doc_num] + 1, 
-            help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num]);
-  vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
-           help_line_buffer, 0, FG_FGCOLOR);
-  cursor_visible = (keymask & KEY_UP) ? 6 : 0;
-  help_draw_page(cursor_visible);
+  // Draw status line depending on size of document and which
+  // keys are enabled
+  unsigned long *dst = PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH);
+  dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+
+  if (help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num] > 1) {
+    posprintf(help_line_buffer, "\x85 %d/%d \x84",
+              help_wanted_page - help_cumul_pages[doc_num] + 1, 
+              help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num]);
+    vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+             help_line_buffer, 0, FG_FGCOLOR);
+  }
+  if (keymask & KEY_UP) {
+    vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+             "\x86\x87""A: Select", 40, FG_FGCOLOR);
+  }
+  if (keymask & KEY_B) {
+    vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+             "B: Exit", WINDOW_WIDTH * 8 - 28, FG_FGCOLOR);
+  }
+}
+
+static const unsigned short bg0_x_sequence[] = {
+  256,
+  WXBASE-130,
+  WXBASE-108,
+  WXBASE-88,
+  WXBASE-70,
+  WXBASE-54,
+  WXBASE-40,
+  WXBASE-28,
+  WXBASE-18,
+  WXBASE-10,
+  WXBASE-4,
+  WXBASE-0,
+  WXBASE+2,
+  WXBASE+3,
+  WXBASE+4,
+  WXBASE+3,
+  WXBASE+1,
+  WXBASE+0
+};
+
+#define bg0_x_sequence_last (count(bg0_x_sequence) - 1)
+#define bg0_x_sequence_peak (count(bg0_x_sequence) - 4)
+
+static unsigned int help_move_window(void) {
+  // If a transition is at its peak, and another transition is
+  // requested, shortcut its retraction to the locked position
+  if (wnd_progress == bg0_x_sequence_peak
+      && help_cur_page != help_wanted_page) {
+    wnd_progress = -(signed int)bg0_x_sequence_peak;
+  }
+
+  unsigned int x = bg0_x_sequence[wnd_progress < 0 ? -wnd_progress : wnd_progress];
+
+  // Clock the sequence forward one step
+  if (wnd_progress < (signed int)bg0_x_sequence_last) {
+    ++wnd_progress;
+  }
+  return x;
+}
+
+unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
+
+  // If not within this document, move to the first page
+  // and move the cursor (if any) to the top
+  if (help_wanted_page < help_cumul_pages[doc_num]
+      || help_wanted_page >= help_cumul_pages[doc_num + 1]) {
+    help_wanted_page = help_cumul_pages[doc_num];
+    help_cursor_y = 0;
+  }
+
+  // If the help VRAM needs to be reloaded, reload its tiles and map
+  if (!help_bg_loaded) {
+    REG_DISPCNT = LCDC_OFF;
+    load_help_bg();
+    REG_DISPCNT = 0;
+  } else {
+    // If changing pages while BG CHR and map are loaded,
+    // schedule an out-load-in sequence and hide the cursor
+    if (help_cur_page != help_wanted_page) {
+      wnd_progress = -(signed int)bg0_x_sequence_last;
+      help_show_cursor = 0;
+    }
+  }
+
+  // Draw document title
+  dma_memset16(PATRAM4(3, 0), FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+  vwf8Puts(PATRAM4(3, 0), helptitles[doc_num], 0, FG_FGCOLOR);
 
   // Load palette
   VBlankIntrWait();
@@ -208,26 +299,57 @@ void helpscreen(unsigned int doc_num, unsigned int keymask) {
   BG_OFFSET[0].y = 4;
   
   // Freeze
-  setRepeat(12, 3);
-  keysDownRepeat();
-  do {
+  while (1) {
     read_pad();
     new_keys &= keymask;
     autorepeat(KEY_UP|KEY_DOWN);
-    
+
+    // Page to page navigation
+    if ((new_keys & KEY_LEFT) 
+        && (help_wanted_page > help_cumul_pages[doc_num])) {
+      --help_wanted_page;
+    }
+    if ((new_keys & KEY_RIGHT) 
+        && (help_wanted_page + 1 < help_cumul_pages[doc_num + 1])) {
+      ++help_wanted_page;
+    }
+
+    // Up and down navigation based on page's line count
     if ((new_keys & KEY_UP) && (help_cursor_y > 0)) {
       --help_cursor_y;
     }
-    if ((new_keys & KEY_DOWN) && (help_cursor_y + 1 < help_page_lines)) {
+    if ((new_keys & KEY_DOWN) && (help_cursor_y + 1 < help_height)) {
       ++help_cursor_y;
     }
+    
+    // If an exit key is pressed while the showing page is the
+    // wanted page, stop
+    if (help_cur_page == help_wanted_page) {
+      if (new_keys & (KEY_B | KEY_A | KEY_START)) {
+        return help_cur_page - help_cumul_pages[doc_num];
+      }
+    } else {
+      // If the showing and wanted pages differ, and a transition
+      // isn't running, start one
+      if (wnd_progress >= (signed int)bg0_x_sequence_last) {
+        wnd_progress = -(signed int)bg0_x_sequence_last;
+      }
+    }
+
+    // If fully offscreen, decide whether to hide or show the cursor
+    if (wnd_progress == 0) {
+      help_show_cursor = (keymask & KEY_UP) ? 6 : 0;
+      help_draw_page(doc_num, help_show_cursor, keymask);
+    }
+    unsigned int wx = help_move_window();
 
     oam_used = 0;
     help_draw_character();
-    if (cursor_visible) help_draw_cursor();
+    if (help_show_cursor) help_draw_cursor(512 - wx + 6);
     ppu_clear_oam(oam_used);
     VBlankIntrWait();
     REG_DISPCNT = MODE_0 | BG1_ON | BG0_ON | OBJ_1D_MAP | OBJ_ON;
+    BG_OFFSET[0].x = wx;
     ppu_copy_oam();
-  } while (!(new_keys & (KEY_B | KEY_A | KEY_START)));
+  }
 }

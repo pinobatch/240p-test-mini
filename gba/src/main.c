@@ -29,7 +29,7 @@ int main(void) {
 //	fputs("\x1b[5;9HHello World!\n", stdout);
 
   while (1) {
-    helpscreen(0, KEY_B|KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
+    helpscreen(0, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
     activity_linearity();
     lame_boy_demo();
   }
