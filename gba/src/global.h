@@ -18,6 +18,15 @@ unsigned int read_pad_help_check(const void *doc_num_as_ptr);
 
 // stills.c
 void activity_linearity(void);
+void activity_sharpness(void);
+void activity_smpte(void);
+void activity_601bars(void);
+void activity_pluge(void);
+void activity_gcbars(void);
+void activity_cps_grid(void);
+void activity_full_stripes(void);
+void activity_color_bleed(void);
+void activity_solid_color(void);
 
 // pads.c
 extern unsigned short cur_keys, new_keys, das_keys, das_timer;

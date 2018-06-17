@@ -10,7 +10,7 @@ Linearity
 NYAGray ramp
 NYASolid screen
 NYAMotion blur
-NYASharpness
+Sharpness
 NYAOverscan
 ----
 NYAShadow sprite

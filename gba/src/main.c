@@ -40,7 +40,7 @@ static const activity_func page_one_handlers[] = {
   lame_boy_demo,  // activity_gray_ramp,
   lame_boy_demo,  // activity_solid_screen,
   lame_boy_demo,  // activity_motion_blur,
-  lame_boy_demo,  // activity_sharpness,
+  activity_sharpness,
   lame_boy_demo,  // activity_overscan,
 };
 static const activity_func page_two_handlers[] = {
