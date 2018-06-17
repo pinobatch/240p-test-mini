@@ -544,7 +544,6 @@ draw_v_reticle:
   jr draw_sprite_reticle
 
 draw_result_b:
-;  ld b,b
   push bc
   call vwfClearBuf
   pop bc
