@@ -136,11 +136,13 @@ static void draw_bg(void) {
   put1block(2, 16);
   put1block(26, 14);
   put1block(26, 16);
-  
+
   // sorry I was gone
-  loadMapRowMajor(&(MAP[PFMAP][1][1]), 0x1000 | 32, 28, 1);
-  dma_memset16(PATRAM4(0, 32), 0x0000, 32*28);
-  vwf8Puts(PATRAM4(0, 32), "In May 2018, Pino returned to the GBA scene.", 0, 1);
+  const char return_msg[] =
+    "\x08""\x08""In May 2018,\n"
+    "\x22""\x10""Pino returned to the GBA scene.";
+
+  vwfDrawLabels(return_msg, PFMAP, 0x1000 + 32);
 }
 
 void lame_boy_demo() {

@@ -40,6 +40,9 @@ vwfDrawLabels::
   inc hl  ; Skip Y
   call vwfStrWidth
   pop hl  ; B: width of string; HL: X; stack: DE
+  
+  ; Calculate the width in pixels of tiles occupied by this string,
+  ; including left and right partial tiles
   ld a,[hl]
   and %00000111  ; A: X coord within tile
   add b          ; A: X coord at right side of string
@@ -52,6 +55,8 @@ vwfDrawLabels::
   srl a
   srl a          ; A: Tile count
   push af        ; Stack: Width in tiles, CHR RAM destination
+
+  ; Retrieve rest of label's position
   ld a,[hl+]
   ld b,a
   ld a,[hl+]

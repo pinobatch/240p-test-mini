@@ -44,4 +44,7 @@ const char *vwf8Puts(uint32_t *restrict dst, const char *restrict s,
                      unsigned int x, unsigned int color);
 unsigned int vwf8StrWidth(const char *s);
 
+// vwflabels.c
+void vwfDrawLabels(const char *labelset, unsigned int sbb, unsigned int tilenum);
+
 #endif
