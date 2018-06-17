@@ -248,12 +248,6 @@ should make attempted
 deinterlacing easy
 to spot.
 ----
-Some handhelds' LCD
-driver circuits use a
-technique similar to
-interlacing to improve
-pixel response times.
-
 ↑↓←→: Move sprite
 A: Skip flicker frame
   or rotate stripes
@@ -261,14 +255,18 @@ A+↑: Change shadow type
   (flicker or stripes)
 A+←→: Change background
 Select: Change shape
+
+These shouldn't happen:
+- Background loses detail
+- Shadow disappears
+- Horizontal stripes in
+  flicker pattern
 ----
-Whether still or moving,
-background detail must
-not be lost, and the
-shadow must not
-disappear. The flicker
-pattern must not have
-horizontal stripes.
+Some handhelds' LCD
+driver circuits use a
+technique similar to
+interlacing to improve
+pixel response time.
 
 Portrait of Gus by
   darryl.revok

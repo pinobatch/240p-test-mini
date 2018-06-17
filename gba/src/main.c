@@ -10,12 +10,10 @@
 extern const unsigned char helpsect_160p_test_suite_menu[];
 extern const unsigned char helpsect_160p_test_suite[];
 extern const unsigned char helpsect_about[];
-extern const unsigned char helpsect_160p_test_suite[];
 
 #define DOC_MENU ((unsigned int)helpsect_160p_test_suite_menu)
 #define DOC_CREDITS ((unsigned int)helpsect_160p_test_suite)
 #define DOC_ABOUT ((unsigned int)helpsect_about)
-#define DOC_INITIAL ((unsigned int)helpsect_160p_test_suite)
 
 // Notes:
 // iprintf/siprintf is devkitARM-specific printf/sprintf without float
@@ -71,7 +69,7 @@ int main(void) {
   // Enable vblank IRQ, without which VBlankIntrWait() won't work
   irqInit();
   irqEnable(IRQ_VBLANK);
-  helpscreen(DOC_INITIAL, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  activity_credits();
 
   while (1) {
     unsigned int chosenpg = helpscreen(0, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);

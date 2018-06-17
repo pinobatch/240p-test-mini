@@ -158,9 +158,8 @@ incorrect color resampling.
   pattern by one pixel
 Hold ↑↓←→: Move the
   pattern every frame
-A: Switch among
-  horizontal, vertical,
-  and diagonal patterns
+A: Switch among horizontal,
+  vertical, and checkerboard
 Select: Show or hide
   frame counter
 
@@ -399,19 +398,18 @@ make attempted deinterlacing
 easy to spot.
 ----
 ↑↓←→: Move sprite
-A: Skip flicker frame or
-  change stripe direction
+A: Skip flicker frame
+  or rotate stripes
 A+↑: Change shadow type
   (flicker or stripes)
 A+←→: Change background
 Select: Change sprite shape
 
-Whether still or moving,
-background detail must not
-be lost, and the shadow must
-not disappear. The flicker
-pattern must not have
-horizontal stripes.
+These shouldn't happen:
+- Background loses detail
+- Shadow disappears
+- Thin horizontal stripes
+  in flicker pattern
 
 Portrait of Gus by
   darryl.revok
@@ -574,9 +572,8 @@ lines, each one pixel wide.
   pattern by one pixel
 Hold ↑↓←→: Move the
   pattern every frame
-A: Switch among
-  horizontal, vertical,
-  and diagonal patterns
+A: Switch among horizontal,
+  vertical, and checkerboard
 Select: Show or hide
   frame counter
 
