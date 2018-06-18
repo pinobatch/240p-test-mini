@@ -296,7 +296,7 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
   BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(3)|SCREEN_BASE(BGMAP);
   BGCTRL[0] = BG_16_COLOR|BG_WID_64|BG_HT_32|CHAR_BASE(3)|SCREEN_BASE(FGMAP);
   BG_OFFSET[1].x = BG_OFFSET[1].y = 0;
-  BG_OFFSET[0].x = (512 - 240) + (16 + 8 * WINDOW_WIDTH);
+  BG_OFFSET[0].x = help_wnd_progress ? WXBASE : 256;
   BG_OFFSET[0].y = 4;
   
   // Freeze

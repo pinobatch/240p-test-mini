@@ -109,7 +109,7 @@ void canvasRect(const TileCanvas *v, int l, int t, int r, int b, int c) {
 void canvasClear(const TileCanvas *w, unsigned int color) {
   size_t nBytes = 32 * w->width * w->height;
   color = (color & 0x000F) * 0x1111;
-  dma_memset16(w->chrBase, 0, nBytes);
+  dma_memset16(w->chrBase, color, nBytes);
 }
 
 #if 0

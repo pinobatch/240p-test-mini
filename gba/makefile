@@ -85,6 +85,10 @@ $(BUILD)/%.o: $(SOURCES)/%.S
 $(BUILD)/%.o: $(BUILD)/%.s
 	$(AS) $< -o $@
 
+# Files that #include specialized libraries' headers
+
+$(BUILD)/stills.o: $(SOURCES)/4bcanvas.h
+
 # Help conversion
 
 $(BUILD)/helppages.s: tools/paginate_help.py $(SOURCES)/helppages.txt

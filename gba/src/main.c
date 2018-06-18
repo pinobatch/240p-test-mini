@@ -6,11 +6,10 @@
 #include <stdlib.h>
 #include "global.h"
 
-// Attempt to import a helpsect ID
+// It's a bit tricky to import a document ID into C.
 extern const unsigned char helpsect_160p_test_suite_menu[];
 extern const unsigned char helpsect_160p_test_suite[];
 extern const unsigned char helpsect_about[];
-
 #define DOC_MENU ((unsigned int)helpsect_160p_test_suite_menu)
 #define DOC_CREDITS ((unsigned int)helpsect_160p_test_suite)
 #define DOC_ABOUT ((unsigned int)helpsect_about)
@@ -30,10 +29,10 @@ void activity_about(void);
 void activity_credits(void);
 
 static const activity_func page_one_handlers[] = {
-  lame_boy_demo,  // activity_pluge,
+  activity_pluge,
   lame_boy_demo,  // activity_gc_bars,
-  lame_boy_demo,  // activity_smpte,
-  lame_boy_demo,  // activity_601bars,
+  activity_smpte,
+  activity_601bars,
   lame_boy_demo,  // activity_color_bleed,
   lame_boy_demo,  // activity_cps_grid,
   activity_linearity,

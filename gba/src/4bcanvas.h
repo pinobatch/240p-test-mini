@@ -40,6 +40,8 @@ typedef struct TileCanvas {
   uint16_t mapTileBase;
 } TileCanvas;
 
+extern const TileCanvas screen;
+
 void canvasClear(const TileCanvas *src, unsigned int color);
 void canvasInit(const TileCanvas *src, unsigned int color);
 void canvasRectfill(const TileCanvas *v,

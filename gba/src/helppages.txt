@@ -1,9 +1,9 @@
 == 160p Test Suite: Menu ==
 
-NYAPLUGE
+PLUGE
 NYAGradient color bars
-NYASMPTE color bars
-NYAColor bars on gray
+WIPSMPTE color bars
+WIPColor bars on gray
 NYAColor bleed
 NYAGrid
 Linearity

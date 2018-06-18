@@ -4,6 +4,7 @@
 #include <gba_compression.h>
 #include <gba_systemcalls.h>
 #include "global.h"
+#include "4bcanvas.h"
 
 extern const unsigned char helpsect_pluge[];
 extern const unsigned char helpsect_smpte_color_bars[];
@@ -22,14 +23,36 @@ extern const unsigned char helpsect_full_screen_stripes[];
 
 extern const VBTILE linearity_chrTiles[27];
 extern const unsigned int linearity_chrMap[];
-extern const VBTILE sharpness_chrTiles[64];
+extern const VBTILE sharpness_chrTiles[48];
 extern const unsigned int sharpness_chrMap[];
+
 const unsigned short gray4pal[] = {
   RGB5( 0, 0, 0),RGB5(15,15,15),RGB5(23,23,23),RGB5(31,31,31)
 };
 const unsigned short invgray4pal[] = {
   RGB5(31,31,31),RGB5(23,23,23),RGB5(15,15,15),RGB5( 0, 0, 0)
 };
+static const unsigned short smptePalette75[] = {
+  RGB5( 2, 2, 2),RGB5( 2, 2,24),RGB5(24, 2, 2),RGB5(24, 2,24),
+  RGB5( 2,24, 2),RGB5( 2,24,24),RGB5(24,24, 2),RGB5(24,24,24),
+  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 1, 1, 1),
+  RGB5( 3, 3, 3)
+};
+static const unsigned short smptePalette100[] = {
+  RGB5( 2, 2, 2),RGB5( 2, 2,31),RGB5(31, 2, 2),RGB5(31, 2,31),
+  RGB5( 2,31, 2),RGB5( 2,31,31),RGB5(31,31, 2),RGB5(31,31,31),
+  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 1, 1, 1),
+  RGB5( 3, 3, 3)
+};
+static const unsigned short plugePaletteNTSC[] = {
+  RGB5( 2, 2, 2),RGB5( 3, 3, 3),RGB5( 1, 1, 1),RGB5( 1, 1, 1),
+  RGB5(13,13,13),RGB5(19,19,19),RGB5(25,25,25),RGB5(31,31,31)
+};
+static const unsigned short plugePaletteNTSCJ[] = {
+  RGB5( 0, 0, 0),RGB5( 1, 1, 1),RGB5( 1, 0, 1),RGB5( 0, 1, 0),
+  RGB5(13,13,13),RGB5(19,19,19),RGB5(25,25,25),RGB5(31,31,31)
+};
+
 
 void activity_linearity(void) {
   unsigned int inverted = 0;
@@ -101,20 +124,142 @@ void activity_sharpness(void) {
   }
 }
 
-static void do_bars(void) {
-  
+typedef struct BarsListEntry {
+  unsigned char l, t, r, b, color;
+} BarsListEntry;
+
+static const BarsListEntry smpterects[] = {
+  {  0,  0, 34,104, 7},
+  { 34,  0, 69,104, 6},
+  { 69,  0,103,104, 5},
+  {103,  0,137,104, 4},
+  {137,  0,171,104, 3},
+  {171,  0,206,104, 2},
+  {206,  0,240,104, 1},
+
+  {  0,104, 34,120, 1},
+  { 69,104,103,120, 3},
+  {137,104,171,120, 5},
+  {206,104,240,120, 7},
+
+  {  0,120, 44,160,10},
+  { 44,120, 88,160, 9},
+  { 88,120,132,160, 8},
+  {171,120,183,160,11},
+  {194,120,206,160,12},
+
+  {-1}
+};
+
+static const BarsListEntry cbogrects[] = {
+  {  0,  0,240,160, 7},
+
+  { 34, 32, 69, 64, 6},
+  { 69, 32,103, 64, 5},
+  {103, 32,137, 64, 4},
+  {137, 32,171, 64, 3},
+  {171, 32,206, 64, 2},
+  {206, 32,240, 64, 1},
+
+  {  0, 96, 34,128, 1},
+  { 34, 96, 69,128, 2},
+  { 69, 96,103,128, 3},
+  {103, 96,137,128, 4},
+  {137, 96,171,128, 5},
+  {171, 96,206,128, 6},
+
+  {-1}
+};
+
+static const BarsListEntry plugerects[] = {
+  { 16,  8, 32,152, 1},  // Left outer bar
+
+  {208,  8,224,152, 1},  // Right outer bar
+
+  // Inner bar is drawn separately
+
+  { 80,  8,160, 44, 7},  // light grays
+  { 80, 44,160, 80, 6},
+  { 80, 80,160,116, 5},
+  { 80,116,160,152, 4},
+
+  {-1}
+};
+
+static void draw_barslist(const BarsListEntry *rects) {
+  canvasInit(&screen, 0);
+  for(; rects->l < 240; ++rects) {
+    canvasRectfill(&screen,
+                   rects->l, rects->t, rects->r, rects->b,
+                   rects->color);
+  }
+}
+
+static void do_bars(const BarsListEntry *rects, const unsigned char *helpsect) {
+  unsigned int bright = 0, beep = 0;
+
+  draw_barslist(rects);
+  while (1) {
+    read_pad_help_check(helpsect);
+    if (new_keys & KEY_A) {
+      bright = !bright;
+    }
+    if (new_keys & KEY_SELECT) {
+      beep = !beep;
+      // TODO: Set volume
+    }
+    if (new_keys & KEY_B) {
+      return;
+    }
+
+    VBlankIntrWait();
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    dmaCopy(bright ? smptePalette100 : smptePalette75, BG_COLORS+0x00, sizeof(smptePalette100));
+    REG_DISPCNT = MODE_0 | BG0_ON;
+  }
 }
 
 void activity_smpte(void) {
-  
+  do_bars(smpterects, helpsect_smpte_color_bars);
 }
 
 void activity_601bars(void) {
-  
+  do_bars(cbogrects, helpsect_color_bars_on_gray);
 }
 
 void activity_pluge(void) {
-  
+  unsigned int bright = 0;
+
+  draw_barslist(plugerects);
+
+  // PLUGE rects is missing checkerboard stipples of colors 2 and 3
+  // at (48, 8)-(64, 152) and (176, 8)-(192, 152)
+  for (unsigned int x = 6; x < 24; x += 1) {
+    if (x == 8) x = 22;
+    unsigned int stride = screen.height * 8;
+    uint32_t *tile = screen.chrBase + stride * x + 8;
+    for (unsigned int yleft = 72; yleft > 0; --yleft) {
+      *tile++ = 0x23232323;
+      *tile++ = 0x32323232;
+    }
+  }
+
+  while (1) {
+    read_pad_help_check(helpsect_pluge);
+    if (new_keys & KEY_A) {
+      bright = !bright;
+    }
+    if (new_keys & KEY_B) {
+      return;
+    }
+
+    VBlankIntrWait();
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    dmaCopy(bright ? plugePaletteNTSCJ : plugePaletteNTSC, BG_COLORS+0x00, sizeof(plugePaletteNTSC));
+    REG_DISPCNT = MODE_0 | BG0_ON;
+  }
 }
 
 void activity_gcbars(void) {
