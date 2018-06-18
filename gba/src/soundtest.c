@@ -43,7 +43,7 @@ static void beepTri(const unsigned char *wave, unsigned int period) {
   dmaCopy(wave, (void *)WAVE_RAM, 16);
   REG_SOUND3CNT_L = 0xC0;    // lock waveram
   REG_SOUND3CNT_H = 0x2000;  // full volume
-  REG_SOUND3CNT_X = (2048 - period) + 0x8000;  // full volume
+  REG_SOUND3CNT_X = (2048 - period) + 0x8000;  // pitch
   wait24();
   REG_SOUND3CNT_H = 0;
 }
@@ -93,10 +93,10 @@ static void beep1kR(void) {
 static void beepPulse(void) {
   REG_SOUND1CNT_L = 0x08;    // no sweep
   REG_SOUND1CNT_H = 0xA080;  // 2/3 volume, 50% duty
-  REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // full volume
+  REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // pitch
   wait24();
   REG_SOUND1CNT_H = 0;
-  REG_SOUND1CNT_X = 0x8000;  // full volume
+  REG_SOUND1CNT_X = 0x8000;  // note cut
 }
 
 static void beepHiss(void) {
@@ -104,7 +104,7 @@ static void beepHiss(void) {
   REG_SOUND4CNT_H = 0x8024;  // divider
   wait24();
   REG_SOUND4CNT_L = 0;
-  REG_SOUND4CNT_H = 0x8000;  // full volume
+  REG_SOUND4CNT_H = 0x8000;  // note cut
 }
 
 static void beepBuzz(void) {
@@ -112,7 +112,7 @@ static void beepBuzz(void) {
   REG_SOUND4CNT_H = 0x802C;  // divider
   wait24();
   REG_SOUND4CNT_L = 0;
-  REG_SOUND4CNT_H = 0x8000;  // full volume
+  REG_SOUND4CNT_H = 0x8000;  // note cut
 }
 
 static void beepPCM(void) {

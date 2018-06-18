@@ -1,5 +1,76 @@
 #include "global.h"
+#include <gba_video.h>
+#include <gba_sound.h>
+#include <gba_input.h>
+
+extern const unsigned char helpsect_audio_sync_test[];
+#define PFMAP 23
+
+static const BarsListEntry audiosync_rects[] = {
+  {  0,128,240,136, 1},
+  {  0, 40, 24, 64, 2},
+  { 24, 40, 48, 64, 3},
+  { 48, 40, 72, 64, 4},
+  { 72, 40, 96, 64, 5},
+  {144, 40,168, 64, 5},
+  {168, 40,192, 64, 4},
+  {192, 40,216, 64, 3},
+  {216, 40,240, 64, 2},
+  {0xFF}
+};
+
+static const unsigned char min_progress[6] = {
+  120, 0, 40, 60, 80, 100
+};
 
 void activity_audio_sync() {
-  lame_boy_demo();
+  unsigned int progress = 0, running = 0;
+
+  REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
+  REG_SOUNDBIAS = 0xC200;   // C200: 262 kHz PWM (for PSG)
+  REG_SOUNDCNT_H = 0x0002;  // PSG/PCM mixing
+  REG_SOUNDCNT_L = 0xFF77;  // PSG vol/pan
+  REG_SOUND1CNT_L = 0x08;   // no sweep
+
+  draw_barslist(audiosync_rects);
+  load_common_obj_tiles();
+
+  do {
+    if (progress < 120) {
+      REG_SOUND1CNT_H = 0;  // note cut
+      REG_SOUND1CNT_X = 0x8000;
+      read_pad_help_check(helpsect_audio_sync_test);
+    
+      if (new_keys & KEY_A) {
+        running = !running;
+        if (running) progress = 0;
+      }
+    }
+    if (running) {
+      progress += 1;
+      if (progress >= 122) progress = 0;
+    }
+
+    unsigned int y = (progress < 60) ? 128 - progress : 8 + progress;
+    SOAM[0].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
+    SOAM[0].attr1 = 119 | ATTR1_SIZE_8;
+    SOAM[0].attr2 = 0x0023;
+    ppu_clear_oam(1);
+
+    VBlankIntrWait();
+    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    for (unsigned int i = 0; i < 6; ++i) {
+      BG_COLORS[i] = progress >= min_progress[i] ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    }
+    OBJ_COLORS[1] = RGB5(31, 31, 31);
+    ppu_copy_oam();
+
+    if (progress == 120) {
+      REG_SOUND1CNT_H = 0xA080;  // 2/3 volume, 50% duty
+      REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // pitch
+    }
+  } while (!(new_keys & KEY_B));
+  REG_SOUNDCNT_X = 0;  // reset audio
 }

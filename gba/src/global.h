@@ -19,6 +19,12 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask);
 unsigned int read_pad_help_check(const void *doc_num_as_ptr);
 
 // stills.c
+
+typedef struct BarsListEntry {
+  unsigned char l, t, r, b, color;
+} BarsListEntry;
+void draw_barslist(const BarsListEntry *rects);
+
 extern const unsigned short gray4pal[];
 extern const unsigned short invgray4pal[];
 void activity_linearity(void);

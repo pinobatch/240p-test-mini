@@ -21,8 +21,8 @@ Overscan
 Grid scroll
 Full screen stripes
 Backlight zone
-Sound test
-(NYA) Audio sync
+(WIP) Sound test
+Audio sync
 Lame boy
 About
 Credits
@@ -627,8 +627,7 @@ You can help:
 Roadmap
 
 0.02: Stopwatch
-0.03: Audio sync,
-  Manual lag test
+0.03: Manual lag test
 0.04: Scroll test
 0.05: Shadow sprite
 0.06: PCM in Sound test
@@ -636,8 +635,8 @@ Roadmap
 ----
 Size watch
 
-As of 0.01, all but 6 tests
-fit in 31 KiB, but some of the
+As of 0.01, all but 5 tests
+fit in 32 KiB, but some of the
 remaining tests are the most
 asset-intensive.
 Should they bust my 64 KiB

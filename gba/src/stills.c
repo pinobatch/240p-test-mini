@@ -114,10 +114,6 @@ void activity_sharpness(void) {
   }
 }
 
-typedef struct BarsListEntry {
-  unsigned char l, t, r, b, color;
-} BarsListEntry;
-
 static const BarsListEntry smpterects[] = {
   {  0,  0, 34,104, 7},
   { 34,  0, 69,104, 6},
@@ -176,7 +172,7 @@ static const BarsListEntry plugerects[] = {
   {-1}
 };
 
-static void draw_barslist(const BarsListEntry *rects) {
+void draw_barslist(const BarsListEntry *rects) {
   canvasInit(&screen, 0);
   for(; rects->l < 240; ++rects) {
     canvasRectfill(&screen,
