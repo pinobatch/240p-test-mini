@@ -70,15 +70,16 @@ int main(void) {
   // Enable vblank IRQ, without which VBlankIntrWait() won't work
   irqInit();
   irqEnable(IRQ_VBLANK);
-  //activity_credits();
-  helpscreen(DOC_TODO, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  //activity_overscan();
+  //helpscreen(DOC_TODO, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  activity_credits();
 
   while (1) {
     unsigned int chosenpg = helpscreen(DOC_MENU, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
     last_page = help_wanted_page;
     last_y = help_cursor_y;
     
-    // Start does About instead of what
+    // Start does About instead of the chosen item
     if (new_keys & KEY_START) {
       activity_about();
     } else {

@@ -103,7 +103,6 @@ void activity_sharpness(void) {
       inverted = !inverted;
     }
     if (new_keys & KEY_B) {
-      REG_BLDCNT = 0;
       return;
     }
 
@@ -284,8 +283,7 @@ static const char gcbars_labels[] =
   "\x10""\x18""Red\n"
   "\x10""\x38""Green\n"
   "\x10""\x58""Blue\n"
-  "\x10""\x78""White\n"
-  "\xFF";
+  "\x10""\x78""White";
 
 void activity_gcbars(void) {
   unsigned int bgctrl0 = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);

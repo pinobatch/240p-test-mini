@@ -9,9 +9,9 @@ Grid
 Linearity
 Gray ramp
 Solid color screen
-(NYA) Motion blur
+Motion blur
 Sharpness
-(NYA) Overscan
+Overscan
 ----
 (NYA) Shadow sprite
 (NYA) Stopwatch
@@ -20,7 +20,7 @@ Sharpness
 (NYA) Vertical scroll
 Grid scroll
 Full screen stripes
-(NYA) Backlight zone
+Backlight zone
 Sound test
 (NYA) Audio sync
 Lame boy
@@ -43,16 +43,20 @@ has two goals:
    levels of a display.
 ----
 The Game Boy Advance
-outputs a progressive video
-signal with 160 lines of
-picture. It has a TFT panel
-with 32 levels per RGB
-channel and a reputation
-for crushing black levels,
-for which its launch titles
-failed to compensate.
+system outputs progressive
+video with 160 lines of
+picture. Its TFT panel has 32
+levels per RGB channel and a
+reputation for crushing black
+levels, for which its launch
+titles failed to compensate.
 Game Boy Advance SP and
 Nintendo DS are backlit.
+
+The Game Boy Player
+accessory for Nintendo
+GameCube outputs 480i
+or 480p video.
 ----
 Press Start in any test
 pattern to show help for
@@ -620,25 +624,24 @@ You can help:
 
 == To do ==
 
-Preliminary milestone
-definition
-0.02: Backlight zone,
-  Motion blur, Overscan
-0.03: Stopwatch, Audio sync,
+Roadmap
+
+0.02: Stopwatch
+0.03: Audio sync,
   Manual lag test
 0.04: Scroll test
 0.05: Shadow sprite
 0.06: PCM in Sound test
 0.07: Compress under 64 KiB
 ----
-Compression
+Size watch
 
-I aim to keep 160p Test Suite
-under 64 KiB. As of 0.01,
-I have about half the tests
-in 30 KiB, but I have yet to
-add the most asset-intensive
-tests.  Once I exceed:
+As of 0.01, all but 6 tests
+fit in 31 KiB, but some of the
+remaining tests are the most
+asset-intensive.
+Should they bust my 64 KiB
+size target, I have options:
 
 - Apply a dictionary codec
   to help text, be it DTE
