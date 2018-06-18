@@ -4,11 +4,11 @@ PLUGE
 NYAGradient color bars
 WIPSMPTE color bars
 WIPColor bars on gray
-NYAColor bleed
-NYAGrid
+Color bleed
+Grid
 Linearity
 NYAGray ramp
-NYASolid screen
+Solid screen
 NYAMotion blur
 Sharpness
 NYAOverscan
@@ -19,7 +19,7 @@ NYAManual lag test
 NYAHill zone scroll
 NYAVertical scroll
 NYAGrid scroll
-NYAFull screen stripes
+Full screen stripes
 NYABacklight zone
 NYASound test
 NYAAudio sync
@@ -479,11 +479,10 @@ A: Start/stop the test
 == Lame boy ==
 
 This test serves as a
-placeholder in early
-versions of 160p Test
-Suite for tests that have
-not yet been ported to
-Game Boy Advance.
+placeholder in early versions
+of 160p Test Suite for tests
+that have not yet been ported
+to Game Boy Advance.
 It's still cute.
 
 ←→: Move
@@ -618,3 +617,15 @@ You can help:
   external scalers
 - Spread the word about
   the project
+
+== To do ==
+
+0.01: Grid scroll
+0.02: Gradient color bars,
+  Gray ramp
+0.03: Moblur, Overscan,
+  Stopwatch, Backlight
+0.04: Sound test, Audio
+  sync, 1 kHz in color bars
+0.05: Hill zone, Kiki
+0.06: Megaton, Shadow sprite

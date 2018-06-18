@@ -10,9 +10,12 @@
 extern const unsigned char helpsect_160p_test_suite_menu[];
 extern const unsigned char helpsect_160p_test_suite[];
 extern const unsigned char helpsect_about[];
+extern const unsigned char helpsect_to_do[];
+
 #define DOC_MENU ((unsigned int)helpsect_160p_test_suite_menu)
 #define DOC_CREDITS ((unsigned int)helpsect_160p_test_suite)
 #define DOC_ABOUT ((unsigned int)helpsect_about)
+#define DOC_TODO ((unsigned int)helpsect_to_do)
 
 // Notes:
 // iprintf/siprintf is devkitARM-specific printf/sprintf without float
@@ -33,11 +36,11 @@ static const activity_func page_one_handlers[] = {
   lame_boy_demo,  // activity_gc_bars,
   activity_smpte,
   activity_601bars,
-  lame_boy_demo,  // activity_color_bleed,
-  lame_boy_demo,  // activity_cps_grid,
+  activity_color_bleed,
+  activity_cps_grid,
   activity_linearity,
   lame_boy_demo,  // activity_gray_ramp,
-  lame_boy_demo,  // activity_solid_screen,
+  activity_solid_color,
   lame_boy_demo,  // activity_motion_blur,
   activity_sharpness,
   lame_boy_demo,  // activity_overscan,
@@ -49,7 +52,7 @@ static const activity_func page_two_handlers[] = {
   lame_boy_demo,  // activity_hill_zone_scroll_test,
   lame_boy_demo,  // activity_kiki_scroll_test,
   lame_boy_demo,  // activity_grid_scroll,
-  lame_boy_demo,  // activity_full_screen_stripes,
+  activity_full_stripes,
   lame_boy_demo,  // activity_backlight_zone,
   lame_boy_demo,  // activity_sound_test,
   lame_boy_demo,  // activity_audio_sync,
@@ -68,7 +71,8 @@ int main(void) {
   // Enable vblank IRQ, without which VBlankIntrWait() won't work
   irqInit();
   irqEnable(IRQ_VBLANK);
-  activity_credits();
+  //activity_credits();
+  helpscreen(DOC_TODO, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
 
   while (1) {
     unsigned int chosenpg = helpscreen(0, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
