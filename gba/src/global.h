@@ -17,6 +17,8 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask);
 unsigned int read_pad_help_check(const void *doc_num_as_ptr);
 
 // stills.c
+extern const unsigned short gray4pal[];
+extern const unsigned short invgray4pal[];
 void activity_linearity(void);
 void activity_sharpness(void);
 void activity_smpte(void);
@@ -28,12 +30,20 @@ void activity_full_stripes(void);
 void activity_color_bleed(void);
 void activity_solid_color(void);
 
+// scrolltest.c
+void activity_grid_scroll(void);
+void load_hill_zone_bg(void);
+void activity_hill_zone_scroll(void);
+void activity_kiki_scroll(void);
+
 // pads.c
 extern unsigned short cur_keys, new_keys, das_keys, das_timer;
 unsigned int read_pad(void);
 unsigned int autorepeat(unsigned int allowed_keys);
 
 // placeholder.c
+void bitunpack2(void *restrict dst, const void *restrict src, size_t len);
+void load_common_bg_tiles(void);
 void lame_boy_demo(void);
 
 // ppuclear.c
