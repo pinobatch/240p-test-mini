@@ -33,7 +33,7 @@ void activity_credits(void);
 
 static const activity_func page_one_handlers[] = {
   activity_pluge,
-  lame_boy_demo,  // activity_gc_bars,
+  activity_gcbars,
   activity_smpte,
   activity_601bars,
   activity_color_bleed,
@@ -46,16 +46,16 @@ static const activity_func page_one_handlers[] = {
   activity_overscan,
 };
 static const activity_func page_two_handlers[] = {
-  lame_boy_demo,  // activity_shadow_sprite,
+  activity_shadow_sprite,
   activity_stopwatch,
-  lame_boy_demo,  // activity_megaton,
+  activity_megaton,
   activity_hill_zone_scroll,
   activity_kiki_scroll,
   activity_grid_scroll,
   activity_full_stripes,
-  lame_boy_demo,  // activity_backlight_zone,
-  lame_boy_demo,  // activity_sound_test,
-  lame_boy_demo,  // activity_audio_sync,
+  activity_backlight_zone,
+  activity_sound_test,
+  activity_audio_sync,
   lame_boy_demo,
   activity_about,
   activity_credits,

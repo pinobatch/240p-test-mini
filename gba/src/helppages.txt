@@ -1,7 +1,7 @@
 == 160p Test Suite: Menu ==
 
 PLUGE
-NYAGradient color bars
+Gradient color bars
 WIPSMPTE color bars
 WIPColor bars on gray
 Color bleed
@@ -620,9 +620,9 @@ You can help:
 
 == To do ==
 
-0.01: Gradient color bars
+0.01: Backlight zone
 0.02: Moblur, Overscan
-0.03: Stopwatch, Backlight
+0.03: Stopwatch
 0.04: Sound test, Audio
   sync, 1 kHz in color bars
 0.05: Hill zone, Kiki

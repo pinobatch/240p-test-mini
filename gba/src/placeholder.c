@@ -133,6 +133,10 @@ void load_common_bg_tiles(void) {
   bitunpack2(PATRAM4(0, 0), bggfx_chrTiles, sizeof(bggfx_chrTiles));
 }
 
+void load_common_obj_tiles(void) {
+  bitunpack2(SPR_VRAM(0), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+}
+
 static void draw_bg(void) {
   load_common_bg_tiles();
 

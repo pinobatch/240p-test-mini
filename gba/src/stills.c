@@ -252,25 +252,123 @@ void activity_pluge(void) {
   }
 }
 
+static const unsigned short gcbars_palramps[4] = {
+  RGB5(1, 0, 0),
+  RGB5(0, 1, 0),
+  RGB5(0, 0, 1),
+  RGB5(1, 1, 1)
+};
+
+static const char gcbars_labels[] =
+  "\x40""\x10""0\n"
+  "\x54""\x10""2\n"
+  "\x68""\x10""4\n"
+  "\x7c""\x10""6\n"
+  "\x90""\x10""8\n"
+  "\xa4""\x10""A\n"
+  "\xb8""\x10""C\n"
+  "\xcc""\x10""E\n"
+  "\x10""\x18""Red\n"
+  "\x10""\x38""Green\n"
+  "\x10""\x58""Blue\n"
+  "\x10""\x78""White\n"
+  "\xFF";
+
 void activity_gcbars(void) {
+  unsigned int bgctrl0 = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+
+  load_common_bg_tiles();
+  // Draw 5-pixel-wide vertical bars
+  static const TileCanvas graiety = {
+    8, 1, 5, 1, PATRAM4(0, 0x3B), PFMAP, 0, 0x3B
+  };
+  canvasInit(&graiety, 1);
+  for (unsigned int i = 0; i < 8; ++i) {
+    canvasRectfill(&graiety,
+                   5 * i, 0, 5 + 5 * i, 8,
+                   i + 8);
+  }
+
+  // Draw map
+  dma_memset16(MAP[PFMAP], 0x0004, 32*20*2);
+  unsigned int starttn = 0x003B;
+  for (unsigned int y = 3; y < 18; ++y) {
+    if ((y & 0x03) == 2) {
+      ++y;
+      starttn += 0x4000;
+    }
+
+    unsigned int tn = starttn;
+    for (unsigned int x = 8; x < 28; ++x) {
+      MAP[PFMAP][y][x] = tn;
+      if ((++tn & 0xFF) == 0x40) {
+        tn += 0x103B - 0x40;
+      }
+    }
+  }
   
+  // Draw secondary map (with grid)
+  for (unsigned int x = 0; x < 640; ++x) {
+    unsigned int tilenum = MAP[PFMAP][0][x];
+    if (tilenum <= 4) {
+      tilenum = 0x20;
+      if (x & 1) tilenum |= 0x400;
+      if (x & 32) tilenum |= 0x800;
+    }
+    MAP[PFOVERLAY][0][x] = tilenum;
+  }
+  
+  // Draw labels on primary map
+  vwfDrawLabels(gcbars_labels, PFMAP, 0x40);
+
+  while (1) {
+    read_pad_help_check(helpsect_gradient_color_bars);
+    if (new_keys & KEY_B) {
+      return;
+    }
+    if (new_keys & KEY_A) {
+      bgctrl0 ^= SCREEN_BASE(PFMAP) ^ SCREEN_BASE(PFOVERLAY);
+    }
+
+    VBlankIntrWait();
+    BGCTRL[0] = bgctrl0;
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    BG_COLORS[0] = RGB5(0, 0, 0);
+    BG_COLORS[1] = RGB5(31, 31, 31);
+
+    // Calculate the color gradient
+    unsigned int c = 0;
+    const unsigned short *palramp = gcbars_palramps;
+    for (unsigned int p = 8; p < 256; ++p) {
+      if ((p & 0x0F) == 0) {
+        p += 8;
+        if ((p & 0x30) == 0) {
+          ++palramp;
+          c = 0;
+        }
+      }
+      BG_COLORS[p] = c;
+      c += *palramp;
+    }
+    REG_DISPCNT = MODE_0 | BG0_ON;
+  }
 }
 
 void activity_gray_ramp(void) {
 
   // Draw 7-pixel-wide vertical bars
   static const TileCanvas graiety = {
-    0, 1, 30, 1, PATRAM4(0, 0), 23, 0, 0
+    0, 1, 8, 1, PATRAM4(0, 0), PFMAP, 0, 0
   };
   canvasInit(&graiety, 1);
-  for (unsigned int i = 0; i < 32; ++i) {
+  for (unsigned int i = 0; i < 8; ++i) {
     canvasRectfill(&graiety,
                    8 + 7 * i, 0, 15 + 7 * i, 8,
-                   (i & 7) + 1);
+                  i + 1);
   }
 
   // Draw map
-  dma_memset16(MAP[PFMAP], 0x0000, 32*20);
+  dma_memset16(MAP[PFMAP], 0x0000, 32*20*2);
   for (unsigned int y = 1; y < 10; ++y) {
     unsigned int tn = 0x0001;
     for (unsigned int x = 1; x < 29; ++x) {

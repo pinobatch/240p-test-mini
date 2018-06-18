@@ -40,6 +40,7 @@ void activity_kiki_scroll(void);
 // placeholder.c
 void bitunpack2(void *restrict dst, const void *restrict src, size_t len);
 void load_common_bg_tiles(void);
+void load_common_obj_tiles(void);
 void lame_boy_demo(void);
 
 // motionblur.c
@@ -50,6 +51,21 @@ void activity_overscan(void);
 
 // stopwatch.c
 void activity_stopwatch(void);
+
+// backlight.c
+void activity_backlight_zone(void);
+
+// shadowsprite.c
+void activity_shadow_sprite(void);
+
+// megaton.c
+void activity_megaton(void);
+
+// soundtest.c
+void activity_sound_test(void);
+
+// audiosync.c
+void activity_audio_sync(void);
 
 // pads.c
 extern unsigned short cur_keys, new_keys, das_keys, das_timer;
