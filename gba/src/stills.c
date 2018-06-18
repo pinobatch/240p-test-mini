@@ -257,7 +257,52 @@ void activity_gcbars(void) {
 }
 
 void activity_gray_ramp(void) {
+
+  // Draw 7-pixel-wide vertical bars
+  static const TileCanvas graiety = {
+    0, 1, 30, 1, PATRAM4(0, 0), 23, 0, 0
+  };
+  canvasInit(&graiety, 1);
+  for (unsigned int i = 0; i < 32; ++i) {
+    canvasRectfill(&graiety,
+                   8 + 7 * i, 0, 15 + 7 * i, 8,
+                   (i & 7) + 1);
+  }
+
+  // Draw map
+  dma_memset16(MAP[PFMAP], 0x0000, 32*20);
+  for (unsigned int y = 1; y < 10; ++y) {
+    unsigned int tn = 0x0001;
+    for (unsigned int x = 1; x < 29; ++x) {
+      MAP[PFMAP][y][x] = tn;
+      MAP[PFMAP][y + 9][29 - x] = tn | 0x0400;
+      if ((++tn & 0x0F) == 0x08) {
+        tn += 0x1001 - 0x08;
+      }
+    }
+  }
   
+  
+  // TODO: Make the tilemap with palette for the custom canvas
+  while (1) {
+    read_pad_help_check(helpsect_gray_ramp);
+    if (new_keys & KEY_B) {
+      REG_BLDCNT = 0;
+      return;
+    }
+
+    VBlankIntrWait();
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    
+    unsigned int c = 0;
+    for (unsigned int p = 1; p < 64; ++p) {
+      BG_COLORS[p] = c;
+      c += RGB5(1, 1, 1);
+      if ((p & 0x0F) == 8) p += 8;
+    }
+    REG_DISPCNT = MODE_0 | BG0_ON;
+  }
 }
 
 void activity_cps_grid(void) {

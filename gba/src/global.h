@@ -25,6 +25,7 @@ void activity_smpte(void);
 void activity_601bars(void);
 void activity_pluge(void);
 void activity_gcbars(void);
+void activity_gray_ramp(void);
 void activity_cps_grid(void);
 void activity_full_stripes(void);
 void activity_color_bleed(void);

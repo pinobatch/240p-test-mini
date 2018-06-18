@@ -39,7 +39,7 @@ static const activity_func page_one_handlers[] = {
   activity_color_bleed,
   activity_cps_grid,
   activity_linearity,
-  lame_boy_demo,  // activity_gray_ramp,
+  activity_gray_ramp,
   activity_solid_color,
   activity_motion_blur,
   activity_sharpness,

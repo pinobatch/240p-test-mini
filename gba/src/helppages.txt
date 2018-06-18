@@ -7,7 +7,7 @@ WIPColor bars on gray
 Color bleed
 Grid
 Linearity
-NYAGray ramp
+Gray ramp
 Solid screen
 NYAMotion blur
 Sharpness
@@ -620,8 +620,7 @@ You can help:
 
 == To do ==
 
-0.01: Gradient color bars,
-  Gray ramp
+0.01: Gradient color bars
 0.02: Moblur, Overscan
 0.03: Stopwatch, Backlight
 0.04: Sound test, Audio
@@ -633,15 +632,11 @@ You can help:
 Compression
 
 I aim to keep 160p Test Suite
-under 64 KiB.
+under 64 KiB. Once I exceed:
 
-Once I exceed this, first
-I'll apply a dictionary codec
-to help text, be it DTE or
-Huffword.
-
-Currently, many tests use
-2bpp tiles as a form of
-compression.  These tiles
-in turn might need to be
-compressed.
+- Apply a dictionary codec
+  to help text, be it DTE
+  or Huffword.
+- Compress the 2bpp tiles
+  themselves
+- gcc -Os instead of -O3
