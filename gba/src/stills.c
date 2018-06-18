@@ -8,6 +8,7 @@
 #include "posprintf.h"
 
 extern const unsigned char helpsect_pluge[];
+extern const unsigned char helpsect_gcbars[];
 extern const unsigned char helpsect_smpte_color_bars[];
 extern const unsigned char helpsect_color_bars_on_gray[];
 extern const unsigned char helpsect_color_bleed[];
@@ -264,6 +265,10 @@ void activity_pluge(void) {
 }
 
 void activity_gcbars(void) {
+  
+}
+
+void activity_gray_ramp(void) {
   
 }
 

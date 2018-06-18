@@ -26,7 +26,7 @@ TARGET := 240pee_mb
 VERSION := wip
 OBJS := \
   main help \
-  placeholder stills overscan scrolltest \
+  placeholder stills overscan scrolltest motionblur \
   shadowsprite stopwatch soundtest audiosync backlight megaton \
   pads ppuclear vwfdraw vwflabels undte rand posprintf 4bcanvas \
   helpbgtiles_chr helpsprites_chr helppages vwf7 \

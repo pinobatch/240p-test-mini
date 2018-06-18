@@ -629,3 +629,20 @@ You can help:
   sync, 1 kHz in color bars
 0.05: Hill zone, Kiki
 0.06: Megaton, Shadow sprite
+0.07: Compress under 64 KiB
+----
+Compression
+
+I aim to keep 160p Test Suite
+under 64 KiB.
+
+Once I exceed this, first
+I'll apply a dictionary codec
+to help text, be it DTE or
+Huffword.
+
+Currently, many tests use
+2bpp tiles as a form of
+compression.  These tiles
+in turn might need to be
+compressed.
