@@ -54,7 +54,7 @@ export OFILES := \
 
 ARCH := -mthumb -mthumb-interwork
 CFLAGS := \
-  -g -Wall -O3 -fomit-frame-pointer -ffast-math \
+  -g -Wall -Os -fomit-frame-pointer -ffast-math \
   -mcpu=arm7tdmi -mtune=arm7tdmi $(ARCH)
 CFLAGS += $(INCLUDE)
 ASFLAGS	:=	-g $(ARCH)

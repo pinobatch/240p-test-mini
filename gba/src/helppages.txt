@@ -639,4 +639,3 @@ under 64 KiB. Once I exceed:
   or Huffword.
 - Compress the 2bpp tiles
   themselves
-- gcc -Os instead of -O3
