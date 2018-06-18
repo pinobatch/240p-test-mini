@@ -1,0 +1,5 @@
+0.01 (2018-06-xx)
+* initial release, including PLUGE, Gradient color bars, SMPTE color
+  bars, Color bars on gray, Color bleed, Grid, Linearity, Gray ramp,
+  Solid color screen, Sharpness, Grid scroll, Full screen stripes,
+  Sound test, and Lame boy

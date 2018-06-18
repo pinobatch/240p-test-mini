@@ -27,7 +27,6 @@ extern const unsigned char helpsect_to_do[];
 // But consoleDemoInit() and fputs() are still fairly big because
 // they cause the devoptab infrastructure to be linked in.
 
-typedef void (*activity_func)(void);
 void activity_about(void);
 void activity_credits(void);
 
@@ -75,7 +74,7 @@ int main(void) {
   helpscreen(DOC_TODO, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
 
   while (1) {
-    unsigned int chosenpg = helpscreen(0, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
+    unsigned int chosenpg = helpscreen(DOC_MENU, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
     last_page = help_wanted_page;
     last_y = help_cursor_y;
     

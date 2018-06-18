@@ -2,6 +2,7 @@
 #include <gba_compression.h>
 #include <gba_dma.h>
 #include <gba_input.h>
+#include <gba_sound.h>
 #include "global.h"
 #include "posprintf.h"
 
@@ -367,6 +368,7 @@ unsigned int read_pad_help_check(const void *pg) {
   if (!(new_keys & KEY_START)) return 0;
 
   REG_BLDCNT = 0;
+  REG_SOUND3CNT_H = 0;
   help_wnd_progress = 0;
   helpscreen((unsigned int)pg, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   new_keys = 0;

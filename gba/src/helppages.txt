@@ -2,27 +2,27 @@
 
 PLUGE
 Gradient color bars
-WIPSMPTE color bars
-WIPColor bars on gray
+SMPTE color bars
+Color bars on gray
 Color bleed
 Grid
 Linearity
 Gray ramp
-Solid screen
-NYAMotion blur
+Solid color screen
+(NYA) Motion blur
 Sharpness
-NYAOverscan
+(NYA) Overscan
 ----
-NYAShadow sprite
-NYAStopwatch
-NYAManual lag test
-NYAHill zone scroll
-NYAVertical scroll
+(NYA) Shadow sprite
+(NYA) Stopwatch
+(NYA) Manual lag test
+(NYA) Hill zone scroll
+(NYA) Vertical scroll
 Grid scroll
 Full screen stripes
-NYABacklight zone
-NYASound test
-NYAAudio sync
+(NYA) Backlight zone
+Sound test
+(NYA) Audio sync
 Lame boy
 About
 Credits
@@ -429,7 +429,7 @@ Select: Invert grays
 1000 Hz (pulse)
 Hiss noise
 Buzz noise
-PCM
+(NYA) PCM
 
 == Sound test ==
 
@@ -620,22 +620,28 @@ You can help:
 
 == To do ==
 
-0.01: Backlight zone
-0.02: Moblur, Overscan
-0.03: Stopwatch
-0.04: Sound test, Audio
-  sync, 1 kHz in color bars
-0.05: Hill zone, Kiki
-0.06: Megaton, Shadow sprite
+Preliminary milestone
+definition
+0.02: Backlight zone,
+  Motion blur, Overscan
+0.03: Stopwatch, Audio sync,
+  Manual lag test
+0.04: Scroll test
+0.05: Shadow sprite
+0.06: PCM in Sound test
 0.07: Compress under 64 KiB
 ----
 Compression
 
 I aim to keep 160p Test Suite
-under 64 KiB. Once I exceed:
+under 64 KiB. As of 0.01,
+I have about half the tests
+in 30 KiB, but I have yet to
+add the most asset-intensive
+tests.  Once I exceed:
 
 - Apply a dictionary codec
   to help text, be it DTE
-  or Huffword.
+  or Huffword
 - Compress the 2bpp tiles
   themselves

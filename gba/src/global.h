@@ -8,6 +8,8 @@
 // Size of a statically sized array
 #define count(array) (sizeof((array)) / sizeof((array)[0]))
 
+typedef void (*activity_func)(void);
+
 // help.c
 #define HELP_LINE_LEN 48
 extern char help_line_buffer[HELP_LINE_LEN];
@@ -62,6 +64,7 @@ void activity_shadow_sprite(void);
 void activity_megaton(void);
 
 // soundtest.c
+extern const unsigned char waveram_sin2x[16];
 void activity_sound_test(void);
 
 // audiosync.c

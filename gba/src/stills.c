@@ -1,5 +1,6 @@
 #include <gba_input.h>
 #include <gba_video.h>
+#include <gba_sound.h>
 #include <gba_dma.h>
 #include <gba_compression.h>
 #include <gba_systemcalls.h>
@@ -189,16 +190,27 @@ static void do_bars(const BarsListEntry *rects, const unsigned char *helpsect) {
   unsigned int bright = 0, beep = 0;
 
   draw_barslist(rects);
+
+  // Init sound to play 1 kHz tone
+  REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
+  REG_SOUNDBIAS = 0xC200;  // 4200: 65.5 kHz PWM (for PCM); C200: 262 kHz PWM (for PSG)
+  REG_SOUNDCNT_H = 0x0002;  // PSG/PCM mixing
+  REG_SOUNDCNT_L = 0xFF77;  // PSG vol/pan
+  REG_SOUND3CNT_L = 0;  // unlock waveram
+  dmaCopy(waveram_sin2x, (void *)WAVE_RAM, 16);
+  REG_SOUND3CNT_L = 0xC0;    // lock waveram
+  REG_SOUND3CNT_H = 0;       // volume control
+  REG_SOUND3CNT_X = (2048 - 131) + 0x8000;  // full volume
   while (1) {
     read_pad_help_check(helpsect);
     if (new_keys & KEY_A) {
       bright = !bright;
     }
     if (new_keys & KEY_SELECT) {
-      beep = !beep;
-      // TODO: Set volume
+      beep = beep ^ 0x2000;
     }
     if (new_keys & KEY_B) {
+      REG_SOUNDCNT_X = 0;  // turn sound off
       return;
     }
 
@@ -207,6 +219,7 @@ static void do_bars(const BarsListEntry *rects, const unsigned char *helpsect) {
     BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
     dmaCopy(bright ? smptePalette100 : smptePalette75, BG_COLORS+0x00, sizeof(smptePalette100));
     REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_SOUND3CNT_H = beep;
   }
 }
 
