@@ -8,7 +8,7 @@
 #include "posprintf.h"
 
 extern const unsigned char helpsect_pluge[];
-extern const unsigned char helpsect_gcbars[];
+extern const unsigned char helpsect_gradient_color_bars[];
 extern const unsigned char helpsect_smpte_color_bars[];
 extern const unsigned char helpsect_color_bars_on_gray[];
 extern const unsigned char helpsect_color_bleed[];
@@ -60,15 +60,9 @@ void activity_linearity(void) {
   unsigned int inverted = 0;
   unsigned int lcdc_value = MODE_0 | BG1_ON;
 
-  BUP bgtilespec = {
-    .SrcNum=sizeof(linearity_chrTiles), .SrcBitNum=2, .DestBitNum=4, 
-    .DestOffset=0, .DestOffset0_On=0
-  };
-  REG_DISPCNT = LCDC_OFF;
-  BitUnPack(linearity_chrTiles, PATRAM4(0, 0), &bgtilespec);
+  bitunpack2(PATRAM4(0, 0), linearity_chrTiles, sizeof(linearity_chrTiles));
   RLUnCompVram(linearity_chrMap, MAP[PFMAP]);
   dma_memset16(MAP[PFOVERLAY], 0x01, 32*20*2);
-  REG_DISPCNT = 0;
 
   while (1) {
     read_pad_help_check(helpsect_linearity);
@@ -99,14 +93,8 @@ void activity_linearity(void) {
 void activity_sharpness(void) {
   unsigned int inverted = 0;
 
-  BUP bgtilespec = {
-    .SrcNum=sizeof(sharpness_chrTiles), .SrcBitNum=2, .DestBitNum=4, 
-    .DestOffset=0, .DestOffset0_On=0
-  };
-  REG_DISPCNT = LCDC_OFF;
-  BitUnPack(sharpness_chrTiles, PATRAM4(0, 0), &bgtilespec);
+  bitunpack2(PATRAM4(0, 0), sharpness_chrTiles, sizeof(sharpness_chrTiles));
   RLUnCompVram(sharpness_chrMap, MAP[PFMAP]);
-  REG_DISPCNT = 0;
 
   while (1) {
     read_pad_help_check(helpsect_sharpness);
@@ -272,24 +260,15 @@ void activity_gray_ramp(void) {
   
 }
 
-const unsigned int cpsgridtile[8] = {
-  0x11111111,
-  0x00000001,
-  0x00000001,
-  0x00000001,
-  0x00000001,
-  0x00000001,
-  0x00000001,
-  0x10000001
-};
-
 void activity_cps_grid(void) {
   unsigned int bright = 0;
+
+  load_common_bg_tiles();
 
   // Draw grid map
   for (unsigned int y = 0; y < 20; ++y) {
     unsigned short *row = MAP[PFMAP][y];
-    unsigned int basetile = (y & 1) ? 0x0800 : 0x0000;  // Xflip
+    unsigned int basetile = (y & 1) ? 0x0821 : 0x0021;  // Xflip
     if (y < 2 || y >= 18) basetile |= 0x1000;
     
     row[0] = basetile | 0x1000;
@@ -302,8 +281,6 @@ void activity_cps_grid(void) {
     row[29] = basetile | 0x1400;
   }
 
-  // Load tile  
-  dmaCopy(cpsgridtile, PATRAM4(0, 0), sizeof(cpsgridtile));
   while (1) {
     read_pad_help_check(helpsect_grid);
     if (new_keys & KEY_SELECT) {

@@ -18,7 +18,7 @@ NYAStopwatch
 NYAManual lag test
 NYAHill zone scroll
 NYAVertical scroll
-NYAGrid scroll
+Grid scroll
 Full screen stripes
 NYABacklight zone
 NYASound test
@@ -620,11 +620,10 @@ You can help:
 
 == To do ==
 
-0.01: Grid scroll
-0.02: Gradient color bars,
+0.01: Gradient color bars,
   Gray ramp
-0.03: Moblur, Overscan,
-  Stopwatch, Backlight
+0.02: Moblur, Overscan
+0.03: Stopwatch, Backlight
 0.04: Sound test, Audio
   sync, 1 kHz in color bars
 0.05: Hill zone, Kiki

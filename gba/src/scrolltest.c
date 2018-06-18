@@ -9,17 +9,6 @@ extern const unsigned char helpsect_vertical_scroll_test[];
 
 #define PFMAP 23
 
-const unsigned int small_grid_tile[] = {
-  0x11111111,
-  0x10000001,
-  0x10000001,
-  0x10000001,
-  0x10000001,
-  0x10000001,
-  0x10000001,
-  0x11111111
-};
-
 unsigned short scrolltest_y;
 unsigned char scrolltest_dy;
 unsigned char scrolltest_dir;
@@ -34,8 +23,8 @@ void activity_grid_scroll(void) {
   scrolltest_pause = 0;
   scrolltest_dy = 1;
 
-  dmaCopy(small_grid_tile, PATRAM4(0, 0), sizeof(small_grid_tile));
-  dma_memset16(MAP[PFMAP], 0x0000, 32*32*2);
+  load_common_bg_tiles();
+  dma_memset16(MAP[PFMAP], 0x0020, 32*32*2);
   while (1) {
     read_pad_help_check(helpsect_grid_scroll_test);
     held_keys |= new_keys;

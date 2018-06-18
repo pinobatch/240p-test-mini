@@ -104,7 +104,7 @@ static void draw_player_sprite(void) {
 // Still trying to see whether GritHub will cause me to not need
 // pilbmp2nes.py. <https://github.com/devkitPro/grit>
 // It's in Virtual Boy format because that decompresses easily
-extern const VBTILE bggfx_chrTiles[32];
+extern const VBTILE bggfx_chrTiles[48];
 
 static const unsigned short bgcolors00[16] = {
   RGB5(25,25,31), RGB5(20,20, 0), RGB5(27,27, 0), RGB5(31,31, 0)
@@ -120,16 +120,24 @@ static void put1block(unsigned int x, unsigned int y) {
   MAP[PFMAP][y+1][x+1] = 15 | 0x0000;
 }
 
-static void draw_bg(void) {
+void bitunpack2(void *restrict dst, const void *restrict src, size_t len) {
   // Load tiles
   BUP bgtilespec = {
-    .SrcNum=sizeof(bggfx_chrTiles), .SrcBitNum=2, .DestBitNum=4, 
+    .SrcNum=len, .SrcBitNum=2, .DestBitNum=4, 
     .DestOffset=0, .DestOffset0_On=0
   };
-  BitUnPack(bggfx_chrTiles, PATRAM4(0, 0), &bgtilespec);
+  BitUnPack(src, dst, &bgtilespec);
+}
+
+void load_common_bg_tiles(void) {
+  bitunpack2(PATRAM4(0, 0), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+}
+
+static void draw_bg(void) {
+  load_common_bg_tiles();
 
   // Draw background map: sky, top row of floor, bottom row of floor
-  dma_memset16(MAP[PFMAP][0], 0x0000, 2*32*18);
+  dma_memset16(MAP[PFMAP][0], 0x0004, 2*32*18);
   dma_memset16(MAP[PFMAP][18], 11 | 0x1000, 2*30);
   dma_memset16(MAP[PFMAP][19], 1 | 0x1000, 2*30);
   put1block(2, 14);
