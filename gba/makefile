@@ -30,7 +30,8 @@ OBJS := \
   shadowsprite stopwatch soundtest audiosync backlight megaton \
   pads ppuclear vwfdraw vwflabels undte rand posprintf 4bcanvas \
   helpbgtiles_chr helpsprites_chr helppages vwf7 \
-  bggfx_chr spritegfx_chr linearity_chr sharpness_chr
+  bggfx_chr spritegfx_chr linearity_chr sharpness_chr \
+  stopwatchface_chr stopwatchhand_chr stopwatchdigits_chr
 LIBS := -lgba
 
 BUILD		:= obj/gba
@@ -108,6 +109,12 @@ $(BUILD)/linearity_chr.s: tilesets/linearity.png
 	$(GRIT) $< -p! -gB2 -mRtpf -mLs -mzr -o $(basename $@)
 $(BUILD)/sharpness_chr.s: tilesets/sharpness.png
 	$(GRIT) $< -p! -gB2 -mRtpf -mLs -mzr -o $(basename $@)
+$(BUILD)/stopwatchdigits_chr.s: tilesets/stopwatchdigits.png
+	$(GRIT) $< -p! -gB2 -o $(basename $@)
+$(BUILD)/stopwatchhand_chr.s: tilesets/stopwatchhand.png
+	$(GRIT) $< -p! -gB2 -Mw2 -Mh2 -o $(basename $@)
+$(BUILD)/stopwatchface_chr.s: tilesets/stopwatchface.png
+	$(GRIT) $< -p! -gB1 -mRtf -mLf -o $(basename $@)
 $(BUILD)/vwf7.s: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 	$(PY) $^ $@
 $(BUILD)/%_chr.h: $(BUILD)/%_chr.s

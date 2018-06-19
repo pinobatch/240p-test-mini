@@ -5,7 +5,6 @@
 #include <string.h>
 #include "global.h"
 
-
 extern const unsigned char spritegfx_chrTiles[];
 extern const unsigned short spritegfx_chrPal[16];
 
@@ -118,15 +117,6 @@ static void put1block(unsigned int x, unsigned int y) {
   MAP[PFMAP][y][x+1]   = 13 | 0x0000;
   MAP[PFMAP][y+1][x]   = 14 | 0x0000;
   MAP[PFMAP][y+1][x+1] = 15 | 0x0000;
-}
-
-void bitunpack2(void *restrict dst, const void *restrict src, size_t len) {
-  // Load tiles
-  BUP bgtilespec = {
-    .SrcNum=len, .SrcBitNum=2, .DestBitNum=4, 
-    .DestOffset=0, .DestOffset0_On=0
-  };
-  BitUnPack(src, dst, &bgtilespec);
 }
 
 void load_common_bg_tiles(void) {

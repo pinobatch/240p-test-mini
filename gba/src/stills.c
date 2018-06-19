@@ -29,10 +29,10 @@ extern const unsigned int linearity_chrMap[];
 extern const VBTILE sharpness_chrTiles[48];
 extern const unsigned int sharpness_chrMap[];
 
-const unsigned short gray4pal[] = {
+const unsigned short gray4pal[4] = {
   RGB5( 0, 0, 0),RGB5(15,15,15),RGB5(23,23,23),RGB5(31,31,31)
 };
-const unsigned short invgray4pal[] = {
+const unsigned short invgray4pal[4] = {
   RGB5(31,31,31),RGB5(23,23,23),RGB5(15,15,15),RGB5( 0, 0, 0)
 };
 static const unsigned short smptePalette75[] = {

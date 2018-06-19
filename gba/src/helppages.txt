@@ -14,7 +14,7 @@ Sharpness
 Overscan
 ----
 (NYA) Shadow sprite
-(NYA) Stopwatch
+Stopwatch
 Manual lag test
 (NYA) Hill zone scroll
 (NYA) Vertical scroll
@@ -624,15 +624,15 @@ You can help:
 
 Roadmap
 
-0.02: Stopwatch
-0.03: Scroll test
+0.02: Vertical scroll test
+0.03: Hill zone scroll test
 0.04: Shadow sprite
 0.05: PCM in Sound test
 0.06: Compress under 64 KiB
 ----
 Size watch
 
-As of 0.01, all but 4 tests
+As of HEAD, all but 4 tests
 fit in 33 KiB, but some of the
 remaining tests are the most
 asset-intensive.

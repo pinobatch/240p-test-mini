@@ -25,8 +25,8 @@ typedef struct BarsListEntry {
 } BarsListEntry;
 void draw_barslist(const BarsListEntry *rects);
 
-extern const unsigned short gray4pal[];
-extern const unsigned short invgray4pal[];
+extern const unsigned short gray4pal[4];
+extern const unsigned short invgray4pal[4];
 void activity_linearity(void);
 void activity_sharpness(void);
 void activity_smpte(void);
@@ -46,7 +46,6 @@ void activity_hill_zone_scroll(void);
 void activity_kiki_scroll(void);
 
 // placeholder.c
-void bitunpack2(void *restrict dst, const void *restrict src, size_t len);
 void load_common_bg_tiles(void);
 void load_common_obj_tiles(void);
 void lame_boy_demo(void);
@@ -82,12 +81,15 @@ unsigned int read_pad(void);
 unsigned int autorepeat(unsigned int allowed_keys);
 
 // ppuclear.c
-typedef unsigned short VBTILE[16];
+typedef unsigned short VBTILE[8];
+typedef unsigned char ONEBTILE[8];
 extern unsigned char oam_used;
 extern OBJATTR SOAM[128];
 void ppu_clear_oam(size_t start);
 void ppu_copy_oam(void);
 void dma_memset16(void *s, unsigned int c, size_t n);
+void bitunpack2(void *restrict dst, const void *restrict src, size_t len);
+void bitunpack1(void *restrict dst, const void *restrict src, size_t len);
 
 // rand.c
 void lcg_srand(unsigned int in_seed);
