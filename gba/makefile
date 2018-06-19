@@ -31,7 +31,8 @@ OBJS := \
   pads ppuclear vwfdraw vwflabels undte rand posprintf 4bcanvas \
   helpbgtiles_chr helpsprites_chr helppages vwf7 \
   bggfx_chr spritegfx_chr linearity_chr sharpness_chr \
-  stopwatchface_chr stopwatchhand_chr stopwatchdigits_chr
+  stopwatchface_chr stopwatchhand_chr stopwatchdigits_chr \
+  kikimap_chr kikitiles_chr greenhillzone_chr
 LIBS := -lgba
 
 BUILD		:= obj/gba
@@ -117,6 +118,12 @@ $(BUILD)/stopwatchface_chr.s: tilesets/stopwatchface.png
 	$(GRIT) $< -p! -gB1 -mRtf -mLf -o $(basename $@)
 $(BUILD)/vwf7.s: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 	$(PY) $^ $@
+$(BUILD)/kikimap_chr.s: tilesets/kikimap.png
+	$(GRIT) $< -p! -gB2 -tw16 -o $(basename $@)
+$(BUILD)/kikitiles_chr.s: tilesets/kikitiles.png
+	$(GRIT) $< -p! -gB2 -Mh2 -o $(basename $@)
+$(BUILD)/greenhillzone_chr.s: tilesets/greenhillzone.png
+	$(GRIT) $< -pn8 -gB4 -gzl -mRtpf -mLs -mzl -o $(basename $@)
 $(BUILD)/%_chr.h: $(BUILD)/%_chr.s
 	touch $@
 

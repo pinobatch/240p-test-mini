@@ -16,8 +16,8 @@ Overscan
 (NYA) Shadow sprite
 Stopwatch
 Manual lag test
-(NYA) Hill zone scroll
-(NYA) Vertical scroll
+Hill zone scroll test
+Vertical scroll test
 Grid scroll
 Full screen stripes
 Backlight zone
@@ -624,16 +624,14 @@ You can help:
 
 Roadmap
 
-0.02: Vertical scroll test
-0.03: Hill zone scroll test
-0.04: Shadow sprite
-0.05: PCM in Sound test
-0.06: Compress under 64 KiB
+0.02: Shadow sprite
+0.03: PCM in Sound test
+0.04: Compress under 64 KiB
 ----
 Size watch
 
-As of HEAD, all but 4 tests
-fit in 33 KiB, but some of the
+As of HEAD, all but 2 tests
+fit in 40 KiB, but some of the
 remaining tests are the most
 asset-intensive.
 Should they bust my 64 KiB
