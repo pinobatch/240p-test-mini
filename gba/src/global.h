@@ -89,6 +89,11 @@ void ppu_clear_oam(size_t start);
 void ppu_copy_oam(void);
 void dma_memset16(void *s, unsigned int c, size_t n);
 
+// rand.c
+void lcg_srand(unsigned int in_seed);
+int lcg_rand(void);
+#define LCG_RAND_MAX 65535
+
 // vwfdraw.c
 void loadMapRowMajor(unsigned short *dst, unsigned int tilenum,
                      unsigned int width, unsigned int height);

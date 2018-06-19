@@ -15,7 +15,7 @@ Overscan
 ----
 (NYA) Shadow sprite
 (NYA) Stopwatch
-(WIP) Manual lag test
+Manual lag test
 (NYA) Hill zone scroll
 (NYA) Vertical scroll
 Grid scroll
@@ -587,13 +587,11 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Ver. 0.00
+Version 0.01 (2018-06-19)
 We're just getting started
 
-© 2011-2016
-  Artemio Urbina
-© 2015-2018
-  Damian Yerrick
+© 2011-2016 Artemio Urbina
+© 2015-2018 Damian Yerrick
 This is free software; see
 the source for copying
 conditions. The program
@@ -627,16 +625,15 @@ You can help:
 Roadmap
 
 0.02: Stopwatch
-0.03: Manual lag test
-0.04: Scroll test
-0.05: Shadow sprite
-0.06: PCM in Sound test
-0.07: Compress under 64 KiB
+0.03: Scroll test
+0.04: Shadow sprite
+0.05: PCM in Sound test
+0.06: Compress under 64 KiB
 ----
 Size watch
 
-As of 0.01, all but 5 tests
-fit in 32 KiB, but some of the
+As of 0.01, all but 4 tests
+fit in 33 KiB, but some of the
 remaining tests are the most
 asset-intensive.
 Should they bust my 64 KiB
