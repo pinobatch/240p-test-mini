@@ -369,6 +369,10 @@ unsigned int read_pad_help_check(const void *pg) {
 
   REG_BLDCNT = 0;
   REG_SOUND3CNT_H = 0;
+  REG_SOUND1CNT_H = 0;
+  REG_SOUND1CNT_X = 0x8000;
+  REG_SOUND2CNT_L = 0;
+  REG_SOUND2CNT_H = 0x8000;
   help_wnd_progress = 0;
   helpscreen((unsigned int)pg, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   new_keys = 0;

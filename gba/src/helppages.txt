@@ -15,7 +15,7 @@ Overscan
 ----
 (NYA) Shadow sprite
 (NYA) Stopwatch
-(NYA) Manual lag test
+(WIP) Manual lag test
 (NYA) Hill zone scroll
 (NYA) Vertical scroll
 Grid scroll
