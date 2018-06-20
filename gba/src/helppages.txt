@@ -587,7 +587,7 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.01 (2018-06-19)
+Version 0.02pre (2018-06-xx)
 We're just getting started
 
 © 2011-2016 Artemio Urbina

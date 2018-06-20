@@ -32,7 +32,8 @@ OBJS := \
   helpbgtiles_chr helpsprites_chr helppages vwf7 \
   bggfx_chr spritegfx_chr linearity_chr sharpness_chr \
   stopwatchface_chr stopwatchhand_chr stopwatchdigits_chr \
-  kikimap_chr kikitiles_chr greenhillzone_chr
+  kikimap_chr kikitiles_chr greenhillzone_chr \
+  Gus_portrait_chr hepsie_chr
 LIBS := -lgba
 
 BUILD		:= obj/gba
@@ -110,6 +111,10 @@ $(BUILD)/linearity_chr.s: tilesets/linearity.png
 	$(GRIT) $< -p! -gB2 -mRtpf -mLs -mzr -o $(basename $@)
 $(BUILD)/sharpness_chr.s: tilesets/sharpness.png
 	$(GRIT) $< -p! -gB2 -mRtpf -mLs -mzr -o $(basename $@)
+$(BUILD)/Gus_portrait_chr.s: tilesets/Gus_portrait.png
+	$(GRIT) $< -gB4 -gzl -mRtf -mLf -pn16 -o $(basename $@)
+$(BUILD)/hepsie_chr.s: tilesets/hepsie.png
+	$(GRIT) $< -gB2 -p! -o $(basename $@)
 $(BUILD)/stopwatchdigits_chr.s: tilesets/stopwatchdigits.png
 	$(GRIT) $< -p! -gB2 -o $(basename $@)
 $(BUILD)/stopwatchhand_chr.s: tilesets/stopwatchhand.png

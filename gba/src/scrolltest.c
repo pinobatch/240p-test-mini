@@ -11,10 +11,10 @@ extern const unsigned char helpsect_vertical_scroll_test[];
 
 #define PFSCROLLTEST 22
 
-unsigned short scrolltest_y;
-unsigned char scrolltest_dy;
-unsigned char scrolltest_dir;
-unsigned char scrolltest_pause;
+static unsigned short scrolltest_y;
+static unsigned char scrolltest_dy;
+static unsigned char scrolltest_dir;
+static unsigned char scrolltest_pause;
 
 void activity_grid_scroll(void) {
   unsigned int inverted = 0;
@@ -192,7 +192,7 @@ void activity_kiki_scroll(void) {
 
     VBlankIntrWait();
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_64|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
-    BG_OFFSET[0].y = scrolltest_y >> 2;
+    BG_OFFSET[0].y = scrolltest_y >> 1;
     BG_OFFSET[0].x = 0;
     REG_DISPCNT = MODE_0 | BG0_ON;
     dmaCopy(kikipalette0, BG_COLORS+0, sizeof(kikipalette0));
@@ -206,44 +206,42 @@ extern const unsigned short greenhillzone_chrPal[8];
 extern const unsigned short greenhillzone_chrMap[];  // LZ77
 extern const unsigned short greenhillzone_chrTiles[];  // LZ77
 
-void load_hill_zone_bg(void) {
+void hill_zone_load_bg(void) {
   LZ77UnCompVram(greenhillzone_chrTiles, PATRAM4(0, 0));
   LZ77UnCompVram(greenhillzone_chrMap, MAP[PFSCROLLTEST]);
 }
 
-// Parallax scrolling not yet enabled for hill zone
+// Parallax scrolling for hill zone
 void hill_zone_set_scroll(unsigned int x) {
+  BGCTRL[1] = BG_16_COLOR|BG_WID_64|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
   dmaCopy(greenhillzone_chrPal, BG_COLORS+0, sizeof(greenhillzone_chrPal));
   irqEnable(IRQ_VCOUNT);
-  BG_OFFSET[0].x = x >> 3;
+  BG_OFFSET[1].x = x >> 3;
 
   // Wait for y=24 and change the scroll
   REG_DISPSTAT = (REG_DISPSTAT & 0xFF) | (24 << 8);
   Halt();
-  BG_OFFSET[0].x = x >> 2;
+  BG_OFFSET[1].x = x >> 2;
 
   // TODO: Wait for y=128
   REG_DISPSTAT = (REG_DISPSTAT & 0xFF) | (128 << 8);
   Halt();
-  BG_OFFSET[0].x = x;
+  BG_OFFSET[1].x = x;
 
+  BG_OFFSET[1].y = 0;
   irqDisable(IRQ_VCOUNT);
-
 }
 
 void activity_hill_zone_scroll(void) {
   scrolltest_y = scrolltest_dir = scrolltest_pause = 0;
   scrolltest_dy = 1;
-  load_hill_zone_bg();
+  hill_zone_load_bg();
   do {
     read_pad_help_check(helpsect_hill_zone_scroll_test);
     move_1d_scroll();
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_64|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
-    BG_OFFSET[0].x = scrolltest_y;
-    BG_OFFSET[0].y = 0;
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_DISPCNT = MODE_0 | BG1_ON;
     hill_zone_set_scroll(scrolltest_y);
   } while (!(new_keys & KEY_B));
 }

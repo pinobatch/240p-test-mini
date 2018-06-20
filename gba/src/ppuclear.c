@@ -40,3 +40,11 @@ void bitunpack1(void *restrict dst, const void *restrict src, size_t len) {
   };
   BitUnPack(src, dst, &bgtilespec);
 }
+
+void load_flat_map(unsigned short *dst, const unsigned short *src, unsigned int w, unsigned int h) {
+  for (; h > 0; --h) {
+    dmaCopy(src, dst, w * 2);
+    src += w;
+    dst += 32;
+  }
+}

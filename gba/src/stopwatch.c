@@ -35,14 +35,6 @@ static const char sw_labels[] =
   "\x78\x08""second\n"
   "\xA0\x08""frame";
 
-void load_map(unsigned short *dst, const unsigned short *src, unsigned int w, unsigned int h) {
-  for (; h > 0; --h) {
-    dmaCopy(src, dst, w * 2);
-    src += w;
-    dst += 32;
-  }
-}
-
 static void draw_stopwatch_hand(unsigned int phase) {
   unsigned int i = oam_used;
   unsigned int a0 = OBJ_Y(sw_face_y[phase] - 12) | OBJ_16_COLOR | ATTR0_SQUARE;
@@ -83,7 +75,7 @@ void activity_stopwatch() {
   bitunpack1(PATRAM4(0, 0), stopwatchface_chrTiles, sizeof(stopwatchface_chrTiles));
   bitunpack2(PATRAM4(0, 64), stopwatchdigits_chrTiles, sizeof(stopwatchdigits_chrTiles));
   bitunpack2(SPR_VRAM(0), stopwatchhand_chrTiles, sizeof(stopwatchhand_chrTiles));
-  load_map(&(MAP[PFMAP][6][9]), stopwatchface_chrMap, 12, 13);
+  load_flat_map(&(MAP[PFMAP][6][9]), stopwatchface_chrMap, 12, 13);
   vwfDrawLabels(sw_labels, 23, 0x4080);
   
   // Draw colons

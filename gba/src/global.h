@@ -41,7 +41,8 @@ void activity_solid_color(void);
 
 // scrolltest.c
 void activity_grid_scroll(void);
-void load_hill_zone_bg(void);
+void hill_zone_load_bg(void);
+void hill_zone_set_scroll(unsigned int x);
 void activity_hill_zone_scroll(void);
 void activity_kiki_scroll(void);
 
@@ -90,6 +91,7 @@ void ppu_copy_oam(void);
 void dma_memset16(void *s, unsigned int c, size_t n);
 void bitunpack2(void *restrict dst, const void *restrict src, size_t len);
 void bitunpack1(void *restrict dst, const void *restrict src, size_t len);
+void load_flat_map(unsigned short *dst, const unsigned short *src, unsigned int w, unsigned int h);
 
 // rand.c
 void lcg_srand(unsigned int in_seed);
