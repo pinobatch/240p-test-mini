@@ -1,6 +1,8 @@
 0.02 (2018-06-21)
-* Shadow sprite, Stopwatch, Hill zone scroll, and Vertical scroll
-* Audio sync: Move ceiling up to match Genesis 1.16
+* Add Shadow sprite, Stopwatch, Hill zone scroll, and Vertical scroll
+* Sound test: Add a real time synthesized chord played through PCM
+* Audio sync: Move ceiling up to match position in 240p Test Suite
+  (for Sega Genesis) version 1.16
 
 0.01 (2018-06-19)
 * initial release, with all tests except Shadow sprite, Stopwatch,

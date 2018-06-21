@@ -21,7 +21,7 @@ Vertical scroll test
 Grid scroll
 Full screen stripes
 Backlight zone
-PSG sound test
+Sound test
 Audio sync
 Lame boy
 About
@@ -271,7 +271,7 @@ actually runs at 59.73 Hz.
 This means it runs slightly
 slow (1 part in 219).
 ----
-To measure lag, get a digital
+To measure lag, get a
 camera and connect two
 displays to one GameCube.
 One is being tested, and
@@ -435,7 +435,7 @@ Select: Invert grays
 1000 Hz (pulse)
 Hiss noise
 Buzz noise
-(NYA) PCM
+G major (PCM)
 
 == Sound test ==
 
@@ -458,14 +458,18 @@ two 8-bit PCM channels.
 Most options in the menu
 use the wavetable with
 an approximate sine wave.
-It has a prominent
-overtone 5 octaves up.
+It has a prominent overtone
+5 octaves up.
 
 The CPU generates noise
 with a polynomial counter
-that can operate in two
-modes: hiss (32767 steps)
+in one of two modes:
+hiss (32767 steps)
 or buzz (127 steps).
+
+The G chord is synthesized
+in real-time using the
+Karplus/Strong algorithm.
 
 == Audio sync test ==
 
@@ -591,7 +595,8 @@ Select: Show or hide
 
 Version 0.02 (2018-06-21)
 Add Shadow sprite,
-Stopwatch, and Scroll test
+Stopwatch, Scroll test,
+and PCM sound test
 
 © 2011-2016 Artemio Urbina
 © 2015-2018 Damian Yerrick
@@ -628,18 +633,4 @@ You can help:
 Roadmap
 
 0.03: PLUGE Contrast,
-  Sharpness wall,
-  PCM in Sound test
-----
-Size watch
-
-As of 0.02, all tests but
-PCM audio fit in 46 KiB.
-Should that one bust my
-64 KiB budget, I have options:
-
-- Apply a dictionary codec
-  to help text, be it DTE
-  or Huffword
-- Compress the 2bpp tiles
-  themselves
+  Sharpness wall

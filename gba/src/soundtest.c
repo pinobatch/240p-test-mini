@@ -2,9 +2,12 @@
 #include <gba_input.h>
 #include <gba_sound.h>
 #include <gba_dma.h>
+#include <gba_timers.h>
 #include <gba_video.h>
 
-// Sine waves for PCM
+// PSG //////////////////////////////////////////////////////////////
+
+// Sine waves for PSG channel 3
 const unsigned char waveram_sinx[16] __attribute__((aligned (2))) = {
   0x8a,0xbc,0xde,0xff,0xff,0xed,0xcb,0xa8,0x75,0x43,0x21,0x00,0x00,0x12,0x34,0x57
 };
@@ -20,14 +23,6 @@ const unsigned char waveram_sin8x[16] __attribute__((aligned (2))) = {
 const unsigned char waveram_sin16x[16] __attribute__((aligned (2))) = {
   0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3,0xc3
 };
-
-// Sound test menu
-
-extern const unsigned char helpsect_sound_test_frequency[];
-extern const unsigned char helpsect_sound_test[];
-
-#define DOC_MENU ((unsigned int)helpsect_sound_test_frequency)
-#define DOC_HELP ((unsigned int)helpsect_sound_test)
 
 static void wait24() {
   ((volatile u16 *)BG_COLORS)[6] = RGB5(31, 0, 0);
@@ -115,9 +110,96 @@ static void beepBuzz(void) {
   REG_SOUND4CNT_H = 0x8000;  // note cut
 }
 
-static void beepPCM(void) {
-  lame_boy_demo();
+// PCM demo /////////////////////////////////////////////////////////
+
+typedef struct ChordVoice {
+  unsigned short delaylinestart, delaylineend;
+  unsigned char fac1, fac2;
+} ChordVoice;
+
+typedef struct ChordState {
+  
+} ChordState;
+
+#define PCM_NUM_VOICES 6
+#define PCM_PERIOD 924   // 16777216 tstates/s / 18157 samples/s
+#define PCM_BUF_LEN 304  // 280896 tstates/frame / PCM_PERIOD
+
+EWRAM_BSS static signed short delayline[672];
+EWRAM_BSS static signed short mixbuf[PCM_BUF_LEN];
+EWRAM_BSS static signed char playbuf[2][PCM_BUF_LEN];
+
+static const ChordVoice voices[PCM_NUM_VOICES] = {
+  {  0, 186, 1, 3},
+  {186, 334, 3, 1},
+  {334, 458, 3, 1},
+  {458, 551, 3, 1},
+  {551, 625, 3, 1},
+  {625, 672, 3, 1},
+};  
+
+IWRAM_CODE static void beepPCM(void) {
+  unsigned short phases[PCM_NUM_VOICES];
+  unsigned int frames = 0;
+  
+  dma_memset16(delayline, 0, sizeof(delayline));
+  dma_memset16(playbuf, 0, sizeof(playbuf));
+  for(unsigned int ch = 0; ch < PCM_NUM_VOICES; ++ch) {
+    unsigned int i = voices[ch].delaylinestart;
+    phases[ch] = i;
+    dma_memset16(delayline + i, i & 1 ? -10240 : 10240,
+                 (voices[ch].delaylineend - i) / 4);
+  }
+  
+  ((volatile u16 *)BG_COLORS)[6] = RGB5(31, 0, 0);
+  REG_TM0CNT_L = 65536 - PCM_PERIOD;  // 18157 Hz
+  REG_TM0CNT_H = 0x0080;  // enable timer
+  REG_SOUNDBIAS = 0x4200;  // 65.5 kHz PWM (for PCM)
+
+  do {
+    read_pad();
+    dma_memset16(mixbuf, 0, sizeof(mixbuf));
+    for (unsigned int i = 0; i <= frames && i < PCM_NUM_VOICES; ++i) {
+      unsigned int phase = phases[i];
+      for (unsigned int t = 0; t < PCM_BUF_LEN; ++t) {
+        mixbuf[t] += delayline[phase];
+        unsigned int nextphase = phase + 1;
+        if (nextphase >= voices[i].delaylineend) {
+          nextphase = voices[i].delaylinestart;
+        }
+        signed int newsample = voices[i].fac1 * delayline[phase];
+        newsample += voices[i].fac2 * delayline[nextphase] + 2;
+        newsample = newsample * ((i >= 4) ? 511 : 510) / 2048;
+        delayline[phase] = newsample;
+        phase = nextphase;
+      }
+      phases[i] = phase;
+    }
+    signed char *next_playbuf = playbuf[frames & 0x01];
+    for (unsigned int t = 0; t < PCM_BUF_LEN; ++t) {
+      next_playbuf[t] = mixbuf[t] >> 8;
+    }
+
+    VBlankIntrWait();
+    REG_DMA1CNT = 0;
+    REG_DMA1SAD = (unsigned long)next_playbuf;
+    REG_DMA1DAD = 0x040000A0;    // write to PCM A's FIFO
+    REG_DMA1CNT = 0xB6000000;    // DMA timed by FIFO, 32 bit repeating inc src
+    frames += 1;
+  } while (!new_keys && frames < 400);
+  REG_TM0CNT_H = 0;  // stop timer
+  REG_DMA1CNT = 0;   // stop DMA
+  BG_COLORS[6] = RGB5(31, 31, 31);
+  REG_SOUNDBIAS = 0xC200;  // 65.5 kHz PWM (for PCM)
 }
+
+// Sound test menu //////////////////////////////////////////////////
+
+extern const unsigned char helpsect_sound_test_frequency[];
+extern const unsigned char helpsect_sound_test[];
+
+#define DOC_MENU ((unsigned int)helpsect_sound_test_frequency)
+#define DOC_HELP ((unsigned int)helpsect_sound_test)
 
 static const activity_func sound_test_handlers[] = {
   beep8k,
@@ -138,7 +220,7 @@ static const activity_func sound_test_handlers[] = {
 void activity_sound_test() {
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
   REG_SOUNDBIAS = 0xC200;  // 4200: 65.5 kHz PWM (for PCM); C200: 262 kHz PWM (for PSG)
-  REG_SOUNDCNT_H = 0x0002;  // PSG/PCM mixing
+  REG_SOUNDCNT_H = 0x0B06;  // xBxx: PCM A centered from timer 0; PSG/PCM full mix
 
   while (1) {
     REG_SOUNDCNT_L = 0xFF77;  // reset PSG vol/pan
