@@ -189,8 +189,8 @@ audiosync_draw_row:
   inc a
   ldh [dtr_t3],a
 
-  ld b,3
-  ld hl,_SCRN0+32*4
+  ld b,2
+  ld hl,_SCRN0+32*2
   ld de,12
 .rowloop:
   ldh a,[dtr_t0]

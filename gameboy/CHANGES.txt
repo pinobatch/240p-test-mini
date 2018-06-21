@@ -4,6 +4,7 @@
 * ISSOtm golfed SGB detection by 3 bytes
 * Remove unused last 8 glyphs of font
 * Begin to unify help conversion tooling with NES and GBA
+* Audio sync: Move ceiling up to match Genesis 1.16
 
 0.06 (2018-06-03)
 * Add GBC-exclusive tests (PLUGE, Gradient color bars, SMPTE bars,

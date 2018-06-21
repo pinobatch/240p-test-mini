@@ -1,5 +1,6 @@
 0.17 (future)
 * Begin to unify help conversion tooling with GB and GBA
+* Audio sync: Move ceiling up to match Genesis 1.16
 
 0.16 (2017-03-xx)
 * Grid: Select toggles gray or black background (parity with
