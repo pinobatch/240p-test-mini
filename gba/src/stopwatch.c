@@ -18,7 +18,7 @@ static const unsigned char sw_digitmax[NUM_DIGITS] = {
 };
 
 static const unsigned char sw_digitx[NUM_DIGITS] = {
-  22, 20, 17, 15, 12, 10, 7, 5
+  23, 21, 18, 16, 13, 11, 8, 6
 };
 
 static const unsigned char sw_face_x[NUM_FACE_PHASES] = {
@@ -29,11 +29,18 @@ static const unsigned char sw_face_y[NUM_FACE_PHASES] = {
   58, 65, 84, 108, 127, 134, 127, 108, 84, 65
 };
 
+static const unsigned short bluepalette[3] = {
+  RGB5(23,23,31),RGB5(15,15,31),RGB5( 0, 0,31)
+};
+static const unsigned short redpalette[3] = {
+  RGB5(31,23,23),RGB5(31,15,15),RGB5(31, 0, 0)
+};
+
 static const char sw_labels[] =
-  "\x28\x08""hour\n"
-  "\x50\x08""minute\n"
-  "\x78\x08""second\n"
-  "\xA0\x08""frame";
+  "\x30\x08""hour\n"
+  "\x58\x08""minute\n"
+  "\x80\x08""second\n"
+  "\xA8\x08""frame";
 
 static void draw_stopwatch_hand(unsigned int phase) {
   unsigned int i = oam_used;
@@ -106,7 +113,9 @@ void activity_stopwatch() {
       }
     }
     if (new_keys & KEY_UP) {
-      show_ruler = !show_ruler;
+      // 0: off; 3: on; 1: on during even framess
+      show_ruler = (show_ruler - 1) & 0x03;
+      if (show_ruler == 2) show_ruler = 1;
     }
     if (new_keys & KEY_DOWN) {
       hide_face = !hide_face;
@@ -134,17 +143,25 @@ void activity_stopwatch() {
     BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
     BG_COLORS[0] = RGB5(31, 31, 31);
     BG_COLORS[1] = hide_face ? RGB5(31, 31, 31) : RGB5(23, 23, 23);
-    BG_COLORS[3] = show_ruler ? RGB5(31, 0, 0) : RGB5(31, 31, 31);
+    BG_COLORS[3] = (show_ruler & (1 << (face_phase & 1)))
+                   ? RGB5(23, 0, 0) : RGB5(31, 31, 31);
     BG_COLORS[65] = RGB5(0, 0, 0);
     dmaCopy(invgray4pal, BG_COLORS+0x10, sizeof(invgray4pal));
+    dmaCopy(bluepalette, BG_COLORS+0x21, sizeof(invgray4pal));
+    dmaCopy(redpalette, BG_COLORS+0x31, sizeof(invgray4pal));
     dmaCopy(invgray4pal, OBJ_COLORS+0x00, sizeof(invgray4pal));
     ppu_copy_oam();
 
     // Update digits
     if (!is_lap) {
       for (int i = 0; i < NUM_DIGITS; ++i) {
-        unsigned int tilenum = 0x1000 + 64 + 6 * digits[i];
+        unsigned int tilenum = 64 + 6 * digits[i];
         unsigned int x = sw_digitx[i];
+        if (i >= 2) {
+          tilenum += 0x1000;  // Black digits
+        } else {
+          tilenum += (digits[0] & 1) ? 0x3000 : 0x2000;  // colored digits
+        }
         for (unsigned int row = 2; row < 5; ++row) {
           MAP[PFMAP][row][x] = tilenum++;
           MAP[PFMAP][row][x + 1] = tilenum++;
