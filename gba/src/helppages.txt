@@ -13,7 +13,7 @@ Motion blur
 Sharpness
 Overscan
 ----
-(NYA) Shadow sprite
+Shadow sprite
 Stopwatch
 Manual lag test
 Hill zone scroll test
@@ -21,7 +21,7 @@ Vertical scroll test
 Grid scroll
 Full screen stripes
 Backlight zone
-(WIP) Sound test
+PSG sound test
 Audio sync
 Lame boy
 About
@@ -84,7 +84,7 @@ Select: Invert grays
 This pattern shows five
 circles at the square pixel
 aspect ratio of the GBA
-screen.  The circles should
+screen. The circles should
 have the same diameter in
 all directions.
 
@@ -255,7 +255,9 @@ has been on the phone.
 A: Start/stop
 Select when stopped: Reset
 Select when running: Lap
-↑: Show ruler at left
+↑: Change ruler at left
+   (show, hide, or show
+   during even frames)
 ↓: Toggle inactive circles
 ----
 The clock face below helps
@@ -587,8 +589,9 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.02pre (2018-06-xx)
-We're just getting started
+Version 0.02 (2018-06-21)
+Add Shadow sprite,
+Stopwatch, and Scroll test
 
 © 2011-2016 Artemio Urbina
 © 2015-2018 Damian Yerrick
@@ -624,18 +627,16 @@ You can help:
 
 Roadmap
 
-0.02: Shadow sprite
-0.03: PCM in Sound test
-0.04: Compress under 64 KiB
+0.03: PLUGE Contrast,
+  Sharpness wall,
+  PCM in Sound test
 ----
 Size watch
 
-As of HEAD, all but 2 tests
-fit in 40 KiB, but some of the
-remaining tests are the most
-asset-intensive.
-Should they bust my 64 KiB
-size target, I have options:
+As of 0.02, all tests but
+PCM audio fit in 46 KiB.
+Should that one bust my
+64 KiB budget, I have options:
 
 - Apply a dictionary codec
   to help text, be it DTE

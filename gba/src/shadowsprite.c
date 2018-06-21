@@ -3,15 +3,7 @@
 #include <gba_video.h>
 #include <gba_dma.h>
 #include <gba_compression.h>
-
-/* Shadow sprite implementation plan
-
-Load shadow reticle and Hepsie sprites (32 tiles)
-Calculate them ANDed with each shadow type (128 sprite VRAM tiles total)
-Convert Gus sketch in full fidelity
-Load Gus sketch
-
-*/
+#include <stdint.h>
 
 extern const unsigned char helpsect_shadow_sprite[];
 #define PFSCROLLTEST 22
@@ -77,18 +69,48 @@ static const unsigned short shadow_sprite_palettes[3][3] = {
   {RGB5( 0, 0, 0),RGB5( 0, 0, 0),RGB5( 0, 0, 0)},  // Shadow
 };
 
+static const char *const shadow_sprite_types[] = {
+  "even frames",
+  "odd frames",
+  "horiz. stripes",
+  "vert. stripes",
+  "checkerboard"
+};
+
+static void shadow_sprite_message(const char *s) {
+  dma_memset16(PATRAM4(2, 1), 0x2222, 32*8);
+  vwf8Puts(PATRAM4(2, 1), s, 3, 1);
+}
+
+static const unsigned char shadowmasks[3][2] = {
+  {0x00,0xFF},  // horizontal lines
+  {0xF0,0xF0},  // vertical lines
+  {0xF0,0x0F},  // checkerboard
+};  
+
 void activity_shadow_sprite() {
   unsigned int held_keys = 0, x = 112, y = 64, facing = 0;
   unsigned int cur_bg = 0, changetimeout = 0;
   unsigned int cur_shape = 0, shadow_type = 0, frame = 0;
   
   dma_memset16(MAP[PFOVERLAY], 0xF000, 32*21*2);
-  loadMapRowMajor(&(MAP[PFOVERLAY][20][23]), 0xF001, 7, 1);
+  loadMapRowMajor(&(MAP[PFOVERLAY][20][22]), 0xF001, 8, 1);
   dma_memset16(PATRAM4(2, 0), 0x0000, 32*1);
-  dma_memset16(PATRAM4(2, 1), 0x2222, 32*7);
+  dma_memset16(PATRAM4(2, 1), 0x2222, 32*8);
 
   bitunpack2(SPR_VRAM(0), hepsie_chrTiles, sizeof(hepsie_chrTiles));
-  // TODO: Expand shadow reticle and Hepsie to four shadow types
+  // Generate stippled masks at 32, 64, and 96
+  for (unsigned int maskid = 0; maskid < 3; ++maskid) {
+    const uint32_t *src = SPR_VRAM(0);
+    uint32_t *dst = SPR_VRAM(32 + 32 * maskid);
+    uint32_t maskA = 0x01010101 * shadowmasks[maskid][0];
+    uint32_t maskB = 0x01010101 * shadowmasks[maskid][1];
+    
+    for(; src < SPR_VRAM(32); src += 2, dst += 2) {
+      dst[0] = src[0] & maskA;
+      dst[1] = src[1] & maskB;
+    }
+  }
   
   bgtypes[cur_bg].setup();
 
@@ -106,13 +128,32 @@ void activity_shadow_sprite() {
         cur_bg = (cur_bg + 1) & 0x03;
         REG_DISPCNT = MODE_0 | BG0_ON | OBJ_ON;
         bgtypes[cur_bg].setup();
+        held_keys &= ~KEY_A;
       }
       if (new_keys & KEY_LEFT) {
         cur_bg = (cur_bg - 1) & 0x03;
         REG_DISPCNT = MODE_0 | BG0_ON | OBJ_ON;
         bgtypes[cur_bg].setup();
+        held_keys &= ~KEY_A;
+      }
+      if (new_keys & KEY_UP) {
+        shadow_type = (shadow_type < 2) ? 2 : 0;
+        changetimeout = 68;
+        shadow_sprite_message(shadow_sprite_types[shadow_type]);
+        held_keys &= ~KEY_A;
       }
     } else {
+      if (held_keys & KEY_A) {
+        shadow_type += 1;
+        if (shadow_type == 2) {
+          shadow_type = 0;
+        } else if (shadow_type >= 5) {
+          shadow_type = 2;
+        }
+        changetimeout = 68;
+        shadow_sprite_message(shadow_sprite_types[shadow_type]);
+        held_keys &= ~KEY_A;
+      }
       if ((cur_keys & KEY_RIGHT) && x < 240 - 32) {
         x += 1;
         facing = 0;
@@ -130,7 +171,8 @@ void activity_shadow_sprite() {
     }
 
     unsigned int i = 0, sx = x, sy = y;
-    if (cur_shape) {  // Draw the nontransparent part of Hepsie
+    if (cur_shape) {
+      // Draw the nontransparent part of Hepsie
       SOAM[i].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_WIDE;
       SOAM[i].attr1 = OBJ_X(x - 4) | ATTR1_SIZE_32 | facing;
       SOAM[i].attr2 = 0x0010;
@@ -142,7 +184,16 @@ void activity_shadow_sprite() {
       sx += 4;
       sy += 8;
     }
-    // TODO: Draw sprite based on x, y, cur_shape, shadow_type, frame, and facing
+    // If the shadow isn't skipped this frame, draw it
+    if (shadow_type >= 2 || frame != shadow_type) {
+      // Draw the actual shadow using palette 2
+      unsigned int tilenum = shadow_type - (shadow_type > 0);
+      tilenum = tilenum * 32 + cur_shape * 16;
+      SOAM[i].attr0 = OBJ_Y(sy) | OBJ_16_COLOR | ATTR0_SQUARE;
+      SOAM[i].attr1 = OBJ_X(sx) | ATTR1_SIZE_32 | facing;
+      SOAM[i].attr2 = 0x2000 + tilenum;
+      ++i;
+    }
     ppu_clear_oam(i);
 
     VBlankIntrWait();

@@ -1,3 +1,7 @@
+0.02 (2018-06-21)
+* Shadow sprite, Stopwatch, Hill zone scroll, and Vertical scroll
+* Audio sync: Move ceiling up to match Genesis 1.16
+
 0.01 (2018-06-19)
 * initial release, with all tests except Shadow sprite, Stopwatch,
   Hill zone scroll, Vertical scroll, and PCM in audio test
