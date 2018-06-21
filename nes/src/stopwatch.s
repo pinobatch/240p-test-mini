@@ -30,9 +30,8 @@ sw_frames = test_state+3
 sw_framescolor = test_state+4
 ; 7: update; 6: count. 00: lap+stop, 40: lap+run; 80: stop; c0: run
 sw_running = test_state+5
-sw_hide_ruler = test_state+6
+sw_ruler_style = test_state+6
 sw_inactive_color = test_state+7  ; $26 or $20
-sw_framestens = test_state+14
 sw_framesones = test_state+15
 
 .rodata
@@ -63,11 +62,11 @@ lapIndicatorAddr = lineImgBuf+96+24
   lda #$80
   sta sw_running
   asl a
+  sta sw_ruler_style  ; 0: hide; 3: show; 1: show on even frames
   :
     sta sw_hours,x
     dex
     bpl :-
-  stx sw_hide_ruler  ; $FF: hide; $00: show
   lda #$36
   sta sw_inactive_color
 restart:
@@ -204,9 +203,17 @@ loop:
   lda new_keys+0
   and #KEY_UP
   beq notToggleRuler
-    lda #$FF
-    eor sw_hide_ruler
-    sta sw_hide_ruler
+    ; Order 0, 3, 1, ...
+    ldy sw_ruler_style
+    dey
+    tya
+    and #$03
+    tay
+    cpy #$02
+    bne :+
+      dey
+    :
+    sty sw_ruler_style
   notToggleRuler:
 
   lda new_keys+0
@@ -256,11 +263,25 @@ done:
 .endproc
 
 .proc sw_prepare
+hide_ruler = $00
+
+  ; Should the ruler be shown on this frame?
+  lda sw_frames
+  lsr a  ; C=0 for even frame or 1 for odd frame
+  lda sw_ruler_style  ; Bit 0: show in even frames; bit 1: in odd frames
+  bcc :+
+    lsr a
+  :
+  lsr a  ; C: show ruler
+  lda #0
+  adc #$FF  ; A: $00 for show or $01 for hide
+  sta hide_ruler
+  
   ldx #0
   rulerloop:
     txa
-    asl a
-    ora sw_hide_ruler
+    asl a  ; For sprite at index 0, 4, 8, ..., Y is 0, 8, 16, ...
+    ora hide_ruler  ; Offscreen (Y=255) if ruler is hidden
     sta OAM+0,x
     and #$08
     adc #$08
@@ -321,12 +342,13 @@ done:
   sta sprect_x
   lda stopwatch_ball_y,x
   sta sprect_y
-  lda #3
-  sta sprect_attr  ; color palette 3: reds
-  sta sprect_w
-  sta sprect_h
-  lsr a
-  sta sprect_tileadd
+  ldy #3
+  sty sprect_w
+  sty sprect_h
+  dey
+  sty sprect_attr  ; color palette 2: blue (background is pink)
+  dey
+  sty sprect_tileadd
   jsr draw_spriterect
 
   ; And a separate smaller red ball pointing at it
@@ -338,7 +360,7 @@ done:
   sta OAM,x
   lda #90
   sta OAM+1,x
-  lda #3
+  lda #2
   sta OAM+2,x
   lda sprect_x
   lsr a

@@ -133,7 +133,7 @@ $(objdir)/gus_sprite.chr: $(imgdir)/gus_sprite.png
 $(objdir)/gus_bg.sav: $(imgdir)/gus_bg.png
 	$(PY) tools/savtool.py --palette 0f0820180f1a202a0f060f160f0f1424 $< $@
 $(objdir)/lag_clock_face.sav: $(imgdir)/lag_clock_face.png
-	$(PY) tools/savtool.py --palette 20100f24203626242026162420210124 $< $@
+	$(PY) tools/savtool.py --palette 20100f24203626242021012420261624 $< $@
 $(objdir)/vwf7.s: $(cimgdir)/vwf7_cp240p.png
 	$(PY) tools/vwfbuild.py $< $@
 $(objdir)/gus_portrait.sav: $(imgdir)/gus_portrait.png

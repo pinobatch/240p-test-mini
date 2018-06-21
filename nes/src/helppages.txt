@@ -427,7 +427,9 @@ has been on the phone.
 A: Start/stop
 Select when stopped: Reset
 Select when running: Lap
-↑: Show ruler at left
+↑: Change ruler at left
+   (show, hide, or show
+   during even frames)
 ↓: Toggle inactive circles
 
 The clock face below helps
@@ -437,7 +439,7 @@ blurry.
 ----
 Lag measurement
 
-To measure lag, get a digital
+To measure lag, get a
 camera and connect two
 displays at once. One is
 being tested, and the other
@@ -468,7 +470,7 @@ NES mod is enabled, the
 video out works differently:
 white for sprites and black
 for background. The frame
-counter and rulers are drawn
+counter and ruler are drawn
 as sprites to remain visible.
 ----
 Dropped frames
