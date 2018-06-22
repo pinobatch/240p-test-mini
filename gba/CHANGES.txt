@@ -3,6 +3,9 @@
 * Sound test: Add a real time synthesized chord played through PCM
 * Audio sync: Move ceiling up to match position in 240p Test Suite
   (for Sega Genesis) version 1.16
+* Unpacking 2-bit tile data no longer unpacks twice as much data as 
+  required, which exposes a bug at the end of a BitUnPack in mGBA's
+  HLE BIOS
 
 0.01 (2018-06-19)
 * initial release, with all tests except Shadow sprite, Stopwatch,
