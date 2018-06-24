@@ -41,7 +41,7 @@ KT_SHADOW_U_L equ $08
 KT_SHADOW_UL_U equ $09
 KT_SHADOW_UL_L equ $0A
 
-section "scrolltest_pal1",ROMX
+section "scrolltest_pal1",ROM0
 hillzone_palette_gbc:
   drgb $FFFFFF  ; Clouds, water
   drgb $8FA1FF

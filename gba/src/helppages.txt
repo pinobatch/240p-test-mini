@@ -124,6 +124,14 @@ dead or damaged pixels.
 A on white: Toggle RGB
   input box
 ↑↓←→: Change RGB value
+----
+Poor high-voltage
+regulation in a CRT
+causes image size to
+depend on brightness.
+This causes the border
+on Game Boy Player to
+change width.
 
 == Motion blur ==
 
