@@ -294,7 +294,8 @@ on the phone.
 A: Start/stop
 Select stopped: Reset
 Select running: Lap
-↑: Show ruler at left
+↑: Change ruler at left
+   (show, hide, or blink)
 ↓: Toggle inactive
    circles
 ----
@@ -312,12 +313,11 @@ or more noticeably fast
 on Super Game Boy
 (1 part in 51).
 ----
-To measure lag, get
-a digital camera and
-connect two displays to
-one Super NES. One is
-being tested, and the
-other (the reference)
+To measure lag, get a
+camera and connect two
+TVs to one Super NES.
+One is being tested, and
+the other (the reference)
 should be a CRT SDTV or
 a display with known lag.
 For example, connect

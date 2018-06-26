@@ -3,8 +3,12 @@
   (reported by Great Hierophant)
 * ISSOtm golfed SGB detection by 3 bytes
 * Remove unused last 8 glyphs of font
+* Audio sync: Move ceiling up to match position in 240p Test Suite
+  (for Sega Genesis) version 1.16
+* Stopwatch: Draw frames in blue if even or red if odd
+* Solid screen: Explain what a bad high voltage regulator does to
+  SGB and GB Player border (requested by ISSOtm)
 * Begin to unify help conversion tooling with NES and GBA
-* Audio sync: Move ceiling up to match Genesis 1.16
 
 0.06 (2018-06-03)
 * Add GBC-exclusive tests (PLUGE, Gradient color bars, SMPTE bars,

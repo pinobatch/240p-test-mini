@@ -27,6 +27,17 @@ section "audiosync",ROM0
 
 PULSE_1K = 2048-131
 
+audiosync_pb16:
+  db %11111111  ; Tile 0: color 0
+  db %11111111
+  db %01111111  ; Tile 1: color 1
+  db %11111111
+  db %11111111
+  db %01110111  ; Tile 2: dot
+  db %11000000
+  db %00000000
+  db %11111111
+
 activity_audiosync::
 .restart:
   call clear_gbc_attr
@@ -35,22 +46,11 @@ activity_audiosync::
   ldh [rSCY],a
   ldh [progress],a
 
-  ; Load tiles 0: color 0; 1: color 3: 2: dot
+  ; Load tiles
+  ld de,audiosync_pb16
   ld hl,CHRRAM0
-  ; xor a
-  ld c,16
-  call memset_tiny
-  dec a
-  ld c,16
-  call memset_tiny
-  ld a,%11000000
-  ld [hl+],a
-  ld [hl+],a
-  ld [hl+],a
-  ld [hl+],a
-  xor a
-  ld c,16
-  call memset_tiny
+  ld b,3
+  call pb16_unpack_block
 
   ; Load map
   ld de,_SCRN0
@@ -150,7 +150,7 @@ activity_audiosync::
   ldh a,[progress]
   cp 120
   sbc a  ; A=$00 during beep or $FF during test
-  and %00011011
+  and %00000011
   call set_bgp
   call set_obp0
 

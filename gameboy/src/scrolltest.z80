@@ -83,8 +83,8 @@ mt_belowR:
 
 section "gridscroll",ROM0
 gridtile_pb16:
-  db %00011111
-  dw `11111111
+  db %01011111
+  db %11111111
   db %10000001
   db %11111101
   db %11111111

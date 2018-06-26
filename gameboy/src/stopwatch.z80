@@ -31,7 +31,7 @@ is_running  rb 1
 ; "Lap" pauses blitting (instead "LAP" is shown) but continues running
 is_lap      rb 1
 is_ruler    rb 1
-hide_face   rb 1
+show_face   rb 1
 
 section "stopwatch",ROM0
 ; X, Y coordinates of each position of the frames hand
@@ -66,7 +66,8 @@ activity_stopwatch::
   ldh [frames_bcd],a
   ldh [minutes_bcd],a
   ldh [seconds_bcd],a
-  ldh [hide_face],a
+  dec a
+  ldh [show_face],a
 .restart:
   call clear_gbc_attr
 
@@ -179,7 +180,7 @@ activity_stopwatch::
   bit PADB_A,b
   jr z,.not_start_stop
     ldh a,[is_running]
-    xor 1
+    cpl
     ldh [is_running],a
   .not_start_stop:
 
@@ -213,16 +214,21 @@ activity_stopwatch::
   jr z,.not_toggle_ruler
     ; TODO: make this go 0, 3, 1
     ldh a,[is_ruler]
-    xor 1
+    add $03
+    and $03
+    cp 2
+    jr nz,.ruler_skip_2
+      dec a
+    .ruler_skip_2:
     ldh [is_ruler],a
   .not_toggle_ruler:
 
   ; Down: Toggle visibility of BG below rLYC
   bit PADB_DOWN,b
   jr z,.not_toggle_face
-    ld a,[hide_face]
-    xor $01  ; BG enable
-    ld [hide_face],a
+    ld a,[show_face]
+    cpl
+    ld [show_face],a
   .not_toggle_face:
 
   ; Increment the counter by one frame
@@ -273,10 +279,7 @@ activity_stopwatch::
   call sw_blit
 
   ; Show or hide the face
-  ld a,[hide_face]
-  rra    ; 1: Hide face; 0: Show
-  ccf    ; 0: Hide face; 1: Show
-  sbc a  ; $00: Hide face; $FF: Show
+  ld a,[show_face]  ; $00: hide; $FF: show
   or 40  ; $28: Hide face; $FF: Show
   ldh [rWY],a
   jp .loop
@@ -443,10 +446,21 @@ sw_init_oam:
 
 sw_draw_ruler:
   ld hl,SOAM+10*4
-  ; TODO: Draw Y coordinates of ruler sprites if ruler enabled
+
+  ; Is the ruler enabled?  First check the displayed frames digit
+  ld a,[help_line_buffer+6]
+  rra
+  rra
+  ; If C is clear, the frame is even, so use bit 0 of is_ruler.
+  ; If C is set, the frame is odd, so use bit 1 of is_ruler.
   ldh a,[is_ruler]
-  or a
-  jr z,.no_ruler
+  jr nc,.is_even_frame
+    rra
+  .is_even_frame:
+  rra
+  jr nc,.no_ruler
+  
+  ; Draw Y coordinates of ruler sprites if ruler enabled
   ld a,16
   .rulerloop:
     ld [hl+],a

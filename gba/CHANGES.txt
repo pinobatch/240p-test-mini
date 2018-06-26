@@ -1,3 +1,9 @@
+0.03
+* Solid screen: Explain what a bad high voltage regulator does to
+  SGB and GB Player border (requested by ISSOtm)
+* Stopwatch: Draw frames in blue if even or red if odd
+* Stopwatch: Additional mode for ruler in even frames only
+
 0.02 (2018-06-21)
 * Add Shadow sprite, Stopwatch, Hill zone scroll, and Vertical scroll
 * Sound test: Add a real time synthesized chord played through PCM

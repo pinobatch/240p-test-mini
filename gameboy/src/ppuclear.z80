@@ -169,7 +169,7 @@ set_bgp::
   ld bc,$8000 + low(rBCPS)
 
 ;;
-; Emulates xmono palette setting on Game Boy Color.
+; Emulates mono palette setting on Game Boy Color.
 ; @param A BGP or OBP0 value
 ; @param B offset into palette memory (0, 8, 16, ..., 56) plus $80
 ; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
@@ -181,14 +181,13 @@ set_gbc_mono_palette::
   ld [$FF00+c],a
   inc c   ; ad
   ld b,4
-  ld hl,gbmonopalette
+  ld h,high(gbmonopalette)
   ; Regmap now: B=count of remaining colors, C=data port address,
   ;   E=BGP value rlc 1, HL=pointer to start of palette
   loop:
-    ld a,l
-    xor e
-    and %11111001
-    xor e
+    ld a,e
+    and %00000110
+    or low(gbmonopalette)
     ld l,a  ; now L points to this color so stuff it into the palette
     ld a,[hl+]
     ld [$FF00+c],a
