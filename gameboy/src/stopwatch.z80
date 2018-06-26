@@ -47,6 +47,16 @@ sw_hand_xy:
   db  40, 84
   db  54, 65
 
+sw_digit_gbc_palettes:
+  drgb $FFFFFF
+  drgb $8888EE
+  drgb $4444DD
+  drgb $0000CC
+  drgb $FFFFFF
+  drgb $FFAAAA
+  drgb $FF5555
+  drgb $FF0000
+
 activity_stopwatch::
   xor a
   ldh [is_running],a
@@ -63,6 +73,24 @@ activity_stopwatch::
   ; Load background tiles
   ld a,bank(stopwatchface_iu)
   ld [rMBC1BANK1],a
+
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_plane1
+    ld hl, _SCRN0+1*32+15
+    ld de,32-4
+    ld b,3
+    ld a,1
+    ldh [rVBK],a
+    .frameattrloop:
+      ld c,4
+      call memset_tiny
+      add hl,de
+      dec b
+      jr nz,.frameattrloop
+    xor a
+    ldh [rVBK],a
+  .not_plane1:
 
   ; Load background tilemap
   ld h,0
@@ -146,7 +174,7 @@ activity_stopwatch::
   ld b,a
   bit PADB_B,a
   ret nz
-  
+
   ; A: Start/stop
   bit PADB_A,b
   jr z,.not_start_stop
@@ -154,7 +182,7 @@ activity_stopwatch::
     xor 1
     ldh [is_running],a
   .not_start_stop:
-  
+
   ; TODO: Select: Lap/reset (the most complicated among these)
   bit PADB_SELECT,b
   jr z,.not_lap_reset
@@ -175,7 +203,7 @@ activity_stopwatch::
     ld [seconds_bcd],a
     ld [minutes_bcd],a
     ld [hours],a
-    
+
   .have_lap:
   ldh [is_lap],a
   .not_lap_reset:
@@ -183,11 +211,12 @@ activity_stopwatch::
   ; Up: Toggle ruler
   bit PADB_UP,b
   jr z,.not_toggle_ruler
+    ; TODO: make this go 0, 3, 1
     ldh a,[is_ruler]
     xor 1
     ldh [is_ruler],a
   .not_toggle_ruler:
-  
+
   ; Down: Toggle visibility of BG below rLYC
   bit PADB_DOWN,b
   jr z,.not_toggle_face
@@ -243,7 +272,7 @@ activity_stopwatch::
   call run_dma
   call sw_blit
 
-  ; Show or hide the 
+  ; Show or hide the face
   ld a,[hide_face]
   rra    ; 1: Hide face; 0: Show
   ccf    ; 0: Hide face; 1: Show
@@ -259,7 +288,7 @@ digits_label_msg:
   db 100,"frame",0
 
 ; Drawing the digits ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  
+
 sw_convert:
   ld hl,help_line_buffer
   ldh a,[hours]
@@ -366,7 +395,21 @@ sw_blit:
   inc a
 .nolap2:
   ld [hl+],a
-  ret
+
+  ; Find which GBC color 1 palette to copy
+  ld a,[help_line_buffer+6]
+  and $02
+  add a
+  add a
+  ld d,0
+  ld e,a
+  ld hl,sw_digit_gbc_palettes
+  add hl,de
+
+  ; And copy it
+  ld a,$88
+  ld bc,8*256+low(rBCPS)
+  jp set_gbc_palette
 
 ; Drawing the hand (the sprites on the face at bottom half) ;;;;;;;;;
 
@@ -430,7 +473,7 @@ sw_draw_clock_hand:
     add 48-15
   .not5to9:
   ldh [Lspriterect_tile],a
-  
+
   ; Look up XY coord
   ld a,b
   ld de,sw_hand_xy
