@@ -1,6 +1,6 @@
 ;
 ; PB53 unpacker for 6502 systems
-; Copyright 2012 Damian Yerrick
+; Copyright 2012-2016 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided

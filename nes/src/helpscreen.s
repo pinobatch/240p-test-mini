@@ -1,6 +1,6 @@
 ;
 ; Help screen for 240p test suite
-; Copyright 2015 Damian Yerrick
+; Copyright 2015-2018 Damian Yerrick
 ;
 ; This program is free software; you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ txtlinebuf:     .res 32
 
 ;;
 ; Reads the controller, and if Start was just pressed, displays
-; help screen X.
+; a help screen.
 ; @param A the help screen to display if Start was pressed
 ; @return C true iff Start was pressed
 .proc read_pads_helpcheck

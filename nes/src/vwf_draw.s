@@ -1,5 +1,5 @@
 ; NES variable width font drawing library
-; Copyright 2006-2015 Damian Yerrick
+; Copyright 2006-2017 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided

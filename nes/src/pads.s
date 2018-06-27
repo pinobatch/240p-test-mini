@@ -1,6 +1,6 @@
 ;
 ; NES controller reading code
-; Copyright 2009-2011 Damian Yerrick
+; Copyright 2009-2018 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided
@@ -9,6 +9,7 @@
 ;
 
 ;
+; 2018-06: Save a byte in autorepeat
 ; 2011-07: Damian Yerrick added labels for the local variables and
 ;          copious comments and made USE_DAS a compile-time option
 ;

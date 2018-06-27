@@ -25,7 +25,6 @@ the software free.
 
 To get set up to build the NES port, install GNU Make, Coreutils,
 Python 3, Pillow, and cc65 per [nrom-template] instructions.
-(Hint: Install GNU Make, Coreutils, Python 3, Pillow, cc65.)
 The port to Game Boy uses [RGBDS] instead of cc65.  The GBA port
 uses devkitARM and libgba by [devkitPro], but Python 3 and Pillow
 are still required to convert the proportional font.

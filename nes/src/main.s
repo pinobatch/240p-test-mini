@@ -1,6 +1,6 @@
 ;
 ; Dispatch for 240p test suite
-; Copyright 2015 Damian Yerrick
+; Copyright 2015-2017 Damian Yerrick
 ;
 ; This program is free software; you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
@@ -128,31 +128,6 @@ routines:
   .addr do_credits-1
 .popseg
 .endproc
-
-.if 0
-.proc beep
-  ; Demo of tone (for SMPTE bars and tone)
-  ; frequency on NTSC NES is very nearly 1000 Hz
-  lda #$88
-  sta $4008
-  lda #55  ; FIXME: change this for PAL NES and Dendy
-  sta $400A
-  lda #0
-  sta $400B
-  ldx #20
-delayloop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
-  dex
-  bne delayloop
-  lda #$00
-  sta $4008
-  sta $400B
-  rts
-.endproc
-.endif
 
 .proc do_credits
   ldx #helpsect_240p_test_suite

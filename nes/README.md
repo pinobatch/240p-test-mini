@@ -1,7 +1,7 @@
 240p Test Suite
 ===============
 
-The [240p test suite] is a homebrew software suite for video game
+The [240p Test Suite] is a homebrew software suite for video game
 consoles developed to help in the evaluation of upscalers, upscan
 converters and line doublers.
 
@@ -17,7 +17,7 @@ outputs and setups.
 
 This is free software, with full source code available under the GPL.
 
-[240p test suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
+[240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
 
 Usage
 -----
@@ -51,7 +51,7 @@ Since late 2015, five other platforms that run the suite:
 
 * It was first developed in C for the Sega Genesis using the SGDK,
   using 320x224p resolution.  It comes as a cartridge image or as
-  a disc image for Sega CD.
+  a disc image for Sega CD.  Version 1.16 adds support for 256x224p.
 * The TurboGrafx-16 version was made with HuC.  It supports widths
   256, 320, and 512, and heights 224 and 239.  It comes as a HuCard
   image for Turbo EverDrive, a disc image for CD-ROM2 (TurboGrafx-CD
@@ -103,8 +103,8 @@ high-quality displays and scalers.
 [shmups]: http://shmups.system11.org/
 [development thread]: http://forums.nesdev.com/viewtopic.php?t=13394
 
-Copyright 2011-2014 Artemio Urbina  
-Copyright 2015-2017 Damian Yerrick
+Copyright 2011-2018 Artemio Urbina  
+Copyright 2015-2018 Damian Yerrick
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

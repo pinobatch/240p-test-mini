@@ -1,6 +1,6 @@
 ;
 ; Nametable rectangle fill engine
-; Copyright 2015 Damian Yerrick
+; Copyright 2015-2016 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided

@@ -17,6 +17,7 @@ CRCHI: .res 1
 
 .segment "CODE"
 
+; This is Greg Cook's implementation of CRC16
 ; If using CRC as a PRNG, use this entry point
 .proc rand_crc
   lda #$00

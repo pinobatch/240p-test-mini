@@ -32,6 +32,8 @@
 ; taking the whole NMI or waiting for sprite 0) while calling this,
 ; or the result in A will be wrong.
 ;
+; (This is the old version, from before the rewrite in Pently 5)
+;
 ; @return A: TV system (0: NTSC, 1: PAL, 2: Dendy; 3: unknown
 ;         Y: high byte of iterations used (1 iteration = 11 cycles)
 ;         X: low byte of iterations used

@@ -1,6 +1,6 @@
 ;
 ; NES PPU common functions
-; Copyright 2011 Damian Yerrick
+; Copyright 2011-2016 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided
@@ -67,7 +67,9 @@ loop:
   rts
 .endproc
 
-
+;;
+; Runs OAM DMA, sets the scroll to (0, 0), and turns on rendering.
+; @param A value for PPUCTRL
 .proc ppu_oam_dma_screen_on_xy0
   ldx #0
   stx OAMADDR
