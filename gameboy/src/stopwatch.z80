@@ -34,18 +34,34 @@ is_ruler    rb 1
 show_face   rb 1
 
 section "stopwatch",ROM0
+
+; Stopwatch is made of 12 sprites
+;  ,.
+; /XX\
+; \XX/
+;  `'
+; Each row is n+1 bytes of the form &FXT or %VHXXXTTT
+; where V is vertical flip, H is horizontal flip,
+; X is horizontal position in tiles, and T is tile index
+; (0: interior, 1: left or right edge, 2: top or bottom edge).
+sw_shape:
+  db      &011,&121,     $FE
+  db &002,&010,&020,&132,$FE
+  db &202,&010,&020,&332,$FE
+  db      &211,&321,     $FF
+
 ; X, Y coordinates of each position of the frames hand
 sw_hand_xy:
-  db  76, 58
-  db  98, 65
-  db 112, 84
-  db 112,108
-  db  98,127
-  db  76,134
-  db  54,127
-  db  40,108
-  db  40, 84
-  db  54, 65
+  db  72, 54
+  db  94, 61
+  db 108, 80
+  db 108,104
+  db  94,123
+  db  72,130
+  db  50,123
+  db  36,104
+  db  36, 80
+  db  50, 61
 
 sw_digit_gbc_palettes:
   drgb $FFFFFF
@@ -395,15 +411,17 @@ sw_blit:
 ; Drawing the hand (the sprites on the face at bottom half) ;;;;;;;;;
 
 ; Static allocation of OAM:
-; 0-8 face digit
-; 9 dot
-; 10-27 left column
-; 28-39 unused
+; 0 dot
+; 1-12 face digit circle
+; 13-30 left column
+; 31-39 unused
+
+SPRITES_BEFORE_RULER = 13
 
 sw_init_oam:
 
   ; Set X, tile, and attribute of sprites that make up ruler
-  ld hl,SOAM+10*4
+  ld hl,SOAM+SPRITES_BEFORE_RULER*4
   ld b,18
   .rulerobjloop:
     inc hl  ; Skip Y
@@ -423,7 +441,7 @@ sw_init_oam:
   ; Fall through to sw_draw_ruler
 
 sw_draw_ruler:
-  ld hl,SOAM+10*4
+  ld hl,SOAM+SPRITES_BEFORE_RULER*4
 
   ; Is the ruler enabled?  First check the displayed frames digit
   ld a,[help_line_buffer+6]
@@ -459,11 +477,8 @@ sw_draw_clock_hand:
   and $0F
   ld b,a
   add a
-  add b  ; A=3
-  cp 15
-  jr c,.not5to9
-    add 48-15
-  .not5to9:
+  add a
+  add 3
   ldh [Lspriterect_tile],a
 
   ; Look up XY coord
@@ -477,14 +492,14 @@ sw_draw_clock_hand:
 
   ; Draw the small dot halfway out
   ld hl,SOAM
-  add 112  ; Y center position
+  add 116  ; Y center position
   rra
   ld [hl+],a
   ldh a,[Lspriterect_x]
-  add 92  ; X center position
+  add 96  ; X center position
   rra
   ld [hl+],a
-  ld a,$0F  ; dot tile
+  ld a,$03  ; dot tile
   ld [hl+],a
   xor a     ; attr 0
   ld [hl+],a
@@ -492,14 +507,41 @@ sw_draw_clock_hand:
   ld [oam_used],a
 
   ; Draw the large dot with a number on it
-  xor a
-  ldh [Lspriterect_attr],a
-  ld a,3
-  ldh [Lspriterect_height],a
-  ldh [Lspriterect_width],a
-  ld a,16
-  ldh [Lspriterect_tilestride],a
-  ld a,8
-  ldh [Lspriterect_rowht],a
-  jp draw_spriterect
-
+  ld de,sw_shape
+.striploop:
+  ld a,[de]
+  inc de
+  cp $FE
+  jr nc,.isctrl
+;+9
+  ; It's a normal sprite
+  ld c,a
+  and %00111000  ; Isolate X offset
+  ld b,a
+  ldh a,[Lspriterect_y]
+  ld [hl+],a     ; Copy Y coordinate unchanged
+  ldh a,[Lspriterect_x]
+  add b
+  ld [hl+],a     ; Copy X coordinate
+;+11
+  ld a,c
+  and %00000111  ; Tile number 0 means next tile
+  jr nz,.not_utile
+    ldh a,[Lspriterect_tile]
+    inc a
+    ldh [Lspriterect_tile],a
+  .not_utile:
+  ld [hl+],a     ; $00: unused; $01: h edge; $02: v edge; $03: dot; $04-$2B: digits
+;+11
+  ld a,c
+  and %11000000
+  rrca
+  ld [hl+],a     ; Attribute
+  jr .striploop
+;7
+.isctrl:
+  ret nz                 ; $FF: exit
+  ldh a,[Lspriterect_y]  ; $FE: next row
+  add 8
+  ldh [Lspriterect_y],a
+  jr .striploop
