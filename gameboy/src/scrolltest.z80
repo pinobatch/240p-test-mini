@@ -41,7 +41,9 @@ KT_SHADOW_U_L equ $08
 KT_SHADOW_UL_U equ $09
 KT_SHADOW_UL_L equ $0A
 
-section "scrolltest_pal1",ROM0
+; This tends to get moved back and forth when balancing
+; bank 0 and bank 1
+section "scrolltest_pal1",ROMX
 hillzone_palette_gbc:
   drgb $FFFFFF  ; Clouds, water
   drgb $8FA1FF
