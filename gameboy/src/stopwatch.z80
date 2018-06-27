@@ -49,13 +49,13 @@ sw_hand_xy:
 
 sw_digit_gbc_palettes:
   drgb $FFFFFF
+  drgb $0000CC
   drgb $8888EE
   drgb $4444DD
-  drgb $0000CC
   drgb $FFFFFF
-  drgb $FFAAAA
-  drgb $FF5555
   drgb $FF0000
+  drgb $FF8888
+  drgb $FF4444
 
 activity_stopwatch::
   xor a
@@ -120,31 +120,9 @@ activity_stopwatch::
   ld b,sizeof_stopwatchhand_chr/16
   call pb16_unpack_block
 
-  ; Legend in $F0-$FF
-  call vwfClearBuf
+  ld de,$08F0
   ld hl,digits_label_msg
-  .legendloop:
-    ld a,[hl+]
-    ld b,a
-    call vwfPuts
-    ld a,[hl+]
-    or a
-    jr nz,.legendloop
-  ld hl,CHRRAM1+$0700
-  ld b,$FF
-  call vwfPutBuf03
-
-  ld a,$F0
-  ld hl,_SCRN0+2
-  ld [hl+],a
-  inc a
-  ld [hl+],a
-  inc a
-  inc l
-  .legendtileloop:
-    ld [hl+],a
-    inc a
-    jr nz,.legendtileloop
+  call vwfDrawLabels
 
   call sw_convert
   call sw_blit
@@ -152,7 +130,7 @@ activity_stopwatch::
   call run_dma
 
   ; Turn on rendering
-  ld a,%11100100
+  ld a,%10011100
   call set_bgp
   call set_obp0
   ld a,7
@@ -285,10 +263,10 @@ activity_stopwatch::
   jp .loop
 
 digits_label_msg:
-  db 4,"hr",10
-  db 19,"minute",10
-  db 58,"second",10
-  db 100,"frame",0
+  db  20,  0,"hr",10
+  db  43,  0,"minute",10
+  db  81,  0,"second",10
+  db 124,  0,"frame",0
 
 ; Drawing the digits ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
