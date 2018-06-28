@@ -28,6 +28,12 @@ is_hidden rb 1
 cursize rb 1
 
 section "backlight",ROM0
+load_backlight_chr::
+  ld hl,CHRRAM0
+  ld de,backlight_chr
+  ld b,5
+  jp pb16_unpack_block
+
 activity_backlight_zone::
   ld a,88
   ldh [xpos],a
@@ -40,6 +46,7 @@ activity_backlight_zone::
   
 .restart:
   call clear_gbc_attr
+  call load_backlight_chr
 
   ; Clear nametable
   ldh [held_keys],a
@@ -52,12 +59,6 @@ activity_backlight_zone::
   ld a,4
   ld [oam_used],a
   call lcd_clear_oam
-
-  ; Load pattern table
-  ld hl,CHRRAM0
-  ld de,backlight_chr
-  ld b,4
-  call pb16_unpack_block
 
   ; Blank screen
   xor a

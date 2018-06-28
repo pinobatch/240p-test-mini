@@ -27,17 +27,6 @@ section "audiosync",ROM0
 
 PULSE_1K = 2048-131
 
-audiosync_pb16:
-  db %11111111  ; Tile 0: color 0
-  db %11111111
-  db %01111111  ; Tile 1: color 1
-  db %11111111
-  db %11111111
-  db %01110111  ; Tile 2: dot
-  db %11000000
-  db %00000000
-  db %11111111
-
 activity_audiosync::
 .restart:
   call clear_gbc_attr
@@ -47,18 +36,15 @@ activity_audiosync::
   ldh [progress],a
 
   ; Load tiles
-  ld de,audiosync_pb16
-  ld hl,CHRRAM0
-  ld b,3
-  call pb16_unpack_block
+  call load_backlight_chr
 
   ; Load map
   ld de,_SCRN0
   ld bc,32*18
-  ld h,0
+  ld h,4
   call memset
   ld hl,_SCRN0+32*15
-  ld a,1
+  ld a,3
   ld c,20
   call memset_tiny
 
@@ -171,22 +157,26 @@ audiosync_draw_row:
   ld b,a
   cp 40
   sbc a
-  inc a
+  cpl
+  add 4
   ldh [dtr_t0],a
   ld a,b
   cp 60
   sbc a
-  inc a
+  cpl
+  add 4
   ldh [dtr_t1],a
   ld a,b
   cp 80
   sbc a
-  inc a
+  cpl
+  add 4
   ldh [dtr_t2],a
   ld a,b
   cp 100
   sbc a
-  inc a
+  cpl
+  add 4
   ldh [dtr_t3],a
 
   ld b,2
@@ -205,11 +195,10 @@ audiosync_draw_row:
   ldh a,[dtr_t3]
   ld [hl+],a
   ld [hl+],a
-  xor a
-  ld [hl+],a
-  ld [hl+],a
-  ld [hl+],a
-  ld [hl+],a
+  inc hl
+  inc hl
+  inc hl
+  inc hl
   ldh a,[dtr_t3]
   ld [hl+],a
   ld [hl+],a
@@ -239,7 +228,7 @@ audiosync_draw_sprite:
   ld [hl+],a
   ld a,79+8
   ld [hl+],a
-  ld a,2
+  ld a,1
   ld [hl+],a
   xor a
   ld [hl+],a
