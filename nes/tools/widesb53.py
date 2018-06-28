@@ -3,8 +3,10 @@ from __future__ import with_statement, division, print_function
 import array, os, sys
 from binascii import a2b_hex
 from PIL import Image, ImageChops
-import chnutils, pilbmp2nes, savtool
 from pb53 import pb53
+
+import savtool  # also finds common tools
+import chnutils, pilbmp2nes
 
 def bmptowidesb53(infilename, palette, outfilename):
     im = Image.open(infilename)

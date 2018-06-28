@@ -17,6 +17,13 @@ except ImportError:
           file=sys.stderr)
     Image = None
 
+# Find common tools (e.g. pilbmp2nes)
+commontoolspath = os.path.normpath(os.path.join(
+    os.path.dirname(sys.argv[0]), "..", "..", "common", "tools"
+))
+sys.path.append(commontoolspath)
+
+
 default_palette = b'\x0F\x00\x10\x30\x0F\x06\x16\x26\x0F\x1A\x2A\x3A\x0F\x02\x12\x22'
 
 # Command line parsing and help #####################################

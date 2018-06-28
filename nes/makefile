@@ -45,6 +45,7 @@ else
 DOTEXE:=
 PY:=
 endif
+BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 
 .PHONY: run runalt debug dist zip all clean
 
@@ -116,9 +117,9 @@ $(objdir)/pb53files.o: \
 # Generic rules for CHR
 
 $(objdir)/%.chr: $(imgdir)/%.png
-	$(PY) tools/pilbmp2nes.py --planes "0;1" $< $@
+	$(BMP2) --planes "0;1" $< $@
 $(objdir)/%16.chr: $(imgdir)/%.png
-	$(PY) tools/pilbmp2nes.py -H 16 --planes "0;1" $< $@
+	$(BMP2) -H 16 --planes "0;1" $< $@
 $(objdir)/%gray.sav: $(imgdir)/%.png
 	$(PY) tools/savtool.py --palette 0f0010200f1616160f1616160f161616 $< $@
 $(objdir)/%.sb53: $(objdir)/%.sav
@@ -129,7 +130,7 @@ $(objdir)/%.pb53: $(objdir)/%
 # Specific rules for CHR
 
 $(objdir)/gus_sprite.chr: $(imgdir)/gus_sprite.png
-	$(PY) tools/pilbmp2nes.py -H 128 --planes "0;1" $< $@
+	$(BMP2) -H 128 --planes "0;1" $< $@
 $(objdir)/gus_bg.sav: $(imgdir)/gus_bg.png
 	$(PY) tools/savtool.py --palette 0f0820180f1a202a0f060f160f0f1424 $< $@
 $(objdir)/lag_clock_face.sav: $(imgdir)/lag_clock_face.png
@@ -141,7 +142,7 @@ $(objdir)/gus_portrait.sav: $(imgdir)/gus_portrait.png
 $(objdir)/greenhillzone.sb53: $(imgdir)/greenhillzone.png
 	$(PY) tools/widesb53.py $< 2208322022081A29220818282208181A $@
 $(objdir)/kikimap.chr: $(imgdir)/kikimap.png
-	$(PY) tools/pilbmp2nes.py -H 32 --planes "0" $< $@
+	$(BMP2) -H 32 --planes "0" $< $@
 $(objdir)/crosstalk.sav: $(imgdir)/crosstalk.png
 	$(PY) tools/savtool.py --palette 0F161A120F0F0F0F0F0F0F0F0F0F0F0F $< $@
 

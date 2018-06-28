@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 import sys
+import os
 import argparse
 from PIL import Image, ImageChops
-from pilbmp2nes import pilbmp2chr, formatTilePlanar
 import pb16
 from vwfbuild import rgbasm_bytearray
+
+# Find common tools
+commontoolspath = os.path.normpath(os.path.join(
+    os.path.dirname(sys.argv[0]), "..", "..", "common", "tools"
+))
+sys.path.append(commontoolspath)
+from pilbmp2nes import pilbmp2chr, formatTilePlanar
 
 # Image processing ##################################################
 

@@ -35,6 +35,9 @@ else
   PY := python3
 endif
 
+BMP2 := $(PY) ../common/tools/pilbmp2nes.py
+BMP2GB := $(PY) ../common/tools/pilbmp2nes.py --planes "0,1"
+
 .SUFFIXES:
 .PHONY: run all dist zip
 
@@ -110,13 +113,13 @@ obj/gb/gfxincbins.o: \
 # mode 0 (all planes), mode 1 (third plane), and modes 4 and 5
 # (second plane).
 obj/gb/%.chrgb: tilesets/%.png
-	$(PY) tools/pilbmp2nes.py --planes "0,1" $< $@
+	$(BMP2GB) $< $@
 
 obj/gb/%.chrgb16: tilesets/%.png
-	$(PY) tools/pilbmp2nes.py --planes "0,1" -H 16 $< $@
+	$(BMP2GB) -H 16 $< $@
 
 obj/gb/kikimap.chr1: tilesets/kikimap.png
-	$(PY) tools/pilbmp2nes.py --planes "0" -H 32 $< $@
+	$(BMP2) --planes "0" -H 32 $< $@
 
 obj/gb/vwf7.z80: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 	$(PY) $^ $@
