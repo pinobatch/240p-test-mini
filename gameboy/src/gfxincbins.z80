@@ -37,22 +37,20 @@ grayramp_bottomhalfmap::
   db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
 
 grayramp_chr_gbc::
-  db %00111111
-  dw `00000111
+  db %01111111  ; tile 1
+  db %00000111
   db %11111111
-  db %00111111
+  db %00111111  ; tile 2
   dw `11222223
   db %11111111
-  db %00111111
+  db %00111111  ; tile 3
   dw `33330000
   db %11111111
-  db %00111111
+  db %00111111  ; tile 4: full
   dw `33333333
   db %11111111
+  db %11111111  ; tile 5: full
   db %11111111
-  db %11111111
-grayramp_attrmap_gbc::
-  db $00,$00,$00,$21,$21,$02,$02,$02,$23,$23,$04,$04,$04,$25,$25,$06,$06,$06,$27,$27
 
 section "linearity_gfx0",ROM0
 linearity_iu::
@@ -63,6 +61,15 @@ global sizeof_linearity_chr
 section "sharpness_gfx0",ROM0
 sharpness_iu::
   incbin "obj/gb/sharpness.iu"
+sharpness_brick_tile::
+  dw `22111111
+  dw `11221111
+  dw `11112211
+  dw `01111022
+  dw `22011102
+  dw `11221002
+  dw `11112202
+  dw `11111122
 
 section "cpsgrid_gfx0",ROM0
 cps_grid_chr::

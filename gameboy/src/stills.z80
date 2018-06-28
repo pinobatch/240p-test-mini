@@ -155,46 +155,9 @@ load_gray_ramp_gbc:
     cp 32
     jr nz,.palloop
 
-  ; Fill map plane 0
+  ld de,gray_ramp_rowmap
   ld hl,_SCRN0
-  call oneblanktilerow
-  ld b,16  ; Fill with 12321 pattern
-  ld a,1
-  .tilerowloop:
-    ld c,4
-    .tilequarterloop:
-      ld [hl+],a
-      inc a
-      ld [hl+],a
-      inc a
-      ld [hl+],a
-      dec a
-      ld [hl+],a
-      dec a
-      ld [hl+],a
-      dec c
-      jr nz,.tilequarterloop
-    call add_hl_12
-    dec b
-    jr nz,.tilerowloop
-  call oneblanktilerow
-
-  ; Fill map plane 1
-  ld a,1
-  ldh [rVBK],a
-  ld hl,_SCRN0+32
-  ld bc,8*256
-  .topattrs:
-    call onegbcgrayrampattrrow
-    dec b
-    jr nz,.topattrs
-  ld bc,8*256+$07
-  .bottomattrs:
-    call onegbcgrayrampattrrow
-    dec b
-    jr nz,.bottomattrs
-  xor a
-  ldh [rVBK],a
+  call smpte_load_map
 
   ; Because each vertical stripe is 5 pixels wide, the change from
   ; e.g. palette 0 to 1 occurs in the middle of a tile.  This would
@@ -248,19 +211,6 @@ add_hl_12:
   ld de,12
   add hl,de
   ret
-onegbcgrayrampattrrow:
-  ld de,grayramp_attrmap_gbc
-  push bc
-  ld b,20
-  .loop:
-    ld a,[de]
-    inc de
-    xor c
-    ld [hl+],a
-    dec b
-    jr nz,.loop
-  pop bc
-  jr add_hl_12
 
 activity_gray_ramp::
 .restart:
@@ -424,13 +374,21 @@ load_pb16_nam::
   jp load_nam
   endc
 
+sharpness_bricks_gbc_palette:
+  drgb $220000
+  drgb $442222
+  drgb $666644
+
 activity_sharpness::
   ld a,%00011011
   ldh [curpalette],a
+  ld a,LCDCF_ON|BG_NT0|BG_CHR21
+  ldh [curlcdc],a
 
 .restart:
   call clear_gbc_attr
 
+  ; Load primary picture
   ld de,sharpness_iu
   ld hl,CHRRAM2
   call unpack_iu_file
@@ -438,10 +396,20 @@ activity_sharpness::
   ld de,_SCRN0
   call load_full_nam
 
+  ; Load secondary picture
+  ld hl,sharpness_brick_tile
+  ld de,CHRRAM2+$7F0
+  ld bc,16
+  call memcpy
+  ld h,$7F
+  ld de,_SCRN1
+  ld bc,32*18
+  call memset
+
   ld a,255
   ldh [rLYC],a  ; disable lyc irq
   call set_bgp
-  ld a,LCDCF_ON|BG_NT0|BG_CHR21
+  ld a,[curlcdc]
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
 
@@ -450,8 +418,22 @@ activity_sharpness::
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
-  ldh a,[curpalette]
-  call set_bgp
+
+  ; Load the appropriate palette for what is showing
+  ldh a,[curlcdc]
+  and LCDCF_BG9C00
+  jr z,.load_normal_palette
+    ld a,%00011011
+    ldh [rBGP],a
+    ld a,$80
+    ld bc,6*256+LOW(rBCPS)
+    ld hl,sharpness_bricks_gbc_palette
+    call set_gbc_palette
+    jr .done_loading_palette
+  .load_normal_palette:
+    ldh a,[curpalette]
+    call set_bgp
+  .done_loading_palette:
 
   ; Process input
   ld a,[new_keys]
@@ -463,6 +445,14 @@ activity_sharpness::
     cpl
     ldh [curpalette],a
   .not_select:
+
+  bit PADB_A,b
+  jr z,.not_A
+    ldh a,[curlcdc]
+    xor LCDCF_BG9C00
+    ldh [curlcdc],a
+    ld [vblank_lcdc_value],a
+  .not_A:
 
   bit PADB_B,b
   jr z,.loop

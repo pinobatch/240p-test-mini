@@ -200,6 +200,7 @@ white ghost lines on
 the side.
 
 Select: Invert grays
+A: Toggle brick wall
 ----
 Modern TVs' "sharpness"
 control performs edge
