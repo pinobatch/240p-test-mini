@@ -106,9 +106,12 @@ void activity_linearity(void) {
 
 void activity_sharpness(void) {
   unsigned int inverted = 0;
+  unsigned int is_bricks = 0;
 
   bitunpack2(PATRAM4(0, 0), sharpness_chrTiles, sizeof(sharpness_chrTiles));
   RLUnCompVram(sharpness_chrMap, MAP[PFMAP]);
+  dmaCopy(brickstile, PATRAM4(0, 63), sizeof(brickstile));
+  dma_memset16(MAP[PFOVERLAY], 0x043F, 32*20*2);
 
   while (1) {
     read_pad_help_check(helpsect_sharpness);
@@ -118,11 +121,17 @@ void activity_sharpness(void) {
     if (new_keys & KEY_B) {
       return;
     }
+    if (new_keys & KEY_A) {
+      is_bricks = !is_bricks;
+    }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)
+                |SCREEN_BASE(is_bricks ? PFOVERLAY : PFMAP);
     BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    dmaCopy(inverted ? invgray4pal : gray4pal, BG_COLORS+0x00, sizeof(gray4pal));
+    const unsigned short *palsrc = inverted ? invgray4pal : gray4pal;
+    if (is_bricks) palsrc = brickspal;
+    dmaCopy(palsrc, BG_COLORS+0x00, sizeof(gray4pal));
     REG_DISPCNT = MODE_0 | BG0_ON;
   }
 }
