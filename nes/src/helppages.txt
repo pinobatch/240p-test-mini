@@ -277,6 +277,8 @@ middle as no change,
 high as enhancement,
 and low as blurring.
 
+A: Toggle brick wall
+
 == Chroma crosstalk ==
 
 This pattern shows colored

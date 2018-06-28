@@ -29,6 +29,29 @@
 
 ; sb53-based stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.rodata
+; To allow set-and-forget palette management, sharpness bricks do not
+; share color 0 with the main pattern.  This means they use
+; colors 5, 6, 7, not 0, 1, 2.
+bricks_tile:
+  .byte %11000000
+  .byte %00110000
+  .byte %00001100
+  .byte %10000111
+  .byte %11100011
+  .byte %00110111
+  .byte %00001111
+  .byte %00000011
+
+  .byte %11111111
+  .byte %11111111
+  .byte %11111111
+  .byte %01111011
+  .byte %11011101
+  .byte %11111001
+  .byte %11111101
+  .byte %11111111
+
 .segment "BSS"
 test_state: .res 24
 
@@ -80,25 +103,61 @@ loop:
 
 .proc do_sharpness
   lda #VBLANK_NMI
+  sta test_state
   sta help_reload
   sta PPUCTRL
   asl a
   sta PPUMASK
   lda #$06
   jsr load_sb53_file
+  
+  ; Load bricks tile
+  ldx #$24
+  lda #$FF
+  ldy #$55
+  jsr ppu_clear_nt
+  lda #$0F
+  sta $4444
+  sta PPUADDR
+  lda #$F0
+  sta PPUADDR
+  ldx #$00
+  brickloop1:
+    lda bricks_tile,x
+    sta PPUDATA
+    inx
+    cpx #16
+    bcc brickloop1
+  lda #$3F
+  sta PPUADDR
+  lda #$05
+  sta PPUADDR
+  lda #$06
+  sta PPUDATA
+  lda #$17
+  sta PPUDATA
+  lda #$10
+  sta PPUDATA
 
 loop:
   lda nmis
 :
   cmp nmis
   beq :-
-  lda #VBLANK_NMI|BG_0000
+  lda test_state
   clc
   jsr ppu_screen_on_xy0
 
   lda #helpsect_sharpness
   jsr read_pads_helpcheck
   bcs do_sharpness
+  lda new_keys
+  and #KEY_A
+  beq not_toggle_bricks
+    lda #1
+    eor test_state
+    sta test_state
+  not_toggle_bricks:
   lda new_keys
   and #KEY_B
   beq loop

@@ -4,6 +4,7 @@
 #include <gba_dma.h>
 #include <gba_compression.h>
 #include <gba_systemcalls.h>
+#include <stdint.h>
 #include "global.h"
 #include "4bcanvas.h"
 #include "posprintf.h"
@@ -55,7 +56,19 @@ static const unsigned short plugePaletteNTSCJ[] = {
   RGB5( 0, 0, 0),RGB5( 1, 1, 1),RGB5( 1, 0, 1),RGB5( 0, 1, 0),
   RGB5(13,13,13),RGB5(19,19,19),RGB5(25,25,25),RGB5(31,31,31)
 };
-
+static const unsigned short brickspal[] = {
+  RGB5( 5, 0, 0),RGB5(10, 5, 5),RGB5(15,15,10)
+};
+static const uint32_t brickstile[8] = {
+  0x22111111,
+  0x11221111,
+  0x11112211,
+  0x01111022,
+  0x22011102,
+  0x11221002,
+  0x11112202,
+  0x11111122,
+};
 
 void activity_linearity(void) {
   unsigned int inverted = 0;
