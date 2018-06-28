@@ -1,0 +1,16 @@
+FireShark is the Pluge Mascot
+
+color assignments:
+outline, bg light, bg dark, mouth, body, eyes/teeth, body highlight
+
+palette (BGR4)
+000 464 242 00C 600 888 660
+
+darker palette
+000 000 000 000 111 222 111
+
+FireShark dark palette (BGR4)
+000 000 000 000 222 444 222
+
+FireShark light palette (BGR4)
+FFF FFF FFF 999 AAA DDD AAA
