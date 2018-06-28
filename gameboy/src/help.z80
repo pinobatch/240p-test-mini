@@ -873,6 +873,9 @@ help_draw_wanted_page:
   ld a,[help_cur_doc]
   ld de,helptitles
   call de_index_a
+  ld de,help_line_buffer
+  call undte_line
+  ld hl,help_line_buffer
   ld b,$00  ; X position
   call vwfPuts
   ld hl,CHRRAM0+$000

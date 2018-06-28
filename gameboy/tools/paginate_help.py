@@ -44,9 +44,6 @@ section "helppages",ROMX
                  for i, doc in enumerate(docs))
     lines.append('helptitles::')
     lines.extend('  dw helptitle_%s' % doc[1] for doc in docs)
-    lines.extend('helptitle_%s: db %s,0'
-                 % (doc[1], rgbasm_escape_bytes(doc[0].encode("cp144p")))
-                 for doc in docs)
 
     cumul_pages = [0]
     allpages = []
@@ -58,16 +55,23 @@ section "helppages",ROMX
         cumul_pages.append(len(allpages))
 
     # DTE compression
+    helptitledata = [doc[0].encode("cp144p") for doc in docs]
     dtepages = list(allpages)
+    dtepages.extend(helptitledata)
+    oldsize = sum(len(x) for x in dtepages)
     dtepages, replacements, pairfreqs = dte_compress(dtepages, mincodeunit=136)
+    newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
     print("compressed help from %d bytes to %d bytes"
-          % (sum(len(x) for x in allpages),
-             2 * len(replacements) + sum(len(x) for x in dtepages)),
-          file=sys.stderr)
+          % (oldsize, newsize), file=sys.stderr)
+    helptitledata = dtepages[len(allpages):]
+    del dtepages[len(allpages):]
 
     for pagenum, page in enumerate(dtepages):
         lines.append("helppage_%03d:" % pagenum)
         lines.append("  db %s" % rgbasm_escape_bytes(page))
+    lines.extend('helptitle_%s: db %s,0'
+                 % (doc[1], rgbasm_escape_bytes(dtetitle))
+                 for doc, dtetitle in zip(docs, helptitledata))
 
     lines.append('help_cumul_pages::')
     lines.append(rgbasm_bytearray(cumul_pages))
