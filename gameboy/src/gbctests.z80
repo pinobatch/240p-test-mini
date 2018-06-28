@@ -456,14 +456,18 @@ smpte_load_map::
   add a  ; row*2
   add a  ; row*4
   add e  ; row*5
+  ld de,smpte_rowdata
   add a  ; row*10
   add a  ; row*20
-  ld de,smpte_rowdata
-  add e
-  ld e,a
-  jr nc,.rowdata_no_wrap
+  jr nc,.rowdata_nowrap1  ; 13 to 15 times 20 exceeds 256
     inc d
-  .rowdata_no_wrap:
+  .rowdata_nowrap1:
+  add e
+  jr nc,.rowdata_nowrap2
+    inc d
+  .rowdata_nowrap2:
+  ld e,a
+
   pop af  ; Stack: rowmap pos
   swap a
   and $0F
@@ -486,7 +490,7 @@ smpte_load_map::
       and $0F
       bit 3,a
       jr z,.nb3
-        xor %00101000
+        xor %00101000  ; move bit 3 to bit 5
       .nb3:
       ld [hl+],a
       xor a

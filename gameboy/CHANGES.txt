@@ -1,13 +1,19 @@
 0.07 (future)
-* Fix all-black result screen if final press was 0 lag
-  (reported by Great Hierophant)
-* ISSOtm golfed SGB detection by 3 bytes
 * Remove unused last 8 glyphs of font
-* Audio sync: Move ceiling up to match position in 240p Test Suite
-  (for Sega Genesis) version 1.16
-* Stopwatch: Draw frames in blue if even or red if odd
+* Help: Compress document titles with DTE
+* Gray ramp: Use Color tests map loader for GBC version
 * Solid screen: Explain what a bad high voltage regulator does to
   SGB and GB Player border (requested by ISSOtm)
+* Sharpness: A to show brick wall (Genesis 1.16 parity)
+* Stopwatch: Draw even frame numbers in blue and odd in red
+  (Genesis 1.16 parity)
+* Stopwatch: Add third ruler setting to show in even frames
+  (Genesis 1.16 parity)
+* Stopwatch: Lose redundant border tiles on hand (circle) sprites
+* Manual lag: Fix all-black result screen if final press was 0 lag
+  (reported by Great Hierophant)
+* Audio sync: Move ceiling up (Genesis 1.16 parity)
+* ISSOtm golfed SGB detection by 3 bytes
 * Begin to unify help conversion tooling with NES and GBA
 
 0.06 (2018-06-03)

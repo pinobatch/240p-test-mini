@@ -97,7 +97,7 @@ global sizeof_stopwatchdigits_chr
 
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "megaton_gfx0",ROM0
+section "megaton_gfx0",ROMX
 megatontiles_chr:: incbin "obj/gb/megatontiles.chrgb16.pb16"
 sizeof_megaton_tiles equ 320
 global sizeof_megaton_tiles
