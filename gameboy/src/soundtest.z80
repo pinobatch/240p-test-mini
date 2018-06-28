@@ -19,7 +19,7 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-section "soundtest",ROM0,align[4]
+section "soundtest",ROM0
 ; "".join("%x" % round(sin(x*pi/32) * 7.5 + 7.5) for x in range(1, 64, 2))
 
 waveram_sinx:
@@ -154,8 +154,7 @@ soundtest_de_hl:
 load_waveram::
   xor a
   ldh [rNR30],a  ; unlock waveram
-  ld c,low(_AUD3WAVERAM)
-  ld b,16
+  ld bc,16*256 + low(_AUD3WAVERAM)
   .waveloop:
     ld a,[hl+]
     ld [$FF00+c],a
@@ -167,9 +166,11 @@ load_waveram::
   ret
 
 wait30frames:
+  ; Darken GB mono palette
   ld a,%10111101
   ldh [rBGP],a
   ldh [rOBP0],a
+  ; Set GBC text window background color to red
   ld a,$84
   ldh [rBCPS],a
   ld a,$18
@@ -182,9 +183,11 @@ wait30frames:
     call wait_vblank_irq
     dec b
     jr nz,.frameloop
+  ; Restore GB mono palette
   ld a,%01101100
   ldh [rBGP],a
   ldh [rOBP0],a
+  ; Restore GBC palette
   ld hl,helpbgpalette_gbc
   ld bc,(8) * 256 + low(rBCPS)
   ld a,$80
@@ -193,14 +196,15 @@ wait30frames:
 PULSE_1K = 2048-131
 
 soundtest_1kpulse:
+  ld hl,rNR11  ; When loading 4+ regs, [hl+] is 1+ byte smaller than ldh
   ld a,$80
-  ldh [rNR11],a  ; Duty 50%
+  ld [hl+],a  ; NR11: Duty 50%
   ld a,$A0
-  ldh [rNR12],a  ; volume and decay
+  ld [hl+],a  ; NR12: volume and decay
   ld a,low(PULSE_1K)
-  ldh [rNR13],a  ; freq lo
+  ld [hl+],a  ; NR13: freq lo
   ld a,high(PULSE_1K) | $80
-  ldh [rNR14],a  ; freq hi and note start
+  ld [hl],a  ; NR14: freq hi and note start
   call wait30frames
   xor a
   ldh [rNR12],a  ; volume and decay
