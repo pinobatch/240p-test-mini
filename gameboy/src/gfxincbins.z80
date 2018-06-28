@@ -20,7 +20,7 @@ include "src/gb.inc"
 
 ; Help ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "helptiles",ROM0,align[5]
+section "helptiles",ROM0
 helptiles:: incbin "obj/gb/helptiles.chrgb16.pb16"
 sizeof_helptiles equ 672
 global sizeof_helptiles
@@ -160,10 +160,6 @@ spritegfx_chr::
   incbin "obj/gb/spritegfx.chrgb.pb16"
 
 ; GBC exclusive tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section "gradientbars_gfx0",ROM0
-gradientcolorbartiles_chr::
-  incbin "obj/gb/gradientcolorbartiles.chrgb.pb16"
 
 section "smptebars_gfx0",ROM0
 smptetiles_chr::

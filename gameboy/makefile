@@ -101,8 +101,7 @@ obj/gb/gfxincbins.o: \
   obj/gb/kikimap.chr1 obj/gb/kikitiles.chrgb \
   obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16 \
   obj/gb/smptetiles.chrgb.pb16 obj/gb/megatontiles.chrgb16.pb16 \
-  obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16 \
-  obj/gb/gradientcolorbartiles.chrgb.pb16
+  obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16
 
 # Graphics conversion
 
