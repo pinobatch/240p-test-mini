@@ -55,15 +55,11 @@ activity_overscan::
   call clear_gbc_attr
   ld [oam_used],a
   ldh [rWY],a
-
-  ld hl,CHRRAM0
-  ld de,bggfx_chr
-  ld b,32
-  call pb16_unpack_block
+  call load_common_obj_tiles
 
   ; Blank both tilemaps
   ld de,_SCRN0
-  ld h,$04
+  ld h,e
   ld bc,2048
   call memset
 

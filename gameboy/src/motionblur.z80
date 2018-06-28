@@ -43,11 +43,11 @@ wndtxt:
 
 wndmap:
   db $20,$21,$22,$23,$24,$25  ; Back shade
-  db $2E,$2F,$04,$26,$27,$04  ; On time
-  db $04,$04,$04,$23,$24,$25  ;    shade
-  db $2C,$2D,$04,$26,$27,$04  ; Off time
-  db $04,$04,$04,$23,$24,$25  ;     shade
-  db $28,$29,$2A,$2B,$04,$04  ; Stripes
+  db $2E,$2F,$00,$26,$27,$00  ; On time
+  db $00,$00,$00,$23,$24,$25  ;    shade
+  db $2C,$2D,$00,$26,$27,$00  ; Off time
+  db $00,$00,$00,$23,$24,$25  ;     shade
+  db $28,$29,$2A,$2B,$00,$00  ; Stripes
 
 row_high_low:  ; high+1 and low values for each row, monochrome
   dw $0400,$1501,$0400,$1501,$0400,$0200
@@ -82,19 +82,14 @@ activity_motion_blur::
   ldh [back_shade],a 
 .restart:
   call clear_gbc_attr
+  call load_common_obj_tiles
 
   ; Clear tilemaps to color 0
-  ld h,$04
   ld de,_SCRN0
+  ld h,e
   ld bc,32*18
   call memset
 
-  ; Load basic tiles
-  ld hl,CHRRAM0
-  ld de,bggfx_chr
-  ld b,32
-  call pb16_unpack_block
-  
   ; Load label tiles
   call vwfClearBuf
   ld hl,wndtxt
@@ -177,7 +172,7 @@ activity_motion_blur::
   ld b,6
   ld de,32
   .draw_cursor_loop:
-    ld a,$04
+    xor a
     dec c
     jr nz,.draw_cursor_not_this_row
       ld a,$05
@@ -274,7 +269,7 @@ make_help_vram:
     call bcd8bit
     or a
     jr nz,.has_tens
-      ld a,$14
+      ld a,$10
     .has_tens:
     xor $10
     ld [hl+],a

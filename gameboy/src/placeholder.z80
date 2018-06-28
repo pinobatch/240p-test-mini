@@ -130,19 +130,30 @@ lame_boy_demo::
 
 ; Background drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+load_common_obj_tiles::
+  ld hl,CHRRAM0
+  jr load_common_tiles_hl
+
+load_common_bg_tiles::
+  ld hl,CHRRAM2
+load_common_tiles_hl:
+  ld de,bggfx_chr
+  ld b,32
+  jp pb16_unpack_block
+
 draw_bg:
   call lcd_off
-
-  ; Fill CHR RAM
-  ld de,bggfx_chr
-  ld hl,CHRRAM2
-  ld bc,32
-  call pb16_unpack_block
+  call load_common_bg_tiles
 
   ; Clear nametable excl. floor
-  ld h,$00
+  ld h,$04
   ld de,_SCRN0
   ld bc,32*16
+  ld a,[initial_a]
+  cp $11
+  jr nz,.not_gbc_sky
+    ld h,e
+  .not_gbc_sky:
   call memset
 
   ; Draw top of floor
@@ -156,27 +167,6 @@ draw_bg:
   ld de,_SCRN0+32*17
   ld bc,20
   call memset
-
-  ; On GBC, draw sky and floor attributes
-  ld a,[initial_a]
-  cp $11
-  jr nz,.not_gbc_attrs
-    ldh [rVBK],a
-
-    ; Palette 0: Sky and floor
-    ld h,0
-    ld de,_SCRN0
-    ld bc,32*18
-    call memset
-
-    ; Replace first tile (sky) with a blank one
-    xor a
-    ldh [rVBK],a
-    ld hl,CHRRAM2
-    ld c,16
-    call memset_tiny
-  .not_gbc_attrs:
-
 
   ld hl,_SCRN0+32*12+1
   call bg_draw_one_block
