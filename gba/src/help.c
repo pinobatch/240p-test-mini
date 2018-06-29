@@ -60,7 +60,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FG_BGCOLOR 6
 #define FG_FGCOLOR 2
 
-char help_line_buffer[HELP_LINE_LEN];
+char help_line_buffer[HELP_LINE_LEN] __attribute__((aligned (2)));
 unsigned char help_cur_page = (unsigned char)-1;
 unsigned char help_bg_loaded;
 unsigned char help_wanted_page;
