@@ -1,8 +1,10 @@
-0.03
+0.03 (2018-06-30)
 * Solid screen: Explain what a bad high voltage regulator does to
   SGB and GB Player border (requested by ISSOtm)
+* Sharpness: A to show brick wall pattern
 * Stopwatch: Draw frames in blue if even or red if odd
 * Stopwatch: Additional mode for ruler in even frames only
+* License headers for everything
 
 0.02 (2018-06-21)
 * Add Shadow sprite, Stopwatch, Hill zone scroll, and Vertical scroll
