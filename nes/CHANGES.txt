@@ -1,7 +1,9 @@
-0.17 (future)
-* Begin to unify help conversion tooling with GB and GBA
+0.17 (2018-06-30)
+* Sharpness: A to show brick wall (Genesis 1.16 parity)
 * Stopwatch: Option to show ruler during even frames
-* Audio sync: Move ceiling up to match Genesis 1.16
+  (Genesis 1.16 parity)
+* Audio sync: Move ceiling up (Genesis 1.16 parity)
+* Begin to unify help conversion tooling with GB and GBA
 
 0.16 (2017-03-xx)
 * Grid: Select toggles gray or black background (parity with

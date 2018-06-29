@@ -1,5 +1,4 @@
-0.07 (future)
-* Remove unused last 8 glyphs of font
+0.07 (2018-06-30)
 * Help: Compress document titles with DTE
 * Gray ramp: Use Color tests map loader for GBC version
 * Solid screen: Explain what a bad high voltage regulator does to
@@ -9,11 +8,11 @@
   (Genesis 1.16 parity)
 * Stopwatch: Add third ruler setting to show in even frames
   (Genesis 1.16 parity)
-* Stopwatch: Lose redundant border tiles on hand (circle) sprites
 * Manual lag: Fix all-black result screen if final press was 0 lag
-  (reported by Great Hierophant)
+  (reported by Great Hierophant, echoing Quietust's NES report)
 * Audio sync: Move ceiling up (Genesis 1.16 parity)
 * ISSOtm golfed SGB detection by 3 bytes
+* Numerous other size optimizations and tile sheet unifications
 * Begin to unify help conversion tooling with NES and GBA
 
 0.06 (2018-06-03)
