@@ -672,8 +672,9 @@ Select: Show or hide
 
 == 144p Test Suite ==
 
-Ver. 0.06 (2018-06-03)
-Add GBC exclusive tests
+Ver. 0.17 (2018-06-04)
+Sharpness brick wall;
+size optimization
 
 © 2011-2016
   Artemio Urbina

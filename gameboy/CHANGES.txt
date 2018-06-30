@@ -1,4 +1,4 @@
-0.07 (2018-06-30)
+0.17 (2018-06-30)
 * Help: Compress document titles with DTE
 * Gray ramp: Use Color tests map loader for GBC version
 * Solid screen: Explain what a bad high voltage regulator does to
@@ -14,6 +14,7 @@
 * ISSOtm golfed SGB detection by 3 bytes
 * Numerous other size optimizations and tile sheet unifications
 * Begin to unify help conversion tooling with NES and GBA
+* Unify version numbers, skipping 0.07 through 0.16
 
 0.06 (2018-06-03)
 * Add GBC-exclusive tests (PLUGE, Gradient color bars, SMPTE bars,

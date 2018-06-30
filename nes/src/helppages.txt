@@ -728,8 +728,8 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.16 (2017-03-xx)
-Gray grid and Crowd
+Version 0.17 (2017-06-30)
+Add Sharpness brick wall
 
 Concept by Artemio Urbina
   🐦 @Artemio
@@ -737,7 +737,7 @@ Program by Damian Yerrick
   🐦 @PinoBatch
 
 © 2011-2016 Artemio Urbina
-© 2015-2017 Damian Yerrick
+© 2015-2018 Damian Yerrick
 This is free software; see the
 source for copying conditions.
 There is NO warranty, not

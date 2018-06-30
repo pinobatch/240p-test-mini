@@ -602,10 +602,8 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.02 (2018-06-21)
-Add Shadow sprite,
-Stopwatch, Scroll test,
-and PCM sound test
+Version 0.17 (2018-06-30)
+Add Sharpness brick wall
 
 © 2011-2016 Artemio Urbina
 © 2015-2018 Damian Yerrick
@@ -636,10 +634,3 @@ You can help:
   external scalers
 - Spread the word about
   the project
-
-== To do ==
-
-Roadmap
-
-0.03: PLUGE Contrast,
-  Sharpness wall

@@ -1,4 +1,4 @@
-0.03 (2018-06-30)
+0.17 (2018-06-30)
 * Solid screen: Explain what a bad high voltage regulator does to
   GB Player border (requested by ISSOtm)
 * Sharpness: A to show brick wall pattern (Genesis 1.16 parity)
@@ -9,6 +9,7 @@
 * Help: Align line buffer to prevent corruption of nearby variables
   by DMA memset, fixing Down after Scroll test
 * Add license headers
+* Skip versions 0.03 through 0.16
 
 0.02 (2018-06-21)
 * Add Shadow sprite, Stopwatch, Hill zone scroll, and Vertical scroll
