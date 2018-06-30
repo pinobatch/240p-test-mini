@@ -101,7 +101,8 @@ obj/gb/gfxincbins.o: \
   obj/gb/kikimap.chr1 obj/gb/kikitiles.chrgb \
   obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16 \
   obj/gb/smptetiles.chrgb.pb16 obj/gb/megatontiles.chrgb16.pb16 \
-  obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16
+  obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16 \
+  obj/gb/pluge_shark_4color.chrgb.pb16
 
 # Graphics conversion
 
@@ -117,6 +118,9 @@ obj/gb/%.chrgb16: tilesets/%.png
 
 obj/gb/kikimap.chr1: tilesets/kikimap.png
 	$(BMP2) --planes "0" -H 32 $< $@
+
+obj/gb/pluge_shark_4color.chrgb: ../common/tilesets/pluge_shark_4color.png
+	$(BMP2GB) -H 32 $< $@
 
 obj/gb/vwf7.z80: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 	$(PY) $^ $@

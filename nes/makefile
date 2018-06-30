@@ -112,7 +112,8 @@ $(objdir)/pb53files.o: \
   $(objdir)/stdtiles.chr.pb53 $(objdir)/backlight_sprites.chr.pb53 \
   $(objdir)/linearity_ntscgray.sb53 $(objdir)/linearity_palgray.sb53 \
   $(objdir)/linearity_grid_ntscgray.sb53 $(objdir)/linearity_grid_palgray.sb53 \
-  $(objdir)/sharpnessgray.sb53 $(objdir)/crosstalk.sb53
+  $(objdir)/sharpnessgray.sb53 $(objdir)/crosstalk.sb53 \
+  $(objdir)/pluge_shark_4color.chr.pb53
 
 # Generic rules for CHR
 
@@ -145,6 +146,8 @@ $(objdir)/kikimap.chr: $(imgdir)/kikimap.png
 	$(BMP2) -H 32 --planes "0" $< $@
 $(objdir)/crosstalk.sav: $(imgdir)/crosstalk.png
 	$(PY) tools/savtool.py --palette 0F161A120F0F0F0F0F0F0F0F0F0F0F0F $< $@
+$(objdir)/pluge_shark_4color.chr: $(cimgdir)/pluge_shark_4color.png
+	$(BMP2) -H 32 $< $@
 
 # Help me!
 $(objdir)/%.hlp.s: $(srcdir)/%.txt

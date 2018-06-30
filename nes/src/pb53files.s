@@ -41,10 +41,13 @@ unpb53_files:
   .byte <.BANK(help_cursor_pb53), 2
   .addr overclock_s0_pb53
   .byte <.BANK(overclock_s0_pb53), 2
+
   .addr megatontiles_pb53
   .byte <.BANK(megatontiles_pb53), 24
   .addr overscan_pb53
   .byte <.BANK(overscan_pb53), 40
+  .addr pluge_shark_pb53
+  .byte <.BANK(pluge_shark_pb53), 16
 
 ;
 ; 7654 3210
@@ -111,4 +114,4 @@ lag_clock_face_sb53: .incbin "obj/nes/lag_clock_face.sb53"
 fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
 stdtiles_pb53:       .incbin "obj/nes/stdtiles.chr.pb53",2
 megatontiles_pb53:   .incbin "obj/nes/megatontiles.chr.pb53",2
-
+pluge_shark_pb53:    .incbin "obj/nes/pluge_shark_4color.chr.pb53",2
