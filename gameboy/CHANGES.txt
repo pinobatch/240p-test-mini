@@ -3,7 +3,7 @@
 * Gray ramp: Use Color tests map loader for GBC version
 * Solid screen: Explain what a bad high voltage regulator does to
   SGB and GB Player border (requested by ISSOtm)
-* Sharpness: A to show brick wall (Genesis 1.16 parity)
+* Sharpness: A to show brick wall pattern (Genesis 1.16 parity)
 * Stopwatch: Draw even frame numbers in blue and odd in red
   (Genesis 1.16 parity)
 * Stopwatch: Add third ruler setting to show in even frames

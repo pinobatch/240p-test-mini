@@ -8,7 +8,7 @@
 0.16 (2017-03-xx)
 * Grid: Select toggles gray or black background (parity with
   Genesis test 1.15)
-* Sound test: Added "Crowd", a bytebeat composition by Kragen
+* Sound test: Add "Crowd", a bytebeat composition by Kragen
   ported to NES by rainwarrior
 * paginate_help.py: Specify UTF-8 encoding for input file
   (Python for Windows instead defaults to cp1252)
