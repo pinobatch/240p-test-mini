@@ -23,7 +23,7 @@ include $(DEVKITARM)/gba_rules
 #
 #--------------------------------------------------------------------
 TARGET := 240pee_mb
-VERSION := wip
+VERSION := 0.17
 OBJS := \
   main help \
   placeholder stills overscan scrolltest motionblur \

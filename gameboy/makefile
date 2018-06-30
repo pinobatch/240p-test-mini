@@ -11,7 +11,7 @@
 
 # Used in the title of the zipfile and .gb executable
 title:=gb240p
-version:=0.06
+version:=0.17
 
 # Space-separated list of asm files without .z80 extension
 # (use a backslash to continue on the next line)

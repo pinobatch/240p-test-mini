@@ -1,0 +1,30 @@
+Checklist before release
+
+1. `CHANGES.txt` (3): Ensure version and release date are updated
+2. `CHANGES.txt` (3): Ensure all common changes have the same wording
+3. Make a common change highlights list for the GitHub release,
+   based on this version's `CHANGES.txt`
+4. `makefile` (4): Ensure version is updated
+5. `helppages.txt` (3): Ensure version and release date are updated
+6. `make all` to ensure all versions are built, including the
+   sometimes neglected NES-BNROM version
+7. Test major functionality on PowerPak, EverDrive, and GBAMP,
+   starting with Credits and touching every test at least once
+8. Test zipfile for completeness
+
+        rm -r build
+        make dist && mkdir build && cd build
+        unzip ../240p-test-mini-*.zip
+        make -j2 all
+
+9. `git status` and correct anything out of the ordinary
+10. `git add -u && git commit`
+11. `git tag v0.xx && git push && git push --tags`
+12. On GitHub, draft a new release titled
+    "240p Test Suite (NES, GB, and GBA) v0.xx`
+13. Post highlights and link to GitHub release page to NESdev topic,
+    attaching ROM and source zipfile
+14. Post highlights, link to GitHub release page, and link to NESdev 
+    attachment on gbdev.gg8.se and forum.gbadev.org
+15. Mail highlights and link to GitHub release page to the
+    address shown at <https://pdroms.de/submit-news>

@@ -15,6 +15,7 @@
 /gameboy/obj/gb/*.iu
 /gba/obj/gba/*.h
 /gba/obj/gba/*.s
+/240p-test-mini-*.zip
 /zip.in
 /nes/zip.in
 /gameboy/zip.in
