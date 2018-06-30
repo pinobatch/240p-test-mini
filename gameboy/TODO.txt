@@ -1,7 +1,5 @@
-Patches are welcome for any of the following:
+Pull requests are welcome for any of the following:
 
 * Get Gus blinking
-* Game Boy Color enhancement
 * Super Game Boy enhancement
-* Update the NES suite with more concise help pages from this port
-* Add DTE to NES suite's help pages
+* Add DTE to NES/GBA suite's help pages

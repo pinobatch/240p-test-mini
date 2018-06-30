@@ -6,10 +6,10 @@ The Pluge Contrast test in 240p Test Suite (for Sega Genesis) version
 game _Fire Shark_ as a repeating pattern.  When I discovered that
 we probably don't have the rights to this icon, I drew my own
 replacement based on the pose used by emoji fonts' renderings
-of the character 🦈 [SHARK (U+1F988)][1], added in Unicode 11.
+of the character 🦈 [SHARK (U+1F988)][2], added in Unicode 11.
 I made a bit more cartoonish, including a large eye like those
 of the icon, and colored it based on the closest color in the
-[Bisqwit palette on wiki.nesdev.com][2] to each color in the icon.
+[Bisqwit palette on wiki.nesdev.com][3] to each color in the icon.
 
 * Outline: #000000 (NES $0F)
 * Background mark: #003C00 (NES $0A)

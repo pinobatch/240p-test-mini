@@ -26,12 +26,12 @@ Load 240pee.nes onto a [PowerPak] or [EverDrive-N8] and run it.
 You can also burn it to an NES cartridge with an UNROM board.
 Full instructions are in `making-carts.md`.
 
-Once the test is running, the credits will appear.  You can navigate
+Once the suite is running, the credits will appear.  You can navigate
 the menu with the Control Pad and the A and B Buttons.  There are
-two pages of tests, the first with mostly still images and the second
-with more interactive tests.  In each test, you can press B to exit
-or Start to display instructions.  The test instructions are also
-available in `helppages.txt` in the suite's source code.
+two pages of tests, one with mostly still images and the other with
+more interactive tests.  Each test is controlled with the Control Pad
+and the A and Select Buttons.  To show help for any test, press Start
+or read `src/helppages.txt`.  To leave a test, press the B Button.
 
 Versions
 --------
@@ -47,7 +47,7 @@ written in Python 3 and [Pillow] (Python Imaging Library).  It
 compensates for regional speed differences and has been tested on
 authentic NTSC and PAL NES consoles and on a Dendy (PAL famiclone).
 
-Since late 2015, five other platforms that run the suite:
+Artemio Urbina maintains the upstream suite on five platforms:
 
 * It was first developed in C for the Sega Genesis using the SGDK,
   using 320x224p resolution.  It comes as a cartridge image or as
@@ -68,6 +68,8 @@ Since late 2015, five other platforms that run the suite:
   resolutions as the Dreamcast version.  It comes as a disc image for
   a modded GameCube, a DOL file for SD Media Launcher on GameCube,
   and a DOL file for Homebrew Channel on Wii.
+* The author of the NES port also maintains a port to Game Boy and
+  Game Boy Color and a port to Game Boy Advance.
 
 [ca65]: https://cc65.github.io/cc65/
 [Pillow]: https://pillow.readthedocs.org/
@@ -92,6 +94,7 @@ Contributors
 * Portrait in Shadow sprite test: darryl.revok
 * Hill zone background: mikejmoffitt
 * Extra patterns and collaboration: Konsolkongen & [shmups] regulars
+* "Crowd" bytebeat player: Kragen & rainwarrior
 
 If you're interested in contributing to the NES port, you're invited
 to post in its [development thread].  We seek experts with authentic

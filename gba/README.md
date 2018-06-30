@@ -1,4 +1,4 @@
-144p Test Suite
+160p Test Suite
 ===============
 
 The [240p Test Suite] is a homebrew software suite for video game
@@ -6,16 +6,18 @@ consoles developed to help in the evaluation of upscalers, upscan
 converters and line doublers.
 
 This program is a port of Artemio Urbina's 240p Test Suite
-to the Game Boy, as a way of learning the Game Boy CPU.
+to the Game Boy Advance.
 
-Build requirements: RGBDS, Python 3, Pillow, and GNU Make
+Build requirements: MSYS, devkitARM, libgba, Python3, and Pillow
 
 [240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
 
 Usage
 -----
-To run this on a Game Boy, load the ROM onto your [EverDrive-GB]
-or [Catskull cartridge].
+This is a multiboot program, one that runs entirely in RAM.  It can
+be loaded onto a GBA through a flash card, a GBA Movie Player, a PC
+with an MBV2 or Xboo multiboot cable, or the homebrew Game Boy
+Interface software for GameCube.
 
 Once the suite is running, the credits will appear.  You can navigate
 the menu with the Control Pad and the A and B Buttons.  There are
@@ -25,34 +27,27 @@ color balance.  Each test is controlled with the Control Pad and the
 A and Select Buttons.  To show help for any test, press Start or read
 src/helppages.txt. To leave a test, press the B Button.
 
-[EverDrive-GB]: https://krikzz.com/store/home/48-everdrive-gb.html
-[Catskull cartridge]: https://catskullelectronics.com/32kcart
+Because the controls match the Game Boy Color version, the L and R
+(shoulder) buttons are not used.
 
 Versions
 --------
-The Game Boy outputs a progressive video signal with 144 lines
-of picture.  The original Game Boy and Game Boy Pocket have a
-passive matrix STN LCD panel that displays four shades of gray.
-The Super Game Boy accessory maps these gray shades to colors.
-The Game Boy Color has a TFT panel with 32 levels per RGB channel.
-Super Game Boy and Game Boy Player accessories act as scalers to
-allow use of Game Boy software with a television.
+The Game Boy Advance system outputs progressive video with 160
+lines of picture.  Its TFT panel has 32 levels per RGB channel
+and a reputation for crushing black levels, for which its launch
+titles failed to compensate.  Game Boy Advance SP and Nintendo DS
+are backlit.
 
-The Game Boy display works by absorbing light instead of emitting it.
-Because of this "subtractive" nature, as well as the overall reduced
-contrast and other display artifacts on monochrome handhelds, many
-tests allow inverting grays with the Select Button.
+The Game Boy Player accessory for Nintendo GameCube outputs 480i
+or 480p video.  It acts as a scaler to allow use of GBA software
+with a television.
 
-Though the NES version of 240p Test Suite uses about 52 KiB of ROM
-data, the [cartridges sold by Catskull] are limited to 32 KiB.
-Fortunately, the graphics for several tests are smaller than on a
-240p platform, which makes the menu, Linearity, Sharpness, Drop
-Shadow, and Scroll Test smaller.  I managed to make some tests' help
-text more concise.  Easily readable VRAM helps, as does the LR35902
-CPU's better code density for anything that doesn't use structs or
-parallel arrays.
+The GBA display works by absorbing light instead of emitting it.
+Because of this "subtractive" nature, as well as the overall
+darkness on GBA prior to SP, many tests allow inverting grays
+with the Select Button.
 
-A Game Boy Advance port is also available.
+NES and Game Boy ports are also available.
 
 Artemio Urbina maintains the upstream suite on five platforms:
 
@@ -64,13 +59,8 @@ Artemio Urbina maintains the upstream suite on five platforms:
 
 Limits
 ------
-* No Super Game Boy enhancements, as they would not fit in 32 KiB.
-  It was hard enough making GBC fit.
-* Linearity: No support for non-square NTSC or PAL pixel aspect
-  ratios when used through Super Game Boy.
-* Sound Test: No "Crowd" because GB PCM is limited to 4 bits.
-* Alternate 240p/480i: SGB and GB Player offer no control over
-  the host systems' interlace modes except through SGB JUMP.
+* Alternate 240p/480i is omitted because Game Boy Player offers
+  no control over the host system's interlace mode.
 * The true IRE levels of the GameCube's output when running Game Boy
   Player have not yet been measured.
 
@@ -83,14 +73,13 @@ Contributors
 * Hill zone background: mikejmoffitt
 * Extra patterns and collaboration: Konsolkongen & [shmups] regulars
 
-If you're interested in contributing to the Game Boy port, you're
-invited to post in its [NESdev thread] or [GBDev thread].
+If you're interested in contributing to the GBA port, you're
+invited to post in its [gbadev thread].
 
 [@Artemio]: https://twitter.com/Artemio
 [@PinoBatch]: https://twitter.com/PinoBatch
 [shmups]: http://shmups.system11.org/
-[NESdev thread]: https://forums.nesdev.com/viewtopic.php?f=20&t=17221
-[GBDev thread]: http://gbdev.gg8.se/forums/viewtopic.php?id=542
+[gbadev thread]: http://forum.gbadev.org/viewtopic.php?t=18168
 
 Copyright 2011-2018 Artemio Urbina  
 Copyright 2018 Damian Yerrick

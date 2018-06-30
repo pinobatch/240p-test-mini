@@ -1,6 +1,6 @@
 0.17 (2018-06-30)
-* Sharpness: A to show brick wall (Genesis 1.16 parity)
-* Stopwatch: Option to show ruler during even frames
+* Sharpness: A to show brick wall pattern (Genesis 1.16 parity)
+* Stopwatch: Add third ruler setting to show in even frames
   (Genesis 1.16 parity)
 * Audio sync: Move ceiling up (Genesis 1.16 parity)
 * Begin to unify help conversion tooling with GB and GBA
