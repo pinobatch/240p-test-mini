@@ -33,7 +33,7 @@ it freely, subject to the following restrictions:
 void dma_memset16(void *dst, unsigned int c16, size_t n);
 
 const TileCanvas screen = {
-  .left = 0, .top = 0, .width = 32, .height = 24,
+  .left = 0, .top = 0, .width = 32, .height = 20,
   .chrBase = (uint32_t *)PATRAM4(0, 0),
   .map = 23,
   .core = 0,

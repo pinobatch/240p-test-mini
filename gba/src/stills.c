@@ -49,6 +49,30 @@ extern const unsigned int linearity_chrMap[];
 extern const VBTILE sharpness_chrTiles[48];
 extern const unsigned int sharpness_chrMap[];
 
+extern const unsigned char pluge_shark_6color_chrTiles[];
+extern const unsigned short pluge_shark_6color_chrPal[6];
+static const unsigned short pluge_shark_dark[] = {
+  RGB5( 0, 0, 0),RGB5( 0, 0, 0),RGB5( 0, 0, 0),RGB5( 2, 2, 2),
+  RGB5( 2, 2, 2),RGB5( 4, 4, 4)
+};
+static const unsigned short pluge_shark_darker[] = {
+  RGB5( 0, 0, 0),RGB5( 0, 0, 0),RGB5( 0, 0, 0),RGB5( 1, 1, 1),
+  RGB5( 1, 1, 1),RGB5( 2, 2, 2)
+};
+static const unsigned short pluge_shark_light[] = {
+  RGB5(27,27,27),RGB5(29,29,29),RGB5(29,29,29),RGB5(31,31,31),
+  RGB5(31,31,31),RGB5(31,31,31)
+};
+static const unsigned short pluge_shark_lighter[] = {
+  RGB5(29,29,29),RGB5(30,30,30),RGB5(30,30,30),RGB5(31,31,31),
+  RGB5(31,31,31),RGB5(31,31,31)
+};
+static const unsigned short *const pluge_shark_palettes[] = {
+  pluge_shark_6color_chrPal,
+  pluge_shark_dark, pluge_shark_darker,
+  pluge_shark_light, pluge_shark_lighter
+};
+
 const unsigned short gray4pal[4] = {
   RGB5( 0, 0, 0),RGB5(15,15,15),RGB5(23,23,23),RGB5(31,31,31)
 };
@@ -269,6 +293,7 @@ void activity_601bars(void) {
 
 void activity_pluge(void) {
   unsigned int bright = 0;
+  unsigned int shark = 0;
 
   draw_barslist(plugerects);
 
@@ -283,20 +308,36 @@ void activity_pluge(void) {
       *tile++ = 0x32323232;
     }
   }
+  
+  LZ77UnCompVram(pluge_shark_6color_chrTiles, PATRAM4(0, 640));
+  for (unsigned int y = 0; y < 20; ++y) {
+    for (unsigned int x = 0; x < 30; ++x) {
+      MAP[PFOVERLAY][y][x] = 640 + ((y & 0x03) << 2) + (x & 0x03);
+    }
+  }
 
   while (1) {
     read_pad_help_check(helpsect_pluge);
     if (new_keys & KEY_A) {
-      bright = !bright;
+      bright += 1;
+      if (bright >= (shark ? 5 : 2)) bright = 0;
+    }
+    if (new_keys & KEY_SELECT) {
+      shark = !shark;
+      bright = 0;
     }
     if (new_keys & KEY_B) {
       return;
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(shark ? PFOVERLAY : PFMAP);
     BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    dmaCopy(bright ? plugePaletteNTSCJ : plugePaletteNTSC, BG_COLORS+0x00, sizeof(plugePaletteNTSC));
+    if (shark) {
+      dmaCopy(pluge_shark_palettes[bright], BG_COLORS+0x00, sizeof(pluge_shark_6color_chrPal));
+    } else {
+      dmaCopy(bright ? plugePaletteNTSCJ : plugePaletteNTSC, BG_COLORS+0x00, sizeof(plugePaletteNTSC));
+    }
     REG_DISPCNT = MODE_0 | BG0_ON;
   }
 }

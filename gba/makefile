@@ -33,7 +33,7 @@ OBJS := \
   bggfx_chr spritegfx_chr linearity_chr sharpness_chr \
   stopwatchface_chr stopwatchhand_chr stopwatchdigits_chr \
   kikimap_chr kikitiles_chr greenhillzone_chr \
-  Gus_portrait_chr hepsie_chr
+  Gus_portrait_chr hepsie_chr pluge_shark_6color_chr
 LIBS := -lgba
 
 BUILD		:= obj/gba
@@ -129,6 +129,8 @@ $(BUILD)/kikitiles_chr.s: tilesets/kikitiles.png
 	$(GRIT) $< -p! -gB2 -Mh2 -o $(basename $@)
 $(BUILD)/greenhillzone_chr.s: tilesets/greenhillzone.png
 	$(GRIT) $< -pn8 -gB4 -gzl -mRtpf -mLs -mzl -o $(basename $@)
+$(BUILD)/pluge_shark_6color_chr.s: ../common/tilesets/pluge_shark_6color.png
+	$(GRIT) $< -gB4 -gzl -pn8 -o $(basename $@)
 $(BUILD)/%_chr.h: $(BUILD)/%_chr.s
 	touch $@
 
