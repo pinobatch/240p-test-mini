@@ -87,29 +87,57 @@ color_handlers:
 ; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "pluge", ROM0
-pluge_palette_ntsc:
-  drgb $101010
-  drgb $181818
-  drgb $080808
-  drgb $080808
+pluge_palette_common:
   drgb $686868
   drgb $989898
   drgb $c8c8c8
   drgb $f8f8f8
 
-pluge_palette_ntscj:
+pluge_palette_ntsc:
+  drgb $101010
+  drgb $181818
+  drgb $080808
+  drgb $080808
+
   drgb $000000
   drgb $080808
   drgb $080008
   drgb $000800
 
+pluge_shark_palette:
+  drgb $000000
+  drgb $A8A8A8
+  drgb $102080
+  drgb $007080
+
+  drgb $000000
+  drgb $202020
+  drgb $101010
+  drgb $202020
+
+  drgb $000000
+  drgb $101010
+  drgb $080808
+  drgb $101010
+
+  drgb $D8D8D8
+  drgb $F8F8F8
+  drgb $E8E8E8
+  drgb $F8F8F8
+  
+  drgb $E8E8F8
+  drgb $F8F8F8
+  drgb $F0F0F0
+  drgb $F8F8F8
+
 activity_pluge:
   xor a
   ldh [curpalette],a
+  ldh [curvolume],a  ; 1: shark; 0: pluge
 .restart:
   call clear_gbc_attr
 
-  ; Load tiles and map
+  ; Load PLUGE tiles
   call load_common_obj_tiles
   ld hl,CHRRAM0+4*16+1
   ld b,8
@@ -119,14 +147,40 @@ activity_pluge:
     inc l
     dec b
     jr nz,.remap8
-  
+
+  ; Load shark tiles
+  ld a,bank(pluge_shark_chr)
+  ld [rMBC1BANK1],a
+  ld hl,CHRRAM0+32*16
+  ld de,pluge_shark_chr
+  ld b,16
+  call pb16_unpack_block
+
+  ; Load main map
   ld hl,_SCRN0
   ld de,pluge_rowmap
   call smpte_load_map
-  ld hl,pluge_palette_ntsc
-  ld bc,16*256+low(rBCPS)
-  ld a,$80
+  ld hl,pluge_palette_common
+  ld bc,8*256+low(rBCPS)
+  ld a,$88
   call set_gbc_palette
+
+  ; Load shark map (all palette 0)
+  ld hl,_SCRN1
+  ld b,18
+  ld a,$20
+  .sharkmaprowloop:
+    ld c,32
+    .sharkmaptileloop:
+      ld [hl+],a
+      add 4
+      and $2F
+      dec c
+      jr nz,.sharkmaptileloop
+    inc a
+    and $23
+    dec b
+    jr nz,.sharkmaprowloop
 
   ld a,$FF
   ldh [rLYC],a
@@ -140,24 +194,60 @@ activity_pluge:
   jr nz,.restart
 
   ld a,[new_keys]
-  bit PADB_B,a
+  ld b,a
+  bit PADB_B,b  ; B: exit
   ret nz
-  bit PADB_A,a
+
+  bit PADB_A,b  ; A: toggle palette
   jr z,.notogglepalette
+    ld c,2
+    ldh a,[curvolume]
+    or a
+    jr z,.only_two_palettes
+      ld c,5
+    .only_two_palettes:
     ldh a,[curpalette]
-    cpl
+    inc a
+    cp c
+    jr c,.no_palette_wraparound
+      xor a
+    .no_palette_wraparound:
     ldh [curpalette],a
   .notogglepalette:
+
+  bit PADB_SELECT,b  ; Select: toggle background type
+  jr z,.notogglebgtype
+  ldh a,[curvolume]
+    xor 1
+    ldh [curvolume],a
+    xor a
+    ldh [curpalette],a
+  .notogglebgtype:
+  ldh a,[curvolume]
+  add a
+  add a
+  add a  ; bit 3: SCRN0 or SCRN1
+  or LCDCF_ON|BG_NT0|BG_CHR01
+  ld [vblank_lcdc_value],a
 
   call wait_vblank_irq
 
   ; Load palette and tiles
-  ld hl,pluge_palette_ntsc
-  ldh a,[curpalette]
+  ld de,pluge_palette_ntsc
+  ldh a,[curvolume]
   or a
-  jr z,.notloadlight
-    ld hl,pluge_palette_ntscj
-  .notloadlight:
+  jr z,.not_load_shark_palette
+    ld de,pluge_shark_palette
+  .not_load_shark_palette:
+  ld a,[curpalette]
+
+  ; DE: which palette set to use; A: which entry in the set
+  ld h,0
+  add a
+  add a
+  add a
+  ld l,a
+  add hl,de
   ld a,$80
   ld bc,(1*8)*256+low(rBCPS)
   call set_gbc_palette

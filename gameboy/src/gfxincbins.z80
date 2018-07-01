@@ -166,5 +166,5 @@ smptetiles_chr::
   incbin "obj/gb/smptetiles.chrgb.pb16"
 
 section "pluge_shark_gfx1",ROMX
-pluge_shark_chr:
+pluge_shark_chr::
   incbin "obj/gb/pluge_shark_4color.chrgb.pb16"
