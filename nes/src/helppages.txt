@@ -63,9 +63,9 @@ http://junkerhq.net/240p
 == PLUGE ==
 
 The PLUGE (picture line-up
-generation equipment)
-pattern is used to adjust
-the black level.
+generation equipment) pattern
+is used to adjust the TV's
+"brightness" or black level.
 
 The inner bars are a signal
 level slightly lower than
@@ -75,15 +75,16 @@ lose sync. The outer bars
 are the darkest mix of
 colors the NES can show.
 
-You should adjust the TV's
-"brightness" control until the
-outer bars are clearly visible
-and inner bars are not.
+You should adjust brightness
+until the outer bars are
+clearly visible and inner
+bars are not.
 ----
 A: Darken the entire screen
   by 25% with emphasis filter
-Select: Switch outer bars
+↓: Switch outer bars
   between gray and color
+Select: Open PLUGE Contrast
 
 The emphasis filter and gray
 outer bars may misbehave on
@@ -91,6 +92,18 @@ NES consoles modded with
 a 2C03 or 2C05 RGB PPU
 taken from a Vs. System or
 PlayChoice 10 arcade board.
+----
+The PLUGE Contrast
+sub-test fills the screen
+with a pattern based on the
+SHARK (U+1F988) emoji.
+Use it with various palettes
+to check contrast and
+brightness.
+
+A: Switch palette among color,
+  dark, darker, light, or lighter
+Select: Return to PLUGE
 
 == Gradient color bars ==
 

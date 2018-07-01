@@ -593,20 +593,36 @@ visible.
 
 A: Toggle levels between
   NTSC and NTSC-J
+Select: Open PLUGE
+  Contrast
 ----
 GBC's 32 shades should
 correspond to signal
 level steps of about
-3.2 IRE. This would put
-shade 0 at NTSC-J black
-(0 IRE), and shade 2
-should be close to
-NTSC's 7.5 IRE setup.
+3.2 IRE. (This needs
+further testing.)
+This would put shade 0
+at NTSC-J black (0 IRE)
+and shade 2 near NTSC's
+7.5 IRE setup.
 
 NTSC: shades 3 and 0
   on background 2
 NTSC-J: shades 1 and 0.5
   on background 0
+----
+The PLUGE Contrast
+sub-test fills the screen
+with a pattern based on
+the SHARK (U+1F988)
+emoji. Use it with various
+palettes to check
+contrast and brightness.
+
+A: Switch palette among
+  color, dark, darker,
+  light, or lighter
+Select: Return to PLUGE
 
 == Gradient color bars ==
 

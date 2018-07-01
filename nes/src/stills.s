@@ -661,11 +661,21 @@ pluge_palette:
   .byte $0F,$0D,$04,$0A, $0F,$00,$10,$20
 pluge_both_palettes:
   .byte $04,$0A,$2D,$2D
+pluge_shark_palettes:
+  .byte $0F,$10,$02,$1A
+  .byte $0F,$00,$0F,$0A
+  .byte $10,$20,$32,$3A
   
 .segment "CODE"
 .proc do_pluge
 palettechoice = test_state+0
 emphasis = test_state+1
+is_shark = test_state+2
+  lda #0
+  sta palettechoice
+  sta is_shark
+  lda #BG_ON
+  sta emphasis
 
 restart:
   jsr rf_load_tiles
@@ -673,9 +683,6 @@ restart:
   sta rf_curnametable
   lda #$00
   sta rf_curpattable
-  sta palettechoice
-  lda #BG_ON
-  sta emphasis
   ldy #<pluge_rects
   lda #>pluge_rects
   jsr rf_draw_rects_attrs_ay

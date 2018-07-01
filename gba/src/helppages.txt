@@ -539,9 +539,8 @@ NTSC: shades 3 and 0
 NTSC-J: shades 1 and 0.5
   on background 0
 ----
-PLUGE Contrast
-
-This sub test fills the screen
+The PLUGE Contrast
+sub-test fills the screen
 with a pattern based on the
 SHARK (U+1F988) emoji.
 Use it with various palettes
