@@ -80,9 +80,9 @@ until the outer bars are
 clearly visible and inner
 bars are not.
 ----
-A: Darken the entire screen
+↓: Darken the entire screen
   by 25% with emphasis filter
-↓: Switch outer bars
+A: Switch outer bars
   between gray and color
 Select: Open PLUGE Contrast
 
@@ -101,8 +101,8 @@ Use it with various palettes
 to check contrast and
 brightness.
 
-A: Switch palette among color,
-  dark, darker, light, or lighter
+A: Switch palette among normal,
+  dark, or light colors
 Select: Return to PLUGE
 
 == Gradient color bars ==

@@ -657,14 +657,13 @@ pluge_rects:
   rf_attr   0,  0,256,240, 0
   rf_attr  80, 48,176,192, 1
   .byte $00
-pluge_palette:
-  .byte $0F,$0D,$04,$0A, $0F,$00,$10,$20
-pluge_both_palettes:
-  .byte $04,$0A,$2D,$2D
+pluge_palettes:
+  .byte $0F,$0D,$04,$0A
+  .byte $0F,$0D,$2D,$2D
 pluge_shark_palettes:
-  .byte $0F,$10,$02,$1A
-  .byte $0F,$00,$0F,$0A
-  .byte $10,$20,$32,$3A
+  .byte $0F,$10,$02,$1C
+  .byte $0F,$00,$0F,$0C
+  .byte $10,$20,$32,$3C
   
 .segment "CODE"
 .proc do_pluge
@@ -678,7 +677,25 @@ is_shark = test_state+2
   sta emphasis
 
 restart:
+  ; Load initial palette
+  lda #$3F
+  sta PPUADDR
+  ldx #$05
+  stx PPUADDR
+  lda #$00
+  sta PPUDATA
+  lda #$10
+  sta PPUDATA
+  asl a
+  sta PPUDATA
+
   jsr rf_load_tiles
+  ldx #$02
+  ldy #$00
+  lda #10
+  jsr unpb53_file
+
+  ; Draw PLUGE map on nametable 0
   lda #$20
   sta rf_curnametable
   lda #$00
@@ -686,20 +703,71 @@ restart:
   ldy #<pluge_rects
   lda #>pluge_rects
   jsr rf_draw_rects_attrs_ay
-  
-  ; Load initial palette
-  lda #$3F
-  sta PPUADDR
-  ldx #$00
+
+  ; Draw shark map on nametable 1
+  lda #$00
+  tay
+  ldx #$24
+  jsr ppu_clear_nt
+  ldx #$24
   stx PPUADDR
-  :
-    lda pluge_palette,x
-    sta PPUDATA
-    inx
-    cpx #8
-    bcc :-
+  lda #$00
+  sta PPUADDR
+  lda #$23  ; starting tile number
+  ldy #30
+  clc
+  sta $4444
+  sharkrowloop:
+    ldx #32
+    sharktileloop:
+      sta PPUDATA
+      adc #4
+      and #$2F
+      dex
+      bne sharktileloop
+    adc #1
+    and #$23
+    dey
+    bne sharkrowloop
 
 loop:
+  lda #helpsect_pluge
+  jsr read_pads_helpcheck
+  bcs restart
+
+  lda new_keys+0
+  and #KEY_DOWN
+  beq not_toggle_emphasis
+    lda #$E0
+    eor emphasis
+    sta emphasis
+  not_toggle_emphasis:
+
+  lda new_keys+0
+  and #KEY_SELECT
+  beq not_toggle_shark
+    lda #1
+    eor is_shark
+    sta is_shark
+    lda #0
+    sta palettechoice
+  not_toggle_shark:
+
+  lda new_keys+0
+  and #KEY_A
+  beq not_next_palette
+    inc palettechoice
+    lda #2-1
+    ldx is_shark
+    beq :+
+      lda #3-1
+    :
+    cmp palettechoice
+    bcs not_next_palette
+      lda #0
+      sta palettechoice
+  not_next_palette:
+
   lda nmis
 :
   cmp nmis
@@ -708,47 +776,37 @@ loop:
   ; Update palette
   lda #$3F
   sta PPUADDR
-  lda #$02
+  lda #$00
   sta PPUADDR
-  ldx palettechoice
-  .repeat 2, I
-    lda pluge_both_palettes+I,x
+  lda is_shark
+  asl a
+  adc palettechoice
+  asl a
+  asl a
+  tax
+  ldy #4
+  palloadloop:
+    lda pluge_palettes,x
     sta PPUDATA
-  .endrepeat
+    inx
+    dey
+    bne palloadloop
 
   ; And turn the display on
   ; ppu_screen_on doesn't support emphasis
-  lda #0
-  sta PPUSCROLL
-  sta PPUSCROLL
+  sty PPUSCROLL
+  sty PPUSCROLL
   lda #VBLANK_NMI|BG_0000
+  ora is_shark
   sta PPUCTRL
   lda emphasis
   sta PPUMASK
 
-  lda #helpsect_pluge
-  jsr read_pads_helpcheck
-  bcs restart
-
-  lda new_keys+0
-  and #KEY_A
-  beq not_emphasis
-    lda #$E0
-    eor emphasis
-    sta emphasis
-  not_emphasis:
-
-  lda new_keys+0
-  and #KEY_SELECT
-  beq not_2d
-    lda #$02
-    eor palettechoice
-    sta palettechoice
-  not_2d:
-
   lda new_keys+0
   and #KEY_B
-  beq loop
+  bne :+
+    jmp loop
+  :
   rts
 .endproc
 
