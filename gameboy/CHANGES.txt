@@ -1,3 +1,7 @@
+0.18 (future)
+* PLUGE: Add PLUGE Contrast sub-test with shark graphic
+  (Genesis 1.16 parity)
+
 0.17 (2018-06-30)
 * Help: Compress document titles with DTE
 * Gray ramp: Use Color tests map loader for GBC version

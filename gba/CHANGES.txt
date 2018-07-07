@@ -1,3 +1,7 @@
+0.18 (future)
+* PLUGE: Add PLUGE Contrast sub-test with shark graphic
+  (Genesis 1.16 parity)
+
 0.17 (2018-06-30)
 * Solid screen: Explain what a bad high voltage regulator does to
   GB Player border (requested by ISSOtm)

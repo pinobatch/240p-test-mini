@@ -1,3 +1,9 @@
+0.18 (future)
+* PLUGE: Add PLUGE Contrast sub-test with shark graphic
+  (Genesis 1.16 parity)
+* Compress help text with DTE
+* Pixel-align emblem at center of Sharpness
+
 0.17 (2018-06-30)
 * Sharpness: A to show brick wall pattern (Genesis 1.16 parity)
 * Stopwatch: Add third ruler setting to show in even frames
