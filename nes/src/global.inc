@@ -37,10 +37,14 @@
 .global ppu_screen_on, ppu_oam_dma_screen_on_xy0, ppu_screen_on_xy0
 
 ; helpscreen.s
+HELP_LINE_LEN = 40
 .global helpscreen, help_reload, helpcheck, read_pads_helpcheck
-.global txtlinebuf, vram_copydstlo, vram_copydsthi
+.global help_line_buffer, vram_copydstlo, vram_copydsthi
 ; these are for "save your place on the main menu" functionality
 .global help_cursor_y, help_cur_page
+
+; undte.s
+.global undte_line, undte_line0
 
 ; unpb53.s
 .global unpb53_gate, PB53_outbuf

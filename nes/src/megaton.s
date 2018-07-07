@@ -462,30 +462,30 @@ lagtotal100 = $0D
     lda bcd_highdigits
     beq :+
       ora #'0'
-      sta txtlinebuf,y
+      sta help_line_buffer,y
       iny
     :
     txa
     ora #'0'
-    sta txtlinebuf,y
+    sta help_line_buffer,y
     iny
   lessthan100frames:
   lda lagtotal
   jsr bcd8bit
   ora #'0'
-  sta txtlinebuf+2,y
+  sta help_line_buffer+2,y
   lda bcd_highdigits
   eor #'0'
-  sta txtlinebuf,y
+  sta help_line_buffer,y
   lda #'.'
-  sta txtlinebuf+1,y
+  sta help_line_buffer+1,y
   iny
   iny
   iny
   ldx #0
   suffixloop:
     lda msg_frames,x
-    sta txtlinebuf,y
+    sta help_line_buffer,y
     beq suffixdone
     inx
     iny
@@ -493,8 +493,8 @@ lagtotal100 = $0D
   suffixdone:
 
   jsr clearLineImg
-  ldy #<txtlinebuf
-  lda #>txtlinebuf
+  ldy #<help_line_buffer
+  lda #>help_line_buffer
   ldx #0
   jsr vwfPuts
   lda #%0011

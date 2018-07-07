@@ -35,7 +35,7 @@ help_cursor_y:  .res 1
 cursor_dirty:   .res 1
 vram_copydstlo: .res 1
 vram_copydsthi: .res 1
-txtlinebuf:     .res 32
+help_line_buffer:.res HELP_LINE_LEN
 
 .segment "CODE"
 
@@ -281,7 +281,7 @@ not_title_line:
 
   lda help_ok_keys
   and #KEY_DOWN
-  beq no_draw_updowna 
+  beq no_draw_updowna
     lda #>updowna_msg
     ldy #<updowna_msg
     ldx #38
@@ -291,7 +291,7 @@ not_title_line:
   ldy #0
 pagenum_template_loop:
   lda pagenum_template,y
-  sta txtlinebuf,y
+  sta help_line_buffer,y
   beq pagenum_template_done
   iny
   bne pagenum_template_loop
@@ -303,7 +303,7 @@ pagenum_template_done:
   sbc help_cumul_pages,x
   ; Page numbers are 1-based, but subtraction leaves carry set
   adc #'0'  ; Currently do not allow more than 9 pages per document
-  sta txtlinebuf+2
+  sta help_line_buffer+2
   lda help_cumul_pages+1,x
   sec
   sbc help_cumul_pages,x
@@ -311,33 +311,28 @@ pagenum_template_done:
   cmp #2
   bcc finish_line
   adc #'0'-1  ; minus 1 because carry is set
-  sta txtlinebuf+4
+  sta help_line_buffer+4
   lda #2
   sta cur_nonblank
-  lda #>txtlinebuf
-  ldy #<txtlinebuf
+  lda #>help_line_buffer
+  ldy #<help_line_buffer
   jmp have_ay
 
 not_pagenum_line:
   cmp #22
   bcs page_done
 
-  ; Treat leading tab characters as 16 pixels each
-  ldx #0
   ldy #0
-tabloop:
   lda (ciSrc),y
   beq is_null_line
-  cmp #9
-  bne tabdone
-  txa
-  adc #16-1  ; -1 because carry is always set after CMP BNE
-  tax
-  inc ciSrc
-  bne tabloop
-  inc ciSrc+1
-  bne tabloop
-tabdone:
+
+  ; Indent iff a cursor is displayed
+  ldx #0
+  lda help_ok_keys
+  and #KEY_DOWN
+  beq no_indent
+    ldx #12
+  no_indent:
 
   ; Mark this line as having something on it
   ; prev_nonblank is how many lines are actually not blank

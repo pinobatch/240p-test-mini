@@ -11,7 +11,7 @@
 
 # These are used in the title of the NES program and the zip file.
 title = 240pee
-version = 0.17
+version = 0.17+
 
 # Space-separated list of assembly language files that make up the
 # PRG ROM.  If it gets too long for one line, you can add a backslash
@@ -19,7 +19,7 @@ version = 0.17
 objlist = vwf7 overclock paldetect init vwf_draw \
   main helpscreen stills stopwatch backlight scrolling kiki \
   audiosync soundtest crowd overscan megaton semixparent zappertest \
-  pads ppuclear unpb53 bcd random rectfill muldiv \
+  pads ppuclear unpb53 undte bcd random rectfill muldiv \
   pb53files helppages.hlp
 
 AS65 = ca65

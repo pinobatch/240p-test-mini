@@ -1,33 +1,33 @@
 == 240p Test Suite: Menu ==
 
-	PLUGE
-	Gradient color bars
-	SMPTE color bars
-	Color bars on gray
-	Color bleed
-	Grid
-	Linearity
-	Gray ramp
-	Solid color screen
-	IRE
-	Sharpness
-	Chroma crosstalk
-	CPU clock speed
+PLUGE
+Gradient color bars
+SMPTE color bars
+Color bars on gray
+Color bleed
+Grid
+Linearity
+Gray ramp
+Solid color screen
+IRE
+Sharpness
+Chroma crosstalk
+CPU clock speed
 ----
-	Overscan
-	Shadow sprite
-	Stopwatch
-	Manual lag test
-	Hill zone scroll test
-	Vertical scroll test
-	Grid scroll test
-	Full screen stripes
-	Backlight zone test
-	Zapper test
-	Sound test
-	Audio sync test
-	About
-	Credits
+Overscan
+Shadow sprite
+Stopwatch
+Manual lag test
+Hill zone scroll test
+Vertical scroll test
+Grid scroll test
+Full screen stripes
+Backlight zone test
+Zapper test
+Sound test
+Audio sync test
+About
+Credits
 
 == About ==
 
