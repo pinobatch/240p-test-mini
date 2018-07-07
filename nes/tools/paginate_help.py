@@ -8,6 +8,7 @@ commontoolspath = os.path.normpath(os.path.join(
 ))
 sys.path.append(commontoolspath)
 from parsepages import lines_to_docs
+from dte import dte_compress
 import cp240p
 
 def ca65_escape_bytes(blo):
@@ -31,6 +32,7 @@ def render_help(docs):
 ; Help data generated with paginate_help.py - do not edit
 .export helptitles_hi, helptitles_lo
 .export helppages_hi, helppages_lo, help_cumul_pages
+.export dte_replacements
 .exportzp HELP_NUM_PAGES, HELP_NUM_SECTS, HELP_BANK
 
 .segment "HELPDATA"
@@ -48,20 +50,27 @@ HELP_BANK = <.bank(*)
                  % (doc[1], ca65_escape_bytes(doc[0].encode("cp240p")))
                  for doc in docs)
 
+    allpages = []
     cumul_pages = [0]
-    pagenum = 0
     for doc in docs:
         for page in doc[-1]:
-            lines.append("helppage_%03d:" % pagenum)
-            page = [bytearray(line.encode("cp240p")) for line in page]
-            for i in range(len(page) - 1):
-                page[i].append(10)  # newline
-            page[-1].append(0)
-            lines.extend("  .byte %s" % ca65_escape_bytes(line)
-                         for line in page)
-            pagenum += 1
-        assert pagenum == cumul_pages[-1] + len(doc[-1])
-        cumul_pages.append(pagenum)
+            page = [line.encode("cp240p") for line in page]
+            allpages.append(b"\x0A".join(page) + b"\x00")
+        assert len(allpages) == cumul_pages[-1] + len(doc[-1])
+        cumul_pages.append(len(allpages))
+
+    # DTE compression; currently not including titles
+    dtepages = list(allpages)
+    oldsize = sum(len(x) for x in dtepages)
+    dtepages, replacements, pairfreqs = dte_compress(dtepages, mincodeunit=136)
+    newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
+    print("compressed help from %d bytes to %d bytes"
+          % (oldsize, newsize), file=sys.stderr)
+
+    for pagenum, page in enumerate(dtepages):
+        lines.append("helppage_%03d:" % pagenum)
+        lines.append("  .byte %s" % ca65_escape_bytes(page))
+
     lines.append('help_cumul_pages:')
     lines.append(ca65_bytearray(cumul_pages))
     lines.append('HELP_NUM_PAGES = %d' % cumul_pages[-1])
@@ -70,6 +79,9 @@ HELP_BANK = <.bank(*)
     lines.extend('  .byte >helppage_%03d' % i for i in range(cumul_pages[-1]))
     lines.append('helppages_lo:')
     lines.extend('  .byte <helppage_%03d' % i for i in range(cumul_pages[-1]))
+
+    lines.append("dte_replacements:")
+    lines.extend("  .byte %s" % ca65_escape_bytes(r) for r in replacements)
 
     return "\n".join(lines)
 

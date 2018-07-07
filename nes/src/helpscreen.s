@@ -245,6 +245,7 @@ done:
   ldy helptitles_lo,x
 have_ay:
   ldx #0
+have_axy:
   jsr vwfPuts
 finish_line:
   lda help_cur_line
@@ -326,14 +327,6 @@ not_pagenum_line:
   lda (ciSrc),y
   beq is_null_line
 
-  ; Indent iff a cursor is displayed
-  ldx #0
-  lda help_ok_keys
-  and #KEY_DOWN
-  beq no_indent
-    ldx #12
-  no_indent:
-
   ; Mark this line as having something on it
   ; prev_nonblank is how many lines are actually not blank
   ; cur_nonblank is how many lines will be not blank after this
@@ -345,14 +338,33 @@ not_pagenum_line:
   bcc :+
     sty prev_nonblank
   :
-  
-  ; And draw the text at the horizontal position calculated above
+
+  ; Decompress line  
   lda ciSrc+1
   ldy ciSrc
-  jsr vwfPuts
-  sta ciSrc+1
-  sty ciSrc
-  jmp finish_line
+  sta $4444
+  jsr undte_line
+  tay
+  dey
+  lda ($00),y
+  cmp #$01
+  tya
+  adc $00
+  sta ciSrc
+  bcc :+
+    inc ciSrc+1
+  :
+
+  ; Indent iff a cursor is displayed
+  ldx #0
+  lda help_ok_keys
+  and #KEY_DOWN
+  beq no_indent
+    ldx #12
+  no_indent:
+  lda #>help_line_buffer
+  ldy #<help_line_buffer
+  jmp have_axy
 is_null_line:
   ldy cur_nonblank
   dey

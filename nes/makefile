@@ -150,6 +150,6 @@ $(objdir)/pluge_shark_4color.chr: $(cimgdir)/pluge_shark_4color.png
 	$(BMP2) -H 32 $< $@
 
 # Help me!
-$(objdir)/%.hlp.s: $(srcdir)/%.txt
-	$(PY) tools/paginate_help.py $< > $@
+$(objdir)/%.hlp.s: tools/paginate_help.py $(srcdir)/%.txt
+	$(PY) $^ > $@
 

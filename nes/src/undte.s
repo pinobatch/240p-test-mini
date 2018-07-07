@@ -9,7 +9,7 @@
 DTE_MIN_CODEUNIT = 136
 MIN_PRINTABLE = 32
 
-dte_replacements:
+.import dte_replacements
 
 .code
 .proc undte_line
@@ -28,10 +28,12 @@ strlenloop:
   lda (srcaddr),y
   iny
   cpy #HELP_LINE_LEN
-  bcc have_strlen
+  bcs have_strlen
   cmp MIN_PRINTABLE
   bcs strlenloop
 have_strlen:
+  tya
+  pha  ; Save compressed byte count
 
   ; Now copy backward
   ldx #HELP_LINE_LEN
@@ -48,15 +50,17 @@ poolypoc:
 decomploop:
   lda help_line_buffer,x
 decomp_code:
-  cmp DTE_MIN_CODEUNIT
-  bcc handle_bytepair
+  cmp #DTE_MIN_CODEUNIT
+  bcs handle_bytepair
   sta help_line_buffer,y
   iny
   inx
   cpx #HELP_LINE_LEN
   bcc decomploop
 
-  ; Assuming Y here is the string length
+  sta $4444
+  ; A: compressed bytes read; Y: decompressed bytes written
+  pla
   rts
 
 handle_bytepair:

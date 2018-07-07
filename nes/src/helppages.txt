@@ -621,19 +621,19 @@ A: Hide or show the square
 
 == Sound test: Frequency ==
 
-	8000 Hz
-	4000 Hz
-	2000 Hz
-	1000 Hz
-	500 Hz
-	250 Hz
-	125 Hz
-	62 Hz
-	31 Hz
-	1000 Hz (pulse)
-	Hiss noise
-	Buzz noise
-	Crowd (PCM)
+8000 Hz
+4000 Hz
+2000 Hz
+1000 Hz
+500 Hz
+250 Hz
+125 Hz
+62 Hz
+31 Hz
+1000 Hz (pulse)
+Hiss noise
+Buzz noise
+Crowd (PCM)
 
 == Sound test ==
 
