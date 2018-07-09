@@ -90,9 +90,9 @@ vwfDrawLabels::
   ld l,a  ; HL: starting position in tilemap
 
   ; Write tiles to tilemap
-  pop bc  ; B: width in tiles
-  pop de  ; E: starting tile number
-  push bc
+  pop bc  ; B: width in tiles; C: garbage flags
+  ld c,b  ; Save width in tiles for later
+  pop de  ; D: pattern table (8 or 9); E: starting tile number
   ld a,e
 .tilemaploop:
   ld [hl+],a
@@ -101,24 +101,22 @@ vwfDrawLabels::
   jr nz,.tilemaploop
 
   ; Write pixels to tiles
-  pop bc  ; Stack: string end
   ld h,d
   ld l,e
   add hl,hl
   add hl,hl
   add hl,hl
   add hl,hl  ; HL: destination tile address
-  ld a,e
-  add b
+  ld a,e     ; Calculate new tile number
+  add c
   ld e,a
   jr nc,.no_tilenum_wrap
     inc d
   .no_tilenum_wrap:
   push de  ; Stack: new tilenum, string end
 
-  ; Copy the pixels
-  ld c,b
-  ld b,$00
+  ; Copy C tiles' worth of pixels
+;  ld b,$00  ; 0 means colors 0/1; B is still 0 after the last loop
   call vwfPutBuf03_lenC
   pop de
   pop hl
