@@ -15,6 +15,7 @@ import os
 import sys
 from PIL import Image
 from collections import Counter
+import pb53
 
 # Find common tools (e.g. pilbmp2nes)
 commontoolspath = os.path.normpath(os.path.join(
@@ -22,7 +23,7 @@ commontoolspath = os.path.normpath(os.path.join(
 ))
 sys.path.append(commontoolspath)
 from pilbmp2nes import pilbmp2chr
-
+from bitbuilder import log2, BitBuilder, Biterator
 
 def do_job(tiledata, tiles_per_row, xstamps, ystamps):
     blanktile = bytes(16)
@@ -50,7 +51,6 @@ def do_job(tiledata, tiles_per_row, xstamps, ystamps):
         stamptoid[k] = len(stamptoid)
 
     # Now fill the nametable
-    print(repr(blanktile))
     nt = [stamptoid[k] if k[1] != blanktile else 0 for k in stamps]
     idtostamp = sorted((v, k) for (k, v) in stamptoid.items())
     utiles = [row[1][1] for row in idtostamp]
@@ -60,14 +60,17 @@ def do_job(tiledata, tiles_per_row, xstamps, ystamps):
           "without position dependence there'd be only %d uniques"
           % (num_blank_tiles, total_blanks, len(tiledata), len(stamptoid),
              len(set(tiledata))))
-    print("utiles:")    
-    print("\n".join(repr(row) for row in utiles))
-    print("Nametable:")
-    print("\n".join(repr(nt[rowstart:rowstart + tiles_per_row])
-                    for rowstart in range(0, len(nt), tiles_per_row)))
+    return utiles, nt
 
-def linearity_compress_nt(nt):
+def linearity_compress_nt(nt, numfixedtiles=0):
     """
+
+Zero tile is 0
+Fixed tiles are 1 through numfixedtiles
+Sequential tiles are numfixedtiles+1 through 255
+A sequential tile must be no more than 1 plus the highest seen
+sequential tile so far
+
 Format:
 
 0 zero tile
@@ -75,7 +78,40 @@ Format:
 11xxx... old tile, where x is the same number of bits as in last new tile - 1
 
 """
+    out = BitBuilder()
+    numseentiles = numfixedtiles
+    for tilenum in nt:
+        if tilenum == 0:
+            out.append(0)
+            continue
+        if tilenum <= numseentiles:
+            nbits = log2(numseentiles - 1) + 1
+            out.append(3, 2)
+            out.append(tilenum - 1, nbits)
+            continue
+        numseentiles += 1
+        if tilenum > numseentiles:
+            raise ValueError("tile %d premature when expecting %d")
+        out.append(2, 2)
+    return bytes(out)
 
+def linearity_decompress_nt(data, length, numfixedtiles=0):
+    b = Biterator(data)
+    numseentiles = numfixedtiles
+    out = []
+    while len(out) < length:
+        if next(b):
+            if next(b):
+                nbits = log2(numseentiles - 1) + 1
+                out.append(1 + b.read(nbits))
+            else:
+                numseentiles += 1
+                out.append(numseentiles)
+                pass
+        else:
+            out.append(0)
+            pass
+    return out
 
 stampsets = {
     None: ((0,), (0,)),
@@ -87,6 +123,7 @@ jobs = [
     ("../tilesets/linearity_ntsc.png", 'ntsc'),
     ("../tilesets/linearity_pal.png", 'pal'),
 ]
+totalbytes = 0
 for job in jobs:
     filename, stampsetname = job
     print(filename)
@@ -94,4 +131,15 @@ for job in jobs:
     im = Image.open(filename)
     tiles_per_row = im.size[0] // 8
     tiledata = pilbmp2chr(im)
-    do_job(tiledata, tiles_per_row, xstamps, ystamps)
+    tiles, nt = do_job(tiledata, tiles_per_row, xstamps, ystamps)
+    ctiles, _ = pb53.pb53(b''.join(tiles))
+    print(len(ctiles), "bytes in compressed pattern table")
+    totalbytes += len(ctiles)
+    cnt = linearity_compress_nt(nt)
+    print(len(cnt), "bytes in compressed nametable")
+    totalbytes += len(cnt)
+    print(cnt.hex())
+    out = linearity_decompress_nt(cnt, len(nt))
+    print("Match" if nt == out else "Mismatch")
+
+print("total compressed size: %d bytes" % totalbytes)
