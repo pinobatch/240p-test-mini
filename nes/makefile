@@ -30,10 +30,6 @@ srcdir = src
 imgdir = tilesets
 cimgdir = ../common/tilesets
 
-#EMU := "/C/Program Files/Nintendulator/Nintendulator.exe"
-EMU := fceux
-DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
-
 # Windows needs .exe suffixed to the names of executables; UNIX does
 # not.  COMSPEC will be set to the name of the shell on Windows and
 # not defined on UNIX.  Also the Windows Python installer puts
@@ -41,9 +37,13 @@ DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
 ifdef COMSPEC
 DOTEXE:=.exe
 PY:=py
+EMU:=start ""
+DEBUGEMU := start ""
 else
 DOTEXE:=
-PY:=
+PY:=python3
+EMU:=fceux
+DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
 endif
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 
