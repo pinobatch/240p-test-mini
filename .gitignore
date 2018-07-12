@@ -23,11 +23,13 @@
 *.nes.deb
 /nes/map.txt
 /nes/bnmap.txt
+/nes/new-linearity/map.txt
 /gameboy/gb240p.gb
 /gameboy/gb240p.map
 /gameboy/gb240p.sym
 /nes/240pee-bnrom.nes
 /nes/240pee.nes
+/nes/new-linearity/new-linearity.nes
 /gba/240pee_mb.elf
 /gba/240pee_mb.gba
 /gba/240pee_mb.sav
