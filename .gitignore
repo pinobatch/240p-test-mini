@@ -8,6 +8,7 @@
 *.pb16
 *.pb53
 *.sb53
+*.iu53
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
 /gameboy/obj/gb/*.z80
