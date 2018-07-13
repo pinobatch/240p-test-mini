@@ -11,6 +11,7 @@
 *.iu53
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
+/nes/new-linearity/obj/nes/*.sav
 /gameboy/obj/gb/*.z80
 /gameboy/obj/gb/*.nam
 /gameboy/obj/gb/*.iu

@@ -253,5 +253,7 @@ jobs = [
     "  ../new-linearity/obj/nes/test_pal.iu53"
     "  --y-grid 8,2,5,8,0,3,6,8,1,4,7 -v",
 ]
-for job in jobs:
-    main(job.split())
+if __name__=='__main__':
+##    for job in jobs:
+##        main(job.split())
+    main()

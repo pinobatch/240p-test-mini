@@ -50,8 +50,8 @@ $(objdir)/index.txt: makefile
 	echo "Files produced by build tools go here, but caulk goes where?" > $@
 
 clean:
-	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.?b53
-	-rm $(objdir)/*.sav map.txt bnmap.txt
+	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.iu53
+	-rm $(objdir)/*.sav map.txt
 
 # Rules for PRG ROM
 
@@ -66,15 +66,17 @@ $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 $(objdir)/%.o: $(objdir)/%.s
 	$(AS65) $(CFLAGS65) $< -o $@
 
-# extra dependencies
+# included things
+
+$(objdir)/main.o: $(objdir)/linearity_ntsc.iu53 $(objdir)/linearity_pal.iu53
 
 # graphics rules
 
 $(objdir)/linearity_ntsc.iu53: $(objdir)/linearity_ntscgray.sav
-	echo want to compress $< to $@ with 7x1 bg pattern
+	$(PY) ../tools/sav2iu53.py --x-grid 0,1,2,3,4,5,6 $< $@
 
 $(objdir)/linearity_pal.iu53: $(objdir)/linearity_palgray.sav
-	echo want to compress $< to $@ with 1x11 bg pattern
+	$(PY) ../tools/sav2iu53.py --y-grid 8,2,5,8,0,3,6,8,1,4,7 $< $@
 
 $(objdir)/%gray.sav: $(imgdir)/%.png
-	$(PY) tools/savtool.py --palette 0f0010200f1616160f1616160f161616 $< $@
+	$(PY) ../tools/savtool.py --palette 0f0010200f1616160f1616160f161616 $< $@

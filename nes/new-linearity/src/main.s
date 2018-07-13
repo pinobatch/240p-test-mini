@@ -32,6 +32,11 @@ nmis: .res 1
   ldy #$00
   ldx #$24
   jsr ppu_clear_nt
+
+  sta $4444
+  lda #>linearity_ntsc_iu53
+  ldy #<linearity_ntsc_iu53
+  jsr uniu_file_ay
   ldx #$00
   ldy #$00
   lda #VBLANK_NMI|BG_0000
@@ -39,3 +44,9 @@ nmis: .res 1
 forever:
   jmp forever
 .endproc
+
+.rodata
+linearity_ntsc_iu53:
+  .incbin "obj/nes/linearity_ntsc.iu53"
+linearity_pal_iu53:
+  .incbin "obj/nes/linearity_pal.iu53"

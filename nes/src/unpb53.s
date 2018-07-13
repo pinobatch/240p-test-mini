@@ -8,10 +8,10 @@
 ; code copies.  This file is offered as-is, without any warranty.
 ;
 .include "nes.inc"
-.export unpb53_some, unpb53_file_cb, load_sb53_file_cb
+.export unpb53_some, unpb53_xtiles, unpb53_file_cb, load_sb53_file_cb
 .import unpb53_files, sb53_files
 .export PB53_outbuf
-.exportzp ciSrc, ciSrc, ciBufStart, ciBufEnd
+.exportzp ciSrc, ciDst, ciBufStart, ciBufEnd
 .importzp nmis
 
 .segment "ZEROPAGE"

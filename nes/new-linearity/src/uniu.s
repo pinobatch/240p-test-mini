@@ -66,6 +66,7 @@ uniu_seen_tiles = $07
     sta PPUADDR
     clc
     adc #32
+    sta ciDst+0
     bcc :+
       inc ciDst+1
     :
@@ -114,5 +115,105 @@ uniu_seen_tiles = $07
     dec uniu_height
     bne rowloop
   sty ciSrc+0
+  rts
+.endproc
+
+.proc add_a_to_ciSrc
+  clc
+  adc ciSrc
+  sta ciSrc
+  bcc :+
+    inc ciSrc+1
+  :
+  rts
+.endproc
+
+.proc uniu_file_ay
+  sta ciSrc+1
+  sty ciSrc
+.endproc
+.proc uniu_file
+  ; Header before the PB53 tile data:
+  ; Tile number of first nonblank tile, number of PB53 tiles
+
+  ; Get the address of the first nonblank tile
+  ldy #0
+  lda (ciSrc),y
+  pha  ; Stack: first nonblank tile, ...
+  asl a  ; multiply by 16
+  sta ciDst
+  tya
+  rol a
+  asl ciDst
+  rol a
+  asl ciDst
+  rol a
+  asl ciDst
+  rol a
+  sta PPUADDR
+  lda ciDst
+  sta PPUADDR
+
+  ; Get the pb53 tile count
+  iny
+  lda (ciSrc),y
+  tax
+
+  ; Skip the header so far
+  lda #2
+  jsr add_a_to_ciSrc
+  jsr unpb53_xtiles
+  pla
+  sta uniu_first_nonblank
+
+  ; Header after PB53 tile data:
+  ; starting NT address (2 bytes), width, height
+  ldy #0
+  lda (ciSrc),y
+  sta ciDst+0
+  iny
+  lda (ciSrc),y
+  pha  ; save address which has flags in bits 7-6
+  and #$2F
+  sta ciDst+1
+  iny
+  lda (ciSrc),y
+  sta uniu_width
+  iny
+  lda (ciSrc),y
+  sta uniu_height
+  lda #4
+  jsr add_a_to_ciSrc
+  jsr uniu
+  pla  ; A = flags saved earlier
+
+  ; Optionally, attributes and palette can follow
+  asl a
+  bcc no_attributes
+    pha  ; save other flag
+    lda ciDst+1
+    ora #$03  ; skip to attribute table
+    sta PPUADDR
+    lda #$C0
+    sta PPUADDR
+    ldx #64/16
+    jsr unpb53_xtiles
+    pla
+  no_attributes:
+
+  ldy #$00
+  asl a
+  bcc no_palette
+    lda #$3F
+    sta PPUADDR
+    sty PPUADDR
+    palloop:
+      lda (ciSrc),y
+      sta PPUDATA
+      iny
+      cpy #16
+      bcc palloop
+  no_palette:
+
   rts
 .endproc

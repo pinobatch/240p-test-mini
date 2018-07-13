@@ -15,4 +15,4 @@
 
 ; uniu.s
 .globalzp uniu_width, uniu_height, uniu_seen_tiles, uniu_first_nonblank
-.global uniu
+.global uniu, uniu_file_ay, uniu_file
