@@ -16,9 +16,9 @@ version = 0.17+
 # Space-separated list of assembly language files that make up the
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
-objlist = vwf7 overclock paldetect init vwf_draw \
+objlist = vwf7 zappertest overclock paldetect init vwf_draw \
   main helpscreen stills stopwatch backlight scrolling kiki \
-  audiosync soundtest crowd overscan megaton semixparent zappertest \
+  audiosync soundtest crowd overscan megaton semixparent \
   pads ppuclear unpb53 undte bcd random rectfill muldiv \
   pb53files helppages.hlp
 

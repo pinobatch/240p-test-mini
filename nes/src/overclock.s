@@ -102,6 +102,7 @@ loop3:
 :
   bit PPUSTATUS
   bvs loop3
+  .assert >*=>loop3, error, "sov_to_s0 crosses page"
 loop4:
   inx
   bne :+
@@ -109,7 +110,9 @@ loop4:
 :
   bit PPUSTATUS
   bvc loop4
+  .assert >*=>loop4, error, "sov_to_s0 crosses page"
   rts
+;  .out .sprintf("%d bytes so far", *-::s0_rise_to_rise)
 .endproc
 
 ;;
@@ -133,6 +136,7 @@ loop3:
 :
   bit PPUSTATUS
   bvc loop3
+;  .assert >*=>loop3, error, "sov_to_s0 crosses page"
   rts
 .endproc
 
@@ -147,7 +151,7 @@ loop:
   :
   cmp a:nmis
   beq loop
-  .assert >*=>loop, error, "now_to_nmi crosses page"
+;  .assert >*=>loop, error, "now_to_nmi crosses page"
   rts
 .endproc
 
