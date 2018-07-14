@@ -342,7 +342,6 @@ not_pagenum_line:
   ; Decompress line  
   lda ciSrc+1
   ldy ciSrc
-  sta $4444
   jsr undte_line
   tay
   dey

@@ -110,8 +110,6 @@ $(objdir)/pb53files.o: \
   $(objdir)/lag_clock_face.sb53 $(objdir)/fizzter_digits.chr.pb53 \
   $(objdir)/lag_clock_balls.chr.pb53 $(objdir)/gus_portrait.sb53 \
   $(objdir)/stdtiles.chr.pb53 $(objdir)/backlight_sprites.chr.pb53 \
-  $(objdir)/linearity_ntscgray.sb53 $(objdir)/linearity_palgray.sb53 \
-  $(objdir)/linearity_grid_ntscgray.sb53 $(objdir)/linearity_grid_palgray.sb53 \
   $(objdir)/sharpnessgray.sb53 $(objdir)/crosstalk.sb53 \
   $(objdir)/pluge_shark_4color.chr.pb53 \
   $(objdir)/linearity_ntsc.iu53 $(objdir)/linearity_pal.iu53

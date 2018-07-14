@@ -214,10 +214,6 @@ mt_row = $0180
 attrbuf = $0190
 
 .proc load_kiki_map
-mtdstlo = $00
-mtdsthi = $01
-attrdst = $02
-mapsrc = $03
 
   ; Decompress map
   lda #<(kikimap_pb53 + 2)
@@ -229,6 +225,19 @@ mapsrc = $03
   asl a
   sta ciBufStart
   jsr unpb53_gate
+
+  ; Move the rest out of fixed bank
+  lda #<.bank(load_kiki_map_02)
+  sta *-1
+  jmp load_kiki_map_02
+.endproc
+
+.segment "CODE02"
+.proc load_kiki_map_02
+mtdstlo = $00
+mtdsthi = $01
+attrdst = $02
+mapsrc = $03
 
   ; Clear metatile buffer
   lda #$20

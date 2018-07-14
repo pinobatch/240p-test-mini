@@ -543,7 +543,7 @@ frame_names:
   .byte "even frames",10
   .byte "horiz. stripes",10
   .byte "vert. stripes",10
-  .byte "diag. stripes",0
+  .byte "checkerboard",0
 
 .segment "GATEDATA"
 shadow_reticle_pb53:.incbin "obj/nes/shadow_reticle.chr.pb53"

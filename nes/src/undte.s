@@ -58,7 +58,6 @@ decomp_code:
   cpx #HELP_LINE_LEN
   bcc decomploop
 
-  sta $4444
   ; A: compressed bytes read; Y: decompressed bytes written
   pla
   rts

@@ -77,6 +77,9 @@ GATEDATA_BANK = 1
 .global do_full_stripes, do_solid_color, do_crosstalk
 .global test_state, tvSystemFPS
 
+; linearity.s
+.global do_new_linearity
+
 ; stopwatch.s
 .global do_stopwatch
 

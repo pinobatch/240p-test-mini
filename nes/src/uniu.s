@@ -56,9 +56,10 @@ uniu_seen_tiles = $07
   ; Initialize the bit iterator to the empty state
   lda #$80
   sta ciBits
+  asl a
+  sta uniu_seen_tiles
 
   ; Page-align ciSrc
-  asl a
   ldy ciSrc+0
   sta ciSrc+0
 
@@ -176,6 +177,7 @@ uniu_seen_tiles = $07
   jsr add_a_to_ciSrc
   jsr unpb53_xtiles
   pla
+
   sta uniu_first_nonblank
 
   ; Header after PB53 tile data:

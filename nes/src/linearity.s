@@ -1,13 +1,22 @@
 .include "nes.inc"
 .include "global.inc"
+.importzp helpsect_linearity
+
+lcdc_value = test_state+0
 
 .code
 
 .proc do_new_linearity
+  lda #VBLANK_NMI|BG_0000
+  sta PPUCTRL
+  sta lcdc_value
+  sta help_reload
+
   ; set palette
   lda #$3F
-  sta PPUADDR
   ldx #$00
+  stx PPUMASK
+  sta PPUADDR
   stx PPUADDR
   sta PPUDATA
   stx PPUDATA
@@ -28,12 +37,12 @@
   ; Load new Copy grid to other PRG ROM bank
   lda tvSystem
   cmp #1
-  lda #0>>1  ; file 0: NTSC; file 1: PAL
+  lda #0>>1  ; iu53 file 0: NTSC; file 1: PAL
   rol a
   jsr load_iu53_file
 
   ; Copy grid to other PRG ROM bank
-  lda #<.bank(linearity_clear_grid)
+  lda #<.bank(add_grid)
   sta *-1
   jsr add_grid
 
@@ -42,17 +51,27 @@ forever:
 :
   cmp nmis
   beq :-
-  ldx #$00
-  ldy #$00
-  lda #VBLANK_NMI|BG_1000
-  jsr ppu_screen_on
+  lda lcdc_value
+  clc
+  jsr ppu_screen_on_xy0
   
-  jsr read_pads
+  lda #helpsect_linearity
+  jsr read_pads_helpcheck
+  bcs do_new_linearity
+  lda new_keys
+  and #KEY_A
+  beq not_toggle_grid
+    lda #BG_1000
+    eor test_state
+    sta test_state
+  not_toggle_grid:
   lda new_keys
   and #KEY_B
   beq forever
   rts
 .endproc
+
+.segment "CODE02"
 
 .proc linearity_clear_grid
   lda tvSystem
@@ -121,7 +140,6 @@ rowsleft = $00
   sty PPUADDR
   lda #30
   sta rowsleft
-  sta $4444
 
   rowloop:
     

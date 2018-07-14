@@ -73,8 +73,6 @@ test_state: .res 24
   pha
   jsr load_sb53_file
   pla
-  clc
-  adc #2
   eor #6^8  ; 8 and 9: with grid
   jsr load_sb53_file
 
@@ -119,7 +117,6 @@ loop:
   ldy #$55
   jsr ppu_clear_nt
   lda #$0F
-  sta $4444
   sta PPUADDR
   lda #$F0
   sta PPUADDR
@@ -718,7 +715,6 @@ restart:
   lda #$23  ; starting tile number
   ldy #30
   clc
-  sta $4444
   sharkrowloop:
     ldx #32
     sharktileloop:

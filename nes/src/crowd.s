@@ -29,6 +29,12 @@ sjmp = $0A
 
 .segment "CODE"
 crowd:
+  lda #<.bank(crowd02)
+  sta *-1
+  jmp crowd02
+
+.segment "CODE02"
+crowd02:
 	lda #0
 	sta t0
 	sta t1

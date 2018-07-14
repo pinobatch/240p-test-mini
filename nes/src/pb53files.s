@@ -76,14 +76,6 @@ sb53_files:
   .byte <.BANK(sharpnessgray_sb53), SB53_PAT_0000|SB53_MAP_2000
   .addr gus_portrait_sb53
   .byte <.BANK(gus_portrait_sb53), SB53_PAT_0000|SB53_MAP_2000
-  .addr linearity_ntsc
-  .byte <.BANK(linearity_ntsc), SB53_PAT_0000|SB53_MAP_2000
-  .addr linearity_pal
-  .byte <.BANK(linearity_pal), SB53_PAT_0000|SB53_MAP_2000
-  .addr linearity_grid_ntsc
-  .byte <.BANK(linearity_grid_ntsc), SB53_PAT_1000|SB53_MAP_2400
-  .addr linearity_grid_pal
-  .byte <.BANK(linearity_grid_pal), SB53_PAT_1000|SB53_MAP_2400
 
 iu53_files:
   .addr linearity_ntsc_iu53
@@ -91,36 +83,32 @@ iu53_files:
 
 .segment "BANK00"
 gus_bg_sb53:         .incbin "obj/nes/gus_bg.sb53"
+gus_portrait_sb53:   .incbin "obj/nes/gus_portrait.sb53"
+greenhillzone_sb53:  .incbin "obj/nes/greenhillzone.sb53"
+sharpnessgray_sb53:  .incbin "obj/nes/sharpnessgray.sb53"
+crosstalk_sb53:      .incbin "obj/nes/crosstalk.sb53"
+lag_clock_face_sb53: .incbin "obj/nes/lag_clock_face.sb53"
+
+IU53_BANK = <.bank(*)
+linearity_ntsc_iu53: .incbin "obj/nes/linearity_ntsc.iu53"
+linearity_pal_iu53:  .incbin "obj/nes/linearity_pal.iu53"
+
 gus_sprite:          .incbin "obj/nes/gus_sprite.chr.pb53",2
 help_cursor_pb53:
   .byte $87  ; blank tile
   .byte $40,$FF,$9F,$87,$81,$87,$9F,$FF,$82  ; arrow tile
 
-linearity_ntsc:      .incbin "obj/nes/linearity_ntscgray.sb53"
-linearity_pal:       .incbin "obj/nes/linearity_palgray.sb53"
-linearity_grid_ntsc: .incbin "obj/nes/linearity_grid_ntscgray.sb53"
-linearity_grid_pal:  .incbin "obj/nes/linearity_grid_palgray.sb53"
-
-gus_portrait_sb53:   .incbin "obj/nes/gus_portrait.sb53"
-greenhillzone_sb53:  .incbin "obj/nes/greenhillzone.sb53"
+stopwatch_balls:     .incbin "obj/nes/lag_clock_balls.chr.pb53",2
+fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
 kikitiles_pb53:      .incbin "obj/nes/kikitiles16.chr.pb53",2
-overscan_pb53:
-  .incbin "obj/nes/overscan.chr.pb53",2
+overscan_pb53:       .incbin "obj/nes/overscan.chr.pb53",2
 backlight_sprites:   .incbin "obj/nes/backlight_sprites.chr.pb53",2
 overclock_s0_pb53:
   .byte $84
   .byte %00111111,$FF,$00,$80
 
 .segment "BANK01"
-sharpnessgray_sb53:  .incbin "obj/nes/sharpnessgray.sb53"
-crosstalk_sb53:      .incbin "obj/nes/crosstalk.sb53"
-stopwatch_balls:     .incbin "obj/nes/lag_clock_balls.chr.pb53",2
-lag_clock_face_sb53: .incbin "obj/nes/lag_clock_face.sb53"
-fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
 stdtiles_pb53:       .incbin "obj/nes/stdtiles.chr.pb53",2
 megatontiles_pb53:   .incbin "obj/nes/megatontiles.chr.pb53",2
 pluge_shark_pb53:    .incbin "obj/nes/pluge_shark_4color.chr.pb53",2
 
-IU53_BANK = <.bank(*)
-linearity_ntsc_iu53: .incbin "obj/nes/linearity_ntsc.iu53"
-linearity_pal_iu53:  .incbin "obj/nes/linearity_pal.iu53"
