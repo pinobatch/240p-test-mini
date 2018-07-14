@@ -67,7 +67,9 @@ rightMask = $0B
   sta tileAddr
 .endmacro
 
-.res 32  ; 1 or 32 to adjust shiftslide
+; Comment or uncomment this line to keep the shiftslide in vwfPutTile
+; from crossing a page boundary.
+;.res 32
 
 ;;
 ; Puts a 1-bit tile to position X in the line image buffer.
