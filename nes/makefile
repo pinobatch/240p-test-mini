@@ -17,9 +17,9 @@ version = 0.17+
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
 objlist = vwf7 zappertest overclock paldetect init vwf_draw \
-  main helpscreen stills stopwatch backlight scrolling kiki \
-  audiosync soundtest crowd overscan megaton semixparent \
-  pads ppuclear unpb53 undte bcd random rectfill muldiv \
+  main helpscreen stills linearity stopwatch backlight scrolling \
+  kiki audiosync soundtest crowd overscan megaton semixparent \
+  pads ppuclear unpb53 uniu undte bcd random rectfill muldiv \
   pb53files helppages.hlp
 
 AS65 = ca65
@@ -113,7 +113,8 @@ $(objdir)/pb53files.o: \
   $(objdir)/linearity_ntscgray.sb53 $(objdir)/linearity_palgray.sb53 \
   $(objdir)/linearity_grid_ntscgray.sb53 $(objdir)/linearity_grid_palgray.sb53 \
   $(objdir)/sharpnessgray.sb53 $(objdir)/crosstalk.sb53 \
-  $(objdir)/pluge_shark_4color.chr.pb53
+  $(objdir)/pluge_shark_4color.chr.pb53 \
+  $(objdir)/linearity_ntsc.iu53 $(objdir)/linearity_pal.iu53
 
 # Generic rules for CHR
 
@@ -130,6 +131,10 @@ $(objdir)/%.pb53: $(objdir)/%
 
 # Specific rules for CHR
 
+$(objdir)/linearity_ntsc.iu53: $(objdir)/linearity_ntscgray.sav
+	$(PY) tools/sav2iu53.py --x-grid 0,1,2,3,4,5,6 $< $@
+$(objdir)/linearity_pal.iu53: $(objdir)/linearity_palgray.sav
+	$(PY) tools/sav2iu53.py --y-grid 8,2,5,8,0,3,6,8,1,4,7 $< $@
 $(objdir)/gus_sprite.chr: $(imgdir)/gus_sprite.png
 	$(BMP2) -H 128 --planes "0;1" $< $@
 $(objdir)/gus_bg.sav: $(imgdir)/gus_bg.png

@@ -380,7 +380,7 @@ bgloadprocs:
 .popseg
 
 load_gus:
-  lda #7
+  lda #5
   jmp load_sb53_file
 
 load_fullscreenhorz:

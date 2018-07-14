@@ -21,7 +21,8 @@
 ; This allows storing compressed data in a bank other than
 ; the main program bank, even on a 32K mapper like BNROM.
 
-.export sb53_files, unpb53_files
+.export sb53_files, unpb53_files, iu53_files
+.exportzp IU53_BANK
 
 .segment "PB53TABLES"
 unpb53_files:
@@ -67,6 +68,14 @@ sb53_files:
   .byte <.BANK(gus_bg_sb53), SB53_PAT_0000|SB53_MAP_2000
   .addr greenhillzone_sb53
   .byte <.BANK(greenhillzone_sb53), SB53_PAT_0000|SB53_MAP_WIDE
+  .addr lag_clock_face_sb53
+  .byte <.BANK(lag_clock_face_sb53), SB53_PAT_0000|SB53_MAP_2000
+  .addr crosstalk_sb53
+  .byte <.BANK(crosstalk_sb53), SB53_PAT_0000|SB53_MAP_2000
+  .addr sharpnessgray_sb53
+  .byte <.BANK(sharpnessgray_sb53), SB53_PAT_0000|SB53_MAP_2000
+  .addr gus_portrait_sb53
+  .byte <.BANK(gus_portrait_sb53), SB53_PAT_0000|SB53_MAP_2000
   .addr linearity_ntsc
   .byte <.BANK(linearity_ntsc), SB53_PAT_0000|SB53_MAP_2000
   .addr linearity_pal
@@ -75,14 +84,10 @@ sb53_files:
   .byte <.BANK(linearity_grid_ntsc), SB53_PAT_1000|SB53_MAP_2400
   .addr linearity_grid_pal
   .byte <.BANK(linearity_grid_pal), SB53_PAT_1000|SB53_MAP_2400
-  .addr sharpnessgray_sb53
-  .byte <.BANK(sharpnessgray_sb53), SB53_PAT_0000|SB53_MAP_2000
-  .addr gus_portrait_sb53
-  .byte <.BANK(gus_portrait_sb53), SB53_PAT_0000|SB53_MAP_2000
-  .addr lag_clock_face_sb53
-  .byte <.BANK(lag_clock_face_sb53), SB53_PAT_0000|SB53_MAP_2000
-  .addr crosstalk_sb53
-  .byte <.BANK(crosstalk_sb53), SB53_PAT_0000|SB53_MAP_2000
+
+iu53_files:
+  .addr linearity_ntsc_iu53
+  .addr linearity_pal_iu53
 
 .segment "BANK00"
 gus_bg_sb53:         .incbin "obj/nes/gus_bg.sb53"
@@ -115,3 +120,7 @@ fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
 stdtiles_pb53:       .incbin "obj/nes/stdtiles.chr.pb53",2
 megatontiles_pb53:   .incbin "obj/nes/megatontiles.chr.pb53",2
 pluge_shark_pb53:    .incbin "obj/nes/pluge_shark_4color.chr.pb53",2
+
+IU53_BANK = <.bank(*)
+linearity_ntsc_iu53: .incbin "obj/nes/linearity_ntsc.iu53"
+linearity_pal_iu53:  .incbin "obj/nes/linearity_pal.iu53"

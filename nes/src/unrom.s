@@ -39,12 +39,13 @@ resetstub_entry:
 .endmacro
 
 ; Call gates are trivial in UNROM
-.import unpb53_some, unpb53_file_cb, load_sb53_file_cb
-.export unpb53_gate, unpb53_file, load_sb53_file
+.import unpb53_some, unpb53_file_cb, load_sb53_file_cb, load_iu53_file_cb
+.export unpb53_gate, unpb53_file, load_sb53_file, load_iu53_file
 
 unpb53_gate = unpb53_some
 unpb53_file = unpb53_file_cb
 load_sb53_file = load_sb53_file_cb
+load_iu53_file = load_iu53_file_cb
 
 resetstub_in "STUB15"
 

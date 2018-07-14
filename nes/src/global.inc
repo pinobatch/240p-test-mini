@@ -59,6 +59,9 @@ HELP_LINE_LEN = 40
 ; the correct physical bank still gets used.
 GATEDATA_BANK = 1
 
+; uniu.c
+.global load_iu53_file
+
 ; vwf_draw.s
 .global vwfPutTile, vwfPuts, vwfPuts0
 .global vwfGlyphWidth, vwfStrWidth, vwfStrWidth0

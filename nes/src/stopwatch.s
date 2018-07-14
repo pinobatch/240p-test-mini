@@ -78,7 +78,7 @@ restart:
   stx rf_curpattable
 
   ; Tiles $00-$7F (approximately): the clock face
-  lda #8
+  lda #2
   jsr load_sb53_file
 
   ; set sprite palette same as bg palette

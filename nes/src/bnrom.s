@@ -41,6 +41,11 @@ load_sb53_file:
   jsr load_sb53_file_cb
   jmp rtl
 
+load_iu53_file:
+  lsr zerobyte
+  jsr load_iu53_file_cb
+  jmp rtl
+
 unpb53_file:
   lsr zerobyte
   jsr unpb53_file_cb

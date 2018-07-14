@@ -68,12 +68,14 @@ test_state: .res 24
   ; Load pictures
   lda tvSystem
   cmp #1
-  lda #1  ; 2 and 3: without grid
+  lda #6>>1  ; 6 and 7: without grid
   rol a
   pha
   jsr load_sb53_file
   pla
-  eor #$06  ; 4 and 5: without grid
+  clc
+  adc #2
+  eor #6^8  ; 8 and 9: with grid
   jsr load_sb53_file
 
 loop:
@@ -108,7 +110,7 @@ loop:
   sta PPUCTRL
   asl a
   sta PPUMASK
-  lda #$06
+  lda #4
   jsr load_sb53_file
   
   ; Load bricks tile
@@ -171,7 +173,7 @@ palette_base = test_state + 0
   sta PPUCTRL
   asl a
   sta PPUMASK
-  lda #9
+  lda #3
   jsr load_sb53_file
   lda #$16
   sta palette_base
