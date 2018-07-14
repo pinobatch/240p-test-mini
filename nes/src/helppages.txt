@@ -741,8 +741,9 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.17 (2017-06-30)
-Add Sharpness brick wall
+Version 0.17+ (2017-07-xx)
+PLUGE Contrast; better
+compression
 
 Concept by Artemio Urbina
   🐦 @Artemio

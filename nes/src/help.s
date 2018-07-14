@@ -489,7 +489,7 @@ palloop:
   lda helpscreen_palette-$09,y
   iny
   sta PPUDATA
-  cpy #20
+  cpy #9 + helpscreen_palette_size
   bcc palloop
   
   ; Load character sprite tiles
@@ -561,33 +561,47 @@ vwfmap_tileloop:
   rts
 .endproc
 
+; Y, Start tile, Attr, X, Height
 gus_sprite_strips:
-  .byte 115,$21,$40,32, 3
-  .byte 103,$27,$40,40, 5
-  .byte 103,$17,$40,48, 5
-  .byte  69,$11,$40,48, 2
-  .byte  55,$01,$40,56, 2
-  .byte 103,$07,$40,56, 5
-  .byte  55,$01,$00,64, 2
-  .byte 103,$07,$00,64, 5
-  .byte  69,$11,$00,72, 2
-  .byte 103,$17,$00,72, 5
-  .byte 103,$27,$00,80, 5
+  .byte 115,$21,$40,32, 3  ; Elbows
   .byte 115,$21,$00,88, 3
+
+
+  .byte  69,$11,$40,48, 2  ; Head excl. eye
+  .byte  55,$01,$40,56, 2
+  .byte  55,$01,$00,64, 2
+  .byte  69,$11,$00,72, 2
+
+  .byte 103,$27,$41,40, 3  ; Arms and torso (upper)
+  .byte 103,$17,$41,48, 3
+  .byte 103,$07,$41,56, 3
+  .byte 103,$07,$01,64, 3
+  .byte 103,$17,$01,72, 3
+  .byte 103,$27,$01,80, 3
+
+  .byte 151,$2d,$40,40, 2  ; Arms and torso (lower)
+  .byte 151,$1d,$40,48, 2
+  .byte 151,$0d,$40,56, 1
+  .byte 167,$0f,$42,56, 1
+  .byte 151,$0d,$00,64, 1
+  .byte 167,$0f,$02,64, 1
+  .byte 151,$1d,$00,72, 2
+  .byte 151,$2d,$00,80, 2
+
   .byte $FF
 gus_eyes1:  ; eyes open
-  .byte  87,$05,$40,56, 1
-  .byte  87,$05,$00,64, 1
+  .byte  87,$05,$42,56, 1
+  .byte  87,$05,$02,64, 1
   .byte $FF
 gus_eyes2:  ; eyes shut
-  .byte  87,$15,$40,56, 1
-  .byte  87,$15,$00,64, 1
+  .byte  87,$15,$42,56, 1
+  .byte  87,$15,$02,64, 1
   .byte $FF
-
 
 helpscreen_palette:
   .byte     $20,$0F,$20,$0F,$0F,$20,$20
-  .byte $0F,$02,$27,$20
+  .byte $0F,$02,$27,$38, $0F,$18,$27,$38, $0F,$02,$27,$20
+helpscreen_palette_size = * - helpscreen_palette
 pagenum_template:  .byte 134," 1/1 ",135,0
 updowna_msg:       .byte 132,133,"A: Select",0
 b_exit_msg:        .byte "B: Exit",0
@@ -597,4 +611,3 @@ tvSystemNameHi: .hibytes name_ntsc, name_pal, name_dendy
 name_ntsc:   .byte "NTSC",0
 name_pal:    .byte "PAL",0
 name_dendy:  .byte "Dendy",0
-
