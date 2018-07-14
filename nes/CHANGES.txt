@@ -1,8 +1,12 @@
 0.18 (future)
+* Help: Compress text with DTE
+* Help: Update Gus look to match GBA
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic
   (Genesis 1.16 parity)
-* Compress help text with DTE
-* Pixel-align emblem at center of Sharpness
+* Linearity: Compress map with new iu53 codec
+* Linearity: Construct grid CHR from gridless CHR
+* Sharpness: Pixel-align emblem at center
+* Rename some source files to match their GB/GBA counterparts
 
 0.17 (2018-06-30)
 * Sharpness: A to show brick wall pattern (Genesis 1.16 parity)

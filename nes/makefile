@@ -17,10 +17,10 @@ version = 0.17+
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
 objlist = vwf7 zappertest overclock paldetect init vwf_draw \
-  main helpscreen stills linearity stopwatch backlight scrolling \
-  kiki audiosync soundtest crowd overscan megaton semixparent \
+  main help helppages.hlp stills linearity stopwatch backlight scrolltest \
+  kiki audiosync soundtest crowd overscan megaton shadowsprite \
   pads ppuclear unpb53 uniu undte bcd random rectfill muldiv \
-  pb53files helppages.hlp
+  pb53files
 
 AS65 = ca65
 LD65 = ld65
@@ -93,11 +93,11 @@ $(objdir)/%.o: $(objdir)/%.s
 
 # Files that depend on included files (.include, .incbin)
 
-$(objdir)/stills.o $(objdir)/semixparent.o \
+$(objdir)/stills.o $(objdir)/shadowsprite.o \
 $(objdir)/overclock.o $(objdir)/rectfill.o $(objdir)/stopwatch.o \
 $(objdir)/scrolling.o $(objdir)/overscan.o $(objdir)/megaton.o: \
   $(srcdir)/rectfill.inc
-$(objdir)/semixparent.o: \
+$(objdir)/shadowsprite.o: \
   $(objdir)/shadow_reticle.chr.pb53 $(objdir)/hepsie.chr.pb53
 $(objdir)/kiki.o: \
   $(objdir)/kikimap.chr.pb53
