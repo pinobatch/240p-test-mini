@@ -380,8 +380,25 @@ bgloadprocs:
 .popseg
 
 load_gus:
+  ldy #$00
+  sty PPUADDR
+  sty PPUADDR
+  lda #$FF
+  ldx #8
+  :
+    sta PPUDATA
+    dex
+    bne :-
+  :
+    sty PPUDATA
+    dex
+    bne :-
+  tya
+  ldx #$20
+  jsr ppu_clear_nt
+  
   lda #5
-  jmp load_sb53_file
+  jmp load_iu53_file
 
 load_fullscreenhorz:
   lda #$00

@@ -104,15 +104,15 @@ $(objdir)/kiki.o: \
 # Most of the compressed CHR data is grouped into "files" so that
 # I can move them from bank to bank more easily
 $(objdir)/pb53files.o: \
-  $(objdir)/gus_bg.sb53 $(objdir)/gus_sprite.chr.pb53 \
-  $(objdir)/greenhillzone.sb53 $(objdir)/kikitiles16.chr.pb53 \
-  $(objdir)/overscan.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
-  $(objdir)/lag_clock_face.sb53 $(objdir)/fizzter_digits.chr.pb53 \
-  $(objdir)/lag_clock_balls.chr.pb53 $(objdir)/gus_portrait.sb53 \
+  $(objdir)/gus_bg.sb53 $(objdir)/greenhillzone.sb53 \
+  $(objdir)/linearity_ntsc.iu53 $(objdir)/linearity_pal.iu53 \
+  $(objdir)/sharpness.iu53 $(objdir)/stopwatchface.iu53 \
+  $(objdir)/crosstalk.iu53 $(objdir)/gus_portrait.iu53 \
+  $(objdir)/gus_sprite.chr.pb53 $(objdir)/lag_clock_balls.chr.pb53 \
   $(objdir)/stdtiles.chr.pb53 $(objdir)/backlight_sprites.chr.pb53 \
-  $(objdir)/sharpnessgray.sb53 $(objdir)/crosstalk.sb53 \
-  $(objdir)/pluge_shark_4color.chr.pb53 \
-  $(objdir)/linearity_ntsc.iu53 $(objdir)/linearity_pal.iu53
+  $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
+  $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
+  $(objdir)/fizzter_digits.chr.pb53
 
 # Generic rules for CHR
 
@@ -133,10 +133,21 @@ $(objdir)/linearity_ntsc.iu53: $(objdir)/linearity_ntscgray.sav
 	$(PY) tools/sav2iu53.py --x-grid 0,1,2,3,4,5,6 $< $@
 $(objdir)/linearity_pal.iu53: $(objdir)/linearity_palgray.sav
 	$(PY) tools/sav2iu53.py --y-grid 8,2,5,8,0,3,6,8,1,4,7 $< $@
+$(objdir)/sharpness.iu53: $(objdir)/sharpness.sav
+	$(PY) tools/sav2iu53.py --with-attrs --with-palette $< $@
+$(objdir)/stopwatchface.iu53: $(objdir)/lag_clock_face.sav
+	$(PY) tools/sav2iu53.py --with-palette $< $@
+$(objdir)/crosstalk.iu53: $(objdir)/crosstalk.sav
+	$(PY) tools/sav2iu53.py $< $@
+$(objdir)/gus_portrait.iu53: $(objdir)/gus_portrait.sav
+	$(PY) tools/sav2iu53.py --with-attrs --with-palette --blank-color=1 $< $@
+
 $(objdir)/gus_sprite.chr: $(imgdir)/gus_sprite.png
 	$(BMP2) -H 128 --planes "0;1" $< $@
 $(objdir)/gus_bg.sav: $(imgdir)/gus_bg.png
 	$(PY) tools/savtool.py --palette 0f0820180f1a202a0f060f160f0f1424 $< $@
+$(objdir)/sharpness.sav: $(imgdir)/sharpness.png
+	$(PY) tools/savtool.py --palette 000F2024000607100024242400242424 $< $@
 $(objdir)/lag_clock_face.sav: $(imgdir)/lag_clock_face.png
 	$(PY) tools/savtool.py --palette 20100f24203626242021012420261624 $< $@
 $(objdir)/vwf7.s: $(cimgdir)/vwf7_cp240p.png

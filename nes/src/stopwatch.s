@@ -73,18 +73,23 @@ restart:
   lda #VBLANK_NMI
   sta help_reload
   sta PPUCTRL
-  ldx #$00
-  stx PPUMASK
-  stx rf_curpattable
-
+  asl a
+  sta PPUMASK
+  sta rf_curpattable
+  
   ; Tiles $00-$7F (approximately): the clock face
-  lda #2
-  jsr load_sb53_file
+  tay
+  ldx #$20
+  jsr ppu_clear_nt
+  ldx #$00
+  jsr ppu_clear_nt
+  lda #3
+  jsr load_iu53_file
 
   ; set sprite palette same as bg palette
   ldy #0
   palloop:
-    lda PB53_outbuf,y
+    lda (ciSrc),y
     sta PPUDATA
     iny
     cpy #16

@@ -39,9 +39,10 @@ sys.path.append(commontoolspath)
 from pilbmp2nes import pilbmp2chr
 from bitbuilder import log2, BitBuilder, Biterator
 
+color_0_tile = bytes(16)
+
 def uniq_on_grid(tiledata, tiles_per_row=32, xgrid=(0,), ygrid=(0,),
-                 verbose=False):
-    blanktile = bytes(16)
+                 blanktile=color_0_tile, verbose=False):
     nonblank_map_spaces = sum(
         1 if t == blanktile else 0 for t in tiledata
     )
@@ -131,7 +132,7 @@ def iu53_decompress_nt(data, length, numfixedtiles=0):
             pass
     return out
 
-def crop_blank_tiles(tiles, tiles_per_row=32):
+def crop_blank_tiles(tiles, tiles_per_row=32, blanktile=color_0_tile):
     # Copy and reformat as list-of-lists
     tiles = [
         tiles[i:i + tiles_per_row]
@@ -139,7 +140,6 @@ def crop_blank_tiles(tiles, tiles_per_row=32):
     ]
 
     # Bottom crop
-    blanktile = bytes(16)
     while tiles and all(x == blanktile for x in tiles[-1]):
         del tiles[-1]
     if not tiles:  # Blank screen
@@ -179,6 +179,9 @@ def parse_argv(argv):
                    help="include palette in file")
     p.add_argument("--start-tile", type=int, default=None,
                    help="starting tile number of nonblank tiles (default: len(x-grid)*len(y-grid))")
+    p.add_argument("--blank-color", type=int, default=0,
+                   choices=range(4),
+                   help="color to treat as blank (0-3)")
     p.add_argument("--x-grid", type=parse_grid, default=(0,),
                    help="comma-separated pattern of in which columns tiles may be reused")
     p.add_argument("--y-grid", type=parse_grid, default=(0,),
@@ -189,6 +192,10 @@ def parse_argv(argv):
 
 def main(argv=None):
     args = parse_argv(argv or sys.argv)
+    blanktile = b"".join(
+        (b"\xff" if args.blank_color & b else b"\x00") * 8
+        for b in [0x01, 0x02]
+    )
     with open(args.savfile, "rb") as infp:
         tiledata = infp.read(4096)
         infp.read(2048)
@@ -198,14 +205,14 @@ def main(argv=None):
         palette = infp.read(16)
     tiledata = [tiledata[16 * i:16 * i + 16] for i in nt]
     nt = None
-    tiledata, r = crop_blank_tiles(tiledata, 32)
+    tiledata, r = crop_blank_tiles(tiledata, 32, blanktile)
     tiles_per_row = r[2] - r[0]
     tiledata, nt = uniq_on_grid(
         tiledata, tiles_per_row, args.x_grid, args.y_grid,
-        verbose=args.verbose
+        blanktile=blanktile, verbose=args.verbose
     )
     # Crop the leading blank tile
-    assert tiledata[0] == bytes(16)
+    assert tiledata[0] == blanktile
     del tiledata[0]
 
     # Now compress everything

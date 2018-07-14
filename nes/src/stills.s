@@ -57,50 +57,6 @@ test_state: .res 24
 
 .segment "CODE"
 
-.proc do_linearity
-  lda #VBLANK_NMI
-  sta test_state
-  sta help_reload
-  sta PPUCTRL
-  asl a
-  sta PPUMASK
-
-  ; Load pictures
-  lda tvSystem
-  cmp #1
-  lda #6>>1  ; 6 and 7: without grid
-  rol a
-  pha
-  jsr load_sb53_file
-  pla
-  eor #6^8  ; 8 and 9: with grid
-  jsr load_sb53_file
-
-loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
-  lda test_state
-  clc
-  jsr ppu_screen_on_xy0
-
-  lda #helpsect_linearity
-  jsr read_pads_helpcheck
-  bcs do_linearity
-  lda new_keys
-  and #KEY_A
-  beq not_toggle_grid
-    lda #1|BG_1000
-    eor test_state
-    sta test_state
-  not_toggle_grid:
-  lda new_keys
-  and #KEY_B
-  beq loop
-  rts
-.endproc
-
 .proc do_sharpness
   lda #VBLANK_NMI
   sta test_state
@@ -108,8 +64,16 @@ loop:
   sta PPUCTRL
   asl a
   sta PPUMASK
-  lda #4
-  jsr load_sb53_file
+
+  ; Load main nametable, plus main and bricks palettes
+  ldx #$20
+  lda #$00
+  tay
+  jsr ppu_clear_nt
+  tax
+  jsr ppu_clear_nt
+  lda #2
+  jsr load_iu53_file
   
   ; Load bricks tile
   ldx #$24
@@ -127,16 +91,6 @@ loop:
     inx
     cpx #16
     bcc brickloop1
-  lda #$3F
-  sta PPUADDR
-  lda #$05
-  sta PPUADDR
-  lda #$06
-  sta PPUDATA
-  lda #$17
-  sta PPUDATA
-  lda #$10
-  sta PPUDATA
 
 loop:
   lda nmis
@@ -170,8 +124,15 @@ palette_base = test_state + 0
   sta PPUCTRL
   asl a
   sta PPUMASK
-  lda #3
-  jsr load_sb53_file
+
+  ; load bg
+  tay
+  tax
+  jsr ppu_clear_nt
+  ldx #$20
+  jsr ppu_clear_nt
+  lda #4
+  jsr load_iu53_file
   lda #$16
   sta palette_base
 

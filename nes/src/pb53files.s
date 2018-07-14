@@ -68,47 +68,45 @@ sb53_files:
   .byte <.BANK(gus_bg_sb53), SB53_PAT_0000|SB53_MAP_2000
   .addr greenhillzone_sb53
   .byte <.BANK(greenhillzone_sb53), SB53_PAT_0000|SB53_MAP_WIDE
-  .addr lag_clock_face_sb53
-  .byte <.BANK(lag_clock_face_sb53), SB53_PAT_0000|SB53_MAP_2000
-  .addr crosstalk_sb53
-  .byte <.BANK(crosstalk_sb53), SB53_PAT_0000|SB53_MAP_2000
-  .addr sharpnessgray_sb53
-  .byte <.BANK(sharpnessgray_sb53), SB53_PAT_0000|SB53_MAP_2000
-  .addr gus_portrait_sb53
-  .byte <.BANK(gus_portrait_sb53), SB53_PAT_0000|SB53_MAP_2000
 
 iu53_files:
   .addr linearity_ntsc_iu53
   .addr linearity_pal_iu53
+  .addr sharpness_iu53
+  .addr stopwatchface_iu53
+  .addr crosstalk_iu53
+  .addr gus_portrait_iu53
 
 .segment "BANK00"
 gus_bg_sb53:         .incbin "obj/nes/gus_bg.sb53"
-gus_portrait_sb53:   .incbin "obj/nes/gus_portrait.sb53"
 greenhillzone_sb53:  .incbin "obj/nes/greenhillzone.sb53"
-sharpnessgray_sb53:  .incbin "obj/nes/sharpnessgray.sb53"
-crosstalk_sb53:      .incbin "obj/nes/crosstalk.sb53"
-lag_clock_face_sb53: .incbin "obj/nes/lag_clock_face.sb53"
 
 IU53_BANK = <.bank(*)
 linearity_ntsc_iu53: .incbin "obj/nes/linearity_ntsc.iu53"
 linearity_pal_iu53:  .incbin "obj/nes/linearity_pal.iu53"
-
-gus_sprite:          .incbin "obj/nes/gus_sprite.chr.pb53",2
-help_cursor_pb53:
-  .byte $87  ; blank tile
-  .byte $40,$FF,$9F,$87,$81,$87,$9F,$FF,$82  ; arrow tile
+sharpness_iu53:      .incbin "obj/nes/sharpness.iu53"
+stopwatchface_iu53:  .incbin "obj/nes/stopwatchface.iu53"
+crosstalk_iu53:      .incbin "obj/nes/crosstalk.iu53"
+gus_portrait_iu53:   .incbin "obj/nes/gus_portrait.iu53"
 
 stopwatch_balls:     .incbin "obj/nes/lag_clock_balls.chr.pb53",2
 fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
 kikitiles_pb53:      .incbin "obj/nes/kikitiles16.chr.pb53",2
+gus_sprite:          .incbin "obj/nes/gus_sprite.chr.pb53",2
+megatontiles_pb53:   .incbin "obj/nes/megatontiles.chr.pb53",2
+pluge_shark_pb53:    .incbin "obj/nes/pluge_shark_4color.chr.pb53",2
 overscan_pb53:       .incbin "obj/nes/overscan.chr.pb53",2
 backlight_sprites:   .incbin "obj/nes/backlight_sprites.chr.pb53",2
+stdtiles_pb53:       .incbin "obj/nes/stdtiles.chr.pb53",2
+
+help_cursor_pb53:
+  .byte $87  ; blank tile
+  .byte $40,$FF,$9F,$87,$81,$87,$9F,$FF,$82  ; arrow tile
 overclock_s0_pb53:
   .byte $84
   .byte %00111111,$FF,$00,$80
 
 .segment "BANK01"
-stdtiles_pb53:       .incbin "obj/nes/stdtiles.chr.pb53",2
-megatontiles_pb53:   .incbin "obj/nes/megatontiles.chr.pb53",2
-pluge_shark_pb53:    .incbin "obj/nes/pluge_shark_4color.chr.pb53",2
 
+; Overflow pb53/sb53 files can go in bank 1, but the only ones left
+; are gatedata (Shadow sprite tiles and Kiki map).

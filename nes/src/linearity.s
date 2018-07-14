@@ -1,5 +1,6 @@
 .include "nes.inc"
 .include "global.inc"
+.include "rectfill.inc"
 .importzp helpsect_linearity
 
 lcdc_value = test_state+0
@@ -11,19 +12,9 @@ lcdc_value = test_state+0
   sta PPUCTRL
   sta lcdc_value
   sta help_reload
-
-  ; set palette
-  lda #$3F
-  ldx #$00
-  stx PPUMASK
-  sta PPUADDR
-  stx PPUADDR
-  sta PPUDATA
-  stx PPUDATA
-  lda #$10
-  sta PPUDATA
   asl a
-  sta PPUDATA
+  sta PPUMASK
+  jsr rf_load_yrgb_palette
 
   ; clear tiles and tilemap
   lda #$00
