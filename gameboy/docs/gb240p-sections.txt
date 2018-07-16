@@ -1,0 +1,89 @@
+io
+  SECTION: $0001-$0006 ($0006 bytes) ["memset_inc"]
+  SECTION: $0007-$0007 ($0001 bytes) ["main_reti"]
+  SECTION: $0009-$000D ($0005 bytes) ["memset_tiny"]
+  SECTION: $000E-$000E ($0001 bytes) ["main_jp_hl"]
+  SECTION: $0068-$006F ($0008 bytes) ["GBMONOPALETTE"]
+  SECTION: $0100-$014F ($0050 bytes) ["header"]
+  SECTION: $36D9-$37BE ($00E6 bytes) ["rom_pads"]
+  SECTION: $3962-$3A22 ($00C1 bytes) ["rom_ppuclear"]
+  SECTION: $3B39-$3BBF ($0087 bytes) ["rom_init"]
+  SECTION: $3E9E-$3ED3 ($0036 bytes) ["bcd"]
+vwf
+  SECTION: $0200-$05A7 ($03A8 bytes) ["vwfChrData"]
+  SECTION: $05A8-$06C0 ($0119 bytes) ["vwfPutTile"]
+layout
+  SECTION: $3067-$31C0 ($015A bytes) ["smpteloader"]
+  SECTION: $3DBE-$3E1B ($005E bytes) ["vwflabels"]
+compression
+  SECTION: $3E67-$3E9D ($0037 bytes) ["incruniq"]
+  SECTION: $3ED4-$3F03 ($0030 bytes) ["pb16"]
+  SECTION: $3F62-$3F8D ($002C bytes) ["undte"]
+help
+  SECTION: $3AB0-$3B38 ($0089 bytes) ["main"]
+  SECTION: $07DA-$0CEF ($0516 bytes) ["help"]
+  SECTION: $10EC-$14B0 ($03C5 bytes) ["helptiles"]
+  SECTION: $389B-$3961 ($00C7 bytes) ["help_map0"]
+  SECTION: $3E1C-$3E66 ($004B bytes) ["gbctestmenu"]
+helppages
+  SECTION: $470A-$660D ($1F04 bytes) ["helppages"]
+pluge
+  SECTION: $33F8-$34F0 ($00F9 bytes) ["pluge"]
+  SECTION: $7DE7-$7EB9 ($00D3 bytes) ["pluge_shark_gfx1"]
+gradientbars
+  SECTION: $2C06-$2D7C ($0177 bytes) ["gradientbars"]
+smptebars
+  SECTION: $34F1-$35E9 ($00F9 bytes) ["smptebars"]
+  SECTION: $3F8E-$3FB2 ($0025 bytes) ["smptebars_gfx0"]
+colorbleed
+  SECTION: $06C8-$07D9 ($0112 bytes) ["fullstripes"]
+  SECTION: $3D47-$3DBD ($0077 bytes) ["colorbleed"]
+cpsgrid
+  SECTION: $0150-$01E7 ($0098 bytes) ["cpsgrid"]
+  SECTION: $3F04-$3F33 ($0030 bytes) ["cpsgrid_gfx0"]
+linearity
+  SECTION: $0CF0-$10EB ($03FC bytes) ["linearity_gfx0"]
+  SECTION: $3C45-$3CC6 ($0082 bytes) ["linearity"]
+grayramp
+  SECTION: $32E9-$33F7 ($010F bytes) ["grayramp"]
+  SECTION: $3BC0-$3C44 ($0085 bytes) ["grayramp_gfx0"]
+solidscreen
+  SECTION: $2D7D-$2EF2 ($0176 bytes) ["solidscreen"]
+motionblur
+  SECTION: $2A2D-$2C05 ($01D9 bytes) ["motionblur"]
+kiki
+  SECTION: $0080-$0095 ($0016 bytes) ["kikimtbelow"]
+moblur
+  SECTION: $0096-$00F5 ($0060 bytes) ["motionblur_map0"]
+sharpness
+  SECTION: $3A23-$3AAF ($008D bytes) ["sharpness"]
+  SECTION: $14B1-$1846 ($0396 bytes) ["sharpness_gfx0"]
+overscan
+  SECTION: $282F-$2A2C ($01FE bytes) ["overscan"]
+shadowsprite
+  SECTION: $1F4B-$2292 ($0348 bytes) ["shadowsprite"]
+  SECTION: $37BF-$389A ($00DC bytes) ["shadowsprite_gfx0"]
+  SECTION: $6DD6-$747F ($06AA bytes) ["shadowsprite_gfx1"]
+  SECTION: $4000-$4709 ($070A bytes) ["Gus_portrait_GBC"]
+stopwatch
+  SECTION: $2573-$282E ($02BC bytes) ["stopwatch"]
+  SECTION: $660E-$6DD5 ($07C8 bytes) ["stopwatch_gfx1"]
+megaton
+  SECTION: $1BCE-$1F4A ($037D bytes) ["megaton"]
+  SECTION: $3F34-$3F61 ($002E bytes) ["rand"]
+  SECTION: $7EBA-$7F2E ($0075 bytes) ["megaton_gfx0"]
+gridscroll
+  SECTION: $1847-$1BCD ($0387 bytes) ["gridscroll"]
+  SECTION: $3CC7-$3D46 ($0080 bytes) ["scrolltest_gfx0"]
+  SECTION: $7480-$7A94 ($0615 bytes) ["scrolltest_gfx1"]
+  SECTION: $7F2F-$7F5E ($0030 bytes) ["scrolltest_pal1"]
+backlight
+  SECTION: $01E8-$01F9 ($0012 bytes) ["backlight_gfx0"]
+  SECTION: $35EA-$36D8 ($00EF bytes) ["backlight"]
+soundtest
+  SECTION: $2EF3-$3066 ($0174 bytes) ["soundtest"]
+audiosync
+  SECTION: $31C1-$32E8 ($0128 bytes) ["audiosync"]
+lameboy
+  SECTION: $2293-$2572 ($02E0 bytes) ["lameboy"]
+  SECTION: $7A95-$7DE6 ($0352 bytes) ["lameboy_gfx1"]

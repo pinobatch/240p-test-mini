@@ -1,0 +1,42 @@
+io: 536
+compression: 683 vs. 147
+vwf: 1420 vs. 1217
+layout: 968 vs. 440
+to be split up
+    stills.o: 2036 (17.4%)
+    stills.o: 786 (25.5%)
+-rw-r--r-- 1 pino pino  740 Jul 14 14:42 crosstalk.iu53
+-rw-r--r-- 1 pino pino 1284 Jul 14 14:42 sharpness.iu53
+-rw-r--r-- 1 pino pino  222 Jul 14 09:57 pluge_shark_4color.chr.pb53
+menu: 2348 vs. 2678
+helppages: 9644 vs. 7940
+linearity: 4415 vs. 1150
+overclock: 924
+overscan: 1512 vs. 510
+shadowsprite: 3296 vs. 4568
+stopwatch: 4174 vs. 2692
+megaton: 1995 vs. 1056
+gridscroll: 3838 vs. 2636
+backlight: 206 vs. 271
+zappertest: 452
+soundtest: 339 vs. 372
+crowd: 371
+audiosync: 289 vs. 296
+
+
+Why are some bigger on NES?
+* VWF: Probably code density for 16-bit operations
+* Layout: NES attribute tables are painful, among other things
+* Decompression: Nametables are packed tighter (for bigger screen), and special handling for 1bpp tiles.
+* Some tests don't exist on GB, such as Overclock, Crosstalk, Zapper, and Crowd.
+* Linearity: The circles cover nearly twice as much circumference, and there are two of them (NTSC and PAL).
+* Sharpness: Again, more diameter.
+* Help text: Help pages for tests that don't exist on GB don't exist on GB either
+* Overscan: NES lacks anything like GB "window" for drawing two of the edges. Instead a background update must be prepared.
+* Stopwatch: Antialiasing on clock face
+* Manual lag test: The DDR-style grades
+
+Some tests are bigger on GB.
+* Shadow sprite: Two Gus portraits with antialiasing vs. one (slightly larger) portrait without
+* Sound test: Wave RAM.
+* Lame boy doesn't exist

@@ -455,56 +455,7 @@ gradient_push_palette:
 
 ; SMPTE color bars & Color bars on gray ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; There's no wave channel period that is exactly 1 kHz, but there's
-; a 500 Hz.  So load the wave RAM with two sine cycles and play that.
-HALF_KHZ equ 2048-131
-
-section "smptebars", ROM0
-smpte_palette_dark:
-  drgb $C0C0C0  ; white-green
-  drgb $C0C010
-  drgb $10C0C0
-  drgb $10C010
-  drgb $1010C0  ; blue-green
-  drgb $C01010
-  drgb $C010C0
-  drgb $10C010
-  drgb $C0C0C0  ; row 2: nonblue colors replaced with black
-  drgb $101010
-  drgb $10C0C0
-  drgb $101010
-  drgb $1010C0
-  drgb $101010
-  drgb $C010C0
-  drgb $101010
-
-  drgb $101010
-  drgb $300068  ; purple (Q)
-  drgb $FFFFFF  ; bright white
-  drgb $002050  ; blue (I)
-  drgb $101010  ; shade2 (black)
-  drgb $080808  ; shade1
-  drgb $181818  ; shade3
-  drgb $FF00FF
-
-smpte_palette_light:
-  drgb $FFFFFF  ; white-green
-  drgb $FFFF10
-  drgb $10FFFF
-  drgb $10FF10
-  drgb $1010FF  ; blue-green
-  drgb $FF1010
-  drgb $FF10FF
-  drgb $10FF10
-  drgb $FFFFFF  ; row 2: nonblue colors replaced with black
-  drgb $101010
-  drgb $10FFFF
-  drgb $101010
-  drgb $1010FF
-  drgb $101010
-  drgb $FF10FF
-  drgb $101010
-
+section "smpteloader", ROM0
 smpte_rowdata:
   db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00, $00,$00,$00,$00,$00,$00,$00,$00,$00,$00  ; gray
   db $00,$00,$04,$01,$01,$05,$02,$02,$06,$03, $93,$96,$92,$92,$95,$91,$91,$94,$90,$90  ; SMPTE1
@@ -598,6 +549,57 @@ smpte_load_map::
     jr nz,.rowloop
   pop de
   jr .rowgrploop
+
+
+; There's no wave channel period that is exactly 1 kHz, but there's
+; a 500 Hz.  So load the wave RAM with two sine cycles and play that.
+HALF_KHZ equ 2048-131
+
+section "smptebars", ROM0
+smpte_palette_dark:
+  drgb $C0C0C0  ; white-green
+  drgb $C0C010
+  drgb $10C0C0
+  drgb $10C010
+  drgb $1010C0  ; blue-green
+  drgb $C01010
+  drgb $C010C0
+  drgb $10C010
+  drgb $C0C0C0  ; row 2: nonblue colors replaced with black
+  drgb $101010
+  drgb $10C0C0
+  drgb $101010
+  drgb $1010C0
+  drgb $101010
+  drgb $C010C0
+  drgb $101010
+
+  drgb $101010
+  drgb $300068  ; purple (Q)
+  drgb $FFFFFF  ; bright white
+  drgb $002050  ; blue (I)
+  drgb $101010  ; shade2 (black)
+  drgb $080808  ; shade1
+  drgb $181818  ; shade3
+  drgb $FF00FF
+
+smpte_palette_light:
+  drgb $FFFFFF  ; white-green
+  drgb $FFFF10
+  drgb $10FFFF
+  drgb $10FF10
+  drgb $1010FF  ; blue-green
+  drgb $FF1010
+  drgb $FF10FF
+  drgb $10FF10
+  drgb $FFFFFF  ; row 2: nonblue colors replaced with black
+  drgb $101010
+  drgb $10FFFF
+  drgb $101010
+  drgb $1010FF
+  drgb $101010
+  drgb $FF10FF
+  drgb $101010
 
 load_smpte_tiles:
   ld hl,CHRRAM0
