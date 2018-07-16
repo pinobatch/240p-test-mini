@@ -27,7 +27,7 @@
 .segment "PB53TABLES"
 unpb53_files:
   .addr stopwatch_balls
-  .byte <.BANK(stopwatch_balls), 96
+  .byte <.BANK(stopwatch_balls), 62
   .addr fizzter_digits
   .byte <.BANK(fizzter_digits), 64
   .addr stdtiles_pb53
@@ -89,7 +89,7 @@ stopwatchface_iu53:  .incbin "obj/nes/stopwatchface.iu53"
 crosstalk_iu53:      .incbin "obj/nes/crosstalk.iu53"
 gus_portrait_iu53:   .incbin "obj/nes/gus_portrait.iu53"
 
-stopwatch_balls:     .incbin "obj/nes/lag_clock_balls.chr.pb53",2
+stopwatch_balls:     .incbin "obj/nes/stopwatchhand.chr.pb53",2
 fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
 kikitiles_pb53:      .incbin "obj/nes/kikitiles16.chr.pb53",2
 gus_sprite:          .incbin "obj/nes/gus_sprite.chr.pb53",2

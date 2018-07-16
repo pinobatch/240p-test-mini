@@ -98,14 +98,14 @@ restart:
   ; BG and OBJ tiles $80-$BB: background digits (6 tiles each)
   ; $BC: colon dot
   ldx #$08
-  jsr unpb53_fizzter_digits
-  ldx #$18
-  jsr unpb53_fizzter_digits
+  ldy #$00
+  lda #1
+  jsr unpb53_file
 
-  ; $C0-$CF we reserve for labels
+  ; $70-$7F we reserve for labels
   lda #$20
   sta rf_curnametable
-  lda #$C0
+  lda #$70
   sta rf_tilenum
   lda #<stopwatch_labels
   sta ciSrc
@@ -113,11 +113,11 @@ restart:
   sta ciSrc+1
   jsr rf_draw_labels
   
-  ; OBJ tiles $00-$59: sprite dot overlays (9 tiles each)
+  ; OBJ tiles $C0-$FD: sprite dot overlays (6 tiles each)
   ; $5A: pointer dot
-  ldx #$10
+  ldx #$0C
   ldy #$00
-  lda #0  ; 0: stopwatch_balls
+  lda #0  ; 0: stopwatchhand
   jsr unpb53_file
 
   ; Uses 30 sprites for ruler, 10 for clock hand, and 12 for digits
@@ -188,7 +188,7 @@ loop:
   sbc #$10
   sta PPUDATA
 
-  lda #VBLANK_NMI|BG_0000|OBJ_1000
+  lda #VBLANK_NMI|BG_0000|OBJ_0000
   jsr ppu_oam_dma_screen_on_xy0
 
   lda #helpsect_stopwatch
@@ -208,7 +208,7 @@ loop:
   lda new_keys+0
   and #KEY_UP
   beq notToggleRuler
-    ; Order 0, 3, 1, ...
+    ; Toggle sw_ruler_style in order 0, 3, 1, ...
     ldy sw_ruler_style
     dey
     tya
@@ -256,15 +256,6 @@ loop:
   jmp loop
 done:
   rts
-.endproc
-
-;;
-; Loads 64 tiles of digit shape into CHR RAM.
-; @param A upper byte of destination VRAM address
-.proc unpb53_fizzter_digits
-  ldy #$00
-  lda #1
-  jmp unpb53_file
 .endproc
 
 .proc sw_prepare
@@ -339,38 +330,71 @@ hide_ruler = $00
   tax
   sta sprect_tilenum
   asl a
-  asl a
-  asl a
   adc sprect_tilenum
+  asl a
+  ora #$C0
   sta sprect_tilenum
   lda stopwatch_ball_x,x
+  adc #4
   sta sprect_x
   lda stopwatch_ball_y,x
   sta sprect_y
   ldy #3
-  sty sprect_w
   sty sprect_h
   dey
+  sty sprect_w
   sty sprect_attr  ; color palette 2: blue (background is pink)
   dey
   sty sprect_tileadd
   jsr draw_spriterect
-
-  ; And a separate smaller red ball pointing at it
+  
+  ; Draw the left and right border of each ball
   ldx oam_used
+  ballborderloop:
+    clc
+    lda #<-20
+    bit sprect_attr
+    bpl :+
+      lda #<-12
+    :
+    adc sprect_y
+    sta OAM,x
+    inx
+    lda #$FC  ; ball side piece
+    sta OAM,x
+    inx
+    lda sprect_attr
+    sta OAM,x
+    inx
+    clc
+    lda #<-8
+    bit sprect_attr
+    bvc :+
+      lda #16
+    :
+    adc sprect_x
+    sta OAM,x
+    inx
+    lda sprect_attr
+    clc
+    adc #$40
+    sta sprect_attr
+    bcc ballborderloop
+
+  ; And a separate smaller ball pointing at it
   lda sprect_y
   lsr a
   clc
   adc #78-12
   sta OAM,x
-  lda #90
+  lda #$FD  ; dot sprite
   sta OAM+1,x
   lda #2
   sta OAM+2,x
   lda sprect_x
   lsr a
   clc
-  adc #54+12
+  adc #52+12
   sta OAM+3,x
 
   ; Finally draw colon dots

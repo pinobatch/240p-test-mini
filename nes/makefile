@@ -108,7 +108,7 @@ $(objdir)/pb53files.o: \
   $(objdir)/linearity_ntsc.iu53 $(objdir)/linearity_pal.iu53 \
   $(objdir)/sharpness.iu53 $(objdir)/stopwatchface.iu53 \
   $(objdir)/crosstalk.iu53 $(objdir)/gus_portrait.iu53 \
-  $(objdir)/gus_sprite.chr.pb53 $(objdir)/lag_clock_balls.chr.pb53 \
+  $(objdir)/gus_sprite.chr.pb53 $(objdir)/stopwatchhand.chr.pb53 \
   $(objdir)/stdtiles.chr.pb53 $(objdir)/backlight_sprites.chr.pb53 \
   $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
   $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
@@ -136,7 +136,7 @@ $(objdir)/linearity_pal.iu53: $(objdir)/linearity_palgray.sav
 $(objdir)/sharpness.iu53: $(objdir)/sharpness.sav
 	$(PY) tools/sav2iu53.py --with-attrs --with-palette $< $@
 $(objdir)/stopwatchface.iu53: $(objdir)/lag_clock_face.sav
-	$(PY) tools/sav2iu53.py --with-palette $< $@
+	$(PY) tools/sav2iu53.py --with-attrs --with-palette $< $@
 $(objdir)/crosstalk.iu53: $(objdir)/crosstalk.sav
 	$(PY) tools/sav2iu53.py $< $@
 $(objdir)/gus_portrait.iu53: $(objdir)/gus_portrait.sav
