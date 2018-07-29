@@ -51,6 +51,21 @@ uniu_seen_tiles = $07
   rts
 .endproc
 
+;;
+; Decompresses a nametable fragment using incrementing uniques.
+;
+; Each image has a width and height because some images have a
+; blank margin, and coding all the blank tiles individually would
+; waste space.  Blank tiles and tiles outside the rectangle are
+; left untouched; if you want them zeroed, call ppu_clear_nt first.
+; @param ciSrc pointer to compressed data
+; @param ciDst pointer to top left of destination
+; @param uniu_width width in tiles of image
+; @param uniu_height height in tiles of image
+; @param uniu_first_nonblank tile number of first nonblank tile
+; @return ciDst: below first tile of last row; ciSrc: at end of
+;   source data; uniu_height: 0; uniu_width: unchanged;
+;   uniu_seen_tiles: number of unique nonblank tiles used
 .proc uniu
 
   ; Initialize the bit iterator to the empty state
@@ -94,7 +109,8 @@ uniu_seen_tiles = $07
       is_previous_tile:
         ; 11xxxxxx with same number of x bits as last tile in
         ; sequence: Write byte
-        ; First count bits in last new tile
+        ; First count bits in last new tile.
+        ; sec  ; carry set by bcs
         lda uniu_seen_tiles
         beq have_nonblank_tile
         sbc #1
@@ -177,7 +193,6 @@ uniu_seen_tiles = $07
   jsr add_a_to_ciSrc
   jsr unpb53_xtiles
   pla
-
   sta uniu_first_nonblank
 
   ; Header after PB53 tile data:
