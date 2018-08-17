@@ -29,7 +29,7 @@ strlenloop:
   iny
   cpy #HELP_LINE_LEN
   bcs have_strlen
-  cmp MIN_PRINTABLE
+  cmp #MIN_PRINTABLE
   bcs strlenloop
 have_strlen:
   tya
