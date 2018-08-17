@@ -157,16 +157,16 @@ draw_bg:
   call memset
 
   ; Draw top of floor
-  ld h,$0B
-  ld de,_SCRN0+32*16
-  ld bc,20
-  call memset
+  ld h,d  ; switch from ldir to fast calling convention
+  ld l,e
+  ld a,$0B
+  ld c,32
+  call memset_tiny
   
   ; Draw bottom of floor
-  ld h,$01
-  ld de,_SCRN0+32*17
-  ld bc,20
-  call memset
+  ld a,$01
+  ld c,20
+  call memset_tiny
 
   ld hl,_SCRN0+32*12+1
   call bg_draw_one_block
@@ -179,39 +179,22 @@ draw_bg:
 
   ; Make VWF window
   ld a,$60
-  ld hl,_SCRN0+32*0+4
-.vwffill1:
-  ld [hl+],a
-  inc a
-  cp $70
-  jr nz,.vwffill1
+  ld hl,_SCRN0+32*0+8
+  ld c,12
+  call memset_inc
 
   ; Write initial A and B values and result of Super Game Boy test
   ld hl,help_line_buffer
-  ld a,"A"
-  ld [hl+],a
-  ld a,":"
-  ld [hl+],a
   ld a,[initial_a]
-  call puthex
-  ld a," "
-  ld [hl+],a
-  ld a,"B"
-  ld [hl+],a
-  ld a,":"
-  ld [hl+],a
+  ld b,"A"
+  call lettercolonhex
   ld a,[initial_b]
-  call puthex
-  ld a," "
-  ld [hl+],a
-  ld a,"S"
-  ld [hl+],a
-  ld a,":"
-  ld [hl+],a
+  ld b,"B"
+  call spacelettercolonhex
   ld a,[is_sgb]
-  call puthex
-  xor a
-  ld [hl],a
+  ld b,"S"
+  call spacelettercolonhex
+  ld [hl],0
 
   ; Draw the text
   call vwfClearBuf
@@ -305,6 +288,16 @@ bg_draw_one_block:
     ldh [rVBK],a
   .not_gbc:
   ret
+
+spacelettercolonhex:
+  ld [hl]," "
+  inc hl
+
+lettercolonhex:
+  ld [hl],b
+  inc hl
+  ld [hl],":"
+  inc hl
 
 ;;
 ; Writes two hex nibbles ("0123456789ABCDEF") to HL

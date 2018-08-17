@@ -121,7 +121,7 @@ reset_handler::
   ldh [rSCX], a   ; clear scroll
   ldh [rNR52], a  ; disable (and reset) audio
 
-  ; Copy the sprite DMA routine
+  ; Copy the sprite DMA routine to HRAM
   ld hl,run_dma_master
   ld de,run_dma
   ld bc,run_dma_end-run_dma_master
@@ -187,7 +187,12 @@ memcpy::
   ret
 
 ;;
-; The routine gets copied to high RAM
+; The routine gets copied to high RAM.  While OAM DMA is running,
+; both ROM and WRAM are inaccessible; only HRAM is readable.
+; But unlike on the NES, the CPU continues to fetch and execute
+; instructions.  So a program needs to run 160 mcycles' worth of
+; code from HRAM until this finishes.  Thus to present a display
+; list, the program will call run_dma, not run_dma_master.
 run_dma_master:
   ld a,SOAM >> 8
   ldh [rDMA],a
@@ -213,12 +218,10 @@ memset_tiny::
 
 section "memset_inc",ROM0
 ;;
-; Writes C bytes of value A starting at HL.
+; Writes C bytes of value A, A+1, ..., A+C-1 starting at HL.
 memset_inc::
   ld [hl+],a
   inc a
   dec c
   jr nz,memset_inc
   ret
-
-
