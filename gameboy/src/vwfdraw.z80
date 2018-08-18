@@ -108,12 +108,14 @@ vwfPutTile_shifter:
 ; Draws the tile for glyph A at horizontal position B
 vwfPutTile::
 
-  ; Rotate the glyph number for later source address calc
-  sub " "
+  ; Calculate address of glyph
+  ld h,0
+  ld l,a
+  ld de,vwfChrData - (" "*GLYPH_HEIGHT)
   rept LOG_GLYPH_HEIGHT
-    rlca
+    add hl,hl
   endr
-  ld d,a  ; D = rotated glyph number
+  add hl,de
 
   ; Get the destination offset in line buffer
   ld a,b
@@ -139,13 +141,8 @@ vwfPutTile::
   sub e
   ldh [Lshifterid],a
 
-  ; Calculate glyph source address DE from rotated glyph number
-  ld a,d
-  and $100-GLYPH_HEIGHT  ; e.g. 8: %11111000
-  ld e,a  ; E = low byte
-  xor d
-  add high(vwfChrData)
-  ld d,a
+  ld d,h
+  ld e,l
 
   ; Shift each row
 vwfPutTile_rowloop:
@@ -186,7 +183,7 @@ vwfPuts::
 .nodrawspace:
   
   ; Add up the width of the glyph
-  ld de,vwfChrWidths-32
+  ld de,vwfChrWidths-" "
   add e
   ld e,a
   jr nc,.gwnowrap
