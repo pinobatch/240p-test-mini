@@ -189,12 +189,14 @@ sgb_send:
   ld a,[hl+]
   ld d,a
 .bitloop:
-  ; Send a 1 as $10 then $30, or a 0 as $20 then $30
+  ; Send a 1 as $10 then $30, or a 0 as $20 then $30.
+  ; This is constant time thanks to ISSOtm, unlike SGB BIOS
+  ; which takes 1 mcycle longer to send a 0 then a 1.
   ld a,$10
   bit 0,d
-  jr nz,.bitIs0
+  jr nz,.bitIs1
   add a,a ; ld a,$20
-.bitIs0:
+.bitIs1:
   ldh [rP1],a
   ld a,$30
   ldh [rP1],a
