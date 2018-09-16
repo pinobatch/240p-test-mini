@@ -69,14 +69,7 @@ activity_megaton::
   call memset
 
   ; Turn on audio
-  ld a,$80
-  ldh [rNR52],a  ; Bring audio circuit out of reset
-  ld a,$FF
-  ldh [rNR51],a  ; Set panning
-  ld a,$77
-  ldh [rNR50],a  ; Set master volume
-  xor a
-  ldh [rNR10],a  ; Disable sweep
+  call init_apu
   ld a,$80
   ldh [rNR11],a  ; Duty 50%
   ldh [rNR21],a  ; Duty 50%
@@ -349,8 +342,8 @@ activity_megaton_complete:
   ld c,16
   call vwfPutBufHBlank
 
+  xor a
   ldh [rNR52],a  ; turn off audio
-
 
 .loop:
   call read_pad

@@ -636,12 +636,7 @@ smpte_bars_engine:
   ld hl,_SCRN0
   call smpte_load_map
 
-  ld a,$80
-  ldh [rNR52],a  ; Bring audio circuit out of reset
-  ld a,$FF
-  ldh [rNR51],a  ; Set panning
-  ld a,$77
-  ldh [rNR50],a  ; Set master volume
+  call init_apu
   ld hl,waveram_sin2x
   call load_waveram
   ldh a,[curvolume]
@@ -668,7 +663,7 @@ smpte_bars_engine:
   bit PADB_B,b
   jr z,.no_quit
     xor a
-    ld [rNR52],a  ; stop audio circuit
+    ldh [rNR52],a  ; stop audio circuit
     ret
   .no_quit:
   bit PADB_A,b

@@ -33,7 +33,7 @@ waveram_sin8x:
 waveram_sin16x:
   db $c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3
 
-activity_soundtest::
+init_apu::
   ld a,$80
   ldh [rNR52],a  ; Bring audio circuit out of reset
   ld a,$FF
@@ -42,6 +42,10 @@ activity_soundtest::
   ldh [rNR50],a  ; Set master volume
   xor a
   ldh [rNR10],a  ; Disable pulse 1 sweep
+  ret
+
+activity_soundtest::
+  call init_apu
 
   ld a,PADF_A|PADF_B|PADF_START|PADF_DOWN|PADF_UP|PADF_LEFT|PADF_RIGHT
   ld b,helpsect_sound_test_frequency
@@ -52,7 +56,7 @@ activity_soundtest::
   bit PADB_B,[hl]
   jr z,.not_exit
     xor a
-    ld [rNR52],a
+    ldh [rNR52],a
     ret
   .not_exit:
 

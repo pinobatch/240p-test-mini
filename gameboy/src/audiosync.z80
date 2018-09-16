@@ -48,14 +48,7 @@ activity_audiosync::
   ld c,20
   call memset_tiny
 
-  ld a,$80
-  ldh [rNR52],a  ; Bring audio circuit out of reset
-  ld a,$FF
-  ldh [rNR51],a  ; Set panning
-  ld a,$77
-  ldh [rNR50],a  ; Set master volume
-  xor a
-  ldh [rNR10],a  ; Disable sweep
+  call init_apu
   ld a,$80
   ldh [rNR11],a  ; Duty 50%
 
@@ -80,7 +73,7 @@ activity_audiosync::
   bit PADB_B,b
   jr z,.not_quit
     xor a
-    ld [rNR52],a  ; Disable audio chip
+    ldh [rNR52],a  ; Disable audio chip
     ret
   .not_quit:
 
