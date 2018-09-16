@@ -3,9 +3,15 @@
 * Help: Update Gus look to match GBA
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic
   (Genesis 1.16 parity)
-* Linearity: Compress map with new iu53 codec
+* Sound test, Vertical scroll: Move code to UNROM bank 2 to make room
+  for iu53 decoder
+* Linearity, Sharpness, Stopwatch, Crosstalk: Compress map with new
+  iu53 codec
 * Linearity: Construct grid CHR from gridless CHR
 * Sharpness: Pixel-align emblem at center
+* Stopwatch: Reduce tiles of sprite circles (the "hand")
+* Overscan, Manual lag: List things that can be done later to reduce
+  ROM size
 * Rename some source files to match their GB/GBA counterparts
 
 0.17 (2018-06-30)

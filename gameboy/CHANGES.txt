@@ -1,6 +1,10 @@
 0.18 (future)
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic
   (Genesis 1.16 parity)
+* VWF: Glyph address calculation uses 16-bit shift instruction
+* VWF labels: Reduce stack use, including moving tile width from
+  stack to register C (requested by ISSOtm)
+* More refactoring and other size optimizations
 
 0.17 (2018-06-30)
 * Help: Compress document titles with DTE
