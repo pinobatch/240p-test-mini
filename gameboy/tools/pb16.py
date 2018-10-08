@@ -36,9 +36,9 @@ def pb16(data):
     for unco in ichunk(data, 8):
         # Pad the chunk to a multiple of 2 then to 8 bytes
         if len(unco) < 8:
-            if len(unco) == 1:
+            if len(unco) == 1:  # pad from 1 to 2
                 unco.append(prev[1])
-            elif len(unco) % 1:
+            elif len(unco) % 2:  # pad from 3 to 4, 5 to 6, or 7 to 8
                 unco.append(unco[-2])
             unco.extend(unco[-2:]*(8 - len(unco)))
 
