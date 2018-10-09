@@ -127,7 +127,7 @@ def hflipGB(tile):
     return bytes(br[b] for b in tile)
 
 def vflipGB(tile):
-    br = bitreverse
+    return b"".join(tile[i:i + 2] for i in range(len(tile) - 2, -2, -2))
 
 def flipuniq(it):
     tiles = []
