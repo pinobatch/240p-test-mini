@@ -253,7 +253,7 @@ def main(argv=None):
         "\n".join(subpalette_to_asm(row) for row in palettes),
         '%s_pal_end::' % outsymbolname,
     ]
-    if incruniq:
+    if args.incruniq:
         nampb16size = -(-len(tilemap_lo) // 16)
         ctilemap = b"".join(pb16.pb16(tilemap_lo))
         lines.extend([

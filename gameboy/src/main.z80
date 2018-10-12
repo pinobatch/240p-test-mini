@@ -39,22 +39,19 @@ main::
   cp $11
   jr nz,.no_clear_high_nametables
     ldh [rVBK],a
-	ld h,$00
-	ld de,$9800
-	ld bc,$0800
-	call memset
+    ld h,$00
+    ld de,_SCRN0
+    ld bc,$0800
+    call memset
     xor a
-	ldh [rVBK],a
+    ldh [rVBK],a
   .no_clear_high_nametables:
   
-  ; Avoid uninitialized read warnings for nmis and cur_keys
-  xor a
-  ld [nmis],a
-
   ; Set up vblank handler
   ld a,IEF_VBLANK
   ldh [rIE],a  ; enable IRQs
   xor a
+  ld [nmis],a  ; avoid uninitialized read warning
   ldh [rIF],a  ; Acknowledge any pending IRQs
   ei
   call help_init

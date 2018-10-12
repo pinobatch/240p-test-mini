@@ -1109,8 +1109,8 @@ help_get_doc_bounds:
 ;;
 ; Reads element A of an array of unsigned short *.
 ; @param A the index
-; @param DE pointer to the array
-; @return HL the value at [DE+A*2]
+; @param DE pointer to the array, unchanged
+; @return HL the value at [DE+A*2]; A=L
 de_index_a::
   ld l,a
   ld h,0
