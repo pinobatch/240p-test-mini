@@ -21,9 +21,10 @@
 include "src/hardware.inc"
 include "src/global.inc"
 
-Lshifterid set hLocals+0
-Lshiftermask set hLocals+1
-Ldstoffset set hLocals+2
+  rsset hLocals
+Lshifterid rb 1
+Lshiftermask rb 1
+Ldstoffset rb 1
 
 lineImgBufLen EQU 128  ; number of 1bpp planes
 
