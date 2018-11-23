@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-
+"""
+Long run detector for binary files
+Copyright 2018 Damian Yerrick
+insert zlib license here
+"""
 with open("gb240p.gb", "rb") as infp:
     data = infp.read()
 
-runbyte, runlength, runthreshold = 0xC9, 0, 32
-runs = []
+runthreshold = 32
+runbyte, runlength, runs = 0xC9, 0, []
 for addr, value in enumerate(data):
     if value != runbyte:
         if runlength >= runthreshold:
@@ -12,7 +16,7 @@ for addr, value in enumerate(data):
         runbyte, runlength = value, 0
     runlength += 1
 if runlength >= runthreshold:
-    runs.append((len(data) - runlength, addr))
+    runs.append((len(data) - runlength, len(data)))
 
 totalsz = 0
 for startaddr, endaddr in runs:
