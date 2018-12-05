@@ -131,7 +131,7 @@ updowna_msg:  db $86,$87,"A: Go",0
 b_exit_msg:   db 82, "B: Exit",0
 gb_msg:       db 96, "GB",0
 sgb_msg:      db 90, "SGB",0
-gbp_msg:      db 90, "GBP",0
+gbp_msg:      db 90, "GBp",0  ; lowercase to distinguish from Player
 sgb2_msg:     db 85, "SGB2",0
 gbc_msg:      db 90, "GBC",0
 gba_msg:      db 90, "GBA",0

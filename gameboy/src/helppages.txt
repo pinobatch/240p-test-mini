@@ -162,10 +162,10 @@ A: Start/stop the test
 ----
 The STN display in the
 original Game Boy and
-Game Boy Pocket has a
-fairly slow response,
-causing fast-moving
-things to appear blurry.
+Game Boy Pocket has
+a fairly slow response,
+causing fast motion
+to appear blurry.
 Game Boy Color's TFT
 dramatically improves
 response time.
@@ -178,10 +178,10 @@ in alternate frames.
 STN smearing:
 
 Passive matrix LCDs in
-Game Boy and Game Boy
-Pocket have artifacts.
-Because there's no
-transistor to block
+Game Boy and especially
+Game Boy Pocket have
+artifacts. Because there's
+no transistor to block
 crosstalk from other
 lines of pixels, the image
 on each line leaks a
@@ -556,8 +556,8 @@ Game Boy. It's still cute.
 ----
 Counter counts frames
 in hex and decimal.
-A, B: Register values
-  at power on, used to
+A, B: Initial register
+  values, used to
   determine machine model
 S: 00 for handheld or
   01 for Super Game Boy
