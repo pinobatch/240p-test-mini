@@ -366,13 +366,14 @@ visible area, in case aging
 capacitors cause the picture
 to shrink over time. This
 continues into the modern
-era, as a lot of productions
+era, as many productions
 have unwanted information
-in this overscan area.
+near the edge.
 
 ↑↓←→: Choose an edge
 Hold A + ↑↓←→:
   Move that edge
+Select: Invert grays
 ----
 Move each edge inward until
 you see the white border,
@@ -382,6 +383,14 @@ and subtract 1. The result
 is the amount of overscan
 in pixels in each direction.
 
+Poor high-voltage regulation
+in a CRT causes image size
+to depend on brightness.
+This changes the width of
+the border. To test this,
+press Select and repeat the
+above steps.
+----
 The NES picture is 256x240
 pixels. The nominal 4:3 frame
 on NTSC is 280x240, including

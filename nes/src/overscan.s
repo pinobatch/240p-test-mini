@@ -24,38 +24,26 @@
 
 .segment "RODATA"
 overscan_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect  88,112,136,120,$80, RF_INCR  ; [Bottom ]Overscan:
-  rf_rect 152,112,184,120,$86, RF_INCR  ; pixels (
-  rf_rect  88,120,136,128,$80, RF_INCR  ; [Left ]Overscan:
-  rf_rect 152,120,184,128,$86, RF_INCR  ; pixels (
-  rf_rect  88,128,136,136,$80, RF_INCR  ; [Right ]Overscan:
-  rf_rect 152,128,184,136,$86, RF_INCR  ; pixels (
-  rf_rect 200,112,208,136,$8A, 0        ; ) ) )
-  rf_rect 136,104,154,136,$F0, RF_INCR  ; pixel counts: $F0-$F7
-  rf_rect 184,104,200,136,$F8, RF_INCR  ; percentages: $F8-$FF
+  rf_rect   0,  0,256,240,$00, 0        ; Clear screen
+  rf_rect 112, 40,128, 48,$F0, RF_INCR  ; Top pixels: $F0-$F1
+  rf_rect 120, 48,136, 56,$F8, RF_INCR  ; Top percentage: $F8-$F9
+  rf_rect 112,184,128,192,$F2, RF_INCR  ; Bottom pixels: $FA-$FB
+  rf_rect 128,184,144,192,$80, RF_INCR  ; [Bottom] px
+  rf_rect 120,192,136,200,$FA, RF_INCR  ; Bottom percentage: $FA-$FB
+  rf_rect  40,112, 56,120,$F4, RF_INCR  ; Left pixels: $F4-$F5
+  rf_rect  40,120, 56,128,$80, RF_INCR  ; [Left] px
+  rf_rect  40,128, 56,136,$FC, RF_INCR  ; Left percentage: $FC-$FD
+  rf_rect 200,112,216,120,$F6, RF_INCR  ; Right pixels: $F6-$F7
+  rf_rect 200,120,216,128,$80, RF_INCR  ; [Right] px
+  rf_rect 200,128,216,136,$FE, RF_INCR  ; Right percentage: $FE-$FF
   .byte 0
 
   rf_attr   0,  0,256,240, 0
   .byte 0
 
   ; These start at $80 and are replicated using rects above
-  rf_label  89,104, 1, 0
-  .byte "Overscan:",0  ; $80-$85
-  rf_label 152,104, 1, 0
-  .byte "pixels (",0   ; $86-$89
-  rf_label 201,104, 1, 0
-  .byte ")",0   ; $8A
-
-  ; These aren't replicated
-  rf_label  70,104, 1, 0
-  .byte "Top",0
-  rf_label  56,112, 1, 0
-  .byte "Bottom",0
-  rf_label  67,120, 1, 0
-  .byte "Left",0
-  rf_label  64,128, 1, 0
-  .byte "Right",0
+  rf_label 131,40, 1, 0
+  .byte "px",0   ; $80-$81
   .byte 0
 
 ; BCD-encoded permill amounts
@@ -76,6 +64,10 @@ arrow_xmask:  .byte    0,   0, $FF, $FF
 arrow_ymask:  .byte  $FF, $FF,   0,   0
 arrow_negate: .byte    0, $FF,   0, $FF
 
+NUM_OVERSCAN_PALETTES = 3
+palette_low:  .byte $00, $0F, $20
+palette_high: .byte $20, $20, $0F
+
 .segment "CODE"
 
 amt_top      = test_state+0
@@ -84,14 +76,19 @@ amt_left     = test_state+2
 amt_right    = test_state+3
 change_dir   = test_state+4
 upd_progress = test_state+5
+palette      = test_state+6
 
 .proc do_overscan
-  ldx #5
-  lda #0
-:
-  sta test_state,x
-  dex
-  bpl :-
+  ; set test_state to 4, 4, 4, 4, 0, 0, 0
+  ldx #6
+  :
+    txa
+    and #$04
+    eor #$04
+    sta test_state,x
+    dex
+    bpl :-
+
 restart:
   lda #VBLANK_NMI
   sta PPUCTRL
@@ -184,6 +181,8 @@ loop:
     inc upd_progress
   upd_done:
 
+  ldx palette
+  ldy #$3F
   lda nmis
 :
   cmp nmis
@@ -197,10 +196,17 @@ loop:
   sta OAM_DMA
 
   ; Set palette for arrows based on A
-  lda #$3F
+  sty PPUADDR
+  lda #$00
   sta PPUADDR
-  lda #$12
-  sta PPUADDR
+  lda palette_low,x
+  sta PPUDATA
+  lda palette_high,x
+  sta PPUDATA
+  sty PPUADDR
+  ldx #$11
+  stx PPUADDR
+  sta PPUDATA
   lda #$10
   bit cur_keys+0
   bpl :+
@@ -269,6 +275,17 @@ loop:
       lda #0
       sta upd_progress
   not_move:
+
+  lda new_keys+0
+  and #KEY_SELECT
+  beq not_select
+    inc palette
+    lda palette
+    cmp #NUM_OVERSCAN_PALETTES
+    bcc not_select
+    lda #0
+    sta palette
+  not_select:
 
   lda new_keys+0
   and #KEY_B
