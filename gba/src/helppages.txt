@@ -129,9 +129,9 @@ Poor high-voltage
 regulation in a CRT
 causes image size to
 depend on brightness.
-This causes the border
-on Game Boy Player to
-change width.
+This changes the
+width of the border
+on Game Boy Player.
 
 == Motion blur ==
 

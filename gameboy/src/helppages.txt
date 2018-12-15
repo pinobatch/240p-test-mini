@@ -109,15 +109,14 @@ Use this pattern to
 check color balance.
 This gray ramp should
 not have a red, green,
-or blue tint to it.
+or blue tint to it. On
+Game Boy or Game Boy
+Pocket, four shades
+should be distinct.
 
 Cheap color LCDs may
 have different gamma
 curves per component.
-
-Have fun twiddling the
-contrast of a Game Boy
-original or Pocket.
 
 == Solid screen ==
 
@@ -139,10 +138,10 @@ Poor high-voltage
 regulation in a CRT
 causes image size to
 depend on brightness.
-This causes the border
-on Super Game Boy or
-Game Boy Player to
-change width.
+This changes the
+width of the border
+on Super Game Boy
+or Game Boy Player.
 
 == Motion blur ==
 
@@ -269,8 +268,8 @@ Select: Change shape
 These shouldn't happen:
 - Background loses detail
 - Shadow disappears
-- Horizontal stripes in
-  flicker pattern
+- Thin horizontal stripes
+  in flicker pattern
 ----
 Some handhelds' LCD
 driver circuits use a
