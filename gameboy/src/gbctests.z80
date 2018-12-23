@@ -183,7 +183,7 @@ activity_pluge:
     jr nz,.sharkmaprowloop
 
   ld a,$FF
-  ldh [rLYC],a
+  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
@@ -327,11 +327,10 @@ activity_gradient_bars:
   ldh [rIE],a
   ld a,STATF_LYC
   ldh [rSTAT],a
-  ld a,8
-  ldh [rLYC],a
-
   ld a,%11110111
   call set_bgp
+  ldh [rLYC],a  ; Disable until first vblank
+
   ld hl,gradient_objpalette
   ld bc,32*256+low(rOCPS)
   ld a,$80
@@ -418,7 +417,7 @@ gradient_push_palette:
   ; Prepare to wait for scanline A
   di
   ld b,a
-  ldh [rLYC],a
+  ldh [rLYC],a  ; Set scanline to wait for: tile row above transition
   ld a,STATF_LYC
   ldh [rSTAT],a
 

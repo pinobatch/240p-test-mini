@@ -84,7 +84,7 @@ activity_overscan::
   call set_obp0
   call set_obp1
   dec a
-  ldh [rLYC],a  ; disable BG
+  ldh [rLYC],a  ; disable LYC IRQ until ready
 
   ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR01|OBJ_ON
   ld [vblank_lcdc_value],a
@@ -220,7 +220,7 @@ activity_overscan::
   jr c,.bottom_border_exists
     ld a,255
   .bottom_border_exists:
-  ldh [rLYC],a
+  ldh [rLYC],a  ; Set line on which WX will be slammed hard left
 
   ldh a,[cur_palette]
   call set_bgp

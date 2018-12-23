@@ -548,7 +548,7 @@ help_load_bg:
   ld a,LCDCF_ON|BG_CHR21|OBJ_8X16|BG_NT0|WINDOW_NT1
   ld [stat_lcdc_value],a
   ld a,72
-  ldh [rLYC],a
+  ldh [rLYC],a  ; split between $8000 and $9000 at this line
   ld a,STAT_LYCIRQ
   ld [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC

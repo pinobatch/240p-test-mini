@@ -397,7 +397,7 @@ set_hillzone_scroll_pos::
 .waitandwrite:
   ld a,b
   dec a
-  ldh [rLYC],a
+  ldh [rLYC],a  ; Trigger interrupt at start of next parallax strip
 .wwloop:
   halt
   ldh a,[rLY]
@@ -516,9 +516,9 @@ load_hillzone_bg::
 .not_gbc_attrs:
 
   xor a
-  ldh [rBGP],a
+  ldh [rBGP],a  ; blank initial DMG palette
   ; Enable rSTAT IRQ on rLY=rLYC but put it on hold
-  ld a,255
+  dec a
   ldh [rLYC],a  ; disable lyc irq
   ld a,STAT_LYCIRQ
   ld [rSTAT],a
@@ -706,10 +706,9 @@ load_kiki_bg:
     jp nz,.bitunpack_rowloop
 
   ; Disable raster interrupt and set palette
-  ld a,$FF
-  ldh [rLYC],a
   ld a,%11100100
   ldh [rBGP],a
+  ldh [rLYC],a  ; disable lyc irq
 
   ld a,[initial_a]
   cp $11
