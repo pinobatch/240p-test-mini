@@ -38,12 +38,10 @@ rand::
   ld a,[hl-]
   ld c,a
   ld a,[hl-]
-  ld d,a
-  ld a,[hl]
-  ld e,a
+  ld e,[hl]
 
   ; Multiply by 0x01010101
-  add d
+  add e
   ld d,a
   adc c
   ld c,a
