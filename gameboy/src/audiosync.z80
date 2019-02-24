@@ -134,7 +134,6 @@ activity_audiosync::
   call set_obp0
 
   jp .loop
-  ret
 
 
   rsset hLocals
