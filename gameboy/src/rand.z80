@@ -38,7 +38,6 @@ rand::
   ld a,[hl-]
   ld c,a
   ld a,[hl-]
-  ld d,a
   ld e,[hl]
 
   ; Multiply by 0x01010101
