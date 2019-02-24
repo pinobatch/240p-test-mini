@@ -172,8 +172,8 @@ audiosync_draw_row:
   add 4
   ldh [dtr_t3],a
 
-  ld b,2
   ld hl,_SCRN0+32*2
+  ld bc,4
   ld de,12
 .rowloop:
   ldh a,[dtr_t0]
@@ -188,10 +188,7 @@ audiosync_draw_row:
   ldh a,[dtr_t3]
   ld [hl+],a
   ld [hl+],a
-  inc hl
-  inc hl
-  inc hl
-  inc hl
+  add hl,bc ; Skip over middle tiles
   ldh a,[dtr_t3]
   ld [hl+],a
   ld [hl+],a
@@ -204,8 +201,8 @@ audiosync_draw_row:
   ldh a,[dtr_t0]
   ld [hl+],a
   ld [hl+],a
-  add hl,de
-  dec b
+  add hl,de ; Go to next row
+  bit 7, l ; Check for _SCRN0+32*2 + 32*2
   jr nz,.rowloop
   ret
 
