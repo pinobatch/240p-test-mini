@@ -29,19 +29,20 @@ section "rand",ROM0
 ; using the LCG formula from cc65 rand():
 ; x[i + 1] = x[i] * 0x01010101 + 0x31415927
 ; @return A=B=state bits 31-24 (which have the best entropy),
-; C=state bits 23-16, DEHL trashed
+; C=state bits 23-16, DHL trashed
 rand::
-  ; Load the current value to BCDE
+  ; Load bits 31-8 of the current value to BCA
   ld hl,randstate+3
   ld a,[hl-]
   ld b,a
   ld a,[hl-]
   ld c,a
-  ld a,[hl-]
-  ld e,[hl]
+  ld a,[hl-]  ; skip D; thanks ISSOtm for the idea
+  ; Used to load bits 7-0 to E.  Reading [HL] each time turned out
+  ; no slower and saved 1 byte.
 
   ; Multiply by 0x01010101
-  add e
+  add [hl]
   ld d,a
   adc c
   ld c,a
@@ -49,7 +50,7 @@ rand::
   ld b,a
 
   ; Add 0x31415927 and write back
-  ld a,e
+  ld a,[hl]
   add $27
   ld [hl+],a
   ld a,d

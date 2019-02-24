@@ -27,7 +27,7 @@ include "src/global.inc"
 ; generate random timing of the reticle's motion.  I tested the LCG
 ; inside this activity because at the time, it was easiest to get the
 ; output on the screen.  Removing the RNG test saves 79 bytes.
-SHOW_RNG equ 0
+SHOW_RNG equ 1
 
   rsset hTestState
 player_xsub      rb 1
