@@ -25,6 +25,13 @@ unpaused rb 1
 
 section "audiosync",ROM0
 
+CEILING_Y = 32
+CEILING_HT = 16
+FLOOR_Y = 120
+RISEFALL_FRAMES = 120
+BEEP_FRAMES = 2
+FLOOR_TILE = $03
+DOT_TILE = $01
 PULSE_1K = 2048-131
 
 activity_audiosync::
@@ -43,8 +50,8 @@ activity_audiosync::
   ld bc,32*18
   ld h,4
   call memset
-  ld hl,_SCRN0+32*15
-  ld a,3
+  ld hl,_SCRN0+32*(FLOOR_Y / 8)
+  ld a,FLOOR_TILE
   ld c,20
   call memset_tiny
 
@@ -88,7 +95,7 @@ activity_audiosync::
 
 
   ld a,[progress]
-  cp 122
+  cp RISEFALL_FRAMES + BEEP_FRAMES
   jr c,.notstartover
   .startover:
     xor a
@@ -99,7 +106,7 @@ activity_audiosync::
     ld a,$80
     ldh [rNR14],a  ; freq hi and note start
   .notstartover:
-  cp 120
+  cp RISEFALL_FRAMES
   jr nz,.no_start_beep
 
     ; Start beep
@@ -127,7 +134,7 @@ activity_audiosync::
   call audiosync_draw_row
 
   ldh a,[progress]
-  cp 120
+  cp RISEFALL_FRAMES
   sbc a  ; A=$00 during beep or $FF during test
   and %00000011
   call set_bgp
@@ -171,8 +178,8 @@ audiosync_draw_row:
   add 4
   ldh [dtr_t3],a
 
-  ld b,2
-  ld hl,_SCRN0+32*2
+  ld b,CEILING_HT / 8
+  ld hl,_SCRN0+32*(CEILING_Y / 8)
   ld de,12
 .rowloop:
   ldh a,[dtr_t0]
@@ -187,11 +194,11 @@ audiosync_draw_row:
   ldh a,[dtr_t3]
   ld [hl+],a
   ld [hl+],a
-  inc hl
-  inc hl
-  inc hl
-  inc hl
-  ldh a,[dtr_t3]
+  inc l
+  inc l
+  inc l
+  inc l
+;  ldh a,[dtr_t3]
   ld [hl+],a
   ld [hl+],a
   ldh a,[dtr_t2]
@@ -211,20 +218,19 @@ audiosync_draw_row:
 audiosync_draw_sprite:
   ld hl,SOAM
   ldh a,[progress]
-  cp 60
+  cp RISEFALL_FRAMES / 2
   jr nc,.is_descending
     cpl
-    add 121
+    add RISEFALL_FRAMES + 1
   .is_descending:
-  add 16
+  add 16 + FLOOR_Y - RISEFALL_FRAMES
   ld [hl+],a
   ld a,79+8
   ld [hl+],a
-  ld a,1
+  ld a,DOT_TILE
   ld [hl+],a
   xor a
   ld [hl+],a
-
 
   ld a,l
   ld [oam_used],a
