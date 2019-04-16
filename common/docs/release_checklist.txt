@@ -8,8 +8,9 @@ Checklist before release
 5. `helppages.txt` (3): Ensure version and release date are updated
 6. `make all` to ensure all versions are built, including the
    sometimes neglected NES-BNROM version
-7. Test major functionality on PowerPak, EverDrive, and GBAMP,
-   starting with Credits and touching every test at least once
+7. Test major functionality on NES PowerPak, EverDrive GB, GBAMP in
+   SUD, and GBI self-multiboot, starting with Credits and touching
+   every test at least once
 8. Test zipfile for completeness
 
         rm -r build

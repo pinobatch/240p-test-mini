@@ -614,7 +614,7 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.17 (2018-06-30)
+Version 0.18 (2019-04-2x)
 Add Sharpness brick wall
 
 © 2011-2016 Artemio Urbina

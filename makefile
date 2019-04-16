@@ -1,5 +1,5 @@
 title := 240p-test-mini
-version := 0.17
+version := 0.18
 
 # Make $(MAKE) work correctly even when Make is installed inside
 # C:\Program Files
