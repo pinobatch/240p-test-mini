@@ -1,10 +1,13 @@
-0.18 (future)
+0.18 (2019-04)
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic
   (Genesis 1.16 parity)
 * VWF: Glyph address calculation uses 16-bit shift instruction
 * VWF labels: Reduce stack use, including moving tile width from
   stack to register C (requested by ISSOtm)
-* More refactoring and other size optimizations
+* PB16: Fix padding for odd-length packets
+* gbcnamtool: Fix vertical flip and conversion without incruniq
+* Mention worse smearing on Game Boy Pocket and other help tweaks
+* More refactoring and other size optimizations (with ISSOtm's help)
 
 0.17 (2018-06-30)
 * Help: Compress document titles with DTE
