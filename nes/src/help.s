@@ -23,6 +23,8 @@
 .import helppages_hi, helppages_lo, help_cumul_pages
 .importzp HELP_NUM_PAGES, HELP_NUM_SECTS, HELP_BANK
 
+.assert .bank(helppages_lo) = .bank(helpscreen_cb), error, "HELPDATA and CODE02 banks differ"
+
 .segment "BSS"
 help_cur_doc:   .res 1
 help_cur_page:  .res 1
@@ -89,6 +91,12 @@ help_line_buffer:.res HELP_LINE_LEN
   :
   lda #HELP_BANK
   sta :- + 1
+  jmp helpscreen_cb
+.endproc
+
+; the rest is in the help bank
+.segment "CODE02"
+.proc helpscreen_cb
 
   ; If not within this document, move to the first page
   ldx help_cur_doc
@@ -416,7 +424,7 @@ cursorloop:
 
 ; Help screen background ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.segment "CODE"
+.segment "CODE02"
 .proc helpscreen_load_oam
   ; Prepare Gus sprite
 strip_y = $00
@@ -472,10 +480,34 @@ sprstripdone:
   rts
 .endproc
 
+.code
+; The first part of loading the help scren has to be in the
+; fixed bank because it calls decompression
 .proc helpscreen_load
+  ; Load background image
   lda #0
   jsr load_sb53_file
 
+  ; Load character sprite tiles
+  ldx #$10
+  ldy #$00
+  lda #5
+  jsr unpb53_file
+
+  ; Load arrow tiles
+  ldx #$04
+  ldy #$E0
+  lda #6
+  jsr unpb53_file
+
+:
+  lda #HELP_BANK
+  sta :- + 1
+  jmp helpscreen_load_cb
+.endproc
+
+.segment "CODE02"
+.proc helpscreen_load_cb
   ; Load palette for sprite and VWF text
   lda #$3F
   sta PPUADDR
@@ -487,18 +519,6 @@ palloop:
   sta PPUDATA
   cpy #9 + helpscreen_palette_size
   bcc palloop
-  
-  ; Load character sprite tiles
-  ldx #$10
-  ldy #$00
-  lda #5
-  jsr unpb53_file
-  
-  ; Load arrow tiles
-  ldx #$04
-  ldy #$E0
-  lda #6
-  jsr unpb53_file
 
   ; Load tilemap for VWF
 dstlo   = $00
@@ -557,6 +577,7 @@ vwfmap_tileloop:
   rts
 .endproc
 
+.segment "HELPDATA"
 ; Y, Start tile, Attr, X, Height
 gus_sprite_strips:
   .byte 115,$21,$40,32, 3  ; Elbows
