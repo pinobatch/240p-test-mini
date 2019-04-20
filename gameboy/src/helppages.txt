@@ -693,7 +693,7 @@ size optimization
 
 © 2011-2016
   Artemio Urbina
-© 2015-2018
+© 2015-2019
   Damian Yerrick
 This is free software; see
 the source for copying
@@ -716,12 +716,12 @@ You can help:
 - Run tests on authentic
   Game Boy family
   handhelds and clones
-- Run tests on Super NES
-  with Super Game Boy
-  or GameCube with
-  Game Boy Player, both
-  straight to the TV
+- Run tests on Super Game
+  Boy or Game Boy Player,
+  both straight to the TV
   and with high-quality
   external scalers
 - Spread the word about
   the project
+- Support us:
+  patreon.com/pineight

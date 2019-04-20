@@ -754,13 +754,13 @@ Version 0.18 (2019-04-2x)
 PLUGE Contrast; better
 compression
 
-Concept by Artemio Urbina
+Concept: Artemio Urbina
   🐦 @Artemio
-Program by Damian Yerrick
+Program: Damian Yerrick
   🐦 @PinoBatch
 
 © 2011-2016 Artemio Urbina
-© 2015-2018 Damian Yerrick
+© 2015-2019 Damian Yerrick
 This is free software; see the
 source for copying conditions.
 There is NO warranty, not
@@ -777,4 +777,6 @@ and spreading the word about
 the project.
 
 Interested? Apply at
-http://goo.gl/XF8ef6
+  goo.gl/XF8ef6
+Support us:
+  patreon.com/pineight

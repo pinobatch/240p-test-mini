@@ -618,7 +618,7 @@ Version 0.18 (2019-04-2x)
 Add Sharpness brick wall
 
 © 2011-2016 Artemio Urbina
-© 2015-2018 Damian Yerrick
+© 2015-2019 Damian Yerrick
 This is free software; see
 the source for copying
 conditions. The program
@@ -646,3 +646,5 @@ You can help:
   external scalers
 - Spread the word about
   the project
+- Support us:
+  patreon.com/pineight
