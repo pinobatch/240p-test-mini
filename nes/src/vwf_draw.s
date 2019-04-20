@@ -34,7 +34,7 @@ shiftContinuation = $08
 leftMask = $0A
 rightMask = $0B
 
-.segment "CODE"
+.segment "LIBCODE"
 ;;
 ; Clears the line image buffer.
 ; Does not modify Y or zero page.
@@ -135,7 +135,7 @@ isBlankByte:
   .assert >shiftslide = >dontshift, error, "shiftslide crosses page boundary"
 
 .pushseg
-.segment "RODATA"
+.segment "LIBDATA"
 leftMasks:
   .repeat 8, I
     .byte $FF >> I

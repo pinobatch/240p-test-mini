@@ -16,7 +16,7 @@ version = 0.18
 # Space-separated list of assembly language files that make up the
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
-objlist = vwf7 zappertest overclock paldetect init vwf_draw \
+objlist = vwf7 zappertest overclock paldetect vwf_draw init \
   main help helppages.hlp stills linearity stopwatch backlight scrolltest \
   kiki audiosync soundtest crowd overscan megaton shadowsprite \
   pads ppuclear unpb53 uniu undte bcd random rectfill muldiv \
@@ -150,8 +150,8 @@ $(objdir)/sharpness.sav: $(imgdir)/sharpness.png
 	$(PY) tools/savtool.py --palette 000F2024000607100024242400242424 $< $@
 $(objdir)/lag_clock_face.sav: $(imgdir)/lag_clock_face.png
 	$(PY) tools/savtool.py --palette 20100f24203626242021012420261624 $< $@
-$(objdir)/vwf7.s: $(cimgdir)/vwf7_cp240p.png
-	$(PY) tools/vwfbuild.py $< $@
+$(objdir)/vwf7.s: tools/vwfbuild.py $(cimgdir)/vwf7_cp240p.png
+	$(PY) $^ $@
 $(objdir)/gus_portrait.sav: $(imgdir)/gus_portrait.png
 	$(PY) tools/savtool.py --palette 0F2012370F2028100F2027370F122810 $< $@
 $(objdir)/greenhillzone.sb53: $(imgdir)/greenhillzone.png

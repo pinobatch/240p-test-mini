@@ -11,7 +11,7 @@ MIN_PRINTABLE = 32
 
 .import dte_replacements
 
-.code
+.segment "LIBCODE"
 .proc undte_line
 srcaddr = $00
   sty srcaddr
