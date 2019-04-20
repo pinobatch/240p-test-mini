@@ -38,7 +38,7 @@ mt_cursor_y = test_state + 17
 reticlepos = test_state + 18
 reticletarget = test_state + 19
 reticledir = test_state + 20  ; 1: horizontal; 2: vertical; 3: both
-lastgrade = test_state + 21  ; 0-5: marv-miss; >5: no grade
+lastgrade = test_state + 21  ; $80: A not yet pressed this pass
 lastrawlag = test_state + 22  ; in signed magnitude (7 set: early)
 enableflags = test_state + 23
 
@@ -52,12 +52,9 @@ MT_DIRTY_LAG_HISTORY = $04
 
 ; 00-17: Reticle tiles
 ; 18-44: Static labels
-; 45-5B: Reserved for more labels
-; 5C-7F: Grade labels
+; 45-7F: Grade labels
 ; 80-87: Last raw lag
 ; 88-9B: Raw lag values
-GRADE_NAMES_TILE_BASE = $5C
-TILES_PER_GRADE_NAME = 6
 RAWLAG_TILE_BASE = $80
 LAG_HISTORY_TILE_BASE = $88
 TILES_PER_LAG_HISTORY = $02
@@ -72,31 +69,24 @@ megaton_rects:
   rf_attr   0,  0,256,240, 0
   .byte 0
   ; rf_label stuff goes here
-  rf_label  16,184, 3, 0
+  rf_label  32,184, 3, 0
   .byte "Press A when reticles align",0
-  rf_label  32,192, 3, 0
+  rf_label  48,192, 3, 0
   .byte "Direction:",0
-  rf_label 100,192, 3, 0
+  rf_label 116,192, 3, 0
   .byte "horizontal",0
-  rf_label 164,192, 3, 0
+  rf_label 180,192, 3, 0
   .byte "vertical",0
-  rf_label  32,200, 3, 0
+  rf_label  48,200, 3, 0
   .byte "Randomize:",0
-  rf_label 100,200, 3, 0
+  rf_label 116,200, 3, 0
   .byte "on",0
-  rf_label  32,208, 3, 0
+  rf_label  48,208, 3, 0
   .byte "Audio:",0
-  rf_label 100,208, 3, 0
+  rf_label 116,208, 3, 0
   .byte "on",0
   .byte 0
 
-grade_names:
-  .byte "Marvelous!",0
-  .byte "Perfect!",0
-  .byte "Great!",0
-  .byte "Good",0
-  .byte "Boo",0
-  .byte "Miss",0
 exact_msg:  .byte "exact",0
 late_msg:   .byte "late",0
 early_msg:  .byte "early",0
@@ -118,14 +108,10 @@ megaton_result_rects:
   .byte "Press B to close",0
   .byte 0
   
-; Let's flash the reticle based on DDR colors
-; The actual window widths on DDR Extreme are 2, 4, 11, 17, 27
-; And these are in half frames on each side because it reads pads
-; twice per frame.
-; We don't have that luxury, so we just round times up.
-window_widths:  .byte 1, 2, 6, 9, 14, 255
-NUM_GRADES = * - window_widths
-grade_colors:  .byte $20,$38,$2A,$21,$24,$16,$0F
+; The timing window widths on DDR Extreme are 2, 4, 11, 17, 27
+; half frames, and the colors are $20,$38,$2A,$21,$24,$16,$0F.
+; We used to display a DDR style grade, but it proved too tempting to
+; anticipate the press if you're used to playing DDR on a laggy TV.
 
 reticle_y:     .byte <-33,<-33,<-33,<-33,<-25,<-25,<-17,<-17, <-9, <-9, <-9, <-9
 reticle_tile:  .byte  $02, $03, $03, $02, $01, $01, $01, $01, $02, $03, $03, $02
@@ -162,14 +148,11 @@ restart:
   sta CRCLO
   eor #1
   sta CRCHI
-  lda #LEFTWALL
-  sta reticlepos
-  lda #RIGHTWALL
-  sta reticletarget
 
   lda #VBLANK_NMI
   sta lastgrade
   sta help_reload
+  sta vram_copydsthi
   sta PPUCTRL
   asl a
   sta PPUMASK
@@ -179,6 +162,14 @@ restart:
   tay
   lda #8
   jsr unpb53_file
+:
+  lda #<.bank(do_manual_lag_body)
+  sta :-+1
+  jmp do_manual_lag_body
+.endproc
+
+.segment "CODE02"
+.proc do_manual_lag_body
   jsr rf_load_yrgb_palette
   lda #$3F
   sta PPUADDR
@@ -198,51 +189,11 @@ restart:
   :
   jsr rf_draw_labels
 
-  ; Load grade labels
-  lda #<grade_names
-  sta $00
-  lda #>grade_names
-  sta $01
-  lda #GRADE_NAMES_TILE_BASE
-  gradenameloop:
-    sta rf_tilenum
-    
-    ; Centering
-    jsr clearLineImg
-    jsr vwfStrWidth0
-    lsr a
-    eor #$FF
-    sec
-    adc #4 * TILES_PER_GRADE_NAME
-    tax
-    jsr vwfPuts0
-    inc $00
-    bne :+
-      inc $01
-    :
-    lda #%0011
-    jsr rf_color_lineImgBuf
-    lda rf_tilenum
-    asl a
-    rol a
-    rol a
-    rol a
-    pha
-    and #$F0
-    sta vram_copydstlo
-    pla
-    rol a
-    and #$0F
-    sta vram_copydsthi
-    jsr rf_copy8tiles
-    lda rf_tilenum
-    clc
-    adc #TILES_PER_GRADE_NAME
-    cmp #GRADE_NAMES_TILE_BASE + TILES_PER_GRADE_NAME * NUM_GRADES
-    bcc gradenameloop
-  lda #$FF
-  sta vram_copydsthi
-  
+  lda #LEFTWALL
+  sta reticlepos
+  lda #RIGHTWALL
+  sta reticletarget
+
   ; Clear current lag and lag history tiles
   ldx #$08
   lda #$00
@@ -358,7 +309,7 @@ nobeep_nowhite:
     ldx #helpsect_manual_lag_test
     lda #KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT
     jsr helpscreen
-    jmp restart
+    jmp do_manual_lag::restart
   not_help:
 
   lda #$B0
@@ -382,8 +333,7 @@ no_beep_this_frame:
   lda new_keys
   bpl notA
   lda lastgrade
-  cmp #NUM_GRADES
-  bcc notA
+  bpl notA
     jsr grade_press  
   notA:
 
@@ -648,17 +598,7 @@ absdist = $0C
   notNeg:
   sta absdist
   
-  ; Translate absolute time difference to a color index and name
-  ; based on DDR rules.  Linear search for the first window width
-  ; wider than the absolute time difference.
   ldy #0
-  findgrade:
-    cmp window_widths,y
-    bcc foundgrade
-    iny
-    cpy #NUM_GRADES-1
-    bcc findgrade
-  foundgrade:
   sty lastgrade
 
   ; If absdist is nonzero, bit 7 of reticlepos XOR reticletarget
@@ -691,42 +631,29 @@ absdist = $0C
 ; Background updates ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;
-; Updates the grade color and the checkboxes
+; Updates the checkboxes
 .proc update_checkboxes
   lda mt_dirty
   and #<~MT_DIRTY_CBOXCOLOR
   sta mt_dirty
 
-  ; 1. Grade color
-  ldy lastgrade
-  cpy #6
-  bcc :+
-    ldy #6
-  :
-  lda #$3F
-  sta PPUADDR
-  lda #$01
-  sta PPUADDR
-  lda grade_colors,y
-  sta PPUDATA
-
-  ; $230B: horizontal display enabled
-  ; $2313: vertical display enabled
-  ; $232B: randomize enabled
-  ; $233B: audio enabled
+  ; $230D: horizontal display enabled
+  ; $2315: vertical display enabled
+  ; $232D: randomize enabled
+  ; $233D: audio enabled
   ldy #$23
   lda reticledir
   sta $00
   sty PPUADDR
   lsr $00
-  lda #$0B
+  lda #$0D
   sta PPUADDR
   lda #2
   rol a
   sta PPUDATA
   sty PPUADDR
   lsr $00
-  lda #$13
+  lda #$15
   sta PPUADDR
   lda #2
   rol a
@@ -736,44 +663,19 @@ absdist = $0C
   sta $00
   sty PPUADDR
   asl $00
-  lda #$2B
+  lda #$2D
   sta PPUADDR
   lda #2
   rol a
   sta PPUDATA
   sty PPUADDR
   asl $00
-  lda #$4B
+  lda #$4D
   sta PPUADDR
   lda #2
   rol a
   sta PPUDATA
 
-  lda #$22
-  sta PPUADDR
-  lda #$0D
-  sta PPUADDR
-  ldy #6
-  lda lastgrade
-  cmp #NUM_GRADES
-  bcs nogradetext
-  asl a
-  adc lastgrade
-  asl a
-  adc #GRADE_NAMES_TILE_BASE
-  :
-    sta PPUDATA
-    adc #1
-    dey
-    bne :-
-  jmp gradedone
-  nogradetext:
-  lda #0
-  :
-    sta PPUDATA
-    dey
-    bne :-
-  gradedone:
   rts
 .endproc
 
@@ -945,7 +847,7 @@ objloop:
   lda #0
   sta OAM,x
   inx
-  lda #16
+  lda #32
   sta OAM,x
   inx
   stx oam_used
