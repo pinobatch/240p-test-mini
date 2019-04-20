@@ -118,6 +118,15 @@ restart:
   ldy #$00
   lda #9
   jsr unpb53_file
+:
+  lda #<.bank(do_overscan_body)
+  sta :-+1
+  jmp do_overscan_body
+.endproc
+
+.segment "CODE02"
+.proc do_overscan_body
+
 
   ldx #$20
   stx rf_curnametable
@@ -228,7 +237,7 @@ loop:
   lda #helpsect_overscan
   jsr read_pads_helpcheck
   bcc not_help
-    jmp restart
+    jmp do_overscan::restart
   not_help:
 
   ldx #0
@@ -783,14 +792,11 @@ bottompos = $03
   lda sideprocs,x
   pha
   rts
-.pushseg
-.segment "RODATA"
 sideprocs:
-  .addr overscan_prepare_top-1  ; TODO: top
-  .addr overscan_prepare_bottom-1  ; TODO: bottom
+  .addr overscan_prepare_top-1
+  .addr overscan_prepare_bottom-1
   .addr overscan_prepare_left-1
   .addr overscan_prepare_right-1
-.popseg
 .endproc
 
 .proc overscan_copy4cols
@@ -820,5 +826,3 @@ sideprocs:
     bpl colloop
   rts
 .endproc
-
-

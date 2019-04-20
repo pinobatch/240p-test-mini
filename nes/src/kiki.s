@@ -78,10 +78,28 @@ restart:
   lda #$03
   jsr unpb53_file
 
+  ; Decompress map from 1bpp
 :
   lda #GATEDATA_BANK
   sta :- + 1
-  jsr load_kiki_map
+  lda #<(kikimap_pb53 + 2)
+  sta ciSrc+0
+  lda #>(kikimap_pb53 + 2)
+  sta ciSrc+1
+  lda #128
+  sta ciBufEnd
+  asl a
+  sta ciBufStart
+  jsr unpb53_gate
+
+  ; Move the rest out of fixed bank
+  lda #<.bank(load_kiki_map_02)
+  sta *-1
+  jmp do_vscrolltest_body
+.endproc
+.segment "CODE02"
+.proc do_vscrolltest_body
+  jsr load_kiki_map_02
 
   ; load palette
   ldx #$3F
@@ -173,7 +191,7 @@ forever:
   lda #helpsect_vertical_scroll_test
   jsr read_pads_helpcheck
   bcc not_help
-    jmp restart
+    jmp do_vscrolltest::restart
   not_help:
   jsr hill_zone_speed_control
   
@@ -210,26 +228,6 @@ pathbits_R = $0160
 mt_row = $0180
 attrbuf = $0190
 
-.proc load_kiki_map
-
-  ; Decompress map
-  lda #<(kikimap_pb53 + 2)
-  sta ciSrc+0
-  lda #>(kikimap_pb53 + 2)
-  sta ciSrc+1
-  lda #128
-  sta ciBufEnd
-  asl a
-  sta ciBufStart
-  jsr unpb53_gate
-
-  ; Move the rest out of fixed bank
-  lda #<.bank(load_kiki_map_02)
-  sta *-1
-  jmp load_kiki_map_02
-.endproc
-
-.segment "CODE02"
 .proc load_kiki_map_02
 mtdstlo = $00
 mtdsthi = $01
