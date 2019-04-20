@@ -62,7 +62,7 @@ TILES_PER_LAG_HISTORY = $02
 .rodata
 megaton_rects:
   rf_rect   0,  0,256,240,$00, 0
-  rf_rect 112, 96,144,128,$08, RF_INCR  ; The receptor
+  rf_rect 112, 96,144,128,$04, RF_INCR  ; The receptor
   rf_rect  96,136,160,144,RAWLAG_TILE_BASE, RF_INCR
   rf_rect  32, 40, 32 + 8 * MAX_TESTS * TILES_PER_LAG_HISTORY, 48,LAG_HISTORY_TILE_BASE, RF_INCR
   .byte 0
@@ -114,8 +114,7 @@ megaton_result_rects:
 ; anticipate the press if you're used to playing DDR on a laggy TV.
 
 reticle_y:     .byte <-33,<-33,<-33,<-33,<-25,<-25,<-17,<-17, <-9, <-9, <-9, <-9
-reticle_tile:  .byte  $02, $03, $03, $02, $01, $01, $01, $01, $02, $03, $03, $02
-reticle_attr:  .byte  $00, $00, $40, $40, $00, $40, $80, $C0, $80, $80, $C0, $C0
+reticle_tile:  .byte  $04, $05, $06, $07, $08, $0B, $0C, $0F, $10, $11, $12, $13
 reticle_x:     .byte <-16, <-8,   0,   8,<-16,   8,<-16,   8,<-16, <-8,   0,   8
 
 .segment "CODE"
@@ -648,14 +647,14 @@ absdist = $0C
   lsr $00
   lda #$0D
   sta PPUADDR
-  lda #2
+  lda #1
   rol a
   sta PPUDATA
   sty PPUADDR
   lsr $00
   lda #$15
   sta PPUADDR
-  lda #2
+  lda #1
   rol a
   sta PPUDATA
 
@@ -665,14 +664,14 @@ absdist = $0C
   asl $00
   lda #$2D
   sta PPUADDR
-  lda #2
+  lda #1
   rol a
   sta PPUDATA
   sty PPUADDR
   asl $00
   lda #$4D
   sta PPUADDR
-  lda #2
+  lda #1
   rol a
   sta PPUDATA
 
@@ -818,7 +817,7 @@ objloop:
   lda reticle_tile,y
   sta OAM,x
   inx
-  lda reticle_attr,y
+  lda #0
   sta OAM,x
   inx
   lda reticle_x,y
@@ -832,6 +831,8 @@ objloop:
   rts
 .endproc
 
+MEGATON_CURSOR_TILE = $01
+
 .proc mt_draw_cursor
   lda mt_cursor_y
   asl a
@@ -841,7 +842,7 @@ objloop:
   ldx oam_used
   sta OAM,x
   inx
-  lda #6
+  lda #MEGATON_CURSOR_TILE
   sta OAM,x
   inx
   lda #0
