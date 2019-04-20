@@ -64,27 +64,29 @@ megaton_rects:
   rf_rect   0,  0,256,240,$00, 0
   rf_rect 112, 96,144,128,$04, RF_INCR  ; The receptor
   rf_rect  96,136,160,144,RAWLAG_TILE_BASE, RF_INCR
-  rf_rect  32, 40, 32 + 8 * MAX_TESTS * TILES_PER_LAG_HISTORY, 48,LAG_HISTORY_TILE_BASE, RF_INCR
+  rf_rect  40, 48, 40 + 8 * TILES_PER_LAG_HISTORY, 48 + 8 * MAX_TESTS, LAG_HISTORY_TILE_BASE, RF_INCR
   .byte 0
   rf_attr   0,  0,256,240, 0
   .byte 0
-  ; rf_label stuff goes here
+  ; Followed by labels
+  ; a later refactor may require these to be first in order to
+  ; arrange for "off" and "on" to be allocated at fixed tile indices
+  rf_label 116,200, 3, 0
+  .byte "on",0
+  rf_label 116,208, 3, 0
+  .byte "on",0
   rf_label  32,184, 3, 0
   .byte "Press A when reticles align",0
   rf_label  48,192, 3, 0
-  .byte "Direction:",0
+  .byte "Direction",0
   rf_label 116,192, 3, 0
   .byte "horizontal",0
   rf_label 180,192, 3, 0
   .byte "vertical",0
   rf_label  48,200, 3, 0
-  .byte "Randomize:",0
-  rf_label 116,200, 3, 0
-  .byte "on",0
+  .byte "Randomize",0
   rf_label  48,208, 3, 0
-  .byte "Audio:",0
-  rf_label 116,208, 3, 0
-  .byte "on",0
+  .byte "Audio",0
   .byte 0
 
 exact_msg:  .byte "exact",0
@@ -93,18 +95,16 @@ early_msg:  .byte "early",0
 msg_frames: .byte " frames", 0
 
 megaton_result_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect  64, 48,64+8*TILES_PER_LAG_HISTORY, 48+8*MAX_TESTS, LAG_HISTORY_TILE_BASE, RF_INCR
-  rf_rect  64, 64 + 8 * MAX_TESTS,112,72 + 8 * MAX_TESTS, RAWLAG_TILE_BASE, RF_INCR
+  rf_rect   0,184,256,240,$00, 0
   .byte $00
   rf_attr   0,  0,256,240, 0
   .byte 0
   ; rf_label stuff goes here
-  rf_label  32,32, 3, 0
+  rf_label  32,40, 3, 0
   .byte "Measured lag:",0
   rf_label  32,56 + 8 * MAX_TESTS, 3, 0
-  .byte "Average lag:",0
-  rf_label  32,200, 3, 0
+  .byte "Average:",0
+  rf_label  32,184, 3, 0
   .byte "Press B to close",0
   .byte 0
   
@@ -120,11 +120,11 @@ reticle_x:     .byte <-16, <-8,   0,   8,<-16,   8,<-16,   8,<-16, <-8,   0,   8
 .segment "CODE"
 
 .proc do_manual_lag
-  lda #0
-  sta num_tests
-  sta mt_cursor_y
   lda #1
   sta reticledir
+  lsr a
+  sta num_tests
+  sta mt_cursor_y
   lda #EN_RANDOM|EN_BEEP  ; SNES 1.03 made beeping the default
   sta enableflags
 
@@ -227,8 +227,8 @@ loop:
 
   ; Draw reticle
   lda reticledir
-  and #1
-  beq :+
+  lsr a
+  bcc :+
     ldx reticlepos
     ldy #128
     jsr draw_one_reticle
@@ -329,9 +329,8 @@ no_beep_this_frame:
   sta $4004
 
   ; If A is pressed for the first time this pass, grade it
-  lda new_keys
-  bpl notA
-  lda lastgrade
+  lda new_keys+0
+  and lastgrade
   bpl notA
     jsr grade_press  
   notA:
@@ -345,32 +344,28 @@ no_beep_this_frame:
   lda new_keys+0
   and #KEY_B
   bne done
-  jmp loop
-done:
+    jmp loop
+  done:
+  ; fall through
+.endproc
+.proc silence_pulses
   lda #$B0  ; silence beeper
   sta $4000
+  sta $4004
   rts
 .endproc
 
 .proc megaton_show_results
-  lda #$B0  ; silence beeper
-  sta $4000
-  sta $4004
+  jsr silence_pulses
   lda #VBLANK_NMI
   sta PPUCTRL
   sta help_reload
   asl a
   sta PPUMASK
   sta rf_curpattable
-  sta PPUADDR
-  sta PPUADDR
   ldx #$20
   stx rf_curnametable
   stx rf_tilenum
-  :
-    sta PPUDATA
-    dex
-    bne :-
 
   jsr draw_lag_history_so_far
 
@@ -397,7 +392,6 @@ lagtotal100 = $0D
     dey
     bpl lagsumloop
   sta lagtotal
-  sta $FF
 
   ; Write sum
   ldy #0
@@ -441,7 +435,7 @@ lagtotal100 = $0D
   jsr clearLineImg
   ldy #<help_line_buffer
   lda #>help_line_buffer
-  ldx #0
+  ldx #8
   jsr vwfPuts
   lda #%0011
   jsr rf_color_lineImgBuf
@@ -459,7 +453,7 @@ lagtotal100 = $0D
   :
   jsr rf_draw_labels
   
-  ; Set the background color if last hit was Marvelous
+  ; Set the background color
   lda #$3F
   sta PPUADDR
   lda #$00
@@ -629,52 +623,51 @@ absdist = $0C
 
 ; Background updates ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+MT_CHECKBOX_TILE = $02
+
 ;;
 ; Updates the checkboxes
 .proc update_checkboxes
+reticledirbits = $00
+enfbits = $01
   lda mt_dirty
   and #<~MT_DIRTY_CBOXCOLOR
   sta mt_dirty
+  lda reticledir
+  sta reticledirbits
+  lda enableflags
+  sta enfbits
 
   ; $230D: horizontal display enabled
-  ; $2315: vertical display enabled
   ; $232D: randomize enabled
   ; $233D: audio enabled
+  ; $2315: vertical display enabled
+  ldy #VBLANK_NMI|VRAM_DOWN
+  sty PPUCTRL
   ldy #$23
-  lda reticledir
-  sta $00
   sty PPUADDR
-  lsr $00
   lda #$0D
   sta PPUADDR
-  lda #1
+  lsr reticledirbits
+  lda #MT_CHECKBOX_TILE>>1
   rol a
   sta PPUDATA
+  asl enfbits
+  lda #MT_CHECKBOX_TILE>>1
+  rol a
+  sta PPUDATA
+  asl enfbits
+  lda #MT_CHECKBOX_TILE>>1
+  rol a
+  sta PPUDATA
+
   sty PPUADDR
-  lsr $00
   lda #$15
   sta PPUADDR
-  lda #1
+  lsr reticledirbits
+  lda #MT_CHECKBOX_TILE>>1
   rol a
   sta PPUDATA
-
-  lda enableflags
-  sta $00
-  sty PPUADDR
-  asl $00
-  lda #$2D
-  sta PPUADDR
-  lda #1
-  rol a
-  sta PPUDATA
-  sty PPUADDR
-  asl $00
-  lda #$4D
-  sta PPUADDR
-  lda #1
-  rol a
-  sta PPUDATA
-
   rts
 .endproc
 
