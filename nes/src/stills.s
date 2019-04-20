@@ -93,10 +93,7 @@ test_state: .res 24
     bcc brickloop1
 
 loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda test_state
   clc
   jsr ppu_screen_on_xy0
@@ -137,10 +134,7 @@ palette_base = test_state + 0
   sta palette_base
 
 loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #$3F
   sta PPUADDR
   lda #$01
@@ -302,10 +296,7 @@ loop:
     sta vram_copydstlo
   not_reloading:
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
 
   ; Update palette
   lda #$3F
@@ -529,10 +520,7 @@ restart:
   jsr rf_draw_rects_attrs_ay
 
 loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
 
   ; Update palette
   lda #$3F
@@ -727,10 +715,7 @@ loop:
       sta palettechoice
   not_next_palette:
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
 
   ; Update palette
   lda #$3F
@@ -902,11 +887,7 @@ sprite_x = $03
   jsr ppu_clear_oam
 
 loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
-  
+  jsr ppu_wait_vblank
   lda test_state+0
   jsr ppu_oam_dma_screen_on_xy0
 
@@ -971,10 +952,7 @@ restart:
   jsr rf_draw_rects_attrs_ay
   
 loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   
   lda #$3F
   ldx #$00
@@ -1065,10 +1043,7 @@ gray_ramp_rects:
   jsr rf_draw_rects
 
 loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #VBLANK_NMI|BG_0000
   clc
   jsr ppu_screen_on_xy0
@@ -1203,10 +1178,7 @@ bg_type     = test_state+3
   stx frame_count
 
 restart:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #$3F
   sta PPUADDR
   ldy #$00
@@ -1259,10 +1231,7 @@ loop:
   lda xor_value
   ldy frame_count
   jsr prepare_color_bleed_tiles
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   jsr rf_copy8tiles
   ldx #0
   stx OAMADDR
@@ -1433,10 +1402,7 @@ have_bg_color_no_text:
 have_bg_color:
   sta cur_bg_color
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #$3F
   sta PPUADDR
   lda #$00

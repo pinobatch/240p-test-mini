@@ -33,7 +33,7 @@
 .global read_pads, autorepeat
 
 ; ppuclear.s
-.global ppu_clear_nt, ppu_clear_oam
+.global ppu_clear_nt, ppu_clear_oam, ppu_wait_vblank
 .global ppu_screen_on, ppu_oam_dma_screen_on_xy0, ppu_screen_on_xy0
 
 ; helpscreen.s

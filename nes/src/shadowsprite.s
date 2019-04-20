@@ -220,11 +220,7 @@ loop:
 
   ldx oam_used
   jsr ppu_clear_oam
-
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #VBLANK_NMI|BG_0000|OBJ_1000
   jsr ppu_oam_dma_screen_on_xy0
 

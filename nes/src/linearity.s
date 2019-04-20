@@ -38,10 +38,7 @@ lcdc_value = test_state+0
   jsr add_grid
 
 forever:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda lcdc_value
   clc
   jsr ppu_screen_on_xy0

@@ -112,11 +112,7 @@ nomovepage:
 loop:
   jsr help_prepare_line
   jsr helpscreen_load_oam
-  lda nmis
-:
-  cmp nmis
-  beq :-
-
+  jsr ppu_wait_vblank
   ldx #0
   stx OAMADDR
   lda #>OAM

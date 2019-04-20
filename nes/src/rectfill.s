@@ -531,10 +531,7 @@ colorize_one_plane:
 
 .proc rf_load_yrgb_palette
   ; Load palette
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #$3F
   sta PPUADDR
   ldy #$00

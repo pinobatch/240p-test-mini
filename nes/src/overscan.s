@@ -183,22 +183,18 @@ loop:
 
   ldx palette
   ldy #$3F
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
 
   ; Upload OAM first because some capture cards capture the start of
   ; vblank and can see the palette update rainbow
+  sty PPUADDR
   lda #$00
+  sta PPUADDR
   sta OAMADDR
   lda #>OAM
   sta OAM_DMA
 
   ; Set palette for arrows based on A
-  sty PPUADDR
-  lda #$00
-  sta PPUADDR
   lda palette_low,x
   sta PPUDATA
   lda palette_high,x

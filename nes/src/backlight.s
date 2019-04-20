@@ -53,10 +53,8 @@ loop:
   sta OAM+0
   lda sprite_size
   sta OAM+1
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
+  ; do not use ppu_screen_on because BG is not used
   lda #OBJ_ON
   sta PPUMASK
   lda #0

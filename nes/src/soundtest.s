@@ -142,10 +142,7 @@ done:
   ldx #20
   ldy tvSystem
 delayloop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda tvSystem_redtint,y
   sta PPUMASK
   dex

@@ -171,10 +171,7 @@ loop:
     sta lapIndicatorAddr+1
   update_done:
   
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   jsr rf_copy8tiles
 
   ; change the color of inactive circles

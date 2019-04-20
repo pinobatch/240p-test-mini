@@ -149,10 +149,7 @@ loop:
   adc #(192-120)-2
   sta OAM+0
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
 
   ; set palette
   lda #$3F

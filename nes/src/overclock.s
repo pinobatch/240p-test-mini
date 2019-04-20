@@ -207,11 +207,7 @@ done:
 .endproc
 
 .proc oc_present
-  lda nmis
-:
-  cmp nmis
-  beq :-
-
+  jsr ppu_wait_vblank
   lda vram_copydsthi
   bmi :+
     jsr rf_copy8tiles

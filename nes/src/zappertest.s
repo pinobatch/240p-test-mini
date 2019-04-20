@@ -225,11 +225,7 @@ forever:
   lda #$80
   sta vram_copydstlo
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
-
+  jsr ppu_wait_vblank
   lda #$00
   sta OAMADDR
   lda #>OAM

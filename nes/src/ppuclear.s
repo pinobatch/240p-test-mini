@@ -8,10 +8,12 @@
 ; code copies.  This file is offered as-is, without any warranty.
 ;
 .include "nes.inc"
-.export ppu_clear_nt, ppu_clear_oam
+.export ppu_clear_nt, ppu_clear_oam, ppu_wait_vblank
 .export ppu_oam_dma_screen_on_xy0, ppu_screen_on_xy0, ppu_screen_on
 .import OAM
+.importzp nmis
 
+.segment "LIBCODE"
 ;;
 ; Clears a nametable to a given tile number and attribute value.
 ; (Turn off rendering in PPUMASK and set the VRAM address increment
@@ -102,4 +104,11 @@ loop:
   rts
 .endproc
 
-
+.proc ppu_wait_vblank
+  lda nmis
+  :
+    cmp nmis
+    beq :-
+  :
+  rts
+.endproc

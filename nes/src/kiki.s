@@ -160,10 +160,7 @@ forever:
     sta hw_yscroll_hi
   not_bad_s0:
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   ldx #0
   stx OAMADDR
   lda #>OAM

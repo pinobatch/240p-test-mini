@@ -321,10 +321,7 @@ loop:
 nobeep_nowhite:
   sta bgcolor
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
 
   ; Update the first thing that's dirty  
   lda mt_dirty
@@ -522,10 +519,7 @@ lagtotal100 = $0D
   sta PPUDATA
 
 loop:
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #VBLANK_NMI|BG_0000
   clc
   jsr ppu_screen_on_xy0

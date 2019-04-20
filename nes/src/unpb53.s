@@ -12,7 +12,7 @@
 .import unpb53_files, sb53_files
 .export PB53_outbuf
 .exportzp ciSrc, ciDst, ciBufStart, ciBufEnd
-.importzp nmis
+.import ppu_wait_vblank
 
 .segment "ZEROPAGE"
 ciSrc: .res 2
@@ -258,10 +258,7 @@ have_all_pat:
   jsr unpb53_xtiles
 
   ; Load the palette
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   lda #$3F
   sta PPUADDR
   ldy #$00

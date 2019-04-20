@@ -84,17 +84,13 @@ loop:
   not_running_up:
   not_running:
 
+  jsr ppu_wait_vblank
   lda xpos
   and #$07
   tax
   lda ypos
   and #$07
   tay
-
-  lda nmis
-:
-  cmp nmis
-  beq :-
   lda #VBLANK_NMI|BG_0000
   clc
   jsr ppu_screen_on
@@ -183,10 +179,7 @@ restart:
   jsr hill_zone_load
 loop:
 
-  lda nmis
-:
-  cmp nmis
-  beq :-
+  jsr ppu_wait_vblank
   ldy #0
   sty OAMADDR
   lda #>OAM
