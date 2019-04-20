@@ -22,7 +22,8 @@
 /nes/zip.in
 /gameboy/zip.in
 /gba/zip.in
-*.nes.deb
+/nes/*.nes.deb
+/nes/*.dbg
 /nes/map.txt
 /nes/bnmap.txt
 /nes/new-linearity/map.txt

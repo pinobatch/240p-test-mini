@@ -24,7 +24,7 @@ objlist = vwf7 zappertest overclock paldetect vwf_draw init \
 
 AS65 = ca65
 LD65 = ld65
-CFLAGS65 = 
+CFLAGS65 = -g
 objdir = obj/nes
 srcdir = src
 imgdir = tilesets
@@ -45,9 +45,10 @@ PY:=python3
 EMU:=fceux
 DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
 endif
+DEBUGEMU2 := Mesen.exe
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 
-.PHONY: run runalt debug dist zip all clean
+.PHONY: run runalt debug debug2 debugalt dist zip all clean
 
 run: $(title).nes
 	$(EMU) $<
@@ -55,6 +56,10 @@ runalt: $(title)-bnrom.nes
 	$(EMU) $<
 debug: $(title).nes
 	$(DEBUGEMU) $<
+debug2: $(title).nes
+	$(DEBUGEMU2) $<
+debugalt: $(title)-bnrom.nes
+	$(DEBUGEMU2) $<
 
 # Rule to create or update the distribution zipfile by adding all
 # files listed in zip.in.  Use changes to the compiled program and
@@ -80,10 +85,10 @@ clean:
 objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
 
 map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
-	$(LD65) -o $(title).nes -m map.txt -C $^
+	$(LD65) -o $(title).nes -m map.txt --dbgfile $(title).dbg -C $^
 
 bnmap.txt $(title)-bnrom.nes: bnrom512kbit.cfg $(objlisto) $(objdir)/bnrom.o
-	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt -C $^
+	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
 
 $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 	$(AS65) $(CFLAGS65) $< -o $@

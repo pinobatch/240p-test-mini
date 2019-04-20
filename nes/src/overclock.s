@@ -79,7 +79,7 @@ oc_tvSystem     = test_state + 12
 prpos           = vram_copydstlo
 string_buffer   = test_state + 13
 
-.code
+.segment "CODE02"
 ; Alignment sensitive code comes first
 .align 64
 ;;
@@ -155,6 +155,7 @@ loop:
   rts
 .endproc
 
+.code
 .proc do_overclock
   lda #VBLANK_NMI
   sta PPUCTRL
@@ -163,21 +164,26 @@ loop:
   asl a
   sta rf_curpattable
   sta PPUMASK
-  
-  ; Blank the text window
-  tay
-  ldx #$08
-  jsr ppu_clear_nt  ; blank the text window
-  jsr rf_load_yrgb_palette
 
   ; Load static tiles
   ldx #$00
   ldy #$00
   lda #7
   jsr unpb53_file
+  
+:
+  lda #<.BANK(s0_rise_to_rise)
+  sta :-+1
+
+  ; Blank the text window
+  lda #0
+  tay
+  ldx #$08
+  jsr ppu_clear_nt  ; blank the text window
+  jsr rf_load_yrgb_palette
+
   lda #2
   sta rf_tilenum
-
   ldx #$20
   stx rf_curnametable
   ldy #<overclock_rects
@@ -188,13 +194,13 @@ loop:
     inc ciSrc+1
   :
   jsr rf_draw_labels
-  jsr s0_setup
+  jsr oc_s0_setup
 
 loop:
   lda #0
   sta new_keys+0  ; Start collecting START and B presses anew
-  jsr run_tests_once
-  jsr display_results
+  jsr oc_run_once
+  jsr oc_display_results
 
   lda #helpsect_cpu_clock_speed
   jsr helpcheck
@@ -206,6 +212,7 @@ done:
   rts
 .endproc
 
+.segment "CODE02"
 .proc oc_present
   jsr ppu_wait_vblank
   lda vram_copydsthi
@@ -225,7 +232,7 @@ done:
   rts
 .endproc
 
-.proc display_results
+.proc oc_display_results
   ; If a frame is longer than 1.5 * 192 lines, it's PAL
   lda time_192_lines+1
   lsr a
@@ -462,13 +469,10 @@ done:
   rts
 .endproc
 
-; PPU tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.segment "CODE"
-
 ;;
 ; Sets up a screen with 9 sprites near the top and sprite 0
 ; near the bottom
-.proc s0_setup
+.proc oc_s0_setup
 s0_ppuaddr = $2000 + s0_y * 32 + s0_x
 s0_tile = $01
 nine_tile = $00
@@ -504,7 +508,7 @@ clrloop:
   rts
 .endproc
 
-.proc run_tests_once
+.proc oc_run_once
   jsr oc_present
 
   ; Measure frame period in 12 cycle units

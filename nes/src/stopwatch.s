@@ -50,6 +50,10 @@ stopwatch_ball_x:
 stopwatch_ball_y:
   .byte  87, 97,123,155,181,191,181,155,123, 97
 
+; duplicate it here because in BNROM it's in another bank
+stopwatch_sprite_palette:
+  .byte $21,$01,$FF,$FF,$26,$16
+
 COLON_DOT = $BC
 RULER_DOT = $BD
 LAP_INDICATOR_LEFT = $BE
@@ -69,7 +73,8 @@ lapIndicatorAddr = lineImgBuf+96+24
     bpl :-
   lda #$36
   sta sw_inactive_color
-restart:
+.endproc
+.proc stopwatch_restart
   lda #VBLANK_NMI
   sta help_reload
   sta PPUCTRL
@@ -86,14 +91,24 @@ restart:
   lda #3
   jsr load_iu53_file
 
-  ; set sprite palette same as bg palette
-  ldy #0
+  ; set sprite palette 
+  ldy #$3F
+  sty PPUADDR
+  ldy #$19
+  sty PPUADDR
   palloop:
-    lda (ciSrc),y
+    lda stopwatch_sprite_palette-$19,y
     sta PPUDATA
     iny
-    cpy #16
+    cpy #$1F
     bcc palloop
+
+  ; OBJ tiles $C0-$FD: sprite dot overlays (6 tiles each)
+  ; $5A: pointer dot
+  ldx #$0C
+  ldy #$00
+  lda #0  ; 0: stopwatchhand
+  jsr unpb53_file
 
   ; BG and OBJ tiles $80-$BB: background digits (6 tiles each)
   ; $BC: colon dot
@@ -102,6 +117,14 @@ restart:
   lda #1
   jsr unpb53_file
 
+:
+  lda #<.BANK(stopwatch_body)
+  sta :-+1
+  jmp stopwatch_body
+.endproc
+
+.segment "CODE02"
+.proc stopwatch_body
   ; $70-$7F we reserve for labels
   lda #$20
   sta rf_curnametable
@@ -112,13 +135,6 @@ restart:
   lda #>stopwatch_labels
   sta ciSrc+1
   jsr rf_draw_labels
-  
-  ; OBJ tiles $C0-$FD: sprite dot overlays (6 tiles each)
-  ; $5A: pointer dot
-  ldx #$0C
-  ldy #$00
-  lda #0  ; 0: stopwatchhand
-  jsr unpb53_file
 
   ; Uses 30 sprites for ruler, 10 for clock hand, and 12 for digits
   ldx #(30+10+12)*4
@@ -191,7 +207,7 @@ loop:
   lda #helpsect_stopwatch
   jsr read_pads_helpcheck
   bcc not_help
-    jmp restart
+    jmp stopwatch_restart
   not_help:
   
   lda new_keys+0

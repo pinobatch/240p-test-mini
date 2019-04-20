@@ -12,7 +12,7 @@
 .import unpb53_files, sb53_files
 .export PB53_outbuf
 .exportzp ciSrc, ciDst, ciBufStart, ciBufEnd
-.import ppu_wait_vblank
+.importzp nmis
 
 .segment "ZEROPAGE"
 ciSrc: .res 2
@@ -258,7 +258,11 @@ have_all_pat:
   jsr unpb53_xtiles
 
   ; Load the palette
-  jsr ppu_wait_vblank
+  ; ppu_wait_vblank is inlined because on BNROM, it's in another bank
+  lda nmis
+  :
+    cmp nmis
+    beq :-
   lda #$3F
   sta PPUADDR
   ldy #$00
