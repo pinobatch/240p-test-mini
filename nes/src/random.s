@@ -15,7 +15,7 @@
 CRCLO: .res 1
 CRCHI: .res 1
 
-.segment "CODE"
+.segment "LIBCODE"
 
 ; This is Greg Cook's implementation of CRC16
 ; If using CRC as a PRNG, use this entry point

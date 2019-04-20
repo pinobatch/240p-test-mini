@@ -25,8 +25,8 @@
 .include "rectfill.inc"
 .importzp helpsect_zapper_test
 
+.segment "LIBCODE"
 .align 128
-.code
 ;;
 ; @param Y total number of lines to wait
 ; @param X which port to read (0 or 1)

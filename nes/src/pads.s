@@ -30,7 +30,7 @@ DAS_DELAY = 15
 ; time between autorepeat keypresses
 DAS_SPEED = 3
 
-.segment "CODE"
+.segment "LIBCODE"
 .proc read_pads
 thisRead = 0
 firstRead = 2
