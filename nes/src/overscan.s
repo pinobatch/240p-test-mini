@@ -27,7 +27,7 @@ overscan_rects:
   rf_rect   0,  0,256,240,$00, 0        ; Clear screen
   rf_rect 112, 40,128, 48,$F0, RF_INCR  ; Top pixels: $F0-$F1
   rf_rect 120, 48,136, 56,$F8, RF_INCR  ; Top percentage: $F8-$F9
-  rf_rect 112,184,128,192,$F2, RF_INCR  ; Bottom pixels: $FA-$FB
+  rf_rect 112,184,128,192,$F2, RF_INCR  ; Bottom pixels: $F2-$F3
   rf_rect 128,184,144,192,$80, RF_INCR  ; [Bottom] px
   rf_rect 120,192,136,200,$FA, RF_INCR  ; Bottom percentage: $FA-$FB
   rf_rect  40,112, 56,120,$F4, RF_INCR  ; Left pixels: $F4-$F5
@@ -42,7 +42,7 @@ overscan_rects:
   .byte 0
 
   ; These start at $80 and are replicated using rects above
-  rf_label 131,40, 1, 0
+  rf_label 131,40, 3, 2
   .byte "px",0   ; $80-$81
   .byte 0
 
@@ -65,8 +65,9 @@ arrow_ymask:  .byte  $FF, $FF,   0,   0
 arrow_negate: .byte    0, $FF,   0, $FF
 
 NUM_OVERSCAN_PALETTES = 3
-palette_low:  .byte $00, $0F, $20
-palette_high: .byte $20, $20, $0F
+palette_paper:  .byte $00, $0F, $20
+palette_ink:    .byte $20, $20, $0F
+palette_border: .byte $0F, $02, $02
 
 .segment "CODE"
 
@@ -97,22 +98,6 @@ restart:
   asl a
   sta PPUMASK
 
-  ; load the palette
-  ldy #$3F
-  sty PPUADDR
-  lda #$00
-  sta PPUADDR
-  sta PPUDATA
-  ldx #$20
-  stx PPUDATA
-  ldy #$3F
-  sty PPUADDR
-  lda #$11
-  sta PPUADDR
-  stx PPUDATA
-  lda #$10
-  sta PPUDATA
-
   ldx #$00
   stx rf_curpattable
   ldy #$00
@@ -126,7 +111,10 @@ restart:
 
 .segment "CODE02"
 .proc do_overscan_body
-
+  lda #8  ; solid tile
+  ldy #0
+  ldx #$24
+  jsr ppu_clear_nt
 
   ldx #$20
   stx rf_curnametable
@@ -163,9 +151,6 @@ restart:
   ; 2-5: corner overlaps
   ldx #6*4
   jsr ppu_clear_oam
-  
-  ; TO DO:
-  ; Fix corners
 
 loop:
   jsr overscan_prepare_sprites
@@ -195,29 +180,39 @@ loop:
   jsr ppu_wait_vblank
 
   ; Upload OAM first because some capture cards capture the start of
-  ; vblank and can see the palette update rainbow
-  sty PPUADDR
-  lda #$00
-  sta PPUADDR
+  ; vblank and can see the palette update rainbow.  But set the
+  lda #0
   sta OAMADDR
+  sty PPUADDR
+  sta PPUADDR  ; Point VRAM address to palette first
   lda #>OAM
   sta OAM_DMA
 
-  ; Set palette for arrows based on A
-  lda palette_low,x
+  ; Upload background palette
+  lda palette_border,x
   sta PPUDATA
-  lda palette_high,x
   sta PPUDATA
+  lda palette_paper,x
+  sta PPUDATA
+  lda palette_ink,x
+  sta PPUDATA
+
+  ; Upload sprite palette
   sty PPUADDR
-  ldx #$11
-  stx PPUADDR
-  sta PPUDATA
-  lda #$10
+  lda #$11
+  sta PPUADDR
+  lda #$10  ; Inactive arrow
   bit cur_keys+0
   bpl :+
-    lda #$26
+    lda #$26  ; Active arrow
   :
   sta PPUDATA
+  lda palette_paper,x
+  sta PPUDATA
+  lda palette_ink,x
+  sta PPUDATA
+
+  ; If something is prepared, copy it
   bit vram_copydsthi
   bmi isnocopy
   bvs iscolcopy
@@ -430,7 +425,7 @@ base_x = $03
     inx
     cpx #4
     bcc loop
-  lda #%0001
+  lda #%1001
   jmp rf_color_lineImgBuf
 .endproc
 
@@ -488,7 +483,7 @@ base_x = $03
     inx
     cpx #4
     bcc loop
-  lda #%0001
+  lda #%1001
   jmp rf_color_lineImgBuf
 .endproc
 
