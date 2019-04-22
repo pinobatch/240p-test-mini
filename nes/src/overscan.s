@@ -546,20 +546,6 @@ eortype = $02
     adc #32
     tax
     bpl setverts
-
-  ; Now extend these values to the whole row or column
-  ldx #0
-  rowloop:
-    lda lineImgBuf,x
-    inx
-    ldy #31
-    :
-      sta lineImgBuf,x
-      inx
-      dey
-      bne :-
-    cpx #128
-    bcc rowloop
   rts
 .endproc
 
@@ -591,19 +577,18 @@ sideprocs:
     lda vram_copydstlo
     sta PPUADDR
     inc vram_copydstlo
-    ldy #5
+    ldy #10
+    lda lineImgBuf,x
     partloop:
-      .repeat 6, I
-        lda lineImgBuf+I,x
+      .repeat 3
         sta PPUDATA
       .endrepeat
-      txa
-      adc #6
-      tax
       dey
       bne partloop
-    inx
-    inx
+    txa
+    clc
+    adc #32
+    tax
     bpl colloop
   rts
 .endproc
