@@ -46,7 +46,7 @@ unpb53_files:
   .addr megatontiles_pb53
   .byte <.BANK(megatontiles_pb53), 20
   .addr overscan_pb53
-  .byte <.BANK(overscan_pb53), 40
+  .byte <.BANK(overscan_pb53), 18
   .addr pluge_shark_pb53
   .byte <.BANK(pluge_shark_pb53), 16
 

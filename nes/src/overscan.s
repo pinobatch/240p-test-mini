@@ -67,7 +67,7 @@ arrow_negate: .byte    0, $FF,   0, $FF
 NUM_OVERSCAN_PALETTES = 3
 palette_paper:  .byte $00, $0F, $20
 palette_ink:    .byte $20, $20, $0F
-palette_border: .byte $0F, $02, $02
+palette_border: .byte $0F, $02, $12
 
 .segment "CODE"
 
@@ -135,9 +135,6 @@ restart:
   jsr overscan_copy4cols
   lda #VBLANK_NMI
   sta PPUCTRL
-  lda #0
-  jsr overscan_prepare_side_a
-  jsr rf_copy8tiles
   jsr overscan_prepare_pxcounts
   jsr rf_copy8tiles
   jsr overscan_prepare_pctages
@@ -145,10 +142,19 @@ restart:
 
   ; Sprite map:
   ; 0: bottom border
-  ; 1-9: top border
-  ; 10-11: arrows
-  ; 12-15: corner overlaps
+  ; 1-2: arrows
+  ; 3-10:
+  
+  ; Fill OAM with $20 $00 pattern.  This puts all sprites behind
+  ; background, with a don't care opaque tile, and with X = 0.
   ldx #0
+  txa
+  :
+    eor #$20
+    sta OAM,x
+    inx
+    bne :-
+  ; And clear the Y coords
   jsr ppu_clear_oam
 
 loop:
@@ -241,9 +247,24 @@ loop:
     sta vram_copydsthi
   isnocopy:
 
-  lda #VBLANK_NMI|BG_0000|OBJ_0000
+  lda #VBLANK_NMI|BG_0000|OBJ_0000|1
   sec
   jsr ppu_screen_on_xy0
+
+  ; Sprite overflow waiting
+  lda amt_top
+  beq no_sov_wait
+    lda #$A0
+    sovwait0:
+      bit PPUSTATUS
+      bne sovwait0
+    sovwait1:
+      bit PPUSTATUS
+      beq sovwait1
+  no_sov_wait:
+  lda #VBLANK_NMI|BG_0000|OBJ_0000|0
+  sta PPUCTRL
+
 
   lda #helpsect_overscan
   jsr read_pads_helpcheck
@@ -317,12 +338,22 @@ done:
   sec
   sbc amt_bottom
   sta OAM+0
-  lda #$20
-  sta OAM+1  ; tile=don't care
-  sta OAM+2  ; behind
-  sta OAM+3  ; x = 32
 
-  ; Draw the arrow sprites for control of the current edge
+  ; Sprites 3-11 at the top border
+  ldx amt_top
+  dex
+  txa
+  ldx #3*4
+  :
+    sta OAM,x
+    inx
+    inx
+    inx
+    inx
+    cpx #12*4
+    bcc :-
+
+  ; Sprites 1-2: Arrows for control of the current edge
   ldy change_dir
 
   ; X coordinate
@@ -331,10 +362,10 @@ done:
   and arrow_xmask,y
   clc
   adc arrow_xadd1,y
-  sta OAM+43
+  sta OAM+7
   clc
   adc arrow_xadd2,y
-  sta OAM+47
+  sta OAM+11
 
   ; Y coordinate
   lda test_state,y
@@ -342,61 +373,25 @@ done:
   and arrow_ymask,y
   clc
   adc arrow_yadd1,y
-  sta OAM+40
+  sta OAM+4
   clc
   adc arrow_yadd2,y
-  sta OAM+44
+  sta OAM+8
 
   ; Tile number
   tya
   lsr a
   and #$01
-  ora #$20
-  sta OAM+41
-  sta OAM+45
+OVERSCAN_ARROW_TILE = $10
+  ora #OVERSCAN_ARROW_TILE
+  sta OAM+5
+  sta OAM+9
 
   ; Attribute
   lda #0
-  sta OAM+42
+  sta OAM+6
   lda #$C0
-  sta OAM+46
-  
-  ; FIXME: For now there are no corner sprites.  Later on:
-  ; At the corners of the background, horizontal edges override
-  ; vertical. Use sprites to extend the vertical edges.
-  
-  ; Corner sprites Y
-  lda amt_top
-  sec 
-  sbc #1
-  sta OAM+48
-  sta OAM+52
-  
-  ; Corner sprites tile number
-  lda amt_left
-  and #$07
-  ora #$10
-  sta OAM+49
-  lda amt_right
-  and #$07
-  ora #$10
-  sta OAM+53
-  
-  ; Corner sprites attribute
-  lda #$00
-  sta OAM+50
-  lda #$40
-  sta OAM+54
-
-  ; Corner sprites X
-  lda amt_left
-  and #$F8
-  sta OAM+51
-  lda amt_right
-  eor #$FF
-  and #$F8
-  sta OAM+55
-
+  sta OAM+10
   rts
 .endproc
 
@@ -503,6 +498,29 @@ base_x = $03
 
 ; Drawing the edges ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.proc overscan_prepare_left
+  lda #$60
+  sta vram_copydsthi
+  lda #$00
+  sta vram_copydstlo
+  lda amt_left
+  ldx #$00
+  ldy #$FF
+  bne overscan_prepare_bulk
+.endproc
+
+.proc overscan_prepare_right
+  lda #$60
+  sta vram_copydsthi
+  lda #$1C
+  sta vram_copydstlo
+  lda #7
+  sec
+  sbc amt_right
+  ldx #$08
+  ldy #$18
+.endproc
+
 .proc overscan_prepare_bulk
 amt = $00
 tilebase = $01
@@ -551,175 +569,6 @@ eortype = $02
   rts
 .endproc
 
-.proc leading_white_whole_tiles
-  lsr a
-  lsr a
-  lsr a
-  beq notlwholetiles
-  tax
-  dex
-  lda #$08
-  leadwholeloop:
-    .repeat 4, I
-      sta lineImgBuf+32*I,x
-    .endrepeat
-    dex
-    bpl leadwholeloop
-  notlwholetiles:
-  rts
-.endproc
-
-
-.proc trailing_white_whole_tiles
-  lsr a
-  lsr a
-  lsr a
-  beq notlwholetiles
-  eor #$1F
-  tax
-  inx
-  lda #$08
-  leadwholeloop:
-    .repeat 4, I
-      sta lineImgBuf+32*I,x
-    .endrepeat
-    inx
-    cpx #32
-    bcc leadwholeloop
-  notlwholetiles:
-  rts
-.endproc
-
-;;
-; @param A distance along short end;  bit 7 set to subtract 32 instead
-; @param Y distance along long end
-; @param X tile xor
-.proc draw_white_partial_tiles
-toptile      = $00
-startcol     = $01
-coldirection = $02
-
-  ; Calculate distance in tiles from short end
-  and #$98
-  asl a
-  php
-  asl a
-  sta startcol
-  plp
-  lda #32
-  bcc :+
-    lda #<-32
-  :
-  sta coldirection
-
-  tya
-  and #$07
-  beq notopedgefix
-  stx toptile
-  ora toptile
-  sta toptile
-  tya
-  lsr a
-  lsr a
-  lsr a
-  ora startcol
-  tax
-  clc
-  tledgefix:
-    lda toptile
-    sta lineImgBuf,x
-    txa
-    clc
-    adc coldirection
-    tax
-    bpl tledgefix
-  notopedgefix:
-  rts
-.endproc
-
-.proc overscan_prepare_top
-
-  lda amt_top
-  ldx #$00
-  ldy #$FF
-  jsr overscan_prepare_bulk
-
-  lda amt_left
-  jsr leading_white_whole_tiles
-  lda amt_top
-  clc
-  adc #7
-  ldy amt_left
-  ldx #$10
-  jsr draw_white_partial_tiles
-
-  lda amt_right
-  jsr trailing_white_whole_tiles
-  lda #0
-  sec
-  sbc amt_right
-  tay
-  lda amt_top
-  clc
-  adc #7
-  ldx #$18
-  jsr draw_white_partial_tiles
-
-  lda #$20
-  sta vram_copydsthi
-  lda #$00
-  sta vram_copydstlo
-  rts
-.endproc
-
-.proc overscan_prepare_bottom
-  rts
-.endproc
-
-.proc overscan_prepare_left
-  lda amt_left
-  ldx #$10
-  ldy #$FF
-  jsr overscan_prepare_bulk
- 
-  lda amt_top
-  jsr leading_white_whole_tiles
-  lda amt_left
-  ldy amt_top
-  ldx #$00
-  jsr draw_white_partial_tiles
-
-  lda #$60
-  sta vram_copydsthi
-  lda #$00
-  sta vram_copydstlo
-  rts
-.endproc
-
-.proc overscan_prepare_right
-  lda #7
-  sec
-  sbc amt_right
-  ldx #$18
-  ldy #$18
-  jsr overscan_prepare_bulk
-
-  lda amt_top
-  jsr leading_white_whole_tiles
-  lda #159
-  sec
-  sbc amt_right
-  ldy amt_top
-  ldx #$00
-  jsr draw_white_partial_tiles
-
-  lda #$60
-  sta vram_copydsthi
-  lda #$1C
-  sta vram_copydstlo
-  rts
-.endproc
-
 .proc overscan_prepare_side_a
   asl a
   tax
@@ -727,6 +576,8 @@ coldirection = $02
   pha
   lda sideprocs,x
   pha
+overscan_prepare_top:
+overscan_prepare_bottom:
   rts
 sideprocs:
   .addr overscan_prepare_top-1
