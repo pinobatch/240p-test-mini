@@ -12,10 +12,11 @@ RECTFILL_INC = 1
 
 .global rf_curnametable, rf_curpattable, rf_tilenum
 .global rf_draw_rects, rf_draw_attrs, rf_push_attrs, rf_draw_labels
+.global rf_draw_rects_attrs_ay, rf_draw_rects_attrs_labels_ay
 .global rf_load_tiles, rf_color_lineImgBuf, rf_copy8tiles
-.global rf_draw_rects_attrs_ay, rf_load_yrgb_palette
+.global rf_load_yrgb_palette
 
-; Macros for 
+; Macros for defining rects and labels
 
 .macro rf_rect in_left, in_top, in_right, in_bottom, in_tile, in_flags
 .local rectx, recty, rectw, recth

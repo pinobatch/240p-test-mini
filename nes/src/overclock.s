@@ -179,7 +179,7 @@ loop:
   lda #0
   tay
   ldx #$08
-  jsr ppu_clear_nt  ; blank the text window
+  jsr ppu_clear_nt
   jsr rf_load_yrgb_palette
 
   lda #2
@@ -188,12 +188,7 @@ loop:
   stx rf_curnametable
   ldy #<overclock_rects
   lda #>overclock_rects
-  jsr rf_draw_rects_attrs_ay
-  inc ciSrc
-  bne :+
-    inc ciSrc+1
-  :
-  jsr rf_draw_labels
+  jsr rf_draw_rects_attrs_labels_ay
   jsr oc_s0_setup
 
 loop:

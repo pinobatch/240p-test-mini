@@ -822,12 +822,7 @@ restart:
   jsr ppu_clear_nt
   ldy #<gcbars_nogrid
   lda #>gcbars_nogrid
-  jsr rf_draw_rects_attrs_ay
-  inc ciSrc
-  bne :+
-    inc ciSrc+1
-  :
-  jsr rf_draw_labels
+  jsr rf_draw_rects_attrs_labels_ay
 
   ; Set up sprite pattable
   lda #$10

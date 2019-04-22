@@ -1,6 +1,6 @@
 ;
 ; Overscan test for 240p test suite
-; Copyright 2015-2016 Damian Yerrick
+; Copyright 2015-2019 Damian Yerrick
 ;
 ; This program is free software; you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
@@ -95,10 +95,9 @@ restart:
   sta PPUCTRL
   sta help_reload
   sta rf_tilenum
-  asl a
-  sta PPUMASK
 
   ldx #$00
+  stx PPUMASK
   stx rf_curpattable
   ldy #$00
   lda #9
@@ -120,12 +119,7 @@ restart:
   stx rf_curnametable
   ldy #<overscan_rects
   lda #>overscan_rects
-  jsr rf_draw_rects_attrs_ay
-  inc ciSrc
-  bne :+
-    inc ciSrc+1
-  :
-  jsr rf_draw_labels
+  jsr rf_draw_rects_attrs_labels_ay
 
   lda #3
   jsr overscan_prepare_side_a

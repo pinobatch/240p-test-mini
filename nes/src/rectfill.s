@@ -313,6 +313,15 @@ bmask     = $08
 ; The XOR value is the background color, and the AND value is
 ; the foreground color XOR the background color.
 
+;;
+; Skips over a byte, such as a NULL byte from the previous routine,
+; before processing labels
+.proc rf_draw_rects_attrs_labels_ay
+  jsr rf_draw_rects_attrs_ay
+  inc ciSrc
+  bne rf_draw_labels
+  inc ciSrc+1
+.endproc
 .proc rf_draw_labels
 txtptrlo     = $00
 txtptrhi     = $01

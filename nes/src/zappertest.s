@@ -201,12 +201,7 @@ light_height = test_state+1
   stx rf_tilenum
   ldy #<zapper_rects
   lda #>zapper_rects
-  jsr rf_draw_rects_attrs_ay
-  inc ciSrc
-  bne :+
-    inc ciSrc+1
-  :
-  jsr rf_draw_labels
+  jsr rf_draw_rects_attrs_labels_ay
 
 forever:
 
