@@ -135,9 +135,6 @@ restart:
   jsr overscan_copy4cols
   lda #VBLANK_NMI
   sta PPUCTRL
-  lda #1
-  jsr overscan_prepare_side_a
-  jsr rf_copy8tiles
   lda #0
   jsr overscan_prepare_side_a
   jsr rf_copy8tiles
@@ -147,9 +144,11 @@ restart:
   jsr rf_copy8tiles
 
   ; Sprite map:
-  ; 0-1: left
-  ; 2-5: corner overlaps
-  ldx #6*4
+  ; 0: bottom border
+  ; 1-9: top border
+  ; 10-11: arrows
+  ; 12-15: corner overlaps
+  ldx #0
   jsr ppu_clear_oam
 
 loop:
@@ -175,6 +174,22 @@ loop:
     inc upd_progress
   upd_done:
 
+
+  ; Sprite 0 waiting
+  lda amt_bottom
+  beq no_s0_wait
+    lda #$C0
+    s0wait0:
+      bit PPUSTATUS
+      bvs s0wait0
+    s0wait1:
+      bit PPUSTATUS
+      beq s0wait1
+    lda #VBLANK_NMI|BG_0000|OBJ_0000|1
+    sta PPUCTRL
+  no_s0_wait:
+
+
   ldx palette
   ldy #$3F
   jsr ppu_wait_vblank
@@ -184,14 +199,13 @@ loop:
   lda #0
   sta OAMADDR
   sty PPUADDR
-  sta PPUADDR  ; Point VRAM address to palette first
   lda #>OAM
   sta OAM_DMA
 
+  .assert >OAM = $02, error, "shadow OAM address high isn't $02: fix this assumption"
+  sta PPUADDR  ; Point VRAM address to palette first
+
   ; Upload background palette
-  lda palette_border,x
-  sta PPUDATA
-  sta PPUDATA
   lda palette_paper,x
   sta PPUDATA
   lda palette_ink,x
@@ -199,8 +213,10 @@ loop:
 
   ; Upload sprite palette
   sty PPUADDR
-  lda #$11
+  lda #$10
   sta PPUADDR
+  lda palette_border,x
+  sta PPUDATA
   lda #$10  ; Inactive arrow
   bit cur_keys+0
   bpl :+
@@ -296,8 +312,17 @@ done:
 .endproc
 
 .proc overscan_prepare_sprites
+  ; Sprite 0 at the bottom border
+  lda #238
+  sec
+  sbc amt_bottom
+  sta OAM+0
+  lda #$20
+  sta OAM+1  ; tile=don't care
+  sta OAM+2  ; behind
+  sta OAM+3  ; x = 32
 
-  ; First draw the arrow sprites
+  ; Draw the arrow sprites for control of the current edge
   ldy change_dir
 
   ; X coordinate
@@ -306,10 +331,10 @@ done:
   and arrow_xmask,y
   clc
   adc arrow_xadd1,y
-  sta OAM+3
+  sta OAM+43
   clc
   adc arrow_xadd2,y
-  sta OAM+7
+  sta OAM+47
 
   ; Y coordinate
   lda test_state,y
@@ -317,24 +342,24 @@ done:
   and arrow_ymask,y
   clc
   adc arrow_yadd1,y
-  sta OAM+0
+  sta OAM+40
   clc
   adc arrow_yadd2,y
-  sta OAM+4
+  sta OAM+44
 
   ; Tile number
   tya
   lsr a
   and #$01
   ora #$20
-  sta OAM+1
-  sta OAM+5
+  sta OAM+41
+  sta OAM+45
 
   ; Attribute
   lda #0
-  sta OAM+2
+  sta OAM+42
   lda #$C0
-  sta OAM+6
+  sta OAM+46
   
   ; FIXME: For now there are no corner sprites.  Later on:
   ; At the corners of the background, horizontal edges override
@@ -344,44 +369,33 @@ done:
   lda amt_top
   sec 
   sbc #1
-  sta OAM+8
-  sta OAM+12
-  lda #231
-  sec 
-  sbc amt_bottom
-  sta OAM+16
-  sta OAM+20
+  sta OAM+48
+  sta OAM+52
   
   ; Corner sprites tile number
   lda amt_left
   and #$07
   ora #$10
-  sta OAM+9
-  sta OAM+17
+  sta OAM+49
   lda amt_right
   and #$07
   ora #$10
-  sta OAM+13
-  sta OAM+21
+  sta OAM+53
   
   ; Corner sprites attribute
   lda #$00
-  sta OAM+10
-  sta OAM+18
+  sta OAM+50
   lda #$40
-  sta OAM+14
-  sta OAM+22
+  sta OAM+54
 
   ; Corner sprites X
   lda amt_left
   and #$F8
-  sta OAM+11
-  sta OAM+19
+  sta OAM+51
   lda amt_right
   eor #$FF
   and #$F8
-  sta OAM+15
-  sta OAM+23
+  sta OAM+55
 
   rts
 .endproc
@@ -651,7 +665,6 @@ coldirection = $02
   ldx #$18
   jsr draw_white_partial_tiles
 
-
   lda #$20
   sta vram_copydsthi
   lda #$00
@@ -660,45 +673,6 @@ coldirection = $02
 .endproc
 
 .proc overscan_prepare_bottom
-  lda #7
-  sec
-  sbc amt_bottom
-  ldx #$08
-  ldy #$18
-  jsr overscan_prepare_bulk
-
-  lda amt_left
-  jsr leading_white_whole_tiles
-  lda #152
-  sec
-  sbc amt_bottom
-  ldy amt_left
-  ldx #$10
-  jsr draw_white_partial_tiles
-
-  lda amt_right
-  jsr trailing_white_whole_tiles
-  lda #0
-  sec
-  sbc amt_right
-  tay
-  lda #152
-  sec
-  sbc amt_bottom
-  ldx #$18
-  jsr draw_white_partial_tiles
-
-toptile = $00
-bottomtile = $01
-toppos = $02
-bottompos = $03
-
-  ; TO DO: Draw top and bottom
-
-  lda #$23
-  sta vram_copydsthi
-  lda #$40
-  sta vram_copydstlo
   rts
 .endproc
 
@@ -713,18 +687,6 @@ bottompos = $03
   lda amt_left
   ldy amt_top
   ldx #$00
-  jsr draw_white_partial_tiles
-
-  lda amt_bottom
-  clc
-  adc #16
-  jsr trailing_white_whole_tiles
-  lda #240
-  sec
-  sbc amt_bottom
-  tay
-  lda amt_left
-  ldx #$08
   jsr draw_white_partial_tiles
 
   lda #$60
@@ -750,27 +712,6 @@ bottompos = $03
   ldy amt_top
   ldx #$00
   jsr draw_white_partial_tiles
-
-  lda amt_bottom
-  clc
-  adc #16
-  jsr trailing_white_whole_tiles
-  lda #240
-  sec
-  sbc amt_bottom
-  tay
-  lda #159
-  sec
-  sbc amt_right
-  ldx #$08
-  jsr draw_white_partial_tiles
-
-toptile = $00
-bottomtile = $01
-toppos = $02
-bottompos = $03
-
-  ; TO DO: Draw top and bottom
 
   lda #$60
   sta vram_copydsthi
