@@ -41,7 +41,6 @@ cur_palette   rb 1
 
 section "overscan",ROM0
 activity_overscan::
-  xor a
   ld a,2
   ldh [right_border],a
   ldh [left_border],a
@@ -115,7 +114,7 @@ activity_overscan::
     cpl
     ldh [cur_palette],a
   .not_invert:
-  
+
   ld a,[cur_keys]
   bit PADB_A,a
   jr nz,.a_held

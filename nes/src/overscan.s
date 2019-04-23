@@ -106,6 +106,7 @@ restart:
   lda #<.bank(do_overscan_body)
   sta :-+1
   jmp do_overscan_body
+.out .sprintf("NES overscan restart to bank jump: %d bytes", *-restart)
 .endproc
 
 .segment "CODE02"
@@ -151,7 +152,74 @@ restart:
   ; And clear the Y coords
   jsr ppu_clear_oam
 
+.out .sprintf("NES overscan bank jump to loop: %d bytes", *-::do_overscan_body)
 loop:
+  lda #helpsect_overscan
+  jsr read_pads_helpcheck
+  bcc not_help
+    jmp do_overscan::restart
+  not_help:
+  ldx #0
+  lda das_keys
+  and #KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
+  sta das_keys
+  jsr autorepeat
+
+  ; B: exit
+  bit new_keys+0
+  bvc not_b
+    rts
+  not_b:
+
+  ; Select: cycle palette
+  lda new_keys+0
+  and #KEY_SELECT
+  beq not_select
+    ldy palette
+    iny
+    cpy #NUM_OVERSCAN_PALETTES
+    bcc have_new_palette
+      ldy #0
+    have_new_palette:
+    sty palette
+  not_select:
+
+.out .sprintf("NES overscan handle B, Select, Start: %d bytes", not_select - loop)
+
+  ; Control Pad: Choose or move an edge
+  lda new_keys+0
+  and #KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
+  beq not_move
+    ldy #4
+    whichbtnloop:
+      dey
+      lsr a
+      bcc whichbtnloop
+    ; Control Pad (without A):
+    bit cur_keys+0
+    bmi try_adjusting
+      sty change_dir
+      bpl not_move
+    try_adjusting:
+      tya
+      eor change_dir
+      cmp #2
+      bcs not_move
+      ; 1: increase; 0: decrease
+      asl a
+      adc #$FF
+      clc
+      ldx change_dir
+      adc test_state,x
+      cmp #25
+      bcs not_move
+      sta test_state,x
+      lda #0
+      sta upd_progress
+  not_move:
+
+.out .sprintf("NES overscan handle A, Control Pad: %d bytes", not_move - not_select)
+
   jsr overscan_prepare_sprites
 
   ; Find something to update
@@ -174,7 +242,6 @@ loop:
     inc upd_progress
   upd_done:
 
-
   ; Sprite 0 waiting
   lda amt_bottom
   beq no_s0_wait
@@ -188,7 +255,6 @@ loop:
     lda #VBLANK_NMI|BG_0000|OBJ_0000|1
     sta PPUCTRL
   no_s0_wait:
-
 
   ldx palette
   ldy #$3F
@@ -259,71 +325,7 @@ loop:
   lda #VBLANK_NMI|BG_0000|OBJ_0000|0
   sta PPUCTRL
 
-
-  lda #helpsect_overscan
-  jsr read_pads_helpcheck
-  bcc not_help
-    jmp do_overscan::restart
-  not_help:
-
-  ldx #0
-  lda das_keys
-  and #KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
-  sta das_keys
-  jsr autorepeat
-  lda new_keys+0
-  and #KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
-  beq not_move
-    ldy #4
-    whichbtnloop:
-      dey
-      lsr a
-      bcc whichbtnloop
-    bit cur_keys+0
-    bmi try_adjusting
-      sty change_dir
-      bpl not_move
-    try_adjusting:
-      tya
-      eor change_dir
-      cmp #2
-      bcs not_move
-      ; 1: increase; 0: decrease
-      asl a
-      clc
-      adc #$FF
-      clc
-      ldx change_dir
-      adc test_state,x
-      bpl :+
-        lda #0
-      :
-      cmp #24
-      bcc :+
-        lda #24
-      :
-      sta test_state,x
-      lda #0
-      sta upd_progress
-  not_move:
-
-  lda new_keys+0
-  and #KEY_SELECT
-  beq not_select
-    inc palette
-    lda palette
-    cmp #NUM_OVERSCAN_PALETTES
-    bcc not_select
-    lda #0
-    sta palette
-  not_select:
-
-  lda new_keys+0
-  and #KEY_B
-  bne done
   jmp loop
-done:
-  rts
 .endproc
 
 .proc overscan_prepare_sprites
