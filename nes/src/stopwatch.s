@@ -70,7 +70,6 @@ lapIndicatorAddr = lineImgBuf+96+24
   sta PPUCTRL
   asl a
   sta PPUMASK
-  sta rf_curpattable
   
   ; Tiles $00-$7F (approximately): the clock face
   tay

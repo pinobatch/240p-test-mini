@@ -72,7 +72,6 @@ restart:
   lda #VBLANK_NMI
   sta PPUCTRL
   sta help_reload
-  sta rf_tilenum
   asl a
   sta PPUMASK
 

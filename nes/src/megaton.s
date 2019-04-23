@@ -113,7 +113,6 @@ restart:
   sta PPUCTRL
   asl a
   sta PPUMASK
-  sta rf_curpattable
 
   tax
   tay

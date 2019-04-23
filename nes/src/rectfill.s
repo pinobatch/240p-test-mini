@@ -10,6 +10,11 @@
 .include "nes.inc"
 .include "global.inc"
 .include "rectfill.inc"
+.import rectfill_layouts
+.import rf_vwfClearPuts
+.export rf_vwfClearPuts_cb
+
+
 
 plane0and = $04
 plane1and = $05
@@ -292,10 +297,21 @@ bmask     = $08
 ; The XOR value is the background color, and the AND value is
 ; the foreground color XOR the background color.
 
-;;
-; Skips over a byte, such as a NULL byte from the previous routine,
-; before processing labels
-.proc rf_draw_rects_attrs_labels_ay
+
+
+.proc rf_load_layout
+  asl a
+  asl a
+  tax
+  lda #0
+  sta rf_curpattable
+  lda rectfill_layouts+3,x
+  sta rf_tilenum
+  lda rectfill_layouts+2,x
+  sta rf_curnametable
+  lda rectfill_layouts+1,x
+  ldy rectfill_layouts+0,x
+
   sty ciSrc
   sta ciSrc+1
   ldy #0
@@ -336,7 +352,7 @@ width        = $02  ; number of tiles
 xcoord       = $0C
 ycoord       = $0D
 txtcolors    = $0E
-  ; Unpack parameters for text drawing
+  ; Unpack parameters for text drawing: colors, y position, x position
   ldy #$00
   lda (ciSrc),y
   and #$0F
@@ -344,34 +360,33 @@ txtcolors    = $0E
     rts
   notDone:
   sta txtcolors
-  jsr clearLineImg
   ldy #1
   lda (ciSrc),y
   sta ycoord
   iny
   lda (ciSrc),y
   sta xcoord
-
-  ; Draw text and measure its width in tiles
-  ; TODO: Copy text to help line buffer first in case
-  ; VWF and label data are in separate banks
-  and #$07
-  tax
-  clc
-  lda ciSrc
-  adc #3
-  tay
-  lda ciSrc+1
-  adc #0
-  jsr vwfPuts  ; X = width, AY = pointer to nul terminator
-
-  ; Move pointer to next line of text
-  sta ciSrc+1
   iny
-  bne :+
+
+  ; Copy the text out to RAM in case VWF and text are in
+  ; separate banks
+  strcpy_loop:
+    lda (ciSrc),y
+    sta help_line_buffer-3,y
+    beq strcpy_done
+    iny
+    bne strcpy_loop
+  strcpy_done:
+  tya
+  sec
+  adc ciSrc
+  sta ciSrc
+  bcc :+
     inc ciSrc+1
   :
-  sty ciSrc+0
+
+  ; Clear line buffer, draw text, and measure its width in tiles
+  jsr rf_vwfClearPuts
 
   ; Translate pixel width to tile width
   txa
@@ -461,6 +476,17 @@ curplanexor = $09
 .rodata
 times85:
   .byte $00, $55, $AA, $FF
+
+.code
+.proc rf_vwfClearPuts_cb
+  jsr clearLineImg
+  lda rf_load_layout::xcoord
+  and #$07
+  tax
+  lda #>help_line_buffer
+  ldy #<help_line_buffer
+  jmp vwfPuts
+.endproc
 
 ; Things unrelated to rf_load_layout ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

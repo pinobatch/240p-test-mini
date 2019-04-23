@@ -12,6 +12,8 @@
 .importzp nmis
 .import unpb53_some, unpb53_file_cb, load_sb53_file_cb, load_iu53_file_cb
 .export unpb53_gate, unpb53_file, load_sb53_file, load_iu53_file
+.import rf_vwfClearPuts_cb
+.export rf_vwfClearPuts
 
 .segment "INESHDR"
   .byt "NES",$1A  ; magic signature
@@ -72,3 +74,5 @@ unpb53_gate = stub1::unpb53_gate
 unpb53_file = stub1::unpb53_file
 load_sb53_file = stub1::load_sb53_file
 load_iu53_file = stub1::load_iu53_file
+
+rf_vwfClearPuts = rf_vwfClearPuts_cb

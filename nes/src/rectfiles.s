@@ -1,21 +1,5 @@
 .include "rectfill.inc"
-
-.code
-
-.proc rf_load_layout
-  asl a
-  asl a
-  tax
-  lda #0
-  sta rf_curpattable
-  lda rectfill_layouts+3,x
-  sta rf_tilenum
-  lda rectfill_layouts+2,x
-  sta rf_curnametable
-  lda rectfill_layouts+1,x
-  ldy rectfill_layouts+0,x
-  jmp rf_draw_rects_attrs_labels_ay
-.endproc
+.export rectfill_layouts
 
 .segment "RODATA"
 

@@ -41,11 +41,14 @@ resetstub_entry:
 ; Call gates are trivial in UNROM
 .import unpb53_some, unpb53_file_cb, load_sb53_file_cb, load_iu53_file_cb
 .export unpb53_gate, unpb53_file, load_sb53_file, load_iu53_file
+.import rf_vwfClearPuts_cb
+.export rf_vwfClearPuts
 
 unpb53_gate = unpb53_some
 unpb53_file = unpb53_file_cb
 load_sb53_file = load_sb53_file_cb
 load_iu53_file = load_iu53_file_cb
+rf_vwfClearPuts = rf_vwfClearPuts_cb
 
 resetstub_in "STUB15"
 

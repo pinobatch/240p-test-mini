@@ -418,10 +418,6 @@ smpte_type  = test_state+1
   stx smpte_type
 restart:
   jsr rf_load_tiles
-  lda #$20
-  sta rf_curnametable
-  lda #$00
-  sta rf_curpattable
 
   ldx smpte_type
   lda smpte_layout_ids,x
@@ -659,7 +655,6 @@ restart:
   ; is cleared here.
   ldx #$20
   lda #$00
-  sta rf_curpattable
   tay
   jsr ppu_clear_nt
   lda #4  ; $2000: no grid
