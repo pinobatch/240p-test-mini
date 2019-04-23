@@ -22,18 +22,6 @@ rf_curnametable:  .res 1
 rf_tilenum:       .res 1
 
 .segment "CODE"
-.proc rf_load_tiles
-  lda #$80
-  sta help_reload
-  sta PPUCTRL
-  ldx #$00
-  ldy #$00
-  stx PPUMASK
-  lda #$02
-  jmp unpb53_file
-.endproc
-
-.segment "CODE"
 
 ; Filled rectangles are described by start address, width, height,
 ; tile number, and row alternation.  They can be used to draw solid
@@ -269,6 +257,27 @@ bmask     = $08
   jmp rf_draw_attrs
 .endproc 
 
+;;
+; Calculates plane0and, plane1and, plane0xor, plane1xor
+; by expanding bits 0, 1, 2, amd 3 of A to $00 if 0 or $FF if 1.
+; Is a macro, not a function, because both the label engine (in the
+; rf_draw_layout bank) and rf_color_lineImgBuf need it.
+.macro rf_calcandxormasks
+.scope
+  ldx #0
+  colorcalcloop:
+    ldy #0
+    lsr a
+    bcc iszero
+      dey
+    iszero:
+    sty plane0and,x
+    inx
+    cpx #4
+    bcc colorcalcloop
+.endscope
+.endmacro
+
 ; Lines of text are described by color, top left corner, and text
 ; content.  The list is terminated by foreground and background
 ; colors both being 0.
@@ -344,6 +353,8 @@ txtcolors    = $0E
   sta xcoord
 
   ; Draw text and measure its width in tiles
+  ; TODO: Copy text to help line buffer first in case
+  ; VWF and label data are in separate banks
   and #$07
   tax
   clc
@@ -411,7 +422,7 @@ txtcolors    = $0E
 
   ; Calculate AND/XOR masks for each plane
   lda txtcolors
-  jsr rf_calcandxormasks
+  rf_calcandxormasks
 
   ; now copy the line image in the appropriate colors
   ldx #0
@@ -447,19 +458,25 @@ curplanexor = $09
   rts
 .endproc
 
-.proc rf_calcandxormasks
-  ldx #0
-  colorcalcloop:
-    ldy #0
-    lsr a
-    bcc :+
-      dey
-    :
-    sty plane0and,x
-    inx
-    cpx #4
-    bcc colorcalcloop
-  rts
+.rodata
+times85:
+  .byte $00, $55, $AA, $FF
+
+; Things unrelated to rf_load_layout ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.code
+;;
+; Loads stdtiles.png into VRAM $0000
+.proc rf_load_tiles
+  lda #$80
+  sta help_reload
+  sta PPUCTRL
+  asl a
+  sta PPUMASK
+  tax
+  tay
+  lda #$02
+  jmp unpb53_file
 .endproc
 
 ;;
@@ -489,12 +506,12 @@ curplanexor = $09
 ; a dynamic text area.
 ; It overwrites memory that the VWF engine already uses.
 ; In particular, it preserves the VWF text pointer ($00-$01).
-; @param A bits 3-2: bgcolor; bits 1-0: fgcolor
+; @param A bits 3-2: bgcolor ^ fgcolor; bits 1-0: fgcolor
 .proc rf_color_lineImgBuf
 curplaneand = $08
 curplanexor = $09
 srcptr = $0A
-  jsr rf_calcandxormasks
+  rf_calcandxormasks
   .assert >(lineImgBuf + 64) = >lineImgBuf, error, "page-crossing lineImgBuf not supported"
   lda #<(lineImgBuf+64)
   sta srcptr
@@ -540,10 +557,10 @@ colorize_one_plane:
   jsr ppu_wait_vblank
   lda #$3F
   sta PPUADDR
-  ldy #$00
+  ldy #$01
   sty PPUADDR
   palloop:
-    lda gcbars_palette,y
+    lda gcbars_palette-$01,y
     sta PPUDATA
     iny
     cpy #28
@@ -552,9 +569,7 @@ colorize_one_plane:
 .endproc
 
 .rodata
-times85:
-  .byte $00, $55, $AA, $FF
 gcbars_palette:
-  .byte $0F,$00,$10,$20, $0F,$06,$16,$26, $0F,$0A,$1A,$2A, $0F,$02,$12,$22
+  .byte     $00,$10,$20, $0F,$06,$16,$26, $0F,$0A,$1A,$2A, $0F,$02,$12,$22
   .byte $0F,$FF,$FF,$36, $0F,$FF,$FF,$3A, $0F,$FF,$FF,$32
 
