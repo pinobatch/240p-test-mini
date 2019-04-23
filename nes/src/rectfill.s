@@ -269,36 +269,6 @@ bmask     = $08
   jmp rf_draw_attrs
 .endproc 
 
-
-.proc rf_draw_rects_attrs_ay
-  sty ciSrc
-  sta ciSrc+1
-.endproc
-.proc load_rects_and_attrs
-  jsr rf_draw_rects
-  inc ciSrc
-  bne :+
-    inc ciSrc+1
-  :
-  jsr rf_draw_attrs
-  ; fall through
-.endproc
-.proc rf_push_attrs
-  lda rf_curnametable
-  ora #$03
-  sta PPUADDR
-  lda #$C0
-  sta PPUADDR
-  ldx #0
-:
-  lda attrbuf,x
-  sta PPUDATA
-  inx
-  cpx #64
-  bcc :-
-  rts
-.endproc
-
 ; Lines of text are described by color, top left corner, and text
 ; content.  The list is terminated by foreground and background
 ; colors both being 0.
@@ -317,19 +287,46 @@ bmask     = $08
 ; Skips over a byte, such as a NULL byte from the previous routine,
 ; before processing labels
 .proc rf_draw_rects_attrs_labels_ay
-  jsr rf_draw_rects_attrs_ay
+  sty ciSrc
+  sta ciSrc+1
+  ldy #0
+  lda (ciSrc),y
+  beq no_rects
+
+    ; Draw rectangles
+    jsr rf_draw_rects
+    inc ciSrc
+    bne :+
+      inc ciSrc+1
+    :
+    ; Draw and push attributes
+    jsr rf_draw_attrs
+    lda rf_curnametable
+    ora #$03
+    sta PPUADDR
+    lda #$C0
+    sta PPUADDR
+    ldx #0
+    attrcopyloop:
+      lda attrbuf,x
+      sta PPUDATA
+      inx
+      cpx #64
+      bcc attrcopyloop
+  no_rects:
+
+  ; Skip to labels
   inc ciSrc
-  bne rf_draw_labels
+  bne labelloop
   inc ciSrc+1
-.endproc
-.proc rf_draw_labels
+labelloop:
+
 txtptrlo     = $00
 txtptrhi     = $01
 width        = $02  ; number of tiles
 xcoord       = $0C
 ycoord       = $0D
 txtcolors    = $0E
-
   ; Unpack parameters for text drawing
   ldy #$00
   lda (ciSrc),y
@@ -431,7 +428,7 @@ txtcolors    = $0E
     jsr copy1tileplane
     dec width
     bne copytilesloop
-  jmp rf_draw_labels
+  jmp labelloop
 
 copy1tileplane:
 curplaneand = $08

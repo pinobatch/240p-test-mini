@@ -38,7 +38,8 @@
 
 ; helpscreen.s
 HELP_LINE_LEN = 40
-.globalzp helpscreen, help_reload, helpcheck, read_pads_helpcheck
+.global helpscreen, helpcheck, read_pads_helpcheck
+.globalzp help_reload
 .globalzp vram_copydstlo, vram_copydsthi
 .global help_line_buffer
 ; these are for "save your place on the main menu" functionality
@@ -92,9 +93,8 @@ SIZEOF_TEST_STATE = 24
 ; scrolling.s
 .global do_grid_scroll, do_hill_zone_scroll
 .global hill_zone_load, hill_zone_do_raster
-.global hill_zone_xlo, hill_zone_xhi
 .global hill_zone_speed_control
-.global hill_zone_speed, hill_zone_dir, hill_zone_xlo, hill_zone_xhi
+.globalzp hill_zone_speed, hill_zone_dir, hill_zone_xlo, hill_zone_xhi
 
 ; kiki.s
 .global do_vscrolltest

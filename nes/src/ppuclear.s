@@ -109,6 +109,5 @@ loop:
   :
     cmp nmis
     beq :-
-  :
   rts
 .endproc

@@ -34,7 +34,7 @@ audiosync_rects:
   .byte $00
   rf_attr   0,  0,256,240, 0
   rf_attr  32, 80,224,112, 1
-  .byte $00
+  .byte $00,$00
 
 audiosync_palthresholds:
   .byte 120, 0, 120, 40, 120, 60, 80, 100
@@ -59,7 +59,7 @@ calculated_palette = test_state+2
   stx rf_curnametable
   ldy #<audiosync_rects
   lda #>audiosync_rects
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
   lda #$80  ; bit 7: paused
   sta progress
 

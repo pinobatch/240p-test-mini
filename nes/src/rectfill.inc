@@ -10,9 +10,11 @@
 .ifndef RECTFILL_INC
 RECTFILL_INC = 1
 
+; rectfill layout API
 .global rf_curnametable, rf_curpattable, rf_tilenum
-.global rf_draw_rects, rf_draw_attrs, rf_push_attrs, rf_draw_labels
-.global rf_draw_rects_attrs_ay, rf_draw_rects_attrs_labels_ay
+.global rf_draw_rects_attrs_labels_ay
+
+; other related APIs
 .global rf_load_tiles, rf_color_lineImgBuf, rf_copy8tiles
 .global rf_load_yrgb_palette
 

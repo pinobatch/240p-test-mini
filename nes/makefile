@@ -20,7 +20,7 @@ objlist = vwf7 zappertest overclock paldetect vwf_draw init \
   main help helppages.hlp stills linearity stopwatch backlight scrolltest \
   kiki audiosync soundtest crowd overscan megaton shadowsprite \
   pads ppuclear unpb53 uniu undte bcd random rectfill muldiv \
-  pb53files
+  pb53files rectfiles
 
 AS65 = ca65
 LD65 = ld65

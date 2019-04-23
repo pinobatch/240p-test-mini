@@ -36,6 +36,7 @@ sw_framesones = test_state+15
 
 .rodata
 stopwatch_labels:
+  .byte 0
   rf_label  56, 40, 2, 0
   .byte "hours",0
   rf_label  96, 40, 2, 0
@@ -130,11 +131,9 @@ lapIndicatorAddr = lineImgBuf+96+24
   sta rf_curnametable
   lda #$70
   sta rf_tilenum
-  lda #<stopwatch_labels
-  sta ciSrc
+  ldy #<stopwatch_labels
   lda #>stopwatch_labels
-  sta ciSrc+1
-  jsr rf_draw_labels
+  jsr rf_draw_rects_attrs_labels_ay
 
   ; Uses 30 sprites for ruler, 10 for clock hand, and 12 for digits
   ldx #(30+10+12)*4

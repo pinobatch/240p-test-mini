@@ -187,15 +187,14 @@ ire_rects:
   rf_rect  64, 64,192,176,$0C, 0  ; Color 3: inside
   rf_rect 160,192,224,200,$F8, RF_INCR  ; text area
   .byte $00
-ire_attrs:
   rf_attr  0,  0,256, 240, 0
   .byte $00
 .if 0
 ire_texts:
   rf_label 112,112, 0, 3
   .byte "IRE LAND",0
-  .byte $00
 .endif
+  .byte $00
 
 ire_msgs2:
   .byte ire_msg00-ire_msgbase,   ire_msg0D-ire_msgbase
@@ -253,7 +252,7 @@ restart:
   sta rf_curpattable
   ldy #<ire_rects
   lda #>ire_rects
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
 
 loop:
   lda need_reload
@@ -471,6 +470,7 @@ cbgray_rects:
   rf_attr   0,144,112,192, 1  ; bars 7-5
   rf_attr 112,144,144,192, 3  ; green bar
   .byte $00
+  .byte $00  ; no labels
 
 smpte_types:
   .addr smpte_rects
@@ -517,7 +517,7 @@ restart:
   ldx smpte_type
   ldy smpte_types+0,x
   lda smpte_types+1,x
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
 
 loop:
   jsr ppu_wait_vblank
@@ -605,6 +605,7 @@ pluge_rects:
   rf_attr   0,  0,256,240, 0
   rf_attr  80, 48,176,192, 1
   .byte $00
+  .byte $00  ; no labels
 pluge_palettes:
   .byte $0F,$0D,$04,$0A
   .byte $0F,$0D,$2D,$2D
@@ -650,7 +651,7 @@ restart:
   sta rf_curpattable
   ldy #<pluge_rects
   lda #>pluge_rects
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
 
   ; Draw shark map on nametable 1
   lda #$00
@@ -779,6 +780,10 @@ gcbars_nogrid:
   rf_attr  80, 80,176,112, 2  ; green
   rf_attr  80,128,176,160, 3  ; blue
   .byte $00
+  ; Labels are a separate file.  This $00 is both the "no labels"
+  ; sign for gcbars_grid and the "no rects" sign for gcbars_labels
+gcbars_labels:
+  .byte $00
   rf_label  80, 24, 3, 0
   .byte "0",0
   rf_label 112, 24, 3, 0
@@ -811,7 +816,7 @@ restart:
   stx rf_curnametable
   ldy #<gcbars_grid
   lda #>gcbars_grid
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
 
   ldx #$20
   stx rf_curnametable
@@ -822,6 +827,10 @@ restart:
   jsr ppu_clear_nt
   ldy #<gcbars_nogrid
   lda #>gcbars_nogrid
+  jsr rf_draw_rects_attrs_labels_ay
+  
+  ldy #<gcbars_labels
+  lda #>gcbars_labels
   jsr rf_draw_rects_attrs_labels_ay
 
   ; Set up sprite pattable
@@ -914,13 +923,13 @@ cpsgrid_224p_rects:
   .byte $00
   rf_attr   0,  0,256,240, 1
   rf_attr  16, 16,240,208, 0
-  .byte $00
+  .byte $00, $00
 cpsgrid_240p_rects:
   rf_rect   0,  0,256,240,$16, RF_ROWXOR|RF_COLXOR
   .byte $00
   rf_attr   0,  0,256,240, 1
   rf_attr  16, 16,240,224, 0
-  .byte $00
+  .byte $00, $00
 
 .segment "CODE"
 .proc do_cpsgrid
@@ -939,12 +948,12 @@ restart:
   stx rf_curnametable
   ldy #<cpsgrid_224p_rects
   lda #>cpsgrid_224p_rects
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
   ldx #$24
   stx rf_curnametable
   ldy #<cpsgrid_240p_rects
   lda #>cpsgrid_240p_rects
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
   
 loop:
   jsr ppu_wait_vblank
@@ -995,6 +1004,7 @@ loop:
 
 .segment "RODATA"
 gray_ramp_rects:
+  rf_rect   0,  0,256,240,$00, 0
   rf_rect  32, 24, 48,120,$01, 0
   rf_rect  48, 24, 64,120,$02, 0
   rf_rect  64, 24, 80,120,$03, 0
@@ -1020,6 +1030,8 @@ gray_ramp_rects:
   rf_rect 192,120,208,216,$02, 0
   rf_rect 208,120,224,216,$01, 0
   .byte $00
+  rf_attr   0,  0,256,240, 0
+  .byte $00,$00
 
 .code
 
@@ -1028,14 +1040,9 @@ gray_ramp_rects:
   jsr rf_load_yrgb_palette
   ldx #$20
   stx rf_curnametable
-  lda #$00
-  tay
-  jsr ppu_clear_nt
   lda #>gray_ramp_rects
   ldy #<gray_ramp_rects
-  sta ciSrc+1
-  sty ciSrc
-  jsr rf_draw_rects
+  jsr rf_draw_rects_attrs_labels_ay
 
 loop:
   jsr ppu_wait_vblank
@@ -1069,12 +1076,12 @@ bleed_rects:
   rf_attr  16, 32,240, 64, 1
   rf_attr  16, 80,240,112, 2
   rf_attr  16,128,240,160, 3
-  .byte $00
+  .byte $00,$00
 fullstripes_rects:
   rf_rect   0,  0,256,240,$01, 0
   .byte $00
   rf_attr   0,  0,256,240, 0
-  .byte $00
+  .byte $00,$00
 bleed_palette:
   .byte $0F,$0F,$0F,$20, $0F,$0F,$0F,$16, $0F,$0F,$0F,$1A, $0F,$0F,$0F,$12
   .byte $0F,$0F,$0F,$20
@@ -1197,7 +1204,7 @@ restart:
   tax
   ldy bleed_types+0,x
   lda bleed_types+1,x
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
   
   ; Set up the frame counter sprites
   ldx #0
@@ -1314,7 +1321,7 @@ solid_color_rects:
   rf_rect 160, 32,224, 40,$20, RF_INCR
   .byte $00
   rf_attr   0,  0,256,240, 0
-  .byte $00
+  .byte $00,$00
 color_msg:  .byte "Color:",0
 
 .segment "CODE"
@@ -1342,7 +1349,7 @@ restart:
   stx rf_curnametable
   ldy #<solid_color_rects
   lda #>solid_color_rects
-  jsr rf_draw_rects_attrs_ay
+  jsr rf_draw_rects_attrs_labels_ay
 
 loop:
   ; Prepare color display

@@ -178,6 +178,7 @@ delayloop:
 
 .rodata
 crowd_labels:
+  .byte $00  ; no rects or attrs
   rf_label  80, 96, 3, 0
   .byte 34,"Crowd",34," by Kragen",0
   rf_label  80,112, 3, 0
@@ -191,7 +192,6 @@ crowd_labels:
 .code
 do_crowd:
   jsr rf_load_tiles
-  jsr rf_load_yrgb_palette
   ldx #$20
   stx rf_curnametable
   stx rf_tilenum
@@ -201,10 +201,10 @@ do_crowd:
   jsr ppu_clear_nt
   ldy #<crowd_labels
   lda #>crowd_labels
-  sty ciSrc
-  sta ciSrc+1
-  jsr rf_draw_labels
-  lda #0
+  jsr rf_draw_rects_attrs_labels_ay
+  jsr ppu_wait_vblank
+  jsr rf_load_yrgb_palette
+  lda #0  ; disable vblank NMI during "Crowd"
   tay
   tax
   clc
