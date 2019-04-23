@@ -163,10 +163,17 @@ zapper_palette:
 .code
 
 .proc do_zapper_test
+  jsr rf_load_tiles
+:
+  lda #<.BANK(do_zapper_test_body)
+  sta :-+1
+  jmp do_zapper_test_body
+.endproc
+
+.segment "CODE02"
+.proc do_zapper_test_body
 light_y      = test_state+0
 light_height = test_state+1
-
-  jsr rf_load_tiles
 
   ; Load palette with a light background
   ldx #$3F

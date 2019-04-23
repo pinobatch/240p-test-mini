@@ -20,6 +20,7 @@
 .include "global.inc"
 .include "rectfill.inc"
 .importzp helpsect_sound_test_frequency, helpsect_sound_test
+.importzp HELP_BANK
 .import crowd
 
 ; Assuming time constant is 56000 Hz for NTSC and 52000 Hz for PAL
@@ -59,6 +60,8 @@ tvSystem_redtint:
   ldx #helpsect_sound_test_frequency
   lda #KEY_A|KEY_B|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
   jsr helpscreen
+  ; helpscreen leaves bank pointed at CODE02
+
   lda new_keys+0
   and #KEY_A
   beq not_beep
@@ -90,6 +93,9 @@ done:
   rts
 .endproc
 
+.assert .bank(beep_octave_y) = HELP_BANK, error, "assumption that beep handlers are in help bank fails"
+
+.segment "CODE02"
 .proc beep_octave_y
   ; Demo of tone (for SMPTE bars and tone)
   lda #$88
@@ -139,7 +145,7 @@ done:
 .endproc
 
 .proc beepdelay
-  ldx #20
+  ldx #30
   ldy tvSystem
 delayloop:
   jsr ppu_wait_vblank

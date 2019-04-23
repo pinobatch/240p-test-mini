@@ -42,10 +42,19 @@ NUMPALTHRESHOLDS = * - audiosync_palthresholds
 
 .code
 .proc do_audiosync
+
+  jsr rf_load_tiles
+:
+  lda #<.bank(do_audiosync_body)
+  sta :-+1
+  jmp do_audiosync_body
+.endproc
+
+.segment "CODE02"
+.proc do_audiosync_body
 progress = test_state+0
 calculated_palette = test_state+2
 
-  jsr rf_load_tiles
   ldx #$20
   stx rf_curnametable
   ldy #<audiosync_rects
@@ -92,7 +101,9 @@ calculated_palette = test_state+2
 loop:
   lda #helpsect_audio_sync_test
   jsr read_pads_helpcheck
-  bcs do_audiosync
+  bcc :+
+    jmp do_audiosync
+  :
   
   ; Start and stop the dot  
   lda new_keys+0
