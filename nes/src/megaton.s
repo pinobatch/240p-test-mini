@@ -60,54 +60,12 @@ LAG_HISTORY_TILE_BASE = $88
 TILES_PER_LAG_HISTORY = $02
 
 .rodata
-megaton_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect 112, 96,144,128,$04, RF_INCR  ; The receptor
-  rf_rect  96,136,160,144,RAWLAG_TILE_BASE, RF_INCR
-  rf_rect  40, 48, 40 + 8 * TILES_PER_LAG_HISTORY, 48 + 8 * MAX_TESTS, LAG_HISTORY_TILE_BASE, RF_INCR
-  .byte 0
-  rf_attr   0,  0,256,240, 0
-  .byte 0
-  ; Followed by labels
-  ; a later refactor may require these to be first in order to
-  ; arrange for "off" and "on" to be allocated at fixed tile indices
-  rf_label 116,200, 3, 0
-  .byte "on",0
-  rf_label 116,208, 3, 0
-  .byte "on",0
-  rf_label  32,184, 3, 0
-  .byte "Press A when reticles align",0
-  rf_label  48,192, 3, 0
-  .byte "Direction",0
-  rf_label 116,192, 3, 0
-  .byte "horizontal",0
-  rf_label 180,192, 3, 0
-  .byte "vertical",0
-  rf_label  48,200, 3, 0
-  .byte "Randomize",0
-  rf_label  48,208, 3, 0
-  .byte "Audio",0
-  .byte 0
 
 exact_msg:  .byte "exact",0
 late_msg:   .byte "late",0
 early_msg:  .byte "early",0
 msg_frames: .byte " frames", 0
 
-megaton_result_rects:
-  rf_rect   0,184,256,240,$00, 0
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  .byte 0
-  ; rf_label stuff goes here
-  rf_label  32,40, 3, 0
-  .byte "Measured lag:",0
-  rf_label  32,56 + 8 * MAX_TESTS, 3, 0
-  .byte "Average:",0
-  rf_label  32,184, 3, 0
-  .byte "Press B to close",0
-  .byte 0
-  
 ; The timing window widths on DDR Extreme are 2, 4, 11, 17, 27
 ; half frames, and the colors are $20,$38,$2A,$21,$24,$16,$0F.
 ; We used to display a DDR style grade, but it proved too tempting to
@@ -176,13 +134,8 @@ restart:
   sta PPUADDR
   lda #$20
   sta PPUDATA
-  sta rf_curnametable
-  lda #$18
-  sta rf_tilenum
-  ldy #<megaton_rects
-  lda #>megaton_rects
-  jsr rf_draw_rects_attrs_labels_ay
-
+  lda #15
+  jsr rf_load_layout
   lda #LEFTWALL
   sta reticlepos
   lda #RIGHTWALL
@@ -357,11 +310,8 @@ no_beep_this_frame:
   sta help_reload
   asl a
   sta PPUMASK
-  sta rf_curpattable
-  ldx #$20
-  stx rf_curnametable
-  stx rf_tilenum
-
+  lda #16
+  jsr rf_load_layout
   jsr draw_lag_history_so_far
 
   ; Sum
@@ -439,9 +389,6 @@ lagtotal100 = $0D
   lda #<(RAWLAG_TILE_BASE * 16)
   sta vram_copydstlo
   jsr rf_copy8tiles
-  ldy #<megaton_result_rects
-  lda #>megaton_result_rects
-  jsr rf_draw_rects_attrs_labels_ay
   
   ; Set the background color
   lda #$3F

@@ -182,20 +182,6 @@ loop:
 
 .segment "RODATA"
 
-ire_rects:
-  rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
-  rf_rect  64, 64,192,176,$0C, 0  ; Color 3: inside
-  rf_rect 160,192,224,200,$F8, RF_INCR  ; text area
-  .byte $00
-  rf_attr  0,  0,256, 240, 0
-  .byte $00
-.if 0
-ire_texts:
-  rf_label 112,112, 0, 3
-  .byte "IRE LAND",0
-.endif
-  .byte $00
-
 ire_msgs2:
   .byte ire_msg00-ire_msgbase,   ire_msg0D-ire_msgbase
   .byte ire_msg10-ire_msgbase,   ire_msg1D-ire_msgbase
@@ -246,13 +232,8 @@ restart:
   jsr rf_load_tiles
   lda #$20
   sta need_reload
-  sta rf_curnametable
-  sta rf_tilenum
-  lda #$00
-  sta rf_curpattable
-  ldy #<ire_rects
-  lda #>ire_rects
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #0
+  jsr rf_load_layout
 
 loop:
   lda need_reload
@@ -406,80 +387,10 @@ done:
 ; SMPTE color bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .rodata
-smpte_rects:
-  rf_rect   0,  0, 32,160,$04, 0  ; bar 1
-  rf_rect  32,  0, 40,160,$10, 0  ; bar 1-2
-  rf_rect  40,  0, 72,160,$08, 0  ; bar 2 (allegedly not so yellow)
-  rf_rect  72,  0, 80,160,$11, 0  ; bar 2-3
-  rf_rect  80,  0,112,160,$0c, 0  ; bar 3
-  rf_rect 112,  0,144,160,$04, 0  ; bar 4
-  rf_rect 144,  0,176,160,$04, 0  ; bar 5
-  rf_rect 176,  0,184,160,$10, 0  ; bar 5-6
-  rf_rect 184,  0,216,160,$08, 0  ; bar 6
-  rf_rect 216,  0,224,160,$11, 0  ; bar 6-7
-  rf_rect 224,  0,256,160,$0c, 0  ; bar 7
-  rf_rect   0,160,256,240,$00, 0  ; black
-  rf_rect   0,160, 32,176,$0c, 0  ; bar 7
-  rf_rect  32,160, 40,176,$18, 0  ; bar 7-
-  rf_rect  72,160, 80,176,$19, 0  ; bar -5
-  rf_rect  80,160,112,176,$04, 0  ; bar 5
-  rf_rect 144,160,176,176,$0c, 0  ; bar 3
-  rf_rect 176,160,184,176,$18, 0  ; bar 3-
-  rf_rect 216,160,224,176,$19, 0  ; bar -1
-  rf_rect 224,160,256,176,$04, 0  ; bar 1
-  rf_rect   0,176, 48,240,$04, 0  ; i
-  rf_rect  48,176, 96,240,$08, 0  ; white
-  rf_rect  96,176,144,240,$0C, 0  ; q
-  rf_rect 184,176,200,240,$08, 0  ; 0d
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  rf_attr 112,  0,144,160, 3  ; green bar
-  rf_attr 144,  0,256,160, 1  ; bars 5-7
-  rf_attr   0,160,112,176, 1  ; bars 7-5
-  rf_attr   0,176,144,240, 2  ; i, y, q
-  rf_attr 160,176,256,240, 3  ; 0d
-  .byte $00
-
-cbgray_rects:
-  rf_rect   0,  0,256,240,$04, 0  ; bar 1 and bg
-
-  rf_rect  32, 48, 40, 96,$10, 0  ; bar 1-2
-  rf_rect  40, 48, 72, 96,$08, 0  ; bar 2 (allegedly not so yellow)
-  rf_rect  72, 48, 80, 96,$11, 0  ; bar 2-3
-  rf_rect  80, 48,112, 96,$0c, 0  ; bar 3
-  rf_rect 112, 48,144, 96,$04, 0  ; bar 4
-  rf_rect 144, 48,176, 96,$04, 0  ; bar 5
-  rf_rect 176, 48,184, 96,$10, 0  ; bar 5-6
-  rf_rect 184, 48,216, 96,$08, 0  ; bar 6
-  rf_rect 216, 48,224, 96,$11, 0  ; bar 6-7
-  rf_rect 224, 48,256, 96,$0c, 0  ; bar 7
-  rf_rect   0,144, 32,192,$0c, 0  ; bar 7
-  rf_rect  32,144, 40,192,$12, 0  ; bar 7-6
-  rf_rect  40,144, 72,192,$08, 0  ; bar 6
-  rf_rect  72,144, 80,192,$13, 0  ; bar 6-5
-  rf_rect  80,144,112,192,$04, 0  ; bar 5
-  rf_rect 112,144,144,192,$04, 0  ; bar 4
-  rf_rect 144,144,176,192,$0c, 0  ; bar 3
-  rf_rect 176,144,184,192,$12, 0  ; bar 3-2
-  rf_rect 184,144,216,192,$08, 0  ; bar 2
-  rf_rect 216,144,224,192,$13, 0  ; bar 2-1
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  rf_attr 112, 48,144, 96, 3  ; green bar
-  rf_attr 144, 48,256, 96, 1  ; bars 5-7
-  rf_attr   0,144,112,192, 1  ; bars 7-5
-  rf_attr 112,144,144,192, 3  ; green bar
-  .byte $00
-  .byte $00  ; no labels
-
-smpte_types:
-  .addr smpte_rects
-  .byte helpsect_smpte_color_bars
-  .addr cbgray_rects
-  .byte helpsect_color_bars_on_gray
-smpte_helpscreen = smpte_types+2
-
-.segment "RODATA"
+smpte_layout_ids:
+  .byte 1, 2
+smpte_helpscreen:
+  .byte helpsect_smpte_color_bars, helpsect_color_bars_on_gray
 
 smpte_palettes:
   .byte $0f,$10,$28,$2c, $0f,$14,$16,$02, $0f,$01,$20,$04, $0f,$1a,$0d,$00
@@ -495,7 +406,7 @@ tvSystemkHz: .byte 55, 51, 55
 .endproc
 
 .proc do_601bars
-  ldx #3
+  ldx #1
   ; fall through
 .endproc
 .proc do_bars
@@ -511,13 +422,10 @@ restart:
   sta rf_curnametable
   lda #$00
   sta rf_curpattable
-:
-  lda #1
-  sta :-+1
+
   ldx smpte_type
-  ldy smpte_types+0,x
-  lda smpte_types+1,x
-  jsr rf_draw_rects_attrs_labels_ay
+  lda smpte_layout_ids,x
+  jsr rf_load_layout
 
 loop:
   jsr ppu_wait_vblank
@@ -592,20 +500,6 @@ done:
 ; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .segment "RODATA"
-pluge_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect  16, 48, 32,192,$0A, 0  ; lowest color above black
-  rf_rect 224, 48,240,192,$0A, 0
-  rf_rect  48, 48, 64,192,$04, 0  ; below black
-  rf_rect 192, 48,208,192,$04, 0
-  rf_rect  80, 48,176, 96,$0C, 0  ; gray boxes in center
-  rf_rect  80, 96,176,144,$08, 0
-  rf_rect  80,144,176,192,$04, 0
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  rf_attr  80, 48,176,192, 1
-  .byte $00
-  .byte $00  ; no labels
 pluge_palettes:
   .byte $0F,$0D,$04,$0A
   .byte $0F,$0D,$2D,$2D
@@ -645,13 +539,8 @@ restart:
   jsr unpb53_file
 
   ; Draw PLUGE map on nametable 0
-  lda #$20
-  sta rf_curnametable
-  lda #$00
-  sta rf_curpattable
-  ldy #<pluge_rects
-  lda #>pluge_rects
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #3
+  jsr rf_load_layout
 
   ; Draw shark map on nametable 1
   lda #$00
@@ -757,51 +646,6 @@ loop:
 
 ; GRADIENT COLOR BARS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.segment "RODATA"
-
-gcbars_grid:
-  rf_rect   0,  0,256,240,$16, RF_ROWXOR|RF_COLXOR
-gcbars_nogrid:
-  rf_rect  80, 32,112, 64,$04, 0  ; red 0
-  rf_rect 112, 32,144, 64,$08, 0  ; red 1
-  rf_rect 144, 32,176, 64,$0C, 0  ; red 2
-  rf_rect  80, 80,112,112,$04, 0  ; green 0
-  rf_rect 112, 80,144,112,$08, 0  ; green 1
-  rf_rect 144, 80,176,112,$0C, 0  ; green 2
-  rf_rect  80,128,112,160,$04, 0  ; blue 0
-  rf_rect 112,128,144,160,$08, 0  ; blue 1
-  rf_rect 144,128,176,160,$0C, 0  ; blue 2
-  rf_rect  80,176,112,208,$04, 0  ; white 0
-  rf_rect 112,176,144,208,$08, 0  ; white 1
-  rf_rect 144,176,208,208,$0C, 0  ; white 2-3
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  rf_attr  80, 32,176, 64, 1  ; red
-  rf_attr  80, 80,176,112, 2  ; green
-  rf_attr  80,128,176,160, 3  ; blue
-  .byte $00
-  ; Labels are a separate file.  This $00 is both the "no labels"
-  ; sign for gcbars_grid and the "no rects" sign for gcbars_labels
-gcbars_labels:
-  .byte $00
-  rf_label  80, 24, 3, 0
-  .byte "0",0
-  rf_label 112, 24, 3, 0
-  .byte "1",0
-  rf_label 144, 24, 3, 0
-  .byte "2",0
-  rf_label 176, 24, 3, 0
-  .byte "3",0
-  rf_label  48, 40, 3, 0
-  .byte "Red",0
-  rf_label  48, 88, 3, 0
-  .byte "Green",0
-  rf_label  48,136, 3, 0
-  .byte "Blue",0
-  rf_label  48,184, 3, 0
-  .byte "White",0
-  .byte $00
-
 .segment "CODE"
 
 .proc do_gcbars
@@ -811,41 +655,26 @@ restart:
   jsr rf_load_tiles
   jsr rf_load_yrgb_palette
 
-  ; On $2400, draw a CPS-2 grid and no labels
-  ldx #$24
-  stx rf_curnametable
-  ldy #<gcbars_grid
-  lda #>gcbars_grid
-  jsr rf_draw_rects_attrs_labels_ay
-
+  ; The first gradient is drawn without grid; instead, the screen
+  ; is cleared here.
   ldx #$20
-  stx rf_curnametable
-  stx rf_tilenum
   lda #$00
   sta rf_curpattable
   tay
   jsr ppu_clear_nt
-  ldy #<gcbars_nogrid
-  lda #>gcbars_nogrid
-  jsr rf_draw_rects_attrs_labels_ay
-  
-  ldy #<gcbars_labels
-  lda #>gcbars_labels
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #4  ; $2000: no grid
+  jsr rf_load_layout
+  lda #5  ; $2400: with grid
+  jsr rf_load_layout
+  lda #6  ; $2000: add labels
+  jsr rf_load_layout
 
-  ; Set up sprite pattable
-  lda #$10
-  sta PPUADDR
-  ldy #$00
-  sty PPUADDR
-  dey
-  ldx #32
-  sprchrloop:
-    sty PPUDATA
-    dex
-    bne sprchrloop
-  
-  ; The "pale" ($3x) colors are drawn as 24 sprites.
+  ; Set up sprite pattern table
+  lda #$FF
+  tay
+  ldx #$10
+  jsr ppu_clear_nt
+  ; The "pale" ($3x) colors are drawn as solid color sprites.
 
 sprite_y = $00
 sprite_attr = $02
@@ -853,6 +682,7 @@ sprite_x = $03
   lda #31
   sta sprite_y
   ldx #0
+  stx sprite_attr
   sprboxloop:
     lda #176
     sprcolloop:
@@ -916,21 +746,6 @@ loop:
 
 ; CPS-2 STYLE GRID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.segment "RODATA"
-cpsgrid_224p_rects:
-  rf_rect   0,  0,256,224,$16, RF_ROWXOR|RF_COLXOR
-  rf_rect   0,224,256,240,$00, 0
-  .byte $00
-  rf_attr   0,  0,256,240, 1
-  rf_attr  16, 16,240,208, 0
-  .byte $00, $00
-cpsgrid_240p_rects:
-  rf_rect   0,  0,256,240,$16, RF_ROWXOR|RF_COLXOR
-  .byte $00
-  rf_attr   0,  0,256,240, 1
-  rf_attr  16, 16,240,224, 0
-  .byte $00, $00
-
 .segment "CODE"
 .proc do_cpsgrid
 whichpage = test_state+0
@@ -942,18 +757,10 @@ bgcolor = test_state+1
 restart:
   jsr rf_load_tiles
   jsr rf_load_yrgb_palette
-
-  ; On $2400, draw a CPS-2 grid and no labels
-  ldx #$20
-  stx rf_curnametable
-  ldy #<cpsgrid_224p_rects
-  lda #>cpsgrid_224p_rects
-  jsr rf_draw_rects_attrs_labels_ay
-  ldx #$24
-  stx rf_curnametable
-  ldy #<cpsgrid_240p_rects
-  lda #>cpsgrid_240p_rects
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #7
+  jsr rf_load_layout
+  lda #8
+  jsr rf_load_layout
   
 loop:
   jsr ppu_wait_vblank
@@ -1002,47 +809,13 @@ loop:
 
 ; GRAY RAMP ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.segment "RODATA"
-gray_ramp_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect  32, 24, 48,120,$01, 0
-  rf_rect  48, 24, 64,120,$02, 0
-  rf_rect  64, 24, 80,120,$03, 0
-  rf_rect  80, 24, 96,120,$04, 0
-  rf_rect  96, 24,112,120,$05, 0
-  rf_rect 112, 24,128,120,$06, 0
-  rf_rect 128, 24,144,120,$07, 0
-  rf_rect 144, 24,160,120,$08, 0
-  rf_rect 160, 24,176,120,$09, 0
-  rf_rect 176, 24,192,120,$0a, 0
-  rf_rect 192, 24,208,120,$0b, 0
-  rf_rect 208, 24,224,120,$0c, 0
-  rf_rect  32,120, 48,216,$0c, 0
-  rf_rect  48,120, 64,216,$0b, 0
-  rf_rect  64,120, 80,216,$0a, 0
-  rf_rect  80,120, 96,216,$09, 0
-  rf_rect  96,120,112,216,$08, 0
-  rf_rect 112,120,128,216,$07, 0
-  rf_rect 128,120,144,216,$06, 0
-  rf_rect 144,120,160,216,$05, 0
-  rf_rect 160,120,176,216,$04, 0
-  rf_rect 176,120,192,216,$03, 0
-  rf_rect 192,120,208,216,$02, 0
-  rf_rect 208,120,224,216,$01, 0
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  .byte $00,$00
-
 .code
 
 .proc do_gray_ramp
   jsr rf_load_tiles
   jsr rf_load_yrgb_palette
-  ldx #$20
-  stx rf_curnametable
-  lda #>gray_ramp_rects
-  ldy #<gray_ramp_rects
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #9
+  jsr rf_load_layout
 
 loop:
   jsr ppu_wait_vblank
@@ -1065,23 +838,6 @@ loop:
 bleedtile_top:    .byte $00, $55, $55
 bleedtile_bottom: .byte $FF, $55, $AA
 
-bleed_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect  16, 32,240, 64,$01, 0
-  rf_rect  16, 80,240,112,$01, 0
-  rf_rect  16,128,240,160,$01, 0
-  rf_rect  16,176,240,208,$01, 0
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  rf_attr  16, 32,240, 64, 1
-  rf_attr  16, 80,240,112, 2
-  rf_attr  16,128,240,160, 3
-  .byte $00,$00
-fullstripes_rects:
-  rf_rect   0,  0,256,240,$01, 0
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  .byte $00,$00
 bleed_palette:
   .byte $0F,$0F,$0F,$20, $0F,$0F,$0F,$16, $0F,$0F,$0F,$1A, $0F,$0F,$0F,$12
   .byte $0F,$0F,$0F,$20
@@ -1089,12 +845,9 @@ frame_label:
   .byte "Frame",0
 
 bleed_types:
-  .addr bleed_rects
-  .byte helpsect_color_bleed
-  .addr fullstripes_rects
-  .byte helpsect_full_screen_stripes
-
-bleed_helpscreen = bleed_types+2
+  .byte 10, 11
+bleed_helpscreen:
+  .byte helpsect_color_bleed, helpsect_full_screen_stripes
 
 tvSystemFPS:  .byte 60, 50, 50
 .segment "CODE"
@@ -1160,7 +913,7 @@ tvSystemFPS:  .byte 60, 50, 50
 .endproc
 
 .proc do_full_stripes
-  ldx #3
+  ldx #1
   bpl do_generic_color_bleed
 .endproc
 
@@ -1181,9 +934,15 @@ bg_type     = test_state+3
 
 restart:
   jsr ppu_wait_vblank
+  lda #$80
+  sta PPUCTRL
+  sta help_reload
+  asl a
+  sta PPUMASK
+
+  tay
   lda #$3F
   sta PPUADDR
-  ldy #$00
   sty PPUADDR
   palloop:
     lda bleed_palette,y
@@ -1192,19 +951,11 @@ restart:
     cpy #20
     bcc palloop
 
-  ldx #$20
-  stx rf_curnametable
-  lda #$80
-  sta PPUCTRL
-  sta help_reload
-  asl a
-  sta PPUMASK
   lda bg_type
   and #$7F
   tax
-  ldy bleed_types+0,x
-  lda bleed_types+1,x
-  jsr rf_draw_rects_attrs_labels_ay
+  lda bleed_types,x
+  jsr rf_load_layout
   
   ; Set up the frame counter sprites
   ldx #0
@@ -1316,12 +1067,6 @@ done:
 ; cur_color=4: use black_color
 solid_color_rgb: .byte $16,$1A,$12
 
-solid_color_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect 160, 32,224, 40,$20, RF_INCR
-  .byte $00
-  rf_attr   0,  0,256,240, 0
-  .byte $00,$00
 color_msg:  .byte "Color:",0
 
 .segment "CODE"
@@ -1345,11 +1090,8 @@ text_light_color = lineImgBuf+130
   sta black_color
 restart:
   jsr rf_load_tiles
-  ldx #$20
-  stx rf_curnametable
-  ldy #<solid_color_rects
-  lda #>solid_color_rects
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #12
+  jsr rf_load_layout
 
 loop:
   ; Prepare color display

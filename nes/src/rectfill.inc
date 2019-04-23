@@ -13,6 +13,7 @@ RECTFILL_INC = 1
 ; rectfill layout API
 .global rf_curnametable, rf_curpattable, rf_tilenum
 .global rf_draw_rects_attrs_labels_ay
+.global rf_load_layout
 
 ; other related APIs
 .global rf_load_tiles, rf_color_lineImgBuf, rf_copy8tiles

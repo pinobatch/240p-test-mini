@@ -23,28 +23,6 @@
 .importzp helpsect_overscan
 
 .segment "RODATA"
-overscan_rects:
-  rf_rect   0,  0,256,240,$00, 0        ; Clear screen
-  rf_rect 112, 40,128, 48,$F0, RF_INCR  ; Top pixels: $F0-$F1
-  rf_rect 120, 48,136, 56,$F8, RF_INCR  ; Top percentage: $F8-$F9
-  rf_rect 112,184,128,192,$F2, RF_INCR  ; Bottom pixels: $F2-$F3
-  rf_rect 128,184,144,192,$80, RF_INCR  ; [Bottom] px
-  rf_rect 120,192,136,200,$FA, RF_INCR  ; Bottom percentage: $FA-$FB
-  rf_rect  40,112, 56,120,$F4, RF_INCR  ; Left pixels: $F4-$F5
-  rf_rect  40,120, 56,128,$80, RF_INCR  ; [Left] px
-  rf_rect  40,128, 56,136,$FC, RF_INCR  ; Left percentage: $FC-$FD
-  rf_rect 200,112,216,120,$F6, RF_INCR  ; Right pixels: $F6-$F7
-  rf_rect 200,120,216,128,$80, RF_INCR  ; [Right] px
-  rf_rect 200,128,216,136,$FE, RF_INCR  ; Right percentage: $FE-$FF
-  .byte 0
-
-  rf_attr   0,  0,256,240, 0
-  .byte 0
-
-  ; These start at $80 and are replicated using rects above
-  rf_label 131,40, 3, 2
-  .byte "px",0   ; $80-$81
-  .byte 0
 
 ; BCD-encoded permill amounts
 ; To regenerate the next two lines in python3:
@@ -95,11 +73,11 @@ restart:
   sta PPUCTRL
   sta help_reload
   sta rf_tilenum
+  asl a
+  sta PPUMASK
 
-  ldx #$00
-  stx PPUMASK
-  stx rf_curpattable
-  ldy #$00
+  tax
+  tay
   lda #9
   jsr unpb53_file
 :
@@ -115,13 +93,8 @@ restart:
   ldy #0
   ldx #$24
   jsr ppu_clear_nt
-
-  ldx #$20
-  stx rf_curnametable
-  ldy #<overscan_rects
-  lda #>overscan_rects
-  jsr rf_draw_rects_attrs_labels_ay
-
+  lda #17
+  jsr rf_load_layout
   lda #3
   jsr overscan_prepare_side_a
   jsr overscan_copy4cols

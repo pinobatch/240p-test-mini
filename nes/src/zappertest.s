@@ -131,26 +131,6 @@ ZAPPER_S0_X = 128
 ZAPPER_S0_TILE = $0F
 ZAPPER_ARROW_TILE = $1A
 
-zapper_rects:
-  rf_rect   0,  0,256, 24,$04, 0  ; Top letterbox (incl. sprite 0 trigger)
-  rf_rect   0, 24,256,216,$00, 0  ; Blank center
-  rf_rect   0,216,256,240,$04, 0  ; Bottom letterbox
-  rf_rect  64,184,80,200,$F8, RF_INCR  ; text area (Y, height)
-  .byte $00
-zapper_attrs:
-  rf_attr  0,  0,256, 240, 0
-  .byte $00
-zapper_texts:
-  rf_label 16, 168, 1, 0
-  .byte "Zapper test",0
-  rf_label 16, 184, 1, 0
-  .byte "Light Y:",0
-  rf_label 16, 192, 1, 0
-  .byte "Height:",0
-  rf_label 16, 208, 1, 0
-  .byte "B: Exit",0
-  .byte $00
-
 zapper_initial_oam:
   .byte 15,ZAPPER_S0_TILE,$23,ZAPPER_S0_X
   .byte $FF,ZAPPER_ARROW_TILE,$42,232
@@ -201,14 +181,8 @@ light_height = test_state+1
     bpl :-
 
   ; Load nametable
-  ldx #$00
-  stx rf_curpattable
-  ldx #$20
-  stx rf_curnametable
-  stx rf_tilenum
-  ldy #<zapper_rects
-  lda #>zapper_rects
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #19
+  jsr rf_load_layout
 
 forever:
 

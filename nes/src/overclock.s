@@ -27,29 +27,6 @@ nine_y = 2
 s0_x = 16  ; to line up roughly under when 9 sprites bit turns on
 s0_y = nine_y + 24
 
-overclock_rects:
-  rf_rect   0,  0,256,240,$00, 0
-  rf_rect 128,104,192,152,$80, RF_INCR  ; text area
-  .byte 0
-
-  rf_attr   0,  0,256,240, 0
-  .byte 0
-
-  rf_label  64,104, 2, 0
-  .byte "Cycles/line:",0
-  rf_label  64,112, 2, 0
-  .byte "Lines/frame:",0
-  rf_label  64,120, 2, 0
-  .byte "NMI scanline:",0
-  rf_label  64,128, 2, 0
-  .byte "TV system:",0
-  rf_label  64,136, 2, 0
-  .byte "Frame rate:",0
-  rf_label  64,144, 2, 0
-  .byte "CPU speed:",0
-  .byte 0
-
-
 tv_system_names_lo: .lobytes ntsc_name, pal_name
 tv_system_names_hi: .hibytes ntsc_name, pal_name
 ntsc_name: .byte "NTSC (60 Hz)",0
@@ -162,15 +139,14 @@ loop:
   sta help_reload
   sta vram_copydsthi
   asl a
-  sta rf_curpattable
   sta PPUMASK
 
   ; Load static tiles
-  ldx #$00
-  ldy #$00
+  tax
+  tay
   lda #7
   jsr unpb53_file
-  
+
 :
   lda #<.BANK(s0_rise_to_rise)
   sta :-+1
@@ -181,14 +157,8 @@ loop:
   ldx #$08
   jsr ppu_clear_nt
   jsr rf_load_yrgb_palette
-
-  lda #2
-  sta rf_tilenum
-  ldx #$20
-  stx rf_curnametable
-  ldy #<overclock_rects
-  lda #>overclock_rects
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #18
+  jsr rf_load_layout
   jsr oc_s0_setup
 
 loop:

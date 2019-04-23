@@ -35,17 +35,6 @@ sw_inactive_color = test_state+7  ; $26 or $20
 sw_framesones = test_state+15
 
 .rodata
-stopwatch_labels:
-  .byte 0
-  rf_label  56, 40, 2, 0
-  .byte "hours",0
-  rf_label  96, 40, 2, 0
-  .byte "minutes",0
-  rf_label 136, 40, 2, 0
-  .byte "seconds",0
-  rf_label 176, 40, 2, 0
-  .byte "frames",0
-  .byte 0
 stopwatch_ball_x:
   .byte 116,142,159,159,142,116, 90, 73, 73, 90
 stopwatch_ball_y:
@@ -126,14 +115,8 @@ lapIndicatorAddr = lineImgBuf+96+24
 
 .segment "CODE02"
 .proc stopwatch_body
-  ; $70-$7F we reserve for labels
-  lda #$20
-  sta rf_curnametable
-  lda #$70
-  sta rf_tilenum
-  ldy #<stopwatch_labels
-  lda #>stopwatch_labels
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #13
+  jsr rf_load_layout
 
   ; Uses 30 sprites for ruler, 10 for clock hand, and 12 for digits
   ldx #(30+10+12)*4
