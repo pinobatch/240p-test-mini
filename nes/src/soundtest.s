@@ -176,32 +176,11 @@ delayloop:
 
 ; Crowd title by Damian Yerrick
 
-.rodata
-crowd_labels:
-  .byte $00  ; no rects or attrs
-  rf_label  80, 96, 3, 0
-  .byte 34,"Crowd",34," by Kragen",0
-  rf_label  80,112, 3, 0
-  .byte "Ported to NES",0
-  rf_label  80,120, 3, 0
-  .byte "by rainwarrior",0
-  rf_label  80,144, 3, 0
-  .byte "Reset: exit",0
-  .byte $00
-
 .code
 do_crowd:
   jsr rf_load_tiles
-  ldx #$20
-  stx rf_curnametable
-  stx rf_tilenum
-  lda #$00
-  sta rf_curpattable
-  tay
-  jsr ppu_clear_nt
-  ldy #<crowd_labels
-  lda #>crowd_labels
-  jsr rf_draw_rects_attrs_labels_ay
+  lda #20
+  jsr rf_load_layout
   jsr ppu_wait_vblank
   jsr rf_load_yrgb_palette
   lda #0  ; disable vblank NMI during "Crowd"
