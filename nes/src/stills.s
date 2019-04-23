@@ -52,8 +52,8 @@ bricks_tile:
   .byte %11111101
   .byte %11111111
 
-.segment "BSS"
-test_state: .res 24
+.zeropage
+test_state: .res SIZEOF_TEST_STATE
 
 .segment "CODE"
 

@@ -38,10 +38,11 @@
 
 ; helpscreen.s
 HELP_LINE_LEN = 40
-.global helpscreen, help_reload, helpcheck, read_pads_helpcheck
-.global help_line_buffer, vram_copydstlo, vram_copydsthi
+.globalzp helpscreen, help_reload, helpcheck, read_pads_helpcheck
+.globalzp vram_copydstlo, vram_copydsthi
+.global help_line_buffer
 ; these are for "save your place on the main menu" functionality
-.global help_cursor_y, help_cur_page
+.globalzp help_cursor_y, help_cur_page
 
 ; undte.s
 .global undte_line, undte_line0
@@ -75,7 +76,9 @@ GATEDATA_BANK = 1
 .global do_linearity, do_sharpness, do_ire, do_smpte, do_601bars
 .global do_pluge, do_gcbars, do_cpsgrid, do_gray_ramp, do_color_bleed
 .global do_full_stripes, do_solid_color, do_crosstalk
-.global test_state, tvSystemFPS
+.global tvSystemFPS
+SIZEOF_TEST_STATE = 24
+.globalzp test_state
 
 ; linearity.s
 .global do_new_linearity

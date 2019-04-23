@@ -25,7 +25,7 @@
 
 .assert .bank(helppages_lo) = .bank(helpscreen_cb), error, "HELPDATA and CODE02 banks differ"
 
-.segment "BSS"
+.zeropage
 help_cur_doc:   .res 1
 help_cur_page:  .res 1
 help_cur_line:  .res 1
@@ -37,6 +37,7 @@ help_cursor_y:  .res 1
 cursor_dirty:   .res 1
 vram_copydstlo: .res 1
 vram_copydsthi: .res 1
+.bss
 help_line_buffer:.res HELP_LINE_LEN
 
 .segment "CODE"
