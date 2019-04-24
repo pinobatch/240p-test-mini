@@ -12,7 +12,7 @@
 .include "rectfill.inc"
 .import rectfill_layouts
 .import rf_vwfClearPuts
-.export rf_vwfClearPuts_cb
+.export rf_vwfClearPuts_cb, rf_load_layout_cb
 
 
 
@@ -297,9 +297,7 @@ bmask     = $08
 ; The XOR value is the background color, and the AND value is
 ; the foreground color XOR the background color.
 
-
-
-.proc rf_load_layout
+.proc rf_load_layout_cb
   asl a
   asl a
   tax
@@ -480,7 +478,7 @@ times85:
 .code
 .proc rf_vwfClearPuts_cb
   jsr clearLineImg
-  lda rf_load_layout::xcoord
+  lda rf_load_layout_cb::xcoord
   and #$07
   tax
   lda #>help_line_buffer
