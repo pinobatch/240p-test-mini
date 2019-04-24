@@ -51,7 +51,7 @@ kiki_palette:
   .byte $0F,$00,$1A,$10
   .byte $0F,$00,$1A,$10
 
-.code
+.segment "CODE02"
 
 hw_yscroll_lo = test_state+10
 hw_yscroll_hi = test_state+11

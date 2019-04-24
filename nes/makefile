@@ -78,7 +78,7 @@ $(objdir)/index.txt: makefile
 
 clean:
 	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.?b53
-	-rm $(objdir)/*.sav map.txt bnmap.txt
+	-rm $(objdir)/*.sav $(objdir)/*.iu53 map.txt bnmap.txt
 
 # Rules for PRG ROM
 
