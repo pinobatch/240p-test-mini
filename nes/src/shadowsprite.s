@@ -22,6 +22,7 @@
 .include "rectfill.inc"
 .importzp helpsect_shadow_sprite
 
+.code
 
 .proc do_drop_shadow_sprite
 sprite_x = test_state + 0
@@ -55,9 +56,6 @@ restart:
   sta PPUADDR
 
   ; Load reticle graphics
-:
-  lda #GATEDATA_BANK
-  sta :-+1
   ldy #<(shadow_reticle_pb53+2)
   lda #>(shadow_reticle_pb53+2)
   ; ldx #16  ; already loaded from PPUADDR above

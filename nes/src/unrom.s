@@ -58,7 +58,7 @@ unpb53_file:
 
 rf_load_layout:
   ldx #GATE_DATA_BANK
-  stx unpb53_gate+1
+  stx rf_load_layout+1
   jsr rf_load_layout_cb
   jmp rtl
 
@@ -67,7 +67,7 @@ rf_vwfClearPuts:
   sta rtl+1
   jsr rf_vwfClearPuts_cb
   lda #GATE_DATA_BANK
-  sta unpb53_gate+1
+  sta rf_load_layout+1
   rts
 
 nmi_handler:

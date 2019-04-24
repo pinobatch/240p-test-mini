@@ -58,7 +58,7 @@ unpb53_file:
   jmp rtl
 
 rf_load_layout:
-  bit zerobyte  ; lsr zerobyte
+  lsr zerobyte  ; lsr zerobyte
   jsr rf_load_layout_cb
   jmp rtl
 
@@ -66,7 +66,7 @@ rf_vwfClearPuts:
   lda #MAIN_CODE_BANK
   sta rtl+1
   jsr rf_vwfClearPuts_cb
-  bit zerobyte  ; lsr zerobyte
+  lsr zerobyte  ; lsr zerobyte
   rts
 
 nmi_handler:

@@ -132,7 +132,6 @@ loop:
   rts
 .endproc
 
-.code
 .proc do_overclock
   lda #VBLANK_NMI
   sta PPUCTRL
@@ -177,7 +176,6 @@ done:
   rts
 .endproc
 
-.segment "CODE02"
 .proc oc_present
   jsr ppu_wait_vblank
   lda vram_copydsthi

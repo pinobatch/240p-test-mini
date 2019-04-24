@@ -1,7 +1,7 @@
 .include "rectfill.inc"
 .export rectfill_layouts
 
-.segment "RODATA"
+.segment "GATEDATA"
 
 ; each record is 4 bytes, consisting of
 ; address, nametable ($20 or $24), label starting tile

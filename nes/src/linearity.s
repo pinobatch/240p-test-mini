@@ -5,7 +5,7 @@
 
 lcdc_value = test_state+0
 
-.code
+.segment "CODE02"
 
 .proc do_new_linearity
   lda #VBLANK_NMI|BG_0000
@@ -21,8 +21,6 @@ lcdc_value = test_state+0
   tay
   tax
   jsr ppu_clear_nt
-  lda #<.bank(linearity_clear_grid)
-  sta *-1
   jsr linearity_clear_grid
 
   ; Load new Copy grid to other PRG ROM bank
@@ -33,8 +31,6 @@ lcdc_value = test_state+0
   jsr load_iu53_file
 
   ; Copy grid to other PRG ROM bank
-  lda #<.bank(add_grid)
-  sta *-1
   jsr add_grid
 
 forever:

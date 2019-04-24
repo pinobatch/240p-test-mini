@@ -79,9 +79,6 @@ restart:
   jsr unpb53_file
 
   ; Decompress map from 1bpp
-:
-  lda #GATEDATA_BANK
-  sta :- + 1
   lda #<(kikimap_pb53 + 2)
   sta ciSrc+0
   lda #>(kikimap_pb53 + 2)
@@ -91,14 +88,6 @@ restart:
   asl a
   sta ciBufStart
   jsr unpb53_gate
-
-  ; Move the rest out of fixed bank
-  lda #<.bank(load_kiki_map_02)
-  sta *-1
-  jmp do_vscrolltest_body
-.endproc
-.segment "CODE02"
-.proc do_vscrolltest_body
   jsr load_kiki_map_02
 
   ; load palette

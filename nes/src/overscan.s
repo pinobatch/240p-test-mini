@@ -47,7 +47,7 @@ palette_paper:  .byte $00, $0F, $20
 palette_ink:    .byte $20, $20, $0F
 palette_border: .byte $0F, $02, $12
 
-.segment "CODE"
+.segment "CODE02"
 
 amt_top      = test_state+0
 amt_bottom   = test_state+1
@@ -79,15 +79,7 @@ restart:
   tay
   lda #9
   jsr unpb53_file
-:
-  lda #<.bank(do_overscan_body)
-  sta :-+1
-  jmp do_overscan_body
-.out .sprintf("NES overscan restart to bank jump: %d bytes", *-restart)
-.endproc
 
-.segment "CODE02"
-.proc do_overscan_body
   lda #8  ; solid tile
   ldy #0
   ldx #$24
@@ -124,13 +116,10 @@ restart:
   ; And clear the Y coords
   jsr ppu_clear_oam
 
-.out .sprintf("NES overscan bank jump to loop: %d bytes", *-::do_overscan_body)
 loop:
   lda #helpsect_overscan
   jsr read_pads_helpcheck
-  bcc not_help
-    jmp do_overscan::restart
-  not_help:
+  bcs restart
   ldx #0
   lda das_keys
   and #KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
@@ -155,8 +144,6 @@ loop:
     have_new_palette:
     sty palette
   not_select:
-
-.out .sprintf("NES overscan handle B, Select, Start: %d bytes", not_select - loop)
 
   ; Control Pad: Choose or move an edge
   lda new_keys+0
@@ -189,9 +176,6 @@ loop:
       lda #0
       sta upd_progress
   not_move:
-
-.out .sprintf("NES overscan handle A, Control Pad: %d bytes", not_move - not_select)
-
   jsr overscan_prepare_sprites
 
   ; Find something to update

@@ -26,7 +26,7 @@ rf_curpattable:   .res 1
 rf_curnametable:  .res 1
 rf_tilenum:       .res 1
 
-.segment "CODE"
+.segment "PB53CODE"
 
 ; Filled rectangles are described by start address, width, height,
 ; tile number, and row alternation.  They can be used to draw solid
@@ -471,7 +471,7 @@ curplanexor = $09
   rts
 .endproc
 
-.rodata
+.segment "GATEDATA"
 times85:
   .byte $00, $55, $AA, $FF
 

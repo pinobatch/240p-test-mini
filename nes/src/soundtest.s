@@ -54,7 +54,7 @@ tvSystem_redtint:
   .byte LIGHTGRAY|BG_ON|OBJ_ON|TINT_G
   .byte LIGHTGRAY|BG_ON|OBJ_ON|TINT_G
 
-.segment "CODE"
+.segment "CODE02"
 
 .proc do_sound_test
   ldx #helpsect_sound_test_frequency
@@ -176,7 +176,6 @@ delayloop:
 
 ; Crowd title by Damian Yerrick
 
-.code
 do_crowd:
   jsr rf_load_tiles
   lda #20

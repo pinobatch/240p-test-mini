@@ -75,7 +75,7 @@ reticle_y:     .byte <-33,<-33,<-33,<-33,<-25,<-25,<-17,<-17, <-9, <-9, <-9, <-9
 reticle_tile:  .byte  $04, $05, $06, $07, $08, $0B, $0C, $0F, $10, $11, $12, $13
 reticle_x:     .byte <-16, <-8,   0,   8,<-16,   8,<-16,   8,<-16, <-8,   0,   8
 
-.segment "CODE"
+.segment "CODE02"
 
 .proc do_manual_lag
   lda #1
@@ -118,14 +118,7 @@ restart:
   tay
   lda #8
   jsr unpb53_file
-:
-  lda #<.bank(do_manual_lag_body)
-  sta :-+1
-  jmp do_manual_lag_body
-.endproc
 
-.segment "CODE02"
-.proc do_manual_lag_body
   jsr rf_load_yrgb_palette
   lda #$3F
   sta PPUADDR

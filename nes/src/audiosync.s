@@ -28,18 +28,10 @@ audiosync_palthresholds:
   .byte 120, 0, 120, 40, 120, 60, 80, 100
 NUMPALTHRESHOLDS = * - audiosync_palthresholds
 
-.code
-.proc do_audiosync
-
-  jsr rf_load_tiles
-:
-  lda #<.bank(do_audiosync_body)
-  sta :-+1
-  jmp do_audiosync_body
-.endproc
-
 .segment "CODE02"
-.proc do_audiosync_body
+.proc do_audiosync
+  jsr rf_load_tiles
+
 progress = test_state+0
 calculated_palette = test_state+2
 

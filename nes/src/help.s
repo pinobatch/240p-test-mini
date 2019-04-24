@@ -21,7 +21,7 @@
 .include "global.inc"
 .import helptitles_hi, helptitles_lo
 .import helppages_hi, helppages_lo, help_cumul_pages
-.importzp HELP_NUM_PAGES, HELP_NUM_SECTS, HELP_BANK
+.importzp HELP_NUM_PAGES, HELP_NUM_SECTS
 
 .assert .bank(helppages_lo) = .bank(helpscreen_cb), error, "HELPDATA and CODE02 banks differ"
 
@@ -40,7 +40,7 @@ vram_copydsthi: .res 1
 .bss
 help_line_buffer:.res HELP_LINE_LEN
 
-.segment "CODE"
+.code
 
 ;;
 ; Reads the controller, and if Start was just pressed, displays
@@ -90,8 +90,6 @@ help_line_buffer:.res HELP_LINE_LEN
     sta prev_nonblank
     sta help_reload
   :
-  lda #HELP_BANK
-  sta :- + 1
   jmp helpscreen_cb
 .endproc
 
@@ -482,12 +480,16 @@ sprstripdone:
 .endproc
 
 .code
-; The first part of loading the help scren has to be in the
-; fixed bank because it calls decompression
+; Begin loading the help screen
 .proc helpscreen_load
   ; Load background image
   lda #0
   jsr load_sb53_file
+  jmp helpscreen_load_cb
+.endproc
+
+.segment "CODE02"
+.proc helpscreen_load_cb
 
   ; Load character sprite tiles
   ldx #$10
@@ -500,15 +502,6 @@ sprstripdone:
   ldy #$E0
   lda #6
   jsr unpb53_file
-
-:
-  lda #HELP_BANK
-  sta :- + 1
-  jmp helpscreen_load_cb
-.endproc
-
-.segment "CODE02"
-.proc helpscreen_load_cb
   ; Load palette for sprite and VWF text
   lda #$3F
   sta PPUADDR
