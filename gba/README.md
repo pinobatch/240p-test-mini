@@ -8,8 +8,6 @@ converters and line doublers.
 This program is a port of Artemio Urbina's 240p Test Suite
 to the Game Boy Advance.
 
-Build requirements: MSYS, devkitARM, libgba, Python3, and Pillow
-
 [240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
 
 Usage
@@ -63,6 +61,17 @@ Limits
   no control over the host system's interlace mode.
 * The true IRE levels of the GameCube's output when running Game Boy
   Player have not yet been measured.
+
+Building
+--------
+Build requirements: GNU Coreutils and Make (use devkitPro MSYS on
+Windows), devkitARM, libgba, Python 3, and Pillow.
+
+Under Windows, open a devkitPro MSYS and type `make`.  Under Linux
+or macOS, once you have installed `gba-dev` using pacman, type these:
+
+    source /etc/profile.d/devkit-env.sh
+    make
 
 Contributors
 ------------

@@ -397,14 +397,16 @@ void activity_gcbars(void) {
   }
   
   // Draw secondary map (with grid)
-  for (unsigned int x = 0; x < 640; ++x) {
-    unsigned int tilenum = MAP[PFMAP][0][x];
-    if (tilenum <= 4) {
-      tilenum = 0x20;
-      if (x & 1) tilenum |= 0x400;
-      if (x & 32) tilenum |= 0x800;
+  for (unsigned int y = 0; y < 20; ++y) {
+    for (unsigned int x = 0; x < 32; ++x) {
+      unsigned int tilenum = MAP[PFMAP][y][x];
+      if (tilenum <= 4) {
+        tilenum = 0x20;
+        if (x & 1) tilenum |= 0x400;
+        if (y & 1) tilenum |= 0x800;
+      }
+      MAP[PFOVERLAY][y][x] = tilenum;
     }
-    MAP[PFOVERLAY][0][x] = tilenum;
   }
   
   // Draw labels on primary map
