@@ -614,8 +614,8 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.18 (2019-04-2x)
-Add Sharpness brick wall
+Version 0.18 (2019-05-02)
+Add PLUGE Contrast
 
 © 2011-2016 Artemio Urbina
 © 2015-2019 Damian Yerrick

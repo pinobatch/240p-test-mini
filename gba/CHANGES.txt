@@ -1,6 +1,7 @@
-0.18 (2019-04)
+0.18 (2019-05-02)
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic
   (Genesis 1.16 parity)
+* Want your name in the credits? patreon.com/pineight
 
 0.17 (2018-06-30)
 * Solid screen: Explain what a bad high voltage regulator does to

@@ -101,8 +101,8 @@ Use it with various palettes
 to check contrast and
 brightness.
 
-A: Switch palette among normal,
-  dark, or light colors
+A: Switch palette among
+  normal, dark, or light colors
 Select: Return to PLUGE
 
 == Gradient color bars ==
@@ -750,7 +750,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.18 (2019-04-2x)
+Version 0.18 (2019-05-02)
 PLUGE Contrast; better
 compression
 

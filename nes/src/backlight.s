@@ -37,14 +37,15 @@ sprite_hide = test_state+3
 
 restart:
   lda #0
-  sta OAM+2
   sta PPUMASK
   ldx #$1F
   ldy #$C0
   lda #4
   jsr unpb53_file
+  lda #2
+  sta OAM+2  ; set the sprite's palette to same as whites of Gus's eyes
   ldx #4
-  jsr ppu_clear_oam
+  jsr ppu_clear_oam  ; clear the rest of sprites
 loop:
   lda sprite_x
   sta OAM+3

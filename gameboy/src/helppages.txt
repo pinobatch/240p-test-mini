@@ -687,9 +687,8 @@ Select: Show or hide
 
 == 144p Test Suite ==
 
-Ver. 0.18 (2019-04-2x)
-Sharpness brick wall;
-size optimization
+Ver. 0.18 (2019-05-02)
+Add PLUGE Contrast
 
 © 2011-2016
   Artemio Urbina

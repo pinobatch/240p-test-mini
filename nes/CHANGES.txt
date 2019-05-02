@@ -1,16 +1,16 @@
-0.18 (2019-04)
+0.18 (2019-05-02)
 * Help: Compress text with DTE
 * Help: Update Gus look to match GBA
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic
   (Genesis 1.16 parity)
+* Overscan: Select to invert grays; border contrasts with BG
+* Sharpness: Pixel-align emblem at center
+* Manual lag: Remove misleading DDR-style grading
 * Linearity, Sharpness, Stopwatch, Crosstalk: Compress map with
   new iu53 codec
 * Move several tests' code to UNROM bank 2 to make room in fixed bank
 * Linearity: Construct grid CHR from gridless CHR
-* Sharpness: Pixel-align emblem at center
 * Stopwatch: Reduce tiles of sprite circles (the "hand")
-* Overscan: Select to invert grays; border contrasts with BG
-* Manual lag: Remove misleading DDR-style grading
 * Move rectfill-based screen layouts to UNROM bank 1
 * Organize "library" code shared by my other projects into a
   separate part of the fixed bank
