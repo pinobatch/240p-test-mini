@@ -21,6 +21,7 @@
 .include "global.inc"
 .include "rectfill.inc"
 .importzp helpsect_overscan
+.importzp RF_overscan
 
 .segment "RODATA"
 
@@ -84,7 +85,7 @@ restart:
   ldy #0
   ldx #$24
   jsr ppu_clear_nt
-  lda #17
+  lda #RF_overscan
   jsr rf_load_layout
   lda #3
   jsr overscan_prepare_side_a

@@ -21,6 +21,7 @@
 .include "global.inc"
 .include "rectfill.inc"
 .importzp helpsect_audio_sync_test
+.importzp RF_audiosync
 
 .rodata
 
@@ -30,12 +31,11 @@ NUMPALTHRESHOLDS = * - audiosync_palthresholds
 
 .segment "CODE02"
 .proc do_audiosync
-  jsr rf_load_tiles
-
 progress = test_state+0
 calculated_palette = test_state+2
 
-  lda #14
+  jsr rf_load_tiles
+  lda #RF_audiosync
   jsr rf_load_layout
   lda #$80  ; bit 7: paused
   sta progress

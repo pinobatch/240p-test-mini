@@ -1,55 +1,47 @@
 .include "rectfill.inc"
 .export rectfill_layouts
 
+.macro rectfile name, address, nametable, tileno
+  .assert (* - rectfill_layouts) / 4 < 256, error, "too many rectfiles"
+  name = <((* - rectfill_layouts) / 4)
+  .exportzp name
+  .addr address
+  .byte nametable
+  .ifnblank tileno
+    .byte tileno
+  .else
+    .byte $ff
+  .endif
+.endmacro
+
 .segment "GATEDATA"
 
 ; each record is 4 bytes, consisting of
 ; address, nametable ($20 or $24), label starting tile
 rectfill_layouts:
-  .addr ire_rects
-  .byte $20, $FF
-  .addr smpte_rects
-  .byte $20, $FF
-  .addr cbgray_rects
-  .byte $20, $FF
-  .addr pluge_rects
-  .byte $20, $FF
-  .addr gcbars_nogrid
-  .byte $20, $FF
-  .addr gcbars_labels
-  .byte $20, $20
-  .addr gcbars_grid
-  .byte $24, $FF
-  .addr cpsgrid_224p_rects
-  .byte $20, $FF
-  .addr cpsgrid_240p_rects
-  .byte $24, $FF
-  .addr gray_ramp_rects
-  .byte $20, $FF
+  rectfile RF_ire, ire_rects, $20
+  rectfile RF_smpte, smpte_rects, $20
+  rectfile RF_cbgray, cbgray_rects, $20
+  rectfile RF_pluge, pluge_rects, $20
+  rectfile RF_gcbars, gcbars_nogrid, $20
+  rectfile RF_gcbars_labels, gcbars_labels, $20, $20
+  rectfile RF_gcbars_grid, gcbars_grid, $24
+  rectfile RF_cpsgrid_224, cpsgrid_224p_rects, $20
+  rectfile RF_cpsgrid_240, cpsgrid_240p_rects, $24
+  rectfile RF_gray_ramp, gray_ramp_rects, $20
 
-  .addr bleed_rects
-  .byte $20, $FF
-  .addr fullstripes_rects
-  .byte $20, $FF
-  .addr solid_color_rects
-  .byte $20, $FF
-  .addr stopwatch_labels
-  .byte $20, $70
-  .addr audiosync_rects
-  .byte $20, $FF
-  .addr megaton_rects
-  .byte $20, $18
-  .addr megaton_result_rects
-  .byte $20, $18
-  .addr overscan_rects
-  .byte $20, $80
-  .addr overclock_rects
-  .byte $20, $02
-  .addr zapper_rects
-  .byte $20, $20
+  rectfile RF_bleed, bleed_rects, $20
+  rectfile RF_fullstripes, fullstripes_rects, $20
+  rectfile RF_solid, solid_color_rects, $20
+  rectfile RF_sw_hmsf, stopwatch_labels, $20, $70
+  rectfile RF_audiosync, audiosync_rects, $20
+  rectfile RF_megaton, megaton_rects, $20, $18
+  rectfile RF_megaton_end, megaton_result_rects, $20, $18
+  rectfile RF_overscan, overscan_rects, $20, $80
+  rectfile RF_overclock, overclock_rects, $20, $02
+  rectfile RF_zapper, zapper_rects, $20, $20
 
-  .addr crowd_labels
-  .byte $20, $20
+  rectfile RF_crowd, crowd_labels, $20, $20
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black

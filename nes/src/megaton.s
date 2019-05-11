@@ -21,6 +21,7 @@
 .include "global.inc"
 .include "rectfill.inc"
 .importzp helpsect_manual_lag_test
+.importzp RF_megaton, RF_megaton_end
 
 ; Megaton is the manual lag test.
 
@@ -126,7 +127,7 @@ restart:
   sta PPUADDR
   lda #$20
   sta PPUDATA
-  lda #15
+  lda #RF_megaton
   jsr rf_load_layout
   lda #LEFTWALL
   sta reticlepos
@@ -302,7 +303,7 @@ no_beep_this_frame:
   sta help_reload
   asl a
   sta PPUMASK
-  lda #16
+  lda #RF_megaton_end
   jsr rf_load_layout
   jsr draw_lag_history_so_far
 

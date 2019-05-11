@@ -23,7 +23,7 @@
 .include "nes.inc"
 .include "global.inc"
 .include "rectfill.inc"
-.importzp helpsect_zapper_test
+.importzp helpsect_zapper_test, RF_zapper
 
 .segment "LIBCODE"
 .align 128
@@ -181,7 +181,7 @@ light_height = test_state+1
     bpl :-
 
   ; Load nametable
-  lda #19
+  lda #RF_zapper
   jsr rf_load_layout
 
 forever:

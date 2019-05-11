@@ -26,6 +26,10 @@
 .importzp helpsect_gray_ramp, helpsect_color_bleed
 .importzp helpsect_full_screen_stripes, helpsect_solid_color_screen
 .importzp helpsect_chroma_crosstalk
+.importzp RF_ire, RF_smpte, RF_cbgray, RF_pluge
+.importzp RF_gcbars, RF_gcbars_labels, RF_gcbars_grid, RF_cpsgrid_224
+.importzp RF_cpsgrid_240, RF_gray_ramp, RF_bleed, RF_fullstripes
+.importzp RF_solid
 
 ; sb53-based stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -232,7 +236,7 @@ restart:
   jsr rf_load_tiles
   lda #$20
   sta need_reload
-  lda #0
+  lda #RF_ire
   jsr rf_load_layout
 
 loop:
@@ -388,7 +392,7 @@ done:
 
 .rodata
 smpte_layout_ids:
-  .byte 1, 2
+  .byte RF_smpte, RF_cbgray
 smpte_helpscreen:
   .byte helpsect_smpte_color_bars, helpsect_color_bars_on_gray
 
@@ -535,7 +539,7 @@ restart:
   jsr unpb53_file
 
   ; Draw PLUGE map on nametable 0
-  lda #3
+  lda #RF_pluge
   jsr rf_load_layout
 
   ; Draw shark map on nametable 1
@@ -657,11 +661,11 @@ restart:
   lda #$00
   tay
   jsr ppu_clear_nt
-  lda #4  ; $2000: no grid
+  lda #RF_gcbars
   jsr rf_load_layout
-  lda #5  ; $2400: with grid
+  lda #RF_gcbars_labels
   jsr rf_load_layout
-  lda #6  ; $2000: add labels
+  lda #RF_gcbars_grid
   jsr rf_load_layout
 
   ; Set up sprite pattern table
@@ -752,9 +756,9 @@ bgcolor = test_state+1
 restart:
   jsr rf_load_tiles
   jsr rf_load_yrgb_palette
-  lda #7
+  lda #RF_cpsgrid_224
   jsr rf_load_layout
-  lda #8
+  lda #RF_cpsgrid_240
   jsr rf_load_layout
   
 loop:
@@ -809,7 +813,7 @@ loop:
 .proc do_gray_ramp
   jsr rf_load_tiles
   jsr rf_load_yrgb_palette
-  lda #9
+  lda #RF_gray_ramp
   jsr rf_load_layout
 
 loop:
@@ -840,7 +844,7 @@ frame_label:
   .byte "Frame",0
 
 bleed_types:
-  .byte 10, 11
+  .byte RF_bleed, RF_fullstripes
 bleed_helpscreen:
   .byte helpsect_color_bleed, helpsect_full_screen_stripes
 
@@ -1085,7 +1089,7 @@ text_light_color = lineImgBuf+130
   sta black_color
 restart:
   jsr rf_load_tiles
-  lda #12
+  lda #RF_solid
   jsr rf_load_layout
 
 loop:

@@ -21,7 +21,7 @@
 .include "global.inc"
 .include "rectfill.inc"
 
-.importzp helpsect_stopwatch
+.importzp helpsect_stopwatch, RF_sw_hmsf
 
 sw_hours = test_state+0
 sw_minutes = test_state+1
@@ -114,7 +114,7 @@ lapIndicatorAddr = lineImgBuf+96+24
 
 .segment "CODE02"
 .proc stopwatch_body
-  lda #13
+  lda #RF_sw_hmsf
   jsr rf_load_layout
 
   ; Uses 30 sprites for ruler, 10 for clock hand, and 12 for digits

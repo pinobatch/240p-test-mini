@@ -21,6 +21,7 @@
 .include "global.inc"
 .include "rectfill.inc"
 .importzp helpsect_cpu_clock_speed
+.importzp RF_overclock
 
 .segment "RODATA"
 nine_y = 2
@@ -156,7 +157,7 @@ loop:
   ldx #$08
   jsr ppu_clear_nt
   jsr rf_load_yrgb_palette
-  lda #18
+  lda #RF_overclock
   jsr rf_load_layout
   jsr oc_s0_setup
 

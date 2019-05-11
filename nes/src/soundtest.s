@@ -20,6 +20,7 @@
 .include "global.inc"
 .include "rectfill.inc"
 .importzp helpsect_sound_test_frequency, helpsect_sound_test
+.importzp RF_crowd
 .importzp HELP_BANK
 .import crowd
 
@@ -178,7 +179,7 @@ delayloop:
 
 do_crowd:
   jsr rf_load_tiles
-  lda #20
+  lda #RF_crowd
   jsr rf_load_layout
   jsr ppu_wait_vblank
   jsr rf_load_yrgb_palette
