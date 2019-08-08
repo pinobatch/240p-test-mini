@@ -53,10 +53,8 @@ grayramp_chr_gbc::
   db %11111111
 
 section "linearity_gfx0",ROM0
-linearity_iu::
-  incbin "obj/gb/linearity.iu"
-sizeof_linearity_chr equ 1232
-global sizeof_linearity_chr
+linearity_quadrant_iu::
+  incbin "obj/gb/linearity-quadrant.iu"
 
 section "sharpness_gfx0",ROM0
 sharpness_iu::

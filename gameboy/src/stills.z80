@@ -253,6 +253,8 @@ activity_gray_ramp::
 
 ; Linearity ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+linearity_SCRN0_pivot = _SCRN0 + _SCRN0 + 32 * 17 + 19
+
 section "linearity",ROM0
 activity_linearity::
   ld a,%00011011
@@ -263,18 +265,99 @@ activity_linearity::
 .restart:
   call clear_gbc_attr
   
-  ld de,linearity_iu
+  ld de,linearity_quadrant_iu
   ld hl,CHRRAM2
   call unpack_iu_file
   ld hl,_SCRN0+640
   ld de,_SCRN0
-  call load_full_nam
+  ld bc,256*10+9
+  call load_nam
+
+  ; Reflect top left quadrant of tilemap into top right
+  ld de,_SCRN0
+  ld b, 9
+  .nam_hflip_rowloop:
+    ld c, 10
+    ld hl, 19
+    add hl, de
+    .nam_hflip_byteloop:
+      ld a, [de]
+      inc e
+      xor $20
+      ld [hl-], a
+      dec c
+      jr nz, .nam_hflip_byteloop
+    ld hl, 32 - 10
+    add hl, de
+    ld d, h
+    ld e, l
+    dec b
+    jr nz,.nam_hflip_rowloop
+
+  ; Reflect top of tilemap into bottom
+  ld de,_SCRN0
+  ld b, 9
+  .nam_vflip_rowloop:
+    ld a, low(linearity_SCRN0_pivot)
+    sub e
+    ld l, a
+    ld a, high(linearity_SCRN0_pivot)
+    sbc d
+    ld h, a
+    ld c, 20
+    .nam_vflip_byteloop:
+      ld a, [de]
+      inc e
+      xor $5F
+      ld [hl-], a
+      dec c
+      jr nz, .nam_vflip_byteloop
+    ld hl, 32 - 20
+    add hl, de
+    ld d, h
+    ld e, l
+    dec b
+    jr nz,.nam_vflip_rowloop
+
+  ; Reflect tiles horizontally
+  ld de, $9000
+  ld hl, $9200
+  .chr_hflip_loop:
+    ld a, [de]
+    inc de
+    scf
+    adc a
+    .chr_hflip_bitloop:
+      rr b
+      add a
+      jr nz, .chr_hflip_bitloop
+    ld a, b
+    ld [hl+], a
+    ld a, h
+    cp $94
+    jr nz, .chr_hflip_loop
+
+  ; Reflect tiles vertically
+  ld de, $9000
+  ld hl, $97FE
+  .chr_vflip_loop:
+    ld a, [de]
+    inc e
+    ld [hl+], a
+    ld a, [de]
+    inc de
+    ld [hl-], a
+    dec hl
+    dec l
+    ld a, d
+    cp $94
+    jr nz, .chr_vflip_loop
 
   ; Form full grid, copying already loaded tiles from CHRRAM2
   ; (default) to CHRRAM0 (nondefault)
   ld hl,CHRRAM2
   ld de,CHRRAM0
-  ld c,sizeof_linearity_chr/16
+  ld c,128
   ld b,7
   .gridtileloop:
     push bc
@@ -320,7 +403,7 @@ activity_linearity::
 .loop:
   ld b,helpsect_linearity
   call read_pad_help_check
-  jr nz,.restart
+  jp nz,.restart
   call wait_vblank_irq
   ldh a,[curpalette]
   call set_bgp

@@ -15,7 +15,7 @@ for filename in filenames:
             runbyte, runlength = value, 0
         runlength += 1
     if runlength >= runthreshold:
-        runs.append((len(data) - runlength, addr))
+        runs.append((len(data) - runlength, len(data)))
 
     totalsz = 0
     for startaddr, endaddr in runs:

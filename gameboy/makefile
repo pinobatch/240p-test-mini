@@ -96,7 +96,7 @@ obj/gb/gfxincbins.o: \
   obj/gb/Gus_portrait.iu \
   obj/gb/backlightzone.chrgb.pb16 \
   obj/gb/grayramp.chrgb obj/gb/cps_grid.chrgb.pb16 \
-  obj/gb/linearity.iu obj/gb/sharpness.iu obj/gb/stopwatchface.iu \
+  obj/gb/linearity-quadrant.iu obj/gb/sharpness.iu obj/gb/stopwatchface.iu \
   obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16 \
   obj/gb/kikimap.chr1 obj/gb/kikitiles.chrgb \
   obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16 \
