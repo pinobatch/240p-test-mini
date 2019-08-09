@@ -572,7 +572,7 @@ Color bleed
 == Color tests ==
 
 These patterns measure
-color balance.  They
+color balance. They
 require Game Boy Color
 and do not work on
 original Game Boy,
@@ -715,9 +715,10 @@ You can help:
 - Run tests on authentic
   Game Boy family
   handhelds and clones
-- Run tests on Super Game
-  Boy or Game Boy Player,
-  both straight to the TV
+- Run tests on
+  Super Game Boy or
+  Game Boy Player, both
+  straight to the TV
   and with high-quality
   external scalers
 - Spread the word about
