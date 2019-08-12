@@ -237,14 +237,14 @@ have problems with sudden
 changes between solid black
 and solid white or bright
 colors.  Other displays may
-have dead or damaged pixels.
+have stuck or damaged pixels.
 Some cables produce audio
 buzzing while a white
 screen is displayed.
 
-←→: Change among solid
-  white, black, red, green,
-  and blue screens
+←→: Change color among
+  white, black, red,
+  green, or blue
 A on black screen: Switch
   between black and below 
   black (some TVs lose sync)

@@ -126,7 +126,7 @@ with sudden changes
 between deep black
 and a white screen.
 Other displays may have
-dead or damaged pixels.
+stuck or damaged pixels.
 
 ←→: Change gray level
   or color
@@ -138,9 +138,8 @@ Poor high-voltage
 regulation in a CRT
 causes image size to
 depend on brightness.
-This changes the
-width of the border
-on Super Game Boy
+This changes border
+width on Super Game Boy
 or Game Boy Player.
 
 == Motion blur ==
