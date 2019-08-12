@@ -163,8 +163,7 @@ The STN display in the
 original Game Boy and
 Game Boy Pocket has
 a fairly slow response,
-causing fast motion
-to appear blurry.
+which blurs fast motion.
 Game Boy Color's TFT
 dramatically improves
 response time.

@@ -30,7 +30,7 @@ global sizeof_helptiles_gbc
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "grayramp_gfx0",ROM0
+section "grayramp_gfx0",ROM0, align[2]
 grayramp_chr::
   incbin "obj/gb/grayramp.chrgb"
 grayramp_bottomhalfmap::
