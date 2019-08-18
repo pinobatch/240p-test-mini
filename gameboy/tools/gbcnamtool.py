@@ -238,7 +238,7 @@ def main(argv=None):
     if args.incruniq:
         import incruniq
         tiles = [utiles[x] for x in tilemap_lo]
-        utiles, firstsingleton, tilemap_lo = incruniq.incruniq(tiles)
+        utiles, ctilemap_lo = incruniq.iur_encode(tiles)
 
     ctiles = b"".join(pb16.pb16(b"".join(utiles)))
     print("%d tiles, %d unique, %d pb16 bytes"
@@ -254,15 +254,14 @@ def main(argv=None):
         '%s_pal_end::' % outsymbolname,
     ]
     if args.incruniq:
-        nampb16size = -(-len(tilemap_lo) // 16)
-        ctilemap = b"".join(pb16.pb16(tilemap_lo))
+        halfnamsize = -(-len(tilemap_lo) // 2)
+        print("tilemap_lo size is", tilemap_lo)
         lines.extend([
             '%s_iu::' % outsymbolname,
             "  db %d  ; tile count" % len(utiles),
             rgbasm_bytearray(ctiles),
-            "  db %d  ; map data size / 16" % nampb16size,
-            "  db %d  ; first singleton tile" % firstsingleton,
-            rgbasm_bytearray(ctilemap),
+            "  db %d  ; map data size / 16" % halfnamsize,
+            rgbasm_bytearray(ctilemap_lo),
         ])
     else:
         lines.extend([

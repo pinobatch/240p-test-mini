@@ -1,0 +1,139 @@
+;
+; Incrementing unique tiles and runs unpacker
+; Copyright 2019 Damian Yerrick
+;
+; This software is provided 'as-is', without any express or implied
+; warranty.  In no event will the authors be held liable for any damages
+; arising from the use of this software.
+;
+; Permission is granted to anyone to use this software for any purpose,
+; including commercial applications, and to alter it and redistribute it
+; freely, subject to the following restrictions:
+; 
+; 1. The origin of this software must not be misrepresented; you must not
+;    claim that you wrote the original software. If you use this software
+;    in a product, an acknowledgment in the product documentation would be
+;    appreciated but is not required.
+; 2. Altered source versions must be plainly marked as such, and must not be
+;    misrepresented as being the original software.
+; 3. This notice may not be removed or altered from any source distribution.
+;
+
+; IUR: Incrementing Uniques and Runs, an experimental tilemap codec
+;
+; Incr. run  Code  Meaning
+;         0     0  Repeat last tile ID
+;         0    10  Increment max tile ID
+;         1     0  Increment max tile ID
+;         1    10  Repeat last tile ID
+;         X    11  Literal tile number follows in next full byte
+
+include "src/hardware.inc"
+include "src/global.inc"
+
+getbit: macro
+  sla b
+  ; Once out of bits, CF is 1 and B is 0
+  jr nz, .nonewbyte\@
+    ld b, [hl]
+    inc hl
+    rl b
+  .nonewbyte\@:
+  endm
+
+hBytesLeftHi = hLocals + $00
+hInNewRun    = hLocals + $01
+hMaxTile     = hLocals + $02
+hPrevTile    = hLocals + $03
+
+SECTION "incruniq", ROM0
+
+;;
+; Unpack IU file at DE to _SCRN0+640
+unpack_iu_file::
+  ld a,[de]  ; Fetch tile count
+  inc de
+  ld b,a
+  call pb16_unpack_block
+
+  ld a,[de]  ; Fetch tilemap size
+  inc de
+  ld c, a    ; and double it
+  xor a
+  sla c
+  adc a
+  ld b, a
+
+  ld h, d
+  ld l, e
+  ld de, _SCRN0+640
+  xor a
+  ; fall through
+
+;;
+; Decompress IUR tilemap data
+;
+; Uses 4 bytes of locals
+; @param HL source address (usually in ROM)
+; @param DE destination address (usually in VRAM)
+; @param BC number of bytes in tilemap
+; @param A starting tile ID (e.g. $80 for $8800 VRAM)
+iur_unpack::
+
+  ; Initial codec state
+  ldh [hMaxTile], a
+  ldh [hPrevTile], a
+  xor a
+  ldh [hInNewRun], a
+
+  ; Correct tile count for 16-bit pseudo-dec
+  dec bc
+  inc b
+  inc c
+  ld a, b
+  ldh [hBytesLeftHi], a
+
+  ; Prime bit fetcher loop
+  scf
+  jr .byteloop+4
+.byteloop:
+  ; 0: same runtype
+  getbit
+  ldh a, [hInNewRun]
+  jr nc, .do_runtype_a
+
+  ; 10: opposite runtype
+  getbit
+  inc a
+  ldh [hInNewRun], a
+  jr nc, .do_runtype_a
+
+  ; 11: Read literal byte and go to runtype 0
+  xor a
+  ldh [hInNewRun], a
+  ld a, [hl+]
+  jr .write_byte_a
+
+.do_runtype_a:
+  ; Runtype 0: same as previous tile
+  rra
+  jr nc, .is_repeat
+  ; Runtype 1: Write 1 more than last runtype 1 tile
+  ld a, [hMaxTile]
+  inc a
+  ldh [hMaxTile], a
+  jr .write_byte_a
+
+.is_repeat:
+  ldh a, [hPrevTile]
+.write_byte_a:
+  ldh [hPrevTile], a
+  ld [de], a
+  inc de
+  dec c
+  jr nz, .byteloop
+  ldh a, [hBytesLeftHi]
+  dec a
+  ldh [hBytesLeftHi], a
+  jr nz, .byteloop
+  ret
