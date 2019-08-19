@@ -498,65 +498,50 @@ shadow_sprite_bg_loaders:
   dw load_horizontal_stripes
   dw load_diagonal_stripes
 
+clear_scrn0_to_0:
+  ld h, 0
+clear_scrn0_to_h:
+  ld de,_SCRN0
+  ld bc,32*18
+  jp memset
+
 load_gus_portrait:
+  call clear_scrn0_to_0
   ld a,[initial_a]
   cp $11
   jr z,load_gus_portrait_gbc
 
-  ; Load Gus portrait for background
-  ld h,0
-  ld de,_SCRN0
-  ld bc,32*18
-  call memset
+  ld a,%11100100
+  call set_bgp
 
-  ld a,bank(portrait_iu)
-  ld [rMBC1BANK1],a
+  ; Load Gus portrait for background
   ld de,portrait_iu
+.from_de:
   ld hl,CHRRAM2
   call unpack_iu_file
+.load_nam:
   ld hl,_SCRN0+640
   ld de,_SCRN0+0*32+4
   ld bc,13*256+18
-  call load_nam
-
-  ld a,%11100100
-  jp set_bgp
+  jp load_nam
 
 load_gus_portrait_gbc:
   ; Load Gus portrait for background
-  ld a,bank(Gus_portrait_GBC_iu)
-  ld [rMBC1BANK1],a
-
   ; Prepare plane 1
   ld a,1
   ldh [rVBK],a
-  ld h,0
-  ld de,_SCRN0
-  ld bc,32*18
-  call memset
+  call clear_scrn0_to_0
   ld hl,_SCRN0+640
   ld de,Gus_portrait_GBC_attr
   ld b,15
   call pb16_unpack_block
-  ld hl,_SCRN0+640
-  ld de,_SCRN0+4
-  ld bc,13*256+18
-  call load_nam
-
-  ; Prepare plane 0
+  call load_gus_portrait.load_nam
   xor a
   ldh [rVBK],a
-  ld h,a
-  ld de,_SCRN0
-  ld bc,32*18
-  call memset
+
+  ; Prepare plane 0
   ld de,Gus_portrait_GBC_iu
-  ld hl,CHRRAM2
-  call unpack_iu_file
-  ld hl,_SCRN0+640
-  ld de,_SCRN0+0*32+4
-  ld bc,13*256+18
-  call load_nam
+  call load_gus_portrait.from_de
   
   ld hl,Gus_portrait_GBC_pal
   ld a,$80
@@ -581,10 +566,6 @@ load_shadow_sprite_bg_stripes:
     dec b
     jr nz,.loop
 
-  ld h,0
-  ld de,_SCRN0
-  ld bc,32*18
-  call memset
-
+  call clear_scrn0_to_0
   ld a,%11100100
   jp set_bgp

@@ -414,9 +414,6 @@ set_hillzone_scroll_pos::
 load_hillzone_bg::
   call clear_gbc_attr
 
-  ld a,bank(hillzone_nam)
-  ld [rMBC1BANK1],a
-
   ; Load the tilemap
   ld hl,_SCRN0
   ld de,hillzone_nam
@@ -536,9 +533,6 @@ Ltiletotopleft rb 1
 
 load_kiki_bg:
   call clear_gbc_attr
-
-  ld a,bank(kikitiles_chr)
-  ld [rMBC1BANK1],a
 
   ; Load tiles
   ld hl,kikitiles_chr

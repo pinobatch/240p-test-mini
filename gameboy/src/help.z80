@@ -202,8 +202,6 @@ helpscreen::
 
   ; If not within this document, move to the first page and move
   ; the cursor (if any) to the top
-  ld a,bank(helppages)
-  ld [rMBC1BANK1],a
   call help_get_doc_bounds
   ld a,[help_wanted_page]
   cp a,d
@@ -251,8 +249,6 @@ helpscreen::
   ld [wnd_progress],a
 .same_doc:
 
-  ld a,bank(helppages)
-  ld [rMBC1BANK1],a
 
 .loop:
   call read_pad

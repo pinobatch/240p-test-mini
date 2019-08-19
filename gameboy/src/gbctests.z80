@@ -149,8 +149,6 @@ activity_pluge:
     jr nz,.remap8
 
   ; Load shark tiles
-  ld a,bank(pluge_shark_chr)
-  ld [rMBC1BANK1],a
   ld hl,CHRRAM0+32*16
   ld de,pluge_shark_chr
   ld b,16

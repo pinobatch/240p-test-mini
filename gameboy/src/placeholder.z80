@@ -42,9 +42,6 @@ section "lameboy", ROM0
 lame_boy_demo::
   call clear_gbc_attr
 
-  ld a,bank(bggfx_chr)
-  ld [rMBC1BANK1],a
-
   ; This part doesn't use rSTAT IRQ
   ld a,IEF_VBLANK
   ldh [rIE],a  ; enable vblank, disable stat

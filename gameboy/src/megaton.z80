@@ -78,10 +78,7 @@ activity_megaton::
   ld a,LOW(A_PRESS_BEEP_FREQ)
   ldh [rNR23],a  ; Frequency
 
-  ; Load CHR
   ; Load background tiles
-  ld a,bank(megatontiles_chr)
-  ld [rMBC1BANK1],a
   ld de,megatontiles_chr
   ld hl,CHRRAM0
   ld b,sizeof_megaton_tiles/16
