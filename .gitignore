@@ -29,6 +29,8 @@
 /gameboy/gb240p.gb
 /gameboy/gb240p.map
 /gameboy/gb240p.sym
+# mgba-qt makes .sav files even for games with no battery
+/gameboy/gb240p.sav
 /nes/240pee-bnrom.nes
 /nes/240pee.nes
 /nes/new-linearity/new-linearity.nes

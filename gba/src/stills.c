@@ -548,7 +548,7 @@ static void do_full_stripes(const unsigned char *helpsect) {
   dma_memset16(PATRAM4(0, 0), 0x0000, 32);
 
   // row 19: frame counter
-  dma_memset16(MAP[PFOVERLAY], 0x0001, 32*20*2);
+  dma_memset16(MAP[PFOVERLAY], 0x0000, 32*20*2);
   loadMapRowMajor(&(MAP[PFOVERLAY][19][24]), 0x0002, 6, 1);
 
   while (1) {
