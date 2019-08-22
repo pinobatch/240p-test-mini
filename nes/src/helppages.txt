@@ -130,7 +130,7 @@ calibrate for approximate
 color levels.
 
 A: Toggle bars' brightness
-Select: Toggle 1 kHz tone
+Select: Play 1 kHz tone
 
 With some TVs, you can turn
 on blue-only mode to confirm
@@ -156,7 +156,7 @@ non-RGB model breaks the
 blue filter trick.
 
 A: Toggle bars' brightness
-Select: Toggle 1 kHz tone
+Select: Play 1 kHz tone
 
 Based on Digital Video
 Essentials: HD Basics
@@ -243,13 +243,13 @@ buzzing while a white
 screen is displayed.
 
 ←→: Change color among
-  white, black, red,
-  green, or blue
+   white, black, red,
+   green, or blue
 A on black screen: Switch
-  between black and below 
-  black (some TVs lose sync)
-A on white screen: Enter or
-  leave custom color mode
+   between black and below
+   black (some TVs lose sync)
+A on white screen:
+   Hide or show custom color
 ↑↓: Change custom brightness
 ←→: Change custom hue
 
@@ -448,13 +448,14 @@ dropped frames, or just
 count how long your spouse
 has been on the phone.
 
-A: Start/stop
+A: Start or stop
 Select when stopped: Reset
 Select when running: Lap
 ↑: Change ruler at left
    (show, hide, or show
    during even frames)
-↓: Toggle inactive circles
+↓: Hide or show
+   inactive circles
 
 The clock face below helps
 determine the frame even
@@ -488,6 +489,9 @@ scanlines of lag. Use a
 short exposure on your
 camera and divide lines by
 15.7 to get milliseconds.
+To avoid errors caused
+by rolling shutter, put
+the TVs side by side.
 
 When Kevin Horton's Hi-Def
 NES mod is enabled, the
@@ -513,9 +517,9 @@ At 60.00 Hz, it drops one
 frame in 607: one per 10.12
 seconds or two per 20.24.
 
-Hi-Def NES compensates for
-this by slowing down the
-CPU and PPU.
+Hi-Def NES compensates
+for this by slowing down
+the CPU and PPU.
 
 == Manual lag test ==
 
@@ -556,7 +560,7 @@ in frame rate.
 
 ↑↓: Change speed
 ←→: Change direction
-A: Stop or start
+A: Start or stop
 
 Hill zone by mikejmoffitt
   & Damian Yerrick
@@ -570,7 +574,7 @@ detection in a deinterlacer.
 
 ↑↓: Change speed
 ←→: Change direction
-A: Stop or start
+A: Start or stop
 
 Map by Artemio Urbina
 Tiles by Damian Yerrick
@@ -586,7 +590,7 @@ Some scalers may produce a
 still image at maximum speed.
 
 ↑↓: Change speed
-A: Stop or start
+A: Start or stop
 A + ↑↓←→: Change direction
 
 == Full screen stripes ==
@@ -618,7 +622,7 @@ moving square, letting you
 check how a display works
 with small bright areas.
 Some LED-lit LCDs dim
-darker areas to make black
+dark areas to make black
 areas darker, which causes
 problems with scenes such
 as starfields and credits.
@@ -712,7 +716,7 @@ between audio and video
 with recording equipment
 or an oscilloscope.
 
-A: Start/stop the test
+A: Start or stop the test
 
 == Zapper test ==
 

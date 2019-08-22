@@ -99,8 +99,7 @@ Boy stretches them
 horizontally by 14%
 on NTSC or 38% on PAL.
 
-A: Hide or show a
-   square grid
+A: Hide or show grid
 Select: Invert grays
 
 == Gray ramp ==
@@ -130,8 +129,8 @@ stuck or damaged pixels.
 
 ←→: Change gray level
   or color
-A on white: Toggle RGB
-  input box (GBC only)
+A on white: Hide or show
+  RGB input (GBC only)
 ↑↓←→: Change RGB value
 ----
 Poor high-voltage
@@ -156,7 +155,7 @@ check gray levels.
 
 ↑↓: Choose a setting
 ←→: Change its value
-A: Start/stop the test
+A: Start or stop the test
 ----
 The STN display in the
 original Game Boy and
@@ -289,13 +288,13 @@ or just count how long
 your spouse has been
 on the phone.
 
-A: Start/stop
+A: Start or stop
 Select stopped: Reset
 Select running: Lap
 ↑: Change ruler at left
    (show, hide, or blink)
-↓: Toggle inactive
-   circles
+↓: Hide or show
+   inactive circles
 ----
 The clock face below
 helps determine the
@@ -407,7 +406,7 @@ handheld "interlacing".
 
 ↑↓: Change speed
 ←→: Change direction
-A: Stop or start
+A: Start or stop
 
 Map by Artemio Urbina
 Tiles by Damian Yerrick
@@ -424,7 +423,7 @@ may produce a still image
 at maximum speed.
 
 ↑↓: Change speed
-A: Stop or start
+A: Start or stop
 A + ↑↓←→:
   Change direction
 Select: Invert grays
@@ -467,14 +466,13 @@ a display works with
 small bright areas.
 Some LED-lit LCDs dim
 dark areas to make
-blacks darker, which
+blacks deeper, which
 causes problems with
 scenes such as
 starfields and credits.
 ----
 ↑↓←→: Move the square
-A: Hide or show the
-  square
+A: Hide or show square
 A+↑↓: Change its size
   among 1, 2, 4, or 8
   pixels on a side
@@ -538,7 +536,7 @@ between audio and video
 with recording equipment
 or an oscilloscope.
 
-A: Start/stop the test
+A: Start or stop the test
 
 == Lame boy ==
 
@@ -633,7 +631,7 @@ look the same, then
 decrease it slowly until
 you can tell them apart.
 
-A: Toggle grid
+A: Hide or show grid
 
 == SMPTE color bars ==
 

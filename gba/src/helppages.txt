@@ -94,7 +94,7 @@ of your display or scaler or
 to verify the lack of barrel
 distortion of a CRT.
 
-A: Toggle grid
+A: Hide or show grid
 Select: Invert grays
 
 == Gray ramp ==
@@ -121,8 +121,8 @@ stuck or damaged pixels.
 ←→: Change color among
   white, black, red,
   green, or blue
-A on white: Toggle RGB
-  input box
+A on white: Hide or show
+  RGB input
 ↑↓←→: Change RGB value
 ----
 Poor high-voltage
@@ -146,7 +146,7 @@ check gray levels.
 
 ↑↓: Choose a setting
 ←→: Change its value
-A: Start/stop the test
+A: Start or stop the test
 ----
 Like the Game Boy Color,
 the Game Boy Advance has
@@ -229,9 +229,9 @@ easy to spot.
 ----
 ↑↓←→: Move sprite
 A: Skip flicker frame
-  or rotate stripes
+   or rotate stripes
 A+↑: Change shadow type
-  (flicker or stripes)
+   (flicker or stripes)
 A+←→: Change background
 Select: Change sprite shape
 
@@ -261,13 +261,14 @@ dropped frames, or just
 count how long your spouse
 has been on the phone.
 
-A: Start/stop
+A: Start or stop
 Select when stopped: Reset
 Select when running: Lap
 ↑: Change ruler at left
    (show, hide, or show
    during even frames)
-↓: Toggle inactive circles
+↓: Hide or show
+   inactive circles
 ----
 The clock face below helps
 determine the frame even
@@ -285,8 +286,8 @@ camera and connect two
 displays to one GameCube.
 One is being tested, and
 the other (the reference)
-should be a CRT SDTV or a
-display with known lag.
+should be a CRT SDTV or
+a display with known lag.
 For example, connect
 a CRT and your scaler
 using a cable with both
@@ -304,6 +305,9 @@ scanlines of lag. Use a
 short exposure on your
 camera and divide lines by
 15.7 to get milliseconds.
+To avoid errors caused
+by rolling shutter, put
+the TVs side by side.
 
 == Manual lag test ==
 
@@ -346,7 +350,7 @@ drops in frame rate.
 
 ↑↓: Change speed
 ←→: Change direction
-A: Stop or start
+A: Start or stop
 
 Hill zone by mikejmoffitt
   & Damian Yerrick
@@ -363,7 +367,7 @@ handheld "interlacing".
 
 ↑↓: Change speed
 ←→: Change direction
-A: Stop or start
+A: Start or stop
 
 Map by Artemio Urbina
 Tiles by Damian Yerrick
@@ -380,9 +384,8 @@ may produce a still image
 at maximum speed.
 
 ↑↓: Change speed
-A: Stop or start
-A + ↑↓←→:
-  Change direction
+A: Start or stop
+A + ↑↓←→: Change direction
 Select: Invert grays
 
 == Full screen stripes ==
@@ -418,7 +421,7 @@ moving square, letting you
 check how a display works
 with small bright areas.
 Some LED-lit LCDs dim
-darker areas to make black
+dark areas to make black
 areas darker, which causes
 problems with scenes such
 as starfields and credits.
@@ -493,7 +496,7 @@ between audio and video
 with recording equipment
 or an oscilloscope.
 
-A: Start/stop the test
+A: Start or stop the test
 
 == Lame boy ==
 
@@ -521,7 +524,7 @@ incoherent obscenities
 about its dark screen*
 
 A: Toggle levels between
-  NTSC and NTSC-J
+   NTSC and NTSC-J
 Select: Open PLUGE Contrast
 ----
 GBA's 32 shades should
@@ -563,7 +566,7 @@ the same, then decrease
 it slowly until you can
 tell them apart.
 
-A: Toggle grid
+A: Hide or show grid
 
 == SMPTE color bars ==
 
