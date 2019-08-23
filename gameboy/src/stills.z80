@@ -39,54 +39,133 @@ curframe_bcd:: ds 1
 ; Gray ramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "grayramp",ROM0
-load_gray_ramp_mono:
 
-  ; Tiles 1-24 are compressed: 2 rows (4 bytes) are written 4 times
-  ld de,grayramp_chr
-  ld a,25
-  .tileloop:
-    ld [tilesleft],a
-    ld b,4
-    .rowpairloop:
-      ld c,4
-      .byteloop:
-        ld a,[de]
-        inc e
-        ld [hl+],a
-        dec c
-        jr nz,.byteloop
-      ld a,e
-      sub 4
-      ld e,a
-      dec b
-      jr nz,.rowpairloop
+gray_ramp_sgb_rects:
+  db $04*8+2  ; 3 packets hold up to 5 rectangles
+  db 5      ; number of rectangles
 
-    ; Did it wrap to the next page?
-    add 4
+  ; Rectangle 1 of 5: Set whole screen as follows
+  ; [0 2 2 0]
+  ; [0 2 2 0]
+  db %00000111  ; bit 0: inside, 1: border, 2: outside
+  db %00001010  ; inside and border to palette 2, outside to palette 0
+  db 5, 1, 14, 16  ; l, t, r, b, inclusive
+
+  ; Rectangle 2 of 5: Set second to palette 1
+  db %00000001
+  db %00000001
+  db 5, 1, 9, 8
+
+  ; Rectangle 3 of 5: Set seventh to palette 1
+  db %00000001
+  db %00000001
+  db 10, 9, 14, 16
+
+  ; Rectangle 4 of 5: Set fourth to palette 3
+  db %00000001
+  db %00001111
+  db 15, 1, 19, 8
+
+  ; Rectangle 5 of 5: Set fifth to palette 3
+  db %00000001
+  db %00000011
+  db 0, 9, 4, 16
+
+;;
+; Expand A tiles from DE to HL
+; DE must be 4 byte aligned
+load_gray_ramp_tiles:
+  ld [tilesleft],a
+  ld b,4
+  .rowpairloop:
+    ld c,4
+    .byteloop:
+      ld a,[de]
+      inc e
+      ld [hl+],a
+      dec c
+      jr nz,.byteloop
+    ld a,e
+    sub 4
     ld e,a
-    jr nc,.enotwrapped
-      inc d
-    .enotwrapped:
-    ld a,[tilesleft]
-    dec a
-    jr nz,.tileloop
+    dec b
+    jr nz,.rowpairloop
+
+  ; Did it wrap to the next page?
+  add 4
+  ld e,a
+  jr nc,.enotwrapped
+    inc d
+  .enotwrapped:
+  ld a,[tilesleft]
+  dec a
+  jr nz,load_gray_ramp_tiles
+  ret
+
+gray_ramp_row_cmp_d_sub_e:
+  ld b, 20
+  .byteloop:
+    ld [hl+], a
+    inc a
+    cp d
+    jr c,.nosube
+      sub e
+    .nosube:
+    dec b
+    jr nz, .byteloop
+  jp add_hl_12
+
+load_gray_ramp_sgb:
+  ld de, grayramp_sgb_chr
+  ld a, 9
+  call load_gray_ramp_tiles
 
   ; Now the tilemap
   ; Row 0
   ld hl,_SCRN0
   call oneblanktilerow
+
+  ; Rows 1-8
+  ld c, 8
+  .tophalfrowloop:
+    ld a, 1
+    ld de, $0605
+    call gray_ramp_row_cmp_d_sub_e
+    dec c
+    jr nz,.tophalfrowloop
+  ; Rows 9-16
+  ld c, 8
+  .bottomhalfrowloop:
+    ld de, $0A05
+    ld a, e
+    call gray_ramp_row_cmp_d_sub_e
+    dec c
+    jr nz,.bottomhalfrowloop
+
+  call oneblanktilerow
+  ld a,%11100100
+  ldh [rBGP], a
+  ld hl, gray_ramp_sgb_rects
+  jp sgb_send
+
+load_gray_ramp_mono:
+
+  ; Tiles 1-24 are compressed: 2 rows (4 bytes) are written 4 times
+  ld de,grayramp_chr
+  ld a,24
+  call load_gray_ramp_tiles
+
+  ; Now the tilemap
+  ; Row 0
+  ld hl,_SCRN0
+  call oneblanktilerow
+
   ; Rows 1-8
   ld c,8
   .tophalfrowloop:
     xor a
-    .tophalfbyteloop:
-      ld [hl+],a
-      inc a
-      cp 19
-      jr c,.tophalfbyteloop
-    xor a
-    ld [hl+],a
-    call add_hl_12
+    ld de, $1313
+    call gray_ramp_row_cmp_d_sub_e
     dec c
     jr nz,.tophalfrowloop
   ; Rows 9-16
@@ -103,10 +182,10 @@ load_gray_ramp_mono:
     call add_hl_12
     dec c
     jr nz,.bottomhalfrowloop
-  ; Row 19
-  call oneblanktilerow
   ld a,%00011011
-  jp set_bgp
+  ldh [rBGP], a
+  ; Row 19
+  jp oneblanktilerow
 
 load_gray_ramp_gbc:
 
@@ -147,11 +226,11 @@ load_gray_ramp_gbc:
 
     ; and write to the VCE
     ld a,l
-    ld [rBCPD],a
-    ld [rOCPD],a
+    ldh [rBCPD],a
+    ldh [rOCPD],a
     ld a,h
-    ld [rBCPD],a
-    ld [rOCPD],a
+    ldh [rBCPD],a
+    ldh [rOCPD],a
     inc b
     ld a,b
     cp 32
@@ -229,9 +308,16 @@ activity_gray_ramp::
   ld a,[initial_a]
   cp $11
   jr z,.load_gbc
+  ld a,[is_sgb]
+  or a
+  jr z,.load_mono
+    call load_gray_ramp_sgb
+    ld bc, $0809
+    ld de, $0A0B
+    call sgb_set_palettes_bcde
+    jr .load_done
+  .load_mono:
     call load_gray_ramp_mono
-    ld b, 0
-    call sgb_set_palette_b
     jr .load_done
   .load_gbc:
     call load_gray_ramp_gbc
@@ -498,9 +584,6 @@ activity_sharpness::
   ldh [rLCDC],a
   cpl
   ldh [lastlcdc], a
-  ld b, 0
-  call sgb_set_palette_b
-
 
 .loop:
   ld b,helpsect_sharpness
@@ -540,7 +623,7 @@ activity_sharpness::
       ld a, 3
     .sgb_palette_not_zero:
     ld b, a
-    call sgb_set_palettes_bcde_attr_a
+    call sgb_set_palette_b
   .no_sgb_palette_change:
 
   ; Process input

@@ -33,6 +33,8 @@ global sizeof_helptiles_gbc
 section "grayramp_gfx0",ROM0, align[2]
 grayramp_chr::
   incbin "obj/gb/grayramp.chrgb"
+grayramp_sgb_chr::
+  incbin "obj/gb/grayramp-sgb.chrgb", 0, 36
 grayramp_bottomhalfmap::
   db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
 

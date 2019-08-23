@@ -98,6 +98,18 @@ sgb_cmd_load_master_palette:
     db $00
   endr
 
+; An activity that uses PAL01 instead of PAL_SET may need to
+; clear attributes first
+sgb_cmd_clear_attrs::
+  db $04*8+2  ; 3 packets hold up to 5 rectangles
+  db 1      ; number of rectangles
+
+  db %00000111  ; bit 0: inside, 1: border, 2: outside
+  db %00000000  ; inside and border to palette 2, outside to palette 0
+  db 0, 0, 19, 17
+
+  db 0, 0, 0, 0, 0, 0, 0, 0
+
 ;;
 ; Turns off the LCD, sets scroll to 0, sets BGP to identity ($E4),
 ; and sets up the _SCRN0 tilemap for Super Game Boy *_TRN commands.
