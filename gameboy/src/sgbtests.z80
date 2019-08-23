@@ -91,24 +91,9 @@ sgb_cmd_freeze:
     db $00
   endr
 
-sgb_cmd_unfreeze:
-  db $17*8+1
-  db $00  ; Freeze current screen
-  rept 14
-    db $00
-  endr
-
 sgb_cmd_load_master_palette:
   db $0B*8+1
   rept 15
-    db $00
-  endr
-
-sgb_cmd_unfreeze_palette1:
-  db $0A*8+1
-  dw 1, 0, 0, 0  ; palettes to load
-  db $40  ; also unfreeze
-  rept 6
     db $00
   endr
 

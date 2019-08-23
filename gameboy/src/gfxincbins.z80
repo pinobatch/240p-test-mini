@@ -69,7 +69,7 @@ sharpness_brick_tile::
   dw `11112202
   dw `11111122
 
-section "cpsgrid_gfx0",ROM0
+section "cpsgrid_gfx1",ROMX
 cps_grid_chr::
   incbin "obj/gb/cps_grid.chrgb.pb16"
 sizeof_cps_grid_chr equ 128
@@ -103,10 +103,6 @@ global sizeof_megaton_tiles
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "shadowsprite_gfx0",ROM0
-hepsie_chr::
-  incbin "obj/gb/hepsie.chrgb16.pb16"
-sizeof_hepsie_chr equ 16*3*4
-global sizeof_hepsie_chr
 shadow_reticle_chr::
   incbin "obj/gb/shadow_reticle.chrgb16.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4
@@ -123,6 +119,11 @@ hepsie_palette_gbc::
 hepsie_palette_gbc_end::
 
 section "shadowsprite_gfx1",ROMX
+hepsie_chr::
+  incbin "obj/gb/hepsie.chrgb16.pb16"
+sizeof_hepsie_chr equ 16*3*4
+global sizeof_hepsie_chr
+
 portrait_iu::
   incbin "obj/gb/Gus_portrait.iu"
 
@@ -138,13 +139,13 @@ hillzone_nam::
 kikitiles_chr::
   incbin "obj/gb/kikitiles.chrgb"
 
-section "scrolltest_gfx0",ROM0
+section "scrolltest_gfx1",ROMX
 kikimap::
   incbin "obj/gb/kikimap.chr1"
 
 ; Backlight zone ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "backlight_gfx0",ROM0
+section "backlight_gfx1",ROMX
 backlight_chr::
   incbin "obj/gb/backlightzone.chrgb.pb16"
 
@@ -159,7 +160,7 @@ spritegfx_chr::
 
 ; GBC exclusive tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "smptebars_gfx0",ROM0
+section "smptebars_gfx1",ROMX
 smptetiles_chr::
   incbin "obj/gb/smptetiles.chrgb.pb16"
 
