@@ -27,6 +27,7 @@ curpalette rb 1
 curtileid rb 1
 curscry rb 1
 curlcdc rb 1
+lastlcdc rb 1
 customred   rb 1
 customgreen rb 1
 customblue  rb 1
@@ -462,11 +463,6 @@ load_pb16_nam::
   jp load_nam
   endc
 
-sharpness_bricks_gbc_palette:
-  drgb $220000
-  drgb $442222
-  drgb $666644
-
 activity_sharpness::
   ld a,%00011011
   ldh [curpalette],a
@@ -500,8 +496,11 @@ activity_sharpness::
   ld a,[curlcdc]
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
+  cpl
+  ldh [lastlcdc], a
   ld b, 0
   call sgb_set_palette_b
+
 
 .loop:
   ld b,helpsect_sharpness
@@ -509,13 +508,13 @@ activity_sharpness::
   jr nz,.restart
   call wait_vblank_irq
 
-  ; Load the appropriate palette for what is showing
+  ; Load the appropriate GB/GBC palette for what is showing
   ldh a,[curlcdc]
   and LCDCF_BG9C00
   jr z,.load_normal_palette
-    ld a,%00011011
+    ld a,%11100100
     ldh [rBGP],a
-    ld a,$80
+    ld a,$82
     ld bc,6*256+LOW(rBCPS)
     ld hl,sharpness_bricks_gbc_palette
     call set_gbc_palette
@@ -524,6 +523,25 @@ activity_sharpness::
     ldh a,[curpalette]
     call set_bgp
   .done_loading_palette:
+
+  ; If it corresponds to a change in the SGB palette, dew it
+  ldh a, [lastlcdc]
+  ld c, a
+  ldh a, [curlcdc]
+  ldh [lastlcdc], a
+  ld b, a
+  xor c
+  and LCDCF_BG9C00
+  ; B: new LCDC value; C: old LCDC value;
+  ; A: LCDCF_BG9C00 if changed else 0
+  jr z, .no_sgb_palette_change
+    and b
+    jr z, .sgb_palette_not_zero
+      ld a, 3
+    .sgb_palette_not_zero:
+    ld b, a
+    call sgb_set_palettes_bcde_attr_a
+  .no_sgb_palette_change:
 
   ; Process input
   ld a,[new_keys]

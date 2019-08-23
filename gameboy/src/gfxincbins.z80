@@ -60,14 +60,14 @@ section "sharpness_gfx0",ROM0
 sharpness_iu::
   incbin "obj/gb/sharpness.iu"
 sharpness_brick_tile::
-  dw `22111111
-  dw `11221111
-  dw `11112211
-  dw `01111022
-  dw `22011102
-  dw `11221002
-  dw `11112202
-  dw `11111122
+  dw `11222222
+  dw `22112222
+  dw `22221122
+  dw `32222311
+  dw `11322231
+  dw `22112331
+  dw `22221131
+  dw `22222211
 
 section "cpsgrid_gfx1",ROMX
 cps_grid_chr::

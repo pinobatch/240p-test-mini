@@ -12,8 +12,8 @@ sgb_master_palette:
   ; 1: Help
   drgb $F8D0A8
   drgb $A88848
-  drgb $884800
-  drgb $000080
+  drgb $884820
+  drgb $000060
 
   ; 2: Grid
   drgb $F8F8F8
@@ -21,11 +21,12 @@ sgb_master_palette:
   drgb $FF0000
   drgb $000000
 
-  ; 3: Unused
+  ; 3: Sharpness bricks
   drgb $F8F8F8
-  drgb $A8A8A8
-  drgb $585858
-  drgb $000000
+sharpness_bricks_gbc_palette::
+  drgb $606040
+  drgb $402020
+  drgb $200000
 
   ; 4-7: Color bleed, one for each row
   drgb $000000
