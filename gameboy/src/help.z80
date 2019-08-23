@@ -247,8 +247,9 @@ helpscreen::
     ld a,256-(wnd_x_sequence_last-wnd_x_sequence)
   .have_initial_wnd_progress:
   ld [wnd_progress],a
+  ld b, 1
+  call sgb_set_palette_b
 .same_doc:
-
 
 .loop:
   call read_pad

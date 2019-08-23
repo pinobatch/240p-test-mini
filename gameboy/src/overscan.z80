@@ -84,6 +84,8 @@ activity_overscan::
   call set_obp1
   dec a
   ldh [rLYC],a  ; disable LYC IRQ until ready
+  ld b, 0
+  call sgb_set_palette_b
 
   ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR01|OBJ_ON
   ld [vblank_lcdc_value],a

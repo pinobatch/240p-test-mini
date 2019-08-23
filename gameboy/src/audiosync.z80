@@ -58,6 +58,8 @@ activity_audiosync::
   call init_apu
   ld a,$80
   ldh [rNR11],a  ; Duty 50%
+  ld b, 0
+  call sgb_set_palette_b
 
   ; Turn on rendering (no sprites)
   xor a

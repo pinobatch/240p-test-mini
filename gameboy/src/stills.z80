@@ -39,6 +39,7 @@ curframe_bcd:: ds 1
 
 section "grayramp",ROM0
 load_gray_ramp_mono:
+
   ; Tiles 1-24 are compressed: 2 rows (4 bytes) are written 4 times
   ld de,grayramp_chr
   ld a,25
@@ -228,6 +229,8 @@ activity_gray_ramp::
   cp $11
   jr z,.load_gbc
     call load_gray_ramp_mono
+    ld b, 0
+    call sgb_set_palette_b
     jr .load_done
   .load_gbc:
     call load_gray_ramp_gbc
@@ -264,7 +267,9 @@ activity_linearity::
 
 .restart:
   call clear_gbc_attr
-  
+  ld b, 0
+  call sgb_set_palette_b
+
   ld de,linearity_quadrant_iu
   ld hl,CHRRAM2
   call unpack_iu_file
@@ -495,6 +500,8 @@ activity_sharpness::
   ld a,[curlcdc]
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
+  ld b, 0
+  call sgb_set_palette_b
 
 .loop:
   ld b,helpsect_sharpness
@@ -561,7 +568,9 @@ activity_solid_screen::
 
 .restart:
   call clear_gbc_attr
-  
+  ld b, 0
+  call sgb_set_palette_b
+
   ; Tile 0: Blank screen in color 0
   ; Tiles 1-0
   ld hl,CHRRAM2
@@ -834,6 +843,8 @@ activity_cps_grid::
 
 .restart:
   call clear_gbc_attr
+  ld b, 2
+  call sgb_set_palette_b
 
   ld hl,CHRRAM2
   ld de,cps_grid_chr
@@ -1022,6 +1033,8 @@ full_stripes_common::
     call memset
     ld a,%00000011
     call set_bgp
+    ld b, 0
+    call sgb_set_palette_b
     jr .specific_loading_done
   .is_color_bleed:
     call load_color_bleed

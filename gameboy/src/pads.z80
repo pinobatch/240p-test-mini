@@ -163,7 +163,7 @@ CHAR_BIT EQU 8
 ; Sends a Super Game Boy packet starting at HL.
 ; Assumes no IRQ handler does any sort of controller autoreading.
 
-sgb_send:
+sgb_send::
 
   ; B: Number of remaining bytes in this packet
   ; C: Number of remaining packets

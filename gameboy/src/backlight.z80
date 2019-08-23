@@ -43,7 +43,9 @@ activity_backlight_zone::
   ldh [cursize],a
   dec a
   ldh [curpalette],a
-  
+  ld b, 0
+  call sgb_set_palette_b
+
 .restart:
   call clear_gbc_attr
   call load_backlight_chr

@@ -45,7 +45,12 @@ main::
     call memset
     xor a
     ldh [rVBK],a
+    jr .done_clear_high_nametables
   .no_clear_high_nametables:
+    ld a, [is_sgb]
+    or a
+    call nz, sgb_load_master_palette
+  .done_clear_high_nametables:
   
   ; Set up vblank handler
   ld a,IEF_VBLANK

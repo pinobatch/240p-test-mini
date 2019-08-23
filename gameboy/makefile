@@ -17,8 +17,8 @@ version:=0.18
 # (use a backslash to continue on the next line)
 objlist = header init \
   main help helppages.hlp placeholder \
-  stills shadowsprite backlight scrolltest motionblur \
-  megaton stopwatch overscan soundtest audiosync gbctests \
+  stills shadowsprite backlight scrolltest motionblur overscan \
+  megaton stopwatch soundtest audiosync sgbtests gbctests \
   Gus_portrait_GBC \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
   uniur gfxincbins

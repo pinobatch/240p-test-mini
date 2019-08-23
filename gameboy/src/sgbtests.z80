@@ -1,0 +1,223 @@
+include "src/gb.inc"
+include "src/global.inc"
+
+section "sgbcolors", ROM0
+sgb_master_palette:
+  ; 0: Grays
+  drgb $F8F8F8
+  drgb $A8A8A8
+  drgb $585858
+  drgb $000000
+
+  ; 1: Help
+  drgb $F8D0A8
+  drgb $A88848
+  drgb $884800
+  drgb $000080
+
+  ; 2: Grid
+  drgb $F8F8F8
+  drgb $FF0000
+  drgb $FF0000
+  drgb $000000
+
+  ; 3: Unused
+  drgb $F8F8F8
+  drgb $A8A8A8
+  drgb $585858
+  drgb $000000
+
+  ; 4-7: Color bleed, one for each row
+  drgb $000000
+  drgb $000000
+  drgb $000000
+  drgb $FF0000
+  drgb $000000
+  drgb $000000
+  drgb $000000
+  drgb $00FF00
+  drgb $000000
+  drgb $000000
+  drgb $000000
+  drgb $0000FF
+  drgb $000000
+  drgb $000000
+  drgb $000000
+  drgb $FFFFFF
+
+  ; 8-11: 12-step gray ramp
+  drgb $000000
+  drgb $101010
+  drgb $282828
+  drgb $383838
+  drgb $000000
+  drgb $505050
+  drgb $686868
+  drgb $787878
+  drgb $000000
+  drgb $909090
+  drgb $a8a8a8
+  drgb $b8b8b8
+  drgb $000000
+  drgb $d0d0d0
+  drgb $e8e8e8
+  drgb $f8f8f8
+
+  ; 12-13: Color bars on gray (75%)
+  drgb $B80000
+  drgb $B800B8
+  drgb $B8B800
+  drgb $B8B8B8
+  drgb $B80000
+  drgb $00B8B8
+  drgb $00B800
+  drgb $0000B8
+
+  ; 14-15: Color bars on gray (100%)
+  drgb $F80000
+  drgb $F800F8
+  drgb $F8F800
+  drgb $F8F8F8
+  drgb $F80000
+  drgb $00F8F8
+  drgb $00F800
+  drgb $0000F8
+sgb_master_palette_end:
+
+sgb_cmd_freeze:
+  db $17*8+1
+  db $01  ; Freeze current screen
+  rept 14
+    db $00
+  endr
+
+sgb_cmd_unfreeze:
+  db $17*8+1
+  db $00  ; Freeze current screen
+  rept 14
+    db $00
+  endr
+
+sgb_cmd_load_master_palette:
+  db $0B*8+1
+  rept 15
+    db $00
+  endr
+
+sgb_cmd_unfreeze_palette1:
+  db $0A*8+1
+  dw 1, 0, 0, 0  ; palettes to load
+  db $40  ; also unfreeze
+  rept 6
+    db $00
+  endr
+
+;;
+; Turns off the LCD, sets scroll to 0, sets BGP to identity ($E4),
+; and sets up the _SCRN0 tilemap for Super Game Boy *_TRN commands.
+sgb_load_trn_tilemap:
+  call lcd_off
+  ld a, %11100100
+  ldh [rBGP], a
+  ld de, _SCRN0
+  push de
+  ld bc, 1024
+  ld h, c
+  call memset
+  ld hl, _SCRN0+640
+  push hl
+  xor a
+  ld c, a
+  ldh [rSCX], a
+  ldh [rSCY], a
+  call memset_inc
+  pop hl
+  pop de
+  jp load_full_nam
+
+sgb_load_master_palette::
+  ; Freeze display while doing transfers
+  ld hl, sgb_cmd_freeze
+  call sgb_send
+  
+  ; Load master palette into CHRRAM0
+  call sgb_load_trn_tilemap
+  ld hl, sgb_master_palette
+  ld de, CHRRAM0
+  ld bc, sgb_master_palette_end - sgb_master_palette
+  call memcpy
+
+  ; Do the transfer
+  ld a, LCDCF_ON|LCDCF_BGON|LCDCF_BG8000|LCDCF_BG9800
+  ldh [rLCDC], a
+  ld hl, sgb_cmd_load_master_palette
+  call sgb_send
+
+  ; Turn LCD back off, unfreeze, and load help palette
+  call lcd_off
+  ld b, 1
+
+sgb_set_palette_b::
+  ld c, b
+  ld d, b
+  ld e, b
+  ; fall through
+
+;;
+; Sets Super Game Boy palettes and unfreezes the display.
+; Does nothing on non-SGB.
+; @param B index into last PAL_TRN for subpalette 0
+; @param C index into last PAL_TRN for subpalette 1
+; @param D index into last PAL_TRN for subpalette 2
+; @param E index into last PAL_TRN for subpalette 3
+sgb_set_palettes_bcde::
+  ld a, [is_sgb]
+  or a
+  ret z
+  ld a, $40
+  ; fall through
+
+;;
+; Sets Super Game Boy palettes defined through PAL_TRN
+; and optionally loads an attribute table defined through ATTR_TRN.
+; @param B index into last PAL_TRN for subpalette 0
+; @param C index into last PAL_TRN for subpalette 1
+; @param D index into last PAL_TRN for subpalette 2
+; @param E index into last PAL_TRN for subpalette 3
+; @param A bit 7: load attribute table whose index is in bits 0-5;
+;   bit 6: unfreeze display
+sgb_set_palettes_bcde_attr_a::
+  ld hl, help_line_buffer
+  push hl
+  push af
+  push bc
+
+  ; Clear unused bytes of packet
+  push hl
+  xor a
+  ld c, 16
+  call memset_tiny
+  pop hl
+
+  ; Populate packet
+  ld a, $0A*8+1  ; PAL_SET
+  ld [hl+], a
+  pop bc
+  ld a, b
+  ld [hl+], a
+  inc hl
+  ld a, c
+  ld [hl+], a
+  inc hl
+  ld a, d
+  ld [hl+], a
+  inc hl
+  ld a, e
+  ld [hl+], a
+  inc hl
+  pop af  ; A = unfreeze and predefuattribute table command
+  ld [hl+], a
+
+  ; And send it to the SGB
+  pop hl
+  jp sgb_send
