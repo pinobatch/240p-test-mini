@@ -33,15 +33,24 @@ activity_about_gbc_tests:
   jp helpscreen
 
 ;;
-; Ensures that the machine is color before 
+; An additional menu of tests for SGB or GBC
 activity_gbc_tests_menu::
+  ; First ensure that the machine is SGB or GBC.
   ld a,[initial_a]
   cp $11
-  jr nz,activity_about_gbc_tests
+  jr z,.loop
+  ld a,[is_sgb]
+  or a
+  jr z, activity_about_gbc_tests
 
 .loop:
+  ld a, [is_sgb]
+  ld b, helpsect_color_tests_menu
+  or a
+  jr z, .have_help_page_id
+    ld b, helpsect_sgb_color_tests_menu
+  .have_help_page_id:
   ld a,PADF_A|PADF_B|PADF_START|PADF_DOWN|PADF_UP|PADF_LEFT|PADF_RIGHT
-  ld b,helpsect_color_tests_menu
   call helpscreen
 
   ; B to return to the main menu
@@ -65,6 +74,13 @@ activity_gbc_tests_menu::
 
   ; Get the handler for this activity
   ld de,color_handlers
+  ld b, a
+  ld a, [is_sgb]
+  or a
+  ld a, b
+  jr z, .have_activity_id
+    add (super_handlers - color_handlers) / 2
+  .have_activity_id:
   call de_index_a
   call jp_hl
 .skip_activity:
@@ -83,6 +99,10 @@ color_handlers:
   dw activity_smpte_bars
   dw activity_barsongray
   dw activity_color_bleed
+super_handlers:
+  dw lame_boy_demo
+  dw lame_boy_demo
+  dw lame_boy_demo
 
 ; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
