@@ -669,6 +669,8 @@ activity_solid_screen::
 
 .restart:
   call clear_gbc_attr
+  ld hl, sgb_cmd_clear_attrs
+  call sgb_send
   ld b, 0
   call sgb_set_palette_b
 
@@ -679,6 +681,7 @@ activity_solid_screen::
   xor a
   call memset_tiny
   dec a
+  ldh [lastlcdc], a  ; lastlcdc: true if color changed
   ld c,9*16
   call memset_tiny
 
@@ -720,36 +723,35 @@ activity_solid_screen::
   call wait_vblank_irq
 
   ; Write color to both GB and GBC palette ports
-  ldh a,[curpalette]
-  ldh [rBGP],a
+  ld a, [initial_a]
+  cp $11
+  jr nz, .set_color_not_gbc
+    call calc_custom_color
+    ld a,$80
+    ldh [rBCPS],a
+    ld a,l
+    ldh [rBCPD],a
+    ld a,h
+    ldh [rBCPD],a
+    jr .custom_color_written
+  .set_color_not_gbc:
+  ld a, [is_sgb]
   or a
-  jr nz,.set_bcpd_not_custom
-    ld h,a     ; H = 0
-    ldh a,[customgreen]
-	add a,a
-	add a,a
-	add a,a
-	ld l,a
-	add hl,hl
-	add hl,hl  ; HL = G * 32
-    ldh a,[customred]
-	ld e,a             ; E = R
-	ldh a,[customblue]
-	add a
-	add a              ; A = B * 4
-	ld d,a             ; DE = R+B*1024
-	add hl,de
-    jr .have_gbc_color_hl
-  .set_bcpd_not_custom:
-    ld de,solid_screen_constants-2
-    call de_index_a
-  .have_gbc_color_hl:
-  ld a,$80
-  ldh [rBCPS],a
-  ld a,l
-  ldh [rBCPD],a
-  ld a,h
-  ldh [rBCPD],a
+  ldh a, [curpalette]
+  jr z, .set_color_dmg
+    ; Super Game Boy: Write color only if changed
+    ldh a, [lastlcdc]
+    or a
+    jr z, .custom_color_written
+    ldh a, [curpalette]
+    call calc_custom_color
+    call sgb_send_solid_color
+    xor a
+    ldh [lastlcdc], a
+    ld a, %11100100
+  .set_color_dmg:
+  ldh [rBGP], a
+  .custom_color_written:
 
   ; $80: Scroll to x=32 away from RGB control
   ; $00: Scroll to x=0 with RGB control
@@ -768,7 +770,11 @@ activity_solid_screen::
   ld c,4
   ld a,[initial_a]
   cp $11
-  jr nz,.not_5_palettes
+  jr z,.is_5_palettes
+  ld a, [is_sgb]
+  or a
+  jr z, .not_5_palettes
+  .is_5_palettes:
     ; A on white screen on GBC only: Toggle custom mode
     bit PADB_A,b
     jr z,.not_toggle_custom
@@ -788,10 +794,17 @@ activity_solid_screen::
   jr c,.not_custom_control
 
     ; Autorepeat for left and right keys
-	ld b,PADF_LEFT|PADF_RIGHT
-	call autorepeat
-	ld a,[new_keys]
-	ld b,a
+    ld b,PADF_LEFT|PADF_RIGHT
+    ld a, [is_sgb]
+    or a
+    jr z, .normal_autorepeat
+      call autorepeat_60hz
+      jr .autorepeat_done
+    .normal_autorepeat:
+      call autorepeat
+    .autorepeat_done:
+    ld a,[new_keys]
+    ld b,a
     ldh a,[curscry]
 
     ; At this point: A is which row is selected, and B
@@ -817,18 +830,18 @@ activity_solid_screen::
     ld a,[$FF00+c]
     bit PADB_RIGHT,b
     jr z,.not_custom_increase
+    cp 31
+    jr nc,.not_custom_increase
       inc a
-      cp 32
-      jr c,.not_custom_increase
-      dec a
+      ldh [lastlcdc], a
     .not_custom_increase:
 
     bit PADB_LEFT,b
     jr z,.not_custom_decrease
+    or a
+    jr z,.not_custom_decrease
+      ldh [lastlcdc], a
       dec a
-      cp 32
-      jr c,.not_custom_decrease
-      inc a
     .not_custom_decrease:
     ld [$FF00+c],a
 
@@ -858,8 +871,50 @@ activity_solid_screen::
       ldh [curpalette],a
     .not_right:
   .input_done:
-
   jp .loop
+
+calc_custom_color:
+  ldh a, [curpalette]
+  or a
+  jr z,.is_custom
+    ld de,solid_screen_constants-2
+    jp de_index_a
+  .is_custom:
+  ld h,a     ; H = 0
+  ldh a,[customgreen]
+  add a,a
+  add a,a
+  add a,a
+  ld l,a
+  add hl,hl
+  add hl,hl  ; HL = G * 32
+  ldh a,[customred]
+  ld e,a             ; E = R
+  ldh a,[customblue]
+  add a
+  add a              ; A = B * 4
+  ld d,a             ; DE = R+B*1024
+  add hl,de
+  ret
+
+sgb_send_solid_color:
+  ld a, $00*8+1
+  ld [help_line_buffer+0], a
+  ld a, l
+  ld [help_line_buffer+1], a
+  ld a, h
+  ld hl,help_line_buffer+2
+  ld [hl+], a
+  ld a, $FF
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  xor a
+  ld c, 9
+  call memset_tiny
+  ld hl, help_line_buffer
+  jp sgb_send
 
 solid_update_rgb:
   ; Draw labels for Red, Green, and Blue
@@ -1083,6 +1138,15 @@ load_bleed_frame_a:
     jr nz,.loop
   ret
 
+autorepeat_60hz::
+  ld a,[das_timer]
+  cp 4
+  jr nc,.no_skip_das_frames
+    ld a,1
+    ld [das_timer],a
+  .no_skip_das_frames:
+  jp autorepeat
+
 activity_full_stripes::
   ld a,helpsect_full_screen_stripes
 full_stripes_common::
@@ -1152,17 +1216,9 @@ full_stripes_common::
   call read_pad_help_check
   jr nz,.restart
 
-  ; Autorepeat at 60 Hz
-  ld a,[das_timer]
-  cp 4
-  jr nc,.no_skip_das_frames
-    ld a,1
-    ld [das_timer],a
-  .no_skip_das_frames:
-  ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
-  call autorepeat
-
   ; Process input
+  ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
+  call autorepeat_60hz
   ld a,[new_keys]
   ld b,a
   bit PADB_B,b

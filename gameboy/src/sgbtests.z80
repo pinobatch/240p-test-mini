@@ -13,7 +13,7 @@ sgb_master_palette:
   drgb $F8D0A8
   drgb $A88848
   drgb $884820
-  drgb $000060
+  drgb $001050
 
   ; 2: Grid
   drgb $F8F8F8
@@ -101,8 +101,8 @@ sgb_cmd_load_master_palette:
 ; An activity that uses PAL01 instead of PAL_SET may need to
 ; clear attributes first
 sgb_cmd_clear_attrs::
-  db $04*8+2  ; 3 packets hold up to 5 rectangles
-  db 1      ; number of rectangles
+  db $04*8+1  ; 1 packet holds up to 2 rectangles
+  db 1        ; number of rectangles
 
   db %00000111  ; bit 0: inside, 1: border, 2: outside
   db %00000000  ; inside and border to palette 2, outside to palette 0
