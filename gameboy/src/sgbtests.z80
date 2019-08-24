@@ -29,8 +29,7 @@ sharpness_bricks_gbc_palette::
   drgb $200000
 
   ; 4-7: Color bleed, one for each row
-  drgb $000000
-  drgb $000000
+color_bleed_palette::
   drgb $000000
   drgb $FF0000
   drgb $000000
@@ -45,6 +44,9 @@ sharpness_bricks_gbc_palette::
   drgb $000000
   drgb $000000
   drgb $FFFFFF
+  drgb $000000
+  drgb $000000
+color_bleed_palette_end::
 
   ; 8-11: 12-step gray ramp
   drgb $000000

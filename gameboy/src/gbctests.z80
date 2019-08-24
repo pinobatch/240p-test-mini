@@ -102,7 +102,7 @@ color_handlers:
 super_handlers:
   dw lame_boy_demo
   dw lame_boy_demo
-  dw lame_boy_demo
+  dw activity_color_bleed
 
 ; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -718,24 +718,29 @@ smpte_bars_engine:
 ; This shares code with Full screen stripes in stills.z80.
 
 section "colorbleed", ROM0
-color_bleed_palette:
-  drgb $000000
-  drgb $FFFFFF
-  drgb $000000
-  drgb $000000
-  drgb $000000
-  drgb $FF0000
-  drgb $000000
-  drgb $000000
-  drgb $000000
-  drgb $00FF00
-  drgb $000000
-  drgb $000000
-  drgb $000000
-  drgb $0000FF
-  drgb $000000
-  drgb $000000
-color_bleed_palette_end:
+sgb_bleed_rects:
+  db $04*8+2  ; 3 packets hold up to 5 rectangles
+  db 3        ; number of rectangles
+
+  ; Rows 0-5: palette 0
+  ; Rows 6-9: palette 1
+  db %00000111  ; bit 0: inside, 1: border, 2: outside
+  db %00010000  ; inside and border to palette 0, outside to palette 1
+  db 0, 0, 19, 5  ; l, t, r, b, inclusive
+
+  ; Rows 10-13: palette 2
+  db %00000001
+  db %00000010
+  db 0, 10, 19, 13
+
+  ; Rows 14-17: palette 3
+  db %00000001
+  db %00000011
+  db 0, 14, 19, 17
+
+  ; Rectangles 4 and 5 unused
+  db 0, 0, 0, 0, 0, 0
+  db 0, 0, 0, 0, 0, 0
 
 activity_color_bleed::
   ld a,helpsect_color_bleed
@@ -765,8 +770,11 @@ load_color_bleed::
     jr nz,.p0rowgrploop
 
   ; Load attributes
-  ld a,1
+  ld a, [initial_a]
+  cp $11
+  jr nz, .load_sgb_attrs
   ldh [rVBK],a
+  xor a
   ld hl,_SCRN0
   ld c,6*32
   call memset_tiny
@@ -776,9 +784,10 @@ load_color_bleed::
   inc a
   ld c,4*32
   call memset_tiny
-  xor a
+  inc a
   ld c,4*32
   call memset_tiny
+  xor a
   ldh [rVBK],a
   
   ; Load palette
@@ -786,3 +795,12 @@ load_color_bleed::
   ld bc,(color_bleed_palette_end-color_bleed_palette)*256+low(rBCPS)
   ld hl,color_bleed_palette
   jp set_gbc_palette
+
+.load_sgb_attrs:
+  ld a, %11100100
+  ldh [rBGP], a
+  ld hl, sgb_bleed_rects
+  call sgb_send
+  ld bc, $0405
+  ld de, $0607
+  jp sgb_set_palettes_bcde
