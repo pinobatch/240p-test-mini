@@ -220,25 +220,30 @@ set_gbc_palette::
     jr nz,.loop
   ret
 
+clear_scrn0_to_0::
+  ld h, 0
+clear_scrn0_to_h::
+  ld de,_SCRN0
+  ld bc,32*32
+  jp memset
+
 ;;
 ; Turns off rendering, marks help page as needing to be reloaded,
 ; and clears the attribute plane of the GBC tilemaps.
 ; @return A=0
 clear_gbc_attr::
   call lcd_off
+  xor a
+  ld [help_bg_loaded],a
   ld a,[initial_a]
   cp $11
-  jr nz,.not_gbc
+  ret nz
   ldh [rVBK],a
-  ld h,0
-  ld de,_SCRN0
-  ld bc,2048
+  call clear_scrn0_to_0
+  ld b, 4
   call memset
   xor a
   ldh [rVBK],a
-.not_gbc:
-  xor a
-  ld [help_bg_loaded],a
   ret
 
 load_full_nam::

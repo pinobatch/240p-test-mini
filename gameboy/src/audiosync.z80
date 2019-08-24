@@ -46,10 +46,8 @@ activity_audiosync::
   call load_backlight_chr
 
   ; Load map
-  ld de,_SCRN0
-  ld bc,32*18
   ld h,4
-  call memset
+  call clear_scrn0_to_h
   ld hl,_SCRN0+32*(FLOOR_Y / 8)
   ld a,FLOOR_TILE
   ld c,20
@@ -58,8 +56,7 @@ activity_audiosync::
   call init_apu
   ld a,$80
   ldh [rNR11],a  ; Duty 50%
-  ld b, 0
-  call sgb_set_palette_b
+  call sgb_set_palette_gray
 
   ; Turn on rendering (no sprites)
   xor a

@@ -606,7 +606,7 @@ help_load_bg:
   ; Fill window attribute
   ld de,_SCRN1
   ld bc,32*18
-  ld h,0
+  ld h,e
   call memset
 
   ; Draw palette and flipping for character

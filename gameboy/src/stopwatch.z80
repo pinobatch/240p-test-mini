@@ -109,15 +109,12 @@ activity_stopwatch::
     ldh [rVBK],a
   .not_plane1:
 
-  ; Load background tilemap
-  ld h,0
-  ld de,_SCRN0
-  ld bc,32*18
-  call memset
-  ld de,_SCRN1
-  ld bc,32*18
+  ; Clear both tilemaps
+  call clear_scrn0_to_0
+  ld b, 4
   call memset
 
+  ; Load background tilemap to SCRN0
   ld de,stopwatchface_iu
   ld hl,CHRRAM2
   call unpack_iu_file

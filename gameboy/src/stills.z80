@@ -354,8 +354,7 @@ activity_linearity::
 
 .restart:
   call clear_gbc_attr
-  ld b, 0
-  call sgb_set_palette_b
+  call sgb_set_palette_gray
 
   ld de,linearity_quadrant_iu
   ld hl,CHRRAM2
@@ -671,8 +670,7 @@ activity_solid_screen::
   call clear_gbc_attr
   ld hl, sgb_cmd_clear_attrs
   call sgb_send
-  ld b, 0
-  call sgb_set_palette_b
+  call sgb_set_palette_gray
 
   ; Tile 0: Blank screen in color 0
   ; Tiles 1-0
@@ -682,39 +680,28 @@ activity_solid_screen::
   call memset_tiny
   dec a
   ldh [lastlcdc], a  ; lastlcdc: true if color changed
+  ldh [rLYC],a  ; disable lyc irq
   ld c,9*16
   call memset_tiny
 
-  ; Clear tilemap, leaving space for (GBC-only) VWF canvas for RGB
-  ld de,_SCRN0
-  ld bc,32*18
-  ld h,0
-  call memset
-
-  ; Create VWF canvas at X=160-176
+  ; Create VWF canvas at X=160-184, which only GBC/SGB will display
+  call clear_scrn0_to_0
   ld a,1
   ld hl,_SCRN0+32*1+20
-  ld c,3  ;  3 rows tall
+  ld b,3  ;  3 rows tall
   ld de,32-3
-.canvasinitrowloop:
-  ld b,3
-.canvasinitcellloop:
-  ld [hl+],a
-  inc a
-  dec b
-  jr nz,.canvasinitcellloop
-  add hl,de
-  dec c
-  jr nz,.canvasinitrowloop
+  .canvasinitrowloop:
+    ld c,3
+    call memset_inc
+    add hl,de
+    dec b
+    jr nz,.canvasinitrowloop
 
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
   ld a,%11000000
   call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a,32
 
 .loop:
   ld b,helpsect_solid_screen
@@ -743,7 +730,6 @@ activity_solid_screen::
     ldh a, [lastlcdc]
     or a
     jr z, .custom_color_written
-    ldh a, [curpalette]
     call calc_custom_color
     call sgb_send_solid_color
     xor a
@@ -869,6 +855,8 @@ activity_solid_screen::
       .notwrapnext:
     .have_new_curpalette:
       ldh [curpalette],a
+      ld a, c
+      ldh [lastlcdc], a
     .not_right:
   .input_done:
   jp .loop
@@ -1192,14 +1180,11 @@ full_stripes_common::
     ; Loading specific to "Full screen stripes"
 
     ; Blow away the tilemap
-    ld de,_SCRN0
-    ld bc,32*18
     ld h,16
-    call memset
+    call clear_scrn0_to_h
     ld a,%00000011
     call set_bgp
-    ld b, 0
-    call sgb_set_palette_b
+    call sgb_set_palette_gray
     jr .specific_loading_done
   .is_color_bleed:
     call load_color_bleed

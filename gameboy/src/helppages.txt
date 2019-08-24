@@ -568,11 +568,11 @@ Color bleed
 == Color tests ==
 
 These patterns measure
-color balance. They
-require Game Boy Color
-and do not work on
-original Game Boy,
-Super Game Boy, or
+color balance on
+Game Boy Color or
+Super Game Boy.
+They do not work on
+original Game Boy or
 Game Boy Pocket.
 
 == PLUGE ==

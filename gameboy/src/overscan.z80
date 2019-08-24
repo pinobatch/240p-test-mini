@@ -57,9 +57,8 @@ activity_overscan::
   call load_common_obj_tiles
 
   ; Blank both tilemaps
-  ld de,_SCRN0
-  ld h,e
-  ld bc,2048
+  call clear_scrn0_to_0
+  ld b, 4
   call memset
 
   ; Make a screen-sized area in the primary tilemap that isn't blank
@@ -84,8 +83,7 @@ activity_overscan::
   call set_obp1
   dec a
   ldh [rLYC],a  ; disable LYC IRQ until ready
-  ld b, 0
-  call sgb_set_palette_b
+  call sgb_set_palette_gray
 
   ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR01|OBJ_ON
   ld [vblank_lcdc_value],a

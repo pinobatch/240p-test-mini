@@ -34,23 +34,10 @@ jp_hl::
 section "main", ROM0
 
 main::
-  ; Clear GBC high VRAM if necessary
-  ld a,[initial_a]
-  cp $11
-  jr nz,.no_clear_high_nametables
-    ldh [rVBK],a
-    ld h,$00
-    ld de,_SCRN0
-    ld bc,$0800
-    call memset
-    xor a
-    ldh [rVBK],a
-    jr .done_clear_high_nametables
-  .no_clear_high_nametables:
-    ld a, [is_sgb]
-    or a
-    call nz, sgb_load_master_palette
-  .done_clear_high_nametables:
+  call clear_gbc_attr
+  ld a, [is_sgb]
+  or a
+  call nz, sgb_load_master_palette
   
   ; Set up vblank handler
   ld a,IEF_VBLANK

@@ -105,16 +105,12 @@ activity_grid_scroll::
   call init_grid_scroll_vars
   ld a,$03
   ldh [curpalette],a
+  call sgb_set_palette_gray
   ld a,PADF_RIGHT
   ld [cur_dir],a
 .restart:
   call clear_gbc_attr
-
-  ; Blow away the tilemap
-  ld h,a
-  ld de,_SCRN0
-  ld bc,1024
-  call memset
+  call clear_scrn0_to_0
 
   ; Load grid tile
   ld hl,CHRRAM2

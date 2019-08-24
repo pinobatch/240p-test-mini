@@ -43,8 +43,7 @@ activity_backlight_zone::
   ldh [cursize],a
   dec a
   ldh [curpalette],a
-  ld b, 0
-  call sgb_set_palette_b
+  call sgb_set_palette_gray
 
 .restart:
   call clear_gbc_attr
@@ -52,10 +51,7 @@ activity_backlight_zone::
 
   ; Clear nametable
   ldh [held_keys],a
-  ld h,a
-  ld de,_SCRN0
-  ld bc,32*18
-  call memset
+  call clear_scrn0_to_0
 
   ; Clear unused sprites
   ld a,4

@@ -117,11 +117,7 @@ sgb_load_trn_tilemap:
   call lcd_off
   ld a, %11100100
   ldh [rBGP], a
-  ld de, _SCRN0
-  push de
-  ld bc, 1024
-  ld h, c
-  call memset
+  call clear_scrn0_to_0
   ld hl, _SCRN0+640
   push hl
   xor a
@@ -130,7 +126,7 @@ sgb_load_trn_tilemap:
   ldh [rSCY], a
   call memset_inc
   pop hl
-  pop de
+  ld de, _SCRN0
   jp load_full_nam
 
 sgb_load_master_palette::
@@ -154,7 +150,11 @@ sgb_load_master_palette::
   ; Turn LCD back off, unfreeze, and load help palette
   call lcd_off
   ld b, 1
+  jr sgb_set_palette_b
 
+sgb_set_palette_gray::
+  ld b, 0
+  ; fall through
 sgb_set_palette_b::
   ld c, b
   ld d, b

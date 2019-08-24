@@ -85,10 +85,7 @@ activity_motion_blur::
   call load_common_obj_tiles
 
   ; Clear tilemaps to color 0
-  ld de,_SCRN0
-  ld h,e
-  ld bc,32*18
-  call memset
+  call clear_scrn0_to_0
 
   ; Load label tiles
   call vwfClearBuf

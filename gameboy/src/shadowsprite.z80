@@ -498,13 +498,6 @@ shadow_sprite_bg_loaders:
   dw load_horizontal_stripes
   dw load_diagonal_stripes
 
-clear_scrn0_to_0:
-  ld h, 0
-clear_scrn0_to_h:
-  ld de,_SCRN0
-  ld bc,32*18
-  jp memset
-
 load_gus_portrait:
   call clear_scrn0_to_0
   ld a,[initial_a]

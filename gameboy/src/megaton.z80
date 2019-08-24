@@ -56,12 +56,7 @@ activity_megaton::
 
 .restart:
   call clear_gbc_attr
-
-  ; Clear the tilemap
-  ld h,a
-  ld de,_SCRN0
-  ld bc,32*18
-  call memset
+  call clear_scrn0_to_0
 
   ; Clear CHR used for previous lags (tiles $E0-$F3)
   ld de,CHRRAM0+DIGITSPACE_TILE*16
@@ -138,8 +133,7 @@ activity_megaton::
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_8X16
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld b, 0
-  call sgb_set_palette_b
+  call sgb_set_palette_gray
 
   ; Draw previous results
   ld b,0
