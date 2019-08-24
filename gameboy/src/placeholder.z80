@@ -39,6 +39,24 @@ player_facing    rb 1
 
 section "lameboy", ROM0
 
+sgb_lame_boy_rects:
+  db $04*8+1  ; 3 packets hold up to 2 rectangles
+  db 2        ; number of rectangles
+
+  ; Rows 0-5: palette 0
+  ; Rows 6-9: palette 1
+  db %00000111  ; bit 0: inside, 1: border, 2: outside
+  db %00000101  ; inside and border to palette 1, outside to palette 0
+  db 0, 12, 19, 15  ; l, t, r, b, inclusive
+
+  ; Areas where the sprite moves: palette 2
+  db %00000001
+  db %00000010
+  db 3, 12, 16, 15
+
+  db 0, 0
+
+
 lame_boy_demo::
   call clear_gbc_attr
 
@@ -48,13 +66,6 @@ lame_boy_demo::
   call draw_bg
   call load_player_cels
 
-  ; Can turn on LCD at any time.  Only on->off transitions must
-  ; happen in vblank.  But because GB asserts no vblank IRQ in
-  ; forced blanking, set palette to white until shadow OAM is valid.
-  xor a
-  call set_bgp
-  call set_obp0
-  call set_obp1
   ld a,LCDCF_ON|OBJ_ON|BG_NT0|BG_CHR21
   ldh [rLCDC],a
   ld [vblank_lcdc_value],a
@@ -75,12 +86,6 @@ lame_boy_demo::
   ; And present everything
   call wait_vblank_irq
   call run_dma
-
-  ; Set palettes
-  ld a, %01101100
-  ldh [rBGP],a
-  ld a, %00011110
-  ldh [rOBP0],a
 
   ld hl,lameboybgpalette_gbc
   ld bc,(lameboyobjpalette_gbc-lameboybgpalette_gbc) * 256 + low(rBCPS)
@@ -143,12 +148,17 @@ draw_bg:
   call load_common_bg_tiles
 
   ; Clear nametable excl. floor
+  ; Use tile $04 (lighter gray) on DMG or tile 0 (white) on SGB/GBC
   ld h,$04
   ld de,_SCRN0
   ld bc,32*16
   ld a,[initial_a]
   cp $11
-  jr nz,.not_gbc_sky
+  jr z,.is_gbc_sky
+  ld a, [is_sgb]
+  or a
+  jr z,.not_gbc_sky
+  .is_gbc_sky:
     ld h,e
   .not_gbc_sky:
   call memset
@@ -257,8 +267,24 @@ draw_bg:
   call vwfPutBuf03
   endc
 
-  ; Expects palette %01101100
-  ret
+  ; Set palettes
+  ld a, %01101100
+  ldh [rBGP],a
+  ld a, %00011110
+  ldh [rOBP0],a
+
+  ; If SGB, send SGB screen layout and palettes
+  ld a, [is_sgb]
+  or a
+  ret z
+  ld a, %11100100
+  ldh [rBGP],a
+  ldh [rOBP0],a
+  ld hl, sgb_lame_boy_rects
+  call sgb_send
+  ld bc,$1011
+  ld de,$1200
+  jp sgb_set_palettes_bcde
 
 bg_draw_one_block:
   ld a,$0C
@@ -630,20 +656,3 @@ Lx_add                 rb 1
   ld a,l
   ld [oam_used],a
   ret
-
-lameboybgpalette_gbc:
-  drgb $8fa1ff  ; 0: Sky and floor
-  drgb $342800
-  drgb $366d00
-  drgb $55c753
-  drgb $8fa1ff  ; 1: Push blocks
-  drgb $6D5C00
-  drgb $BDAC2C
-  drgb $E4DCA8
-lameboyobjpalette_gbc:
-  drgb $000000
-  drgb $342800
-  drgb $BD3C30
-  drgb $FFCFCA
-lameboyobjpalette_gbc_end:
-

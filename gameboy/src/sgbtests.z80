@@ -85,6 +85,24 @@ color_bleed_palette_end::
   drgb $00F8F8
   drgb $00F800
   drgb $0000F8
+
+  ; 16-18: Lame boy
+lameboybgpalette_gbc::
+  drgb $8fa1ff  ; 0: Sky and floor
+  drgb $342800
+  drgb $366d00
+  drgb $55c753
+  drgb $8fa1ff  ; 1: Push blocks
+  drgb $6D5C00
+  drgb $BDAC2C
+  drgb $E4DCA8
+lameboyobjpalette_gbc::
+  drgb $8fa1ff  ; 2: Obj
+  drgb $342800
+  drgb $BD3C30
+  drgb $FFCFCA
+lameboyobjpalette_gbc_end::
+
 sgb_master_palette_end:
 
 sgb_cmd_freeze:
