@@ -20,10 +20,11 @@ or [Catskull cartridge].
 Once the suite is running, the credits will appear.  You can navigate
 the menu with the Control Pad and the A and B Buttons.  There are
 three pages of tests: one with mostly still images, one with more
-interactive tests, and one exclusive to Game Boy Color that tests
-color balance.  Each test is controlled with the Control Pad and the
-A and Select Buttons.  To show help for any test, press Start or read
-src/helppages.txt. To leave a test, press the B Button.
+interactive tests, and a third exclusive to Game Boy Color and
+Super Game Boy that tests color balance.  Each test is controlled
+with the Control Pad and the A and Select Buttons.  To show help for
+any test, press Start or read src/helppages.txt. To leave a test,
+press the B Button.
 
 [EverDrive-GB]: https://krikzz.com/store/home/48-everdrive-gb.html
 [Catskull cartridge]: https://catskullelectronics.com/32kcart
@@ -43,14 +44,13 @@ Because of this "subtractive" nature, as well as the overall reduced
 contrast and other display artifacts on monochrome handhelds, many
 tests allow inverting grays with the Select Button.
 
-Though the NES version of 240p Test Suite uses about 52 KiB of ROM
-data, the [cartridges sold by Catskull] are limited to 32 KiB.
-Fortunately, the graphics for several tests are smaller than on a
-240p platform, which makes the menu, Linearity, Sharpness, Drop
-Shadow, and Scroll Test smaller.  I managed to make some tests' help
-text more concise.  Easily readable VRAM helps, as does the LR35902
-CPU's better code density for anything that doesn't use structs or
-parallel arrays.
+Though the NES version of 240p Test Suite uses about 40 KiB of ROM
+data, the [Catskull cartridge] is limited to 32 KiB.  Fortunately,
+the graphics for several tests are smaller than on a 240p platform,
+which makes the menu, Linearity, Sharpness, Drop Shadow, and Scroll
+Test smaller.  I managed to make some tests' help text more concise.
+Easily readable VRAM helps, as does the 8080 family's better code
+density for anything that doesn't use structs or parallel arrays.
 
 A Game Boy Advance port is also available.
 
@@ -64,15 +64,13 @@ Artemio Urbina maintains the upstream suite on five platforms:
 
 Limits
 ------
-* No Super Game Boy enhancements, as they would not fit in 32 KiB.
-  It was hard enough making GBC fit.
 * Linearity: No support for non-square NTSC or PAL pixel aspect
   ratios when used through Super Game Boy.
 * Sound Test: No "Crowd" because GB PCM is limited to 4 bits.
 * Alternate 240p/480i: SGB and GB Player offer no control over
   the host systems' interlace modes except through SGB JUMP.
-* The true IRE levels of the GameCube's output when running Game Boy
-  Player have not yet been measured.
+* The IRE levels of the Super NES and Nintendo GameCube video output
+  have not yet been measured.
 
 Contributors
 ------------
@@ -93,7 +91,7 @@ invited to post in its [NESdev thread] or [GBDev thread].
 [GBDev thread]: http://gbdev.gg8.se/forums/viewtopic.php?id=542
 
 Copyright 2011-2018 Artemio Urbina  
-Copyright 2018 Damian Yerrick
+Copyright 2018-2019 Damian Yerrick
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

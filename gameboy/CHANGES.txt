@@ -1,3 +1,12 @@
+0.19
+* Super Game Boy enhancement
+* Stopwatch: Bolder digits
+* Standardize phrasing in help text: "stuck pixels", "hide or show",
+  "start or stop"
+* Linearity: Compress with reflection
+* Improve incruniq tilemap compression
+* Code size optimizations
+
 0.18 (2019-05-02)
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic
   (Genesis 1.16 parity)
@@ -31,7 +40,7 @@
 0.06 (2018-06-03)
 * Add GBC-exclusive tests (PLUGE, Gradient color bars, SMPTE bars,
   Color bars on gray, Color bleed)
-* LR35902 assembly source files use .z80 extension for more
+* Assembly language source files use .z80 extension for more
   convenient syntax highlighting
 * Backlight zone background is black, not green
 * Motion blur, Overscan, and Lame boy demo share 0-9 tiles
