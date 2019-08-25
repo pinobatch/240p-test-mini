@@ -133,7 +133,7 @@ activity_stopwatch::
   ld b,sizeof_stopwatchhand_chr/16
   call pb16_unpack_block
 
-  ld de,$08F0
+  ld de,$0970
   ld hl,digits_label_msg
   call vwfDrawLabels
 

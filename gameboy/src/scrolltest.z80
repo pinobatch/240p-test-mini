@@ -41,9 +41,7 @@ KT_SHADOW_U_L equ $08
 KT_SHADOW_UL_U equ $09
 KT_SHADOW_UL_L equ $0A
 
-; This tends to get moved back and forth when balancing
-; bank 0 and bank 1
-section "scrolltest_pal1",ROMX
+section "scrolltest_color0",ROM0
 hillzone_palette_gbc:
   drgb $FFFFFF  ; Clouds, water
   drgb $8FA1FF
@@ -71,18 +69,14 @@ hillzone_palette_gbc:
   drgb $342800
 hillzone_palette_gbc_end:
 
-section "scrolltest_layout0",ROM0
-
 ; Values at 0, 16, 56, 112, 120
 hillzone_bgp_dmg:  ; Used during Shadow sprite and always on DMG
   db %01010000, %11100100, %11100100, %01100100, %11100100
 hillzone_bgp_sgb:  ; Used during Hill zone scroll test on SGB
   db %10101011, %00000110, %00011011, %11000110, %00011011
 
-
 ; I switched to ATTR_LIN because a rectangle of
 ; 0, 14, 19, 14 doesn't do what I expect
-
 hillzone_sgb_rects:
   db $05*8+2  ; 2 packets hold up to 31 lines
   db 18       ; number of lines
