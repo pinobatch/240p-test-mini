@@ -73,7 +73,7 @@ hillzone_palette_gbc_end:
 hillzone_bgp_dmg:  ; Used during Shadow sprite and always on DMG
   db %01010000, %11100100, %11100100, %01100100, %11100100
 hillzone_bgp_sgb:  ; Used during Hill zone scroll test on SGB
-  db %10101011, %00000110, %00011011, %11000110, %00011011
+  db %10111011, %00000110, %00011011, %11000110, %00011011
 
 ; I switched to ATTR_LIN because a rectangle of
 ; 0, 14, 19, 14 doesn't do what I expect
@@ -91,11 +91,10 @@ hillzone_sgb_rects:
   db 0, 0, 0, 0
   db 0, 0, 0, 0
 
-
 ; SGB layout for Hill zone scroll test
 ; 0-15: Clouds
 ; DMG BGP: 0 0 1 1 %01010000
-; SGB: Sky and water, BGP: 3 2 2 2 %10101011
+; SGB: Sky and water, BGP: 3 2 3 2 %10111011
 ;
 ; 16-55: Distant mountains
 ; DMG BGP: 0, 1, 2, 3 %11100100
