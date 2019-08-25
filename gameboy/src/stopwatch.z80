@@ -73,6 +73,16 @@ sw_digit_gbc_palettes:
   drgb $FF8888
   drgb $FF4444
 
+sw_sgb_rects:
+  db $04*8+1  ; 1 packet holds up to 2 rectangles
+  db 1        ; number of rectangles
+
+  db %00000111  ; bit 0: inside, 1: border, 2: outside
+  db %00000101  ; inside and border to palette 0, outside to palette 0
+  db 15, 1, 19, 3
+
+  db 0, 0, 0, 0, 0, 0, 0, 0
+
 activity_stopwatch::
   xor a
   ldh [is_running],a
@@ -124,14 +134,27 @@ activity_stopwatch::
   call load_nam
 
   ; Load other tiles used by activity
-  ld de,stopwatchdigits_chr
-  ld hl,CHRRAM1
-  ld b,sizeof_stopwatchdigits_chr/16
-  call pb16_unpack_block
   ld de,stopwatchhand_chr
   ld hl,CHRRAM0
   ld b,sizeof_stopwatchhand_chr/16
   call pb16_unpack_block
+  ld de,stopwatchdigits_chr
+  ld hl,CHRRAM1
+  push hl
+  ld b,sizeof_stopwatchdigits_chr/16
+  call pb16_unpack_block
+  pop de
+
+  ; Lighter version of digits used for SGB blue/red
+  ; from DE to HL
+  .lightdigitsloop:
+    ld a, [de]
+    inc de
+    inc de
+    ld [hl+], a
+    ld [hl+], a
+    bit 4, h
+    jr z, .lightdigitsloop
 
   ld de,$0970
   ld hl,digits_label_msg
@@ -142,16 +165,26 @@ activity_stopwatch::
   call sw_init_oam
   call run_dma
 
+  ld a, [is_sgb]
+  xor a
+  jr nz, .not_load_sgb
+    ld hl, sw_sgb_rects
+    call sgb_send
+    ld bc, 0*256+37
+    ld d, b
+    ld e, b
+    call sgb_set_palettes_bcde
+  .not_load_sgb:
+
   ; Turn on rendering
   ld a,%10011100
+  ldh [rLYC],a  ; STAT IRQ not used by this activity
   call set_bgp
   call set_obp0
   ld a,7
   ldh [rWX],a
   ld a,40      ; BG below inactive circles can be toggled by showing
   ldh [rWY],a   ; or hiding window
-  ld a,255
-  ldh [rLYC],a  ; rSTAT rLYC not used by this activity
   ld a,LCDCF_ON|BG_NT0|BG_CHR21|OBJ_ON|WINDOW_NT1
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
@@ -285,13 +318,22 @@ digits_label_msg:
 
 sw_convert:
   ld hl,help_line_buffer
+  ld b, $80
   ldh a,[hours]
   call .convert_1digit
   ldh a,[minutes_bcd]
   call .convert_2digits
   ldh a,[seconds_bcd]
   call .convert_2digits
+  ld a, [is_sgb]
+  or a
   ldh a,[frames_bcd]
+  jr z, .not_odd_sgb
+  bit 0, a
+  jr z, .not_odd_sgb
+    ld b, $C0
+  .not_odd_sgb:
+
 .convert_2digits:
   push af
   swap a
@@ -304,7 +346,7 @@ sw_convert:
   ld c,a
   add c
   add c
-  add $80
+  or b
   ld [hl+],a
   ret
 

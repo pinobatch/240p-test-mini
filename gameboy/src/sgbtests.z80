@@ -202,6 +202,13 @@ pluge_shark_palette::
   drgb $60A000
   drgb $A0E020
 
+  ; 37: Stopwatch frames
+  drgb $F8F8F8
+  drgb $A8A8E0
+  drgb $FF0000
+  drgb $0000C8
+
+
 sgb_master_palette_end:
 
 sgb_cmd_freeze:
