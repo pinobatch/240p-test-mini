@@ -71,6 +71,68 @@ hillzone_palette_gbc:
   drgb $342800
 hillzone_palette_gbc_end:
 
+section "scrolltest_layout0",ROM0
+
+; Values at 0, 16, 56, 112, 120
+hillzone_bgp_dmg:  ; Used during Shadow sprite and always on DMG
+  db %01010000, %11100100, %11100100, %01100100, %11100100
+hillzone_bgp_sgb:  ; Used during Hill zone scroll test on SGB
+  db %10101011, %00000110, %00011011, %11000110, %00011011
+
+
+; I switched to ATTR_LIN because a rectangle of
+; 0, 14, 19, 14 doesn't do what I expect
+
+hillzone_sgb_rects:
+  db $05*8+2  ; 2 packets hold up to 31 lines
+  db 18       ; number of lines
+
+  db $80,$81
+  db $82,$83,$84,$85
+  db $86,$A7,$A8,$A9
+  db $8A,$8B,$8C,$8D
+  db $CE,$EF,$F0,$91
+
+  db 0, 0, 0, 0
+  db 0, 0, 0, 0
+  db 0, 0, 0, 0
+
+
+; SGB layout for Hill zone scroll test
+; 0-15: Clouds
+; DMG BGP: 0 0 1 1 %01010000
+; SGB: Sky and water, BGP: 3 2 2 2 %10101011
+;
+; 16-55: Distant mountains
+; DMG BGP: 0, 1, 2, 3 %11100100
+; SGB: Sky and water, BGP: 2 1 0 0 %00000110
+;
+; 56-79: Foliage
+; DMG BGP: 0, 1, 2, 3 %11100100
+; SGB: Far foliage, BGP: 3 2 1 0 %00011011
+;
+; 80-111: River
+; DMG BGP: 0, 1, 2, 3 %11100100
+; SGB: Sky and water, BGP: 3 2 1 0 %00011011
+;
+; 112-119: Top of grass
+; DMG BGP: 0, 1, 2, 1 %01100100
+; SGB: Top of grass, BGP: 2 1 0 3 %11000110
+;
+; 120-135: Bottom of grass
+; DMG BGP: 0, 1, 2, 3 %11100100
+; SGB: Bottom of grass, BGP: 3 2 1 0 %00011011
+;
+; 136-144: Dirt blocks
+; DMG BGP: 0, 1, 2, 3 %11100100
+; SGB: Sky and water, BGP: 3 2 1 0 %00011011
+;
+; SGB palette
+; 33: Sky and water (dark brown, medium brown, sky blue, white)
+; 34: Far foliage (dark brown, medium green, light green, white)
+; 35: Top of grass (dark brown, medium green, light green, sky blue)
+; 36: Bottom of grass (dark brown, dark green, medium green, light green)
+
 section "kikimtbelow",ROM0,align[5]
 mt_below:
   db KT_SAND0,      KT_SAND0,    KT_WALL,     KT_SAND0
@@ -120,7 +182,7 @@ activity_grid_scroll::
 
   xor a
   call set_bgp  ; blank the palette
-  ld a,$FF
+  cpl
   ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ld [vblank_lcdc_value],a
@@ -208,6 +270,16 @@ activity_hillzone_scroll::
 .restart:
   call load_hillzone_bg
 
+  ld a, [is_sgb]
+  or a
+  jr z, .not_sgb_setup
+    ld bc, $2122
+    ld de, $2324
+    call sgb_set_palettes_bcde
+    ld hl, hillzone_sgb_rects
+    call sgb_send
+  .not_sgb_setup:
+
   ld a,[vblank_lcdc_value]
   ldh [rLCDC],a
 .loop:
@@ -227,7 +299,13 @@ activity_hillzone_scroll::
   ld l,a
   ldh a,[cur_x+1]
   ld h,a
-  call set_hillzone_scroll_pos
+  ld de, hillzone_bgp_dmg
+  ld a, [is_sgb]
+  or a
+  jr z, .not_sgb_bgp_sequence
+    ld de, hillzone_bgp_sgb
+  .not_sgb_bgp_sequence:
+  call set_hillzone_scroll_pos_de
   jp .loop
 
 activity_kiki_scroll::
@@ -369,6 +447,8 @@ move_by_speed:
 ; Also changes BGP so that GB and GBC can use one set of tiles.
 ; @param HL scroll distance
 set_hillzone_scroll_pos::
+  ld de, hillzone_bgp_dmg
+set_hillzone_scroll_pos_de:
   add hl,hl
   add hl,hl
   add hl,hl
@@ -376,19 +456,21 @@ set_hillzone_scroll_pos::
   add hl,hl
   ld a,h
   ldh [rSCX],a
-  ld a,%01010000
+  ld a, [de]
   ldh [rBGP],a
 
   ; uses HALT until IRQ, not
   add hl,hl
-  ld bc,16*256 + %11100100
+  ld b, 16
   di
   call .waitandwrite
-  add hl,hl
-  add hl,hl
-  ld bc,112*256 + %01100100
+  ld b, 56
   call .waitandwrite
-  ld bc,120*256 + %11100100
+  add hl,hl
+  add hl,hl
+  ld b, 112
+  call .waitandwrite
+  ld b, 120
   call .waitandwrite
   reti
 
@@ -396,6 +478,9 @@ set_hillzone_scroll_pos::
   ld a,b
   dec a
   ldh [rLYC],a  ; Trigger interrupt at start of next parallax strip
+  inc de
+  ld a, [de]
+  ld c, a
 .wwloop:
   halt
   ldh a,[rLY]

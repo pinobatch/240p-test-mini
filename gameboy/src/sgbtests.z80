@@ -180,6 +180,27 @@ pluge_shark_palette::
   drgb $F0F0F0
   drgb $F8F8F8
 
+  ; 33-36: Hill zone scroll test
+  ; 33: Sky and water (dark brown, medium brown, sky blue, white)
+  drgb $503000
+  drgb $705000
+  drgb $8FA1FF
+  drgb $FFFFFF
+  ; 34: Far foliage (dark brown, medium green, light green, white)
+  drgb $402000
+  drgb $60A000
+  drgb $A0E020
+  drgb $FFFFFF
+  ; 35: Top of grass (dark brown, medium green, light green, sky blue)
+  drgb $402000
+  drgb $60A000
+  drgb $A0E020
+  drgb $8FA1FF
+  ; 36: Bottom of grass (dark brown, dark green, medium green, light green)
+  drgb $402000
+  drgb $406000
+  drgb $60A000
+  drgb $A0E020
 
 sgb_master_palette_end:
 
