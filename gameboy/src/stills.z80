@@ -668,8 +668,7 @@ activity_solid_screen::
 
 .restart:
   call clear_gbc_attr
-  ld hl, sgb_cmd_clear_attrs
-  call sgb_send
+  call clear_sgb_attr
   call sgb_set_palette_gray
 
   ; Tile 0: Blank screen in color 0
@@ -781,14 +780,7 @@ activity_solid_screen::
 
     ; Autorepeat for left and right keys
     ld b,PADF_LEFT|PADF_RIGHT
-    ld a, [is_sgb]
-    or a
-    jr z, .normal_autorepeat
-      call autorepeat_60hz
-      jr .autorepeat_done
-    .normal_autorepeat:
-      call autorepeat
-    .autorepeat_done:
+    call autorepeat_60hz_if_sgb
     ld a,[new_keys]
     ld b,a
     ldh a,[curscry]
@@ -1126,13 +1118,17 @@ load_bleed_frame_a:
     jr nz,.loop
   ret
 
+autorepeat_60hz_if_sgb::
+  ld a, [is_sgb]
+  or a
+  jr z, autorepeat_normal
 autorepeat_60hz::
   ld a,[das_timer]
   cp 4
-  jr nc,.no_skip_das_frames
-    ld a,1
-    ld [das_timer],a
-  .no_skip_das_frames:
+  jr nc,autorepeat_normal
+  ld a,1
+  ld [das_timer],a
+autorepeat_normal:
   jp autorepeat
 
 activity_full_stripes::

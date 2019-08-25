@@ -159,10 +159,16 @@ detect_sgb::
 SIZEOF_SGB_PACKET EQU 16
 CHAR_BIT EQU 8
 
+clear_sgb_attr::
+  ld hl, sgb_cmd_clear_attrs
+sgb_send_if_sgb::
+  ld a, [is_sgb]
+  or a
+  ret z
+
 ;;
 ; Sends a Super Game Boy packet starting at HL.
 ; Assumes no IRQ handler does any sort of controller autoreading.
-
 sgb_send::
 
   ; B: Number of remaining bytes in this packet

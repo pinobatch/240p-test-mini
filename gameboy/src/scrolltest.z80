@@ -264,15 +264,11 @@ activity_hillzone_scroll::
 .restart:
   call load_hillzone_bg
 
-  ld a, [is_sgb]
-  or a
-  jr z, .not_sgb_setup
-    ld bc, $2122
-    ld de, $2324
-    call sgb_set_palettes_bcde
-    ld hl, hillzone_sgb_rects
-    call sgb_send
-  .not_sgb_setup:
+  ld bc, $2122
+  ld de, $2324
+  call sgb_set_palettes_bcde
+  ld hl, hillzone_sgb_rects
+  call sgb_send_if_sgb
 
   ld a,[vblank_lcdc_value]
   ldh [rLCDC],a

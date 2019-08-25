@@ -165,16 +165,12 @@ activity_stopwatch::
   call sw_init_oam
   call run_dma
 
-  ld a, [is_sgb]
-  xor a
-  jr nz, .not_load_sgb
-    ld hl, sw_sgb_rects
-    call sgb_send
-    ld bc, 0*256+37
-    ld d, b
-    ld e, b
-    call sgb_set_palettes_bcde
-  .not_load_sgb:
+  ld hl, sw_sgb_rects
+  call sgb_send_if_sgb
+  ld bc, 0*256+37
+  ld d, b
+  ld e, b
+  call sgb_set_palettes_bcde
 
   ; Turn on rendering
   ld a,%10011100

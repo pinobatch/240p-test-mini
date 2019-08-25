@@ -704,11 +704,8 @@ smpte_bars_engine:
   ldh [rBGP],a  ; set SGB internal
   ld a, [is_sgb]
   ldh [need_sgb_update], a  ; mark as ready for re-send
-  or a
-  jr z, .init_not_sgb
-    ld hl, cbog_sgb_rects
-    call sgb_send
-  .init_not_sgb:
+  ld hl, cbog_sgb_rects
+  call sgb_send_if_sgb
 
 .loop:
   ldh a,[curhelpsect]

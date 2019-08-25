@@ -69,19 +69,24 @@ activity_motion_blur::
 
   ; Calculate starting on and back shades: 3 and 1 for DMG,
   ; 31 and 15 for GBC
+  ld b, 3
   ld a,[initial_a]
   cp $11
-  ld a,3
-  jr nz,.is_dmg_shade
-    ld a,31
-  .is_dmg_shade:
-  ld b,a
+  jr z,.init_is_color_shade
+  ld a, [is_sgb]
+  or a
+  jr z,.init_is_dmg_shade
+  .init_is_color_shade:
+    ld b, 31
+  .init_is_dmg_shade:
+  ld a, b
   ldh [on_shade],a
   and a
   rra
-  ldh [back_shade],a 
+  ldh [back_shade],a
 .restart:
   call clear_gbc_attr
+  call clear_sgb_attr  ; because we use PAL01
   call load_common_obj_tiles
 
   ; Clear tilemaps to color 0
@@ -127,6 +132,7 @@ activity_motion_blur::
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
+  call motionblur_update_sgb
 
 .loop:
   ld b,helpsect_motion_blur
@@ -140,7 +146,6 @@ activity_motion_blur::
   call motionblur_handle_presses
   call make_help_vram
   call motionblur_calc_bgp
-  
   call wait_vblank_irq
 
   ; Set bg palette
@@ -183,7 +188,7 @@ activity_motion_blur::
 
 motionblur_handle_presses:
   ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
-  call autorepeat
+  call autorepeat_60hz_if_sgb
   ld a,[new_keys]
   ld b,a
 
@@ -218,7 +223,11 @@ motionblur_handle_presses:
   ld de,row_high_low
   ld a,[initial_a]
   cp $11
-  jr nz,.not_gbc_ranges
+  jr z,.is_gbc_ranges
+  ld a, [is_sgb]
+  or a
+  jr z,.not_gbc_ranges
+  .is_gbc_ranges:
     ld de,row_high_low_gbc
   .not_gbc_ranges:
   ld a,[help_cursor_y]
@@ -226,6 +235,7 @@ motionblur_handle_presses:
   ld a,[$FF00+c]
 
   ; Left/Right: Change value on this row
+  ld d, a
   bit PADB_LEFT,b
   jr z,.no_cursor_left
     dec a
@@ -241,6 +251,8 @@ motionblur_handle_presses:
   cp h
   jr nc,.no_writeback_value
     ld [$FF00+c],a
+    cp d
+    call nz, motionblur_update_sgb
   .no_writeback_value:
 
 .no_cursor_control:
@@ -319,7 +331,13 @@ motionblur_calc_bgp:
   ld d,a
   ldh a,[back_shade]
   ld b,a
-  ld c,a
+  ld a, [is_sgb]
+  or a
+  jr z, .not_sgb
+    ld b, $00
+    ld de, $0203
+  .not_sgb:
+  ld c,b
   ; Now b=c=back shade, d=on shade, e=off shade
 
   ; If current step (bit 0) is off, swap the two
@@ -347,12 +365,16 @@ motionblur_calc_bgp:
     ; If not running, use the front shade with the maximum contrast
     ldh a,[is_running]
     rl a
-    jr c,.is_running_mono
-      ld c,0
-      bit 1,b
-      jr nz,.is_running_mono
-      ld c,3
-    .is_running_mono:
+    jr c,.mono_have_text_shade
+      ld c, 1
+      ld a, [is_sgb]
+      or a
+      jr nz, .mono_have_text_shade
+      dec c
+      bit 1, b
+      jr nz, .mono_have_text_shade
+      ld c, 3
+    .mono_have_text_shade:
     ; b=back shade, c=front shade,
     ; d=even rows shade, e=odd rows shade
 
@@ -375,6 +397,7 @@ motionblur_calc_bgp:
   ldh a,[is_running]
   rl a
   jr c,.is_running_gbc
+  .sgb_calc:
     ld c,0
     bit 4,b
     jr nz,.is_running_gbc
@@ -414,4 +437,25 @@ motionblur_calc_bgp:
   ld [$FF00+c],a
   inc c
   ret
-  
+
+motionblur_update_sgb:
+  ldh a,[off_shade]
+  ld e,a
+  ldh a,[on_shade]
+  ld d,a
+  ldh a,[back_shade]
+  ld b,a
+  call motionblur_calc_bgp.sgb_calc
+  ld de, help_line_buffer
+  push de
+  ld a, $00*8+1
+  ld [de], a
+  inc de
+  ld bc, 8
+  ld hl, bgp_value
+  call memcpy
+  ld c, 7
+  ld h, 0
+  call memset
+  pop hl
+  jp sgb_send_if_sgb
