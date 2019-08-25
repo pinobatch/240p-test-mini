@@ -236,6 +236,8 @@ activity_kiki_scroll::
   ld [cur_dir],a
 .restart:
   call load_kiki_bg
+  ld b, 19
+  call sgb_set_palette_b
 .loop:
   ld b,helpsect_vertical_scroll_test
   call read_pad_help_check

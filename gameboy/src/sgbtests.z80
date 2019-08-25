@@ -103,6 +103,80 @@ lameboyobjpalette_gbc::
   drgb $FFCFCA
 lameboyobjpalette_gbc_end::
 
+  ; 19: Vertical scroll
+  drgb $FFFFAA
+  drgb $FFAA55
+  drgb $AA5500
+  drgb $550000
+
+  ; 20-21: Color bars on gray dark
+cbog_palette_dark::
+  drgb $10C010  ; Green to white
+  drgb $10C0C0
+  drgb $C0C010
+  drgb $C0C0C0
+  drgb $10C010  ; Green to blue
+  drgb $C010C0
+  drgb $C01010
+  drgb $1010C0
+
+  ; 22-23: Color bars on gray light
+cbog_palette_light::
+  drgb $10FF10  ; Green to white
+  drgb $10FFFF
+  drgb $FFFF10
+  drgb $FFFFFF
+  drgb $10FF10  ; Green to blue
+  drgb $FF10FF
+  drgb $FF1010
+  drgb $1010FF
+
+  ; 24-26: PLUGE test
+pluge_palette_common::
+  drgb $686868
+  drgb $989898
+  drgb $c8c8c8
+  drgb $f8f8f8
+
+pluge_palette_ntsc::
+  drgb $101010  ; NTSC version
+  drgb $181818
+  drgb $080808
+  drgb $080808
+
+  drgb $000000  ; NTSC-J version
+  drgb $080808
+  drgb $080008
+  drgb $000800
+
+  ; 27-31: PLUGE Contrast test
+pluge_shark_palette::
+  drgb $000000
+  drgb $A8A8A8
+  drgb $102080
+  drgb $007080
+
+  drgb $000000
+  drgb $202020
+  drgb $101010
+  drgb $202020
+
+  drgb $000000
+  drgb $101010
+  drgb $080808
+  drgb $101010
+
+  drgb $D8D8D8
+  drgb $F8F8F8
+  drgb $E8E8E8
+  drgb $F8F8F8
+
+  drgb $E8E8F8
+  drgb $F8F8F8
+  drgb $F0F0F0
+  drgb $F8F8F8
+
+
 sgb_master_palette_end:
 
 sgb_cmd_freeze:

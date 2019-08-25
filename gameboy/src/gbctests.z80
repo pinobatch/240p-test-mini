@@ -24,6 +24,7 @@ curhelpsect rb 1
 curpalette rb 1
 curvolume rb 1
 cur_lcdc rb 1
+need_sgb_update rb 1
 
 ; Game Boy Color tests menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 section "gbctestmenu", ROM0
@@ -101,55 +102,12 @@ color_handlers:
   dw activity_color_bleed
 super_handlers:
   dw lame_boy_demo
-  dw lame_boy_demo
+  dw activity_barsongray
   dw activity_color_bleed
 
 ; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "pluge", ROM0
-pluge_palette_common:
-  drgb $686868
-  drgb $989898
-  drgb $c8c8c8
-  drgb $f8f8f8
-
-pluge_palette_ntsc:
-  drgb $101010
-  drgb $181818
-  drgb $080808
-  drgb $080808
-
-  drgb $000000
-  drgb $080808
-  drgb $080008
-  drgb $000800
-
-pluge_shark_palette:
-  drgb $000000
-  drgb $A8A8A8
-  drgb $102080
-  drgb $007080
-
-  drgb $000000
-  drgb $202020
-  drgb $101010
-  drgb $202020
-
-  drgb $000000
-  drgb $101010
-  drgb $080808
-  drgb $101010
-
-  drgb $D8D8D8
-  drgb $F8F8F8
-  drgb $E8E8E8
-  drgb $F8F8F8
-  
-  drgb $E8E8F8
-  drgb $F8F8F8
-  drgb $F0F0F0
-  drgb $F8F8F8
-
 activity_pluge:
   xor a
   ldh [curpalette],a
@@ -322,7 +280,7 @@ activity_gradient_bars:
   ld de,gradient_rowmap
   call smpte_load_map
   call gradient_load_oam
-  ld de,(CHRRAM0 >> 4)|$0A
+  ld de,(CHRRAM0 >> 4)|$20
   ld hl,gradient_labels
   call vwfDrawLabels
   
@@ -333,7 +291,7 @@ activity_gradient_bars:
     ld a,[hl]
     or a
     jr nz,.addgridnz
-      ld a,$09  ; grid tile
+      ld a,$10  ; grid tile
     .addgridnz:
     ld [hl+],a
     inc c
@@ -474,11 +432,11 @@ gradient_push_palette:
 
 section "smpteloader", ROM0
 smpte_rowdata:
-  db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00, $00,$00,$00,$00,$00,$00,$00,$00,$00,$00  ; gray
-  db $00,$00,$04,$01,$01,$05,$02,$02,$06,$03, $93,$96,$92,$92,$95,$91,$91,$94,$90,$90  ; SMPTE1
-  db $30,$30,$34,$31,$31,$35,$32,$32,$36,$33, $a3,$a6,$a2,$a2,$a5,$a1,$a1,$a4,$a0,$a0  ; SMPTE2
+  db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00, $00,$00,$00,$00,$00,$00,$00,$00,$00,$00  ; color 0
+  db $03,$03,$04,$02,$02,$05,$01,$01,$06,$00, $10,$19,$11,$11,$1A,$12,$12,$1B,$13,$13  ; SMPTE1
+  db $23,$23,$24,$22,$22,$25,$21,$21,$26,$20, $30,$39,$31,$31,$3A,$32,$32,$3B,$33,$33  ; SMPTE2
   db $43,$43,$43,$C8,$42,$42,$42,$41,$41,$41, $C7,$40,$40,$40,$51,$50,$52,$50,$50,$50  ; SMPTE3
-  db $10,$10,$14,$11,$11,$15,$12,$12,$16,$13, $83,$86,$82,$82,$85,$81,$81,$84,$80,$80  ; SMPTE1 flipped
+  db $13,$13,$14,$12,$12,$15,$11,$11,$16,$10, $00,$09,$01,$01,$0A,$02,$02,$0B,$03,$03  ; SMPTE1 flipped
   db $00,$00,$00,$00,$02,$02,$17,$18,$27,$28, $37,$38,$47,$48,$57,$58,$67,$68,$77,$78  ; gradient
   db $00,$00,$01,$01,$00,$00,$04,$04,$00,$00, $13,$13,$13,$13,$13,$13,$13,$13,$00,$00  ; pluge 1
   db $00,$00,$01,$01,$00,$00,$04,$04,$00,$00, $12,$12,$12,$12,$12,$12,$12,$12,$00,$00  ; pluge 2
@@ -486,15 +444,18 @@ smpte_rowdata:
   db $00,$00,$01,$01,$00,$00,$04,$04,$00,$00, $10,$10,$10,$10,$10,$10,$10,$10,$00,$00  ; pluge 4
   db $01,$02,$03,$92,$91,$21,$22,$23,$B2,$B1, $41,$42,$43,$D2,$D1,$61,$62,$63,$F2,$F1  ; gbc gray ramp top
   db $71,$72,$73,$E2,$E1,$51,$52,$53,$C2,$C1, $31,$32,$33,$A2,$A1,$11,$12,$13,$82,$81  ; gbc gray ramp bottom
+  db $03,$03,$03,$03,$03,$03,$03,$03,$03,$03, $03,$03,$03,$03,$03,$03,$03,$03,$03,$03  ; color 3
 
 smpte_rowmap:
   db $B1,$22,$53,$00
 ongray_rowmap:
-  db $30,$41,$40,$44,$30,$00
+  db $3C,$41,$4C,$44,$3C,$00
 gradient_rowmap:
   db $20,$35,$10,$35,$10,$35,$10,$35,$10,$00
 pluge_rowmap:
   db $10,$46,$47,$48,$49,$10,$00
+pluge_sgb_rowmap:
+  db $10,$57,$68,$59,$10,$00
 gray_ramp_rowmap::
   db $10,$8A,$8B,$10,$00
 
@@ -537,11 +498,6 @@ smpte_load_map::
     push de
     push bc   ; Stack: height, rowdata start, rowmap pos
     .byteloop:
-      ; Copy the tile number
-      ld a,[de]  ; A[3:0]: tilenumber
-      and $0F
-      ld [hl],a
-
       ; Copy the attribute
       ld a,1
       ldh [rVBK],a
@@ -552,9 +508,17 @@ smpte_load_map::
       jr z,.nb3
         xor %00101000  ; move bit 3 to bit 5
       .nb3:
-      ld [hl+],a
+      ld [hl],a
       xor a
       ldh [rVBK],a
+
+      ; Copy the tile number
+      ; (on mono or SGB this overwrites the attribute)
+      ld a,[de]  ; A[3:0]: tilenumber
+      and $0F
+      ld [hl+],a
+
+      ; Advance to next byte
       inc de
       dec c
       jr nz,.byteloop
@@ -573,24 +537,19 @@ smpte_load_map::
 HALF_KHZ equ 2048-131
 
 section "smptebars", ROM0
+; These parts of the SMPTE test palette are not also included
+; in the SGB master palette
 smpte_palette_dark:
-  drgb $C0C0C0  ; white-green
-  drgb $C0C010
-  drgb $10C0C0
-  drgb $10C010
-  drgb $1010C0  ; blue-green
-  drgb $C01010
+  drgb $101010  ; Green to blue (nonblue replaced with black)
   drgb $C010C0
-  drgb $10C010
-  drgb $C0C0C0  ; row 2: nonblue colors replaced with black
-  drgb $101010
-  drgb $10C0C0
   drgb $101010
   drgb $1010C0
+  drgb $101010  ; Green to white (nonblue replaced with black)
+  drgb $10C0C0
   drgb $101010
-  drgb $C010C0
-  drgb $101010
+  drgb $C0C0C0
 
+smpte_palette_both:
   drgb $101010
   drgb $300068  ; purple (Q)
   drgb $FFFFFF  ; bright white
@@ -601,27 +560,48 @@ smpte_palette_dark:
   drgb $FF00FF
 
 smpte_palette_light:
-  drgb $FFFFFF  ; white-green
-  drgb $FFFF10
-  drgb $10FFFF
-  drgb $10FF10
-  drgb $1010FF  ; blue-green
-  drgb $FF1010
+  drgb $101010  ; Green to blue (nonblue replaced with black)
   drgb $FF10FF
-  drgb $10FF10
-  drgb $FFFFFF  ; row 2: nonblue colors replaced with black
-  drgb $101010
-  drgb $10FFFF
   drgb $101010
   drgb $1010FF
+  drgb $101010  ; Green to white (nonblue replaced with black)
+  drgb $10FFFF
   drgb $101010
-  drgb $FF10FF
-  drgb $101010
+  drgb $FFFFFF
 
+cbog_sgb_rects:
+  db $04*8+1  ; 1 packet holds up to 2 rectangles
+  db 2        ; number of rectangles
+
+  db %00000111  ; bit 0: inside, 1: border, 2: outside
+  db %00000101  ; inside and border to palette 1, outside to palette 0
+  db 10, 3, 19, 6
+
+  db %00000001  ; bit 0: inside, 1: border, 2: outside
+  db %00000101  ; inside and border to palette 0
+  db 0, 11, 9, 14
+
+  db 0, 0
+
+
+;;
+; 00: c0
+; 01: c1
+; 02: c2
+; 03: c3
+; 04: 7 c3, 1 c2
+; 05: 6 c2, 2 c1
+; 06: 5 c1, 3 c0
+; 07: 4 c0, 4 c1
+; 08: 4 c2, 4 c3
+; 09: 06 flipped
+; 0A: 05 flipped
+; 0B: 04 flipped
+; 0C: Grid square
 load_smpte_tiles:
   ld hl,CHRRAM0
   ld de,smptetiles_chr
-  ld b,10
+  ld b,13
   jp pb16_unpack_block
 
 activity_barsongray:
@@ -638,11 +618,12 @@ smpte_bars_engine:
 .restart:
   call clear_gbc_attr
 
-  ; Load palette and tiles
-  ld a,$80
-  ld bc,(6*8)*256+low(rBCPS)
-  ld hl,smpte_palette_dark
+  ; Load lightness-invariant part of SMPTE bars palette
+  ld a,$A0
+  ld bc,(2*8)*256+low(rBCPS)
+  ld hl,smpte_palette_both
   call set_gbc_palette
+
   call load_smpte_tiles
   ld de,smpte_rowmap
   ldh a,[curhelpsect]
@@ -664,11 +645,21 @@ smpte_bars_engine:
   or $80
   ldh [rNR34],a
 
-  ld a,$FF
-  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
+
+  ld a, %11100100
+  ldh [rLYC],a  ; disable lyc irq
+  ldh [rBGP],a  ; set SGB internal
+  ld a, [is_sgb]
+  ldh [need_sgb_update], a  ; mark as ready for re-send
+  or a
+  jr z, .init_not_sgb
+    ld hl, cbog_sgb_rects
+    call sgb_send
+  .init_not_sgb:
+
 .loop:
   ldh a,[curhelpsect]
   ld b,a
@@ -688,6 +679,8 @@ smpte_bars_engine:
     ldh a,[curpalette]
     cpl
     ldh [curpalette],a
+    ld a, [is_sgb]
+    ldh [need_sgb_update], a
   .notogglepalette:
   bit PADB_SELECT,b
   jr z,.notogglevol
@@ -697,19 +690,44 @@ smpte_bars_engine:
   .notogglevol:
 
   call wait_vblank_irq
+  ; load volume after vsync to ensure the sound starts at the
+  ; same time as the picture
+  ldh a,[curvolume]
+  ldh [rNR32],a
 
   ; Load palette and tiles
-  ld hl,smpte_palette_dark
+  ld hl,cbog_palette_dark
+  ld de,smpte_palette_dark
   ldh a,[curpalette]
   or a
   jr z,.notloadlight
-    ld hl,smpte_palette_light
+    ld hl,cbog_palette_light
+    ld de,smpte_palette_light
   .notloadlight:
   ld a,$80
-  ld bc,(4*8)*256+low(rBCPS)
+  ld bc,(2*8)*256+low(rBCPS)
   call set_gbc_palette
-  ldh a,[curvolume]
-  ldh [rNR32],a
+  ld h, d
+  ld l, e
+  ld a,$90
+  ld bc,(2*8)*256+low(rBCPS)
+  call set_gbc_palette
+
+  ldh a, [need_sgb_update]
+  or a
+  jr z, .not_send_sgb
+    xor a
+    ldh [need_sgb_update], a
+    ld d, a
+    ld e, a
+    ld bc,$1415
+    ld a, [curpalette]
+    or a
+    jr z,.sgb_is_dark
+      ld bc,$1617
+    .sgb_is_dark:
+    call sgb_set_palettes_bcde
+  .not_send_sgb:
 
   jr .loop
 
