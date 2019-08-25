@@ -131,10 +131,14 @@ cbog_palette_light::
   drgb $FF1010
   drgb $1010FF
 
-  ; 24-26: PLUGE test
+  ; 24-27: PLUGE test
 pluge_palette_common::
   drgb $686868
   drgb $989898
+  drgb $c8c8c8
+  drgb $f8f8f8
+  drgb $686868
+  drgb $686868
   drgb $c8c8c8
   drgb $f8f8f8
 
@@ -149,7 +153,7 @@ pluge_palette_ntsc::
   drgb $080008
   drgb $000800
 
-  ; 27-31: PLUGE Contrast test
+  ; 28-32: PLUGE Contrast test
 pluge_shark_palette::
   drgb $000000
   drgb $A8A8A8
@@ -199,7 +203,7 @@ sgb_cmd_clear_attrs::
   db 1        ; number of rectangles
 
   db %00000111  ; bit 0: inside, 1: border, 2: outside
-  db %00000000  ; inside and border to palette 2, outside to palette 0
+  db %00000000  ; inside and border to palette 0, outside to palette 0
   db 0, 0, 19, 17
 
   db 0, 0, 0, 0, 0, 0, 0, 0

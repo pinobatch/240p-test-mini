@@ -101,13 +101,27 @@ color_handlers:
   dw activity_barsongray
   dw activity_color_bleed
 super_handlers:
-  dw lame_boy_demo
+  dw activity_pluge
   dw activity_barsongray
   dw activity_color_bleed
 
 ; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "pluge", ROM0
+pluge_sgb_rects:
+  db $04*8+1  ; 1 packet holds up to 2 rectangles
+  db 2        ; number of rectangles
+
+  db %00000111  ; bit 0: inside, 1: border, 2: outside
+  db %00001010  ; inside and border to palette 2, outside to palette 0
+  db 10, 0, 19, 17  ; right half of screen
+
+  db %00000011
+  db %00001111  ; inside and border to palette 3
+  db 10, 13, 19, 17  ; bottom right
+
+  db 0, 0
+
 activity_pluge:
   xor a
   ldh [curpalette],a
@@ -133,8 +147,15 @@ activity_pluge:
   call pb16_unpack_block
 
   ; Load main map
-  ld hl,_SCRN0
   ld de,pluge_rowmap
+  ld a, [is_sgb]
+  or a
+  jr z,.not_sgb_alt_map
+    ld hl, pluge_sgb_rects
+    call sgb_send
+    ld de, pluge_sgb_rowmap
+  .not_sgb_alt_map:
+  ld hl,_SCRN0
   call smpte_load_map
   ld hl,pluge_palette_common
   ld bc,8*256+low(rBCPS)
@@ -158,11 +179,14 @@ activity_pluge:
     dec b
     jr nz,.sharkmaprowloop
 
-  ld a,$FF
-  ldh [rLYC],a  ; disable lyc irq
+  ld a,%11100100
+  ldh [rBGP], a
+  ldh [rLYC], a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
+  ld a, [is_sgb]
+  ldh [need_sgb_update], a
 
 .loop:
   ld b,helpsect_pluge
@@ -189,15 +213,19 @@ activity_pluge:
       xor a
     .no_palette_wraparound:
     ldh [curpalette],a
+    jr .schedule_sgb_update
   .notogglepalette:
 
   bit PADB_SELECT,b  ; Select: toggle background type
   jr z,.notogglebgtype
-  ldh a,[curvolume]
+    ldh a,[curvolume]
     xor 1
     ldh [curvolume],a
     xor a
     ldh [curpalette],a
+  .schedule_sgb_update:
+    ld a, [is_sgb]
+    ldh [need_sgb_update], a
   .notogglebgtype:
   ldh a,[curvolume]
   add a
@@ -227,6 +255,28 @@ activity_pluge:
   ld a,$80
   ld bc,(1*8)*256+low(rBCPS)
   call set_gbc_palette
+
+  ldh a, [need_sgb_update]
+  or a
+  jr z, .no_sgb_update
+    ldh a, [curpalette]
+    add 28
+    ld b, a
+    ld c, a
+    ld d, a
+    ld e, a
+    xor a
+    ldh [need_sgb_update], a
+
+    ldh a, [curvolume]
+    or a
+    jr nz,.sgb_not_shark_palette
+      dec b
+      dec b
+      ld de, $1819
+    .sgb_not_shark_palette:
+    call sgb_set_palettes_bcde
+  .no_sgb_update:
 
   jr .loop
 
@@ -455,7 +505,7 @@ gradient_rowmap:
 pluge_rowmap:
   db $10,$46,$47,$48,$49,$10,$00
 pluge_sgb_rowmap:
-  db $10,$57,$68,$59,$10,$00
+  db $10,$46,$47,$88,$10,$00
 gray_ramp_rowmap::
   db $10,$8A,$8B,$10,$00
 
