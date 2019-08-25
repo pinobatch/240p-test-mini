@@ -689,8 +689,8 @@ Color bleed
 
 == 144p Test Suite ==
 
-Ver. 0.18 (2019-05-02)
-Add PLUGE Contrast
+Ver. 0.19wip (2019-09-xx)
+Super Game Boy enhanced
 
 © 2011-2016
   Artemio Urbina
@@ -706,12 +706,16 @@ Concept: Artemio Urbina
   🐦 @Artemio
 Program: Damian Yerrick
   🐦 @PinoBatch
-
 Special thanks:
   Shmups Forum
   GBDev Forum & Discord
   Antonio Vivace
-
+Thank you to my patrons
+for sponsoring Super
+Game Boy enhancement:
+  Johnathan Roatch
+  Joe Parsell
+  Bassil S.
 ----
 You can help:
 - Run tests on authentic

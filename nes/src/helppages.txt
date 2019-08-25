@@ -772,6 +772,11 @@ even for MERCHANTABILITY
 or FITNESS FOR A
 PARTICULAR PURPOSE.
 ----
+Thank you to my patrons:
+  Johnathan Roatch
+  Joe Parsell
+  Bassil S.
+
 You can help this project by
 running the test on authentic
 and clone NES consoles, both

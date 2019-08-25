@@ -72,7 +72,7 @@ sharpness_brick_tile::
   dw `22221131
   dw `22222211
 
-section "cpsgrid_gfx1",ROMX
+section "cpsgrid_gfx1",ROM0
 cps_grid_chr::
   incbin "obj/gb/cps_grid.chrgb.pb16"
 sizeof_cps_grid_chr equ 128
