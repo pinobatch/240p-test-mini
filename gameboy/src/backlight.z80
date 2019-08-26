@@ -43,14 +43,11 @@ activity_backlight_zone::
   ldh [cursize],a
   dec a
   ldh [curpalette],a
-  call sgb_set_palette_gray
 
 .restart:
   call clear_gbc_attr
+  call sgb_set_palette_gray
   call load_backlight_chr
-
-  ; Clear nametable
-  ldh [held_keys],a
   call clear_scrn0_to_0
 
   ; Clear unused sprites
@@ -60,9 +57,7 @@ activity_backlight_zone::
 
   ; Blank screen
   xor a
-  call set_bgp
-  call set_obp0
-  call set_obp1
+  ldh [held_keys],a
   dec a
   ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21|OBJ_ON
