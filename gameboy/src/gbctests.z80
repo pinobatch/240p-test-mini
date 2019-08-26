@@ -82,8 +82,7 @@ activity_gbc_tests_menu::
   jr z, .have_activity_id
     add (super_handlers - color_handlers) / 2
   .have_activity_id:
-  call de_index_a
-  call jp_hl
+  call jumptable_de_a
 .skip_activity:
 
   ; Restore menu selection

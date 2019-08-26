@@ -46,11 +46,11 @@ SECTION "rst40", ROM0[$0040]
 SECTION "rst48", ROM0[$0048]
   jp stat_handler
 SECTION "rst50", ROM0[$0050]
-  jp timer_handler
+  reti  ; jp timer_handler
 SECTION "rst58", ROM0[$0058]
-  jp serial_handler
+  reti  ; jp serial_handler
 SECTION "rst60", ROM0[$0060]
-  jp joypad_handler
+  reti  ; jp joypad_handler
 
 SECTION "header", ROM0[$0100]
   nop

@@ -1118,19 +1118,6 @@ load_bleed_frame_a:
     jr nz,.loop
   ret
 
-autorepeat_60hz_if_sgb::
-  ld a, [is_sgb]
-  or a
-  jr z, autorepeat_normal
-autorepeat_60hz::
-  ld a,[das_timer]
-  cp 4
-  jr nc,autorepeat_normal
-  ld a,1
-  ld [das_timer],a
-autorepeat_normal:
-  jp autorepeat
-
 activity_full_stripes::
   ld a,helpsect_full_screen_stripes
 full_stripes_common::

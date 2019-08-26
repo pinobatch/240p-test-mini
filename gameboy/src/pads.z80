@@ -88,6 +88,18 @@ read_pad::
   or $F0   ; A7-4 = 1; A3-0 = unpressed keys
   ret
 
+autorepeat_60hz_if_sgb::
+  ld a, [is_sgb]
+  or a
+  jr z, autorepeat
+autorepeat_60hz::
+  ld a,[das_timer]
+  cp 4
+  jr nc, autorepeat
+  ld a,1
+  ld [das_timer],a
+  ; fall through
+
 ;;
 ; Adds held keys to new_keys, DAS_DELAY frames after press and
 ; every DAS_SPEED frames thereafter
@@ -130,8 +142,8 @@ autorepeat::
 detect_sgb::
   ; Try to set the SGB to 2-player mode
   di
-  ld hl,sgb_packet_twoplayers
-  call sgb_send
+  ld b, 1
+  call sgb_set_bplus1_players
   call sgb_wait
 
   ; When the key matrix is released, SGB returns player number in
@@ -152,9 +164,24 @@ detect_sgb::
 .isSGB:
   ld a, 1
 .haveSGB:
+
+  ; Save result and turn off 2-player mode
   ld [is_sgb],a
-  ld hl,sgb_packet_oneplayer
-  jp sgb_send
+  ld b, 0
+  ; fall through
+
+sgb_set_bplus1_players::
+  ld hl, help_line_buffer
+  push hl
+  ld a, ($11 << 3) + 1
+  ld [hl+], a
+  ld a, b
+  ld [hl+], a
+  xor a
+  ld c, 14
+  call memset_tiny
+  pop hl
+  jr sgb_send
 
 SIZEOF_SGB_PACKET EQU 16
 CHAR_BIT EQU 8
@@ -239,13 +266,3 @@ sgb_wait:
   or d
   jr nz, .loop
   ret
-
-sgb_packet_twoplayers:
-  db ($11 << 3) + 1
-  db 1
-  ds 14
-
-sgb_packet_oneplayer:
-  db ($11 << 3) + 1
-  db 0
-  ds 14
