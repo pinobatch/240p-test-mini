@@ -233,16 +233,16 @@ clear_scrn0_to_h::
 ; @return A=0
 clear_gbc_attr::
   call lcd_off
-  xor a
-  ld [help_bg_loaded],a
   ld a,[initial_a]
   cp $11
-  ret nz
-  ldh [rVBK],a
-  call clear_scrn0_to_0
-  ld b, 4
-  call memset
+  jr nz,.return_0
+    ldh [rVBK],a
+    call clear_scrn0_to_0
+    ld b, 4
+    call memset  ; clear the second one
+  .return_0:
   xor a
+  ld [help_bg_loaded],a
   ldh [rVBK],a
   ret
 

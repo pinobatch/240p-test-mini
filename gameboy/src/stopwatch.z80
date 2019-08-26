@@ -98,9 +98,6 @@ activity_stopwatch::
   call clear_gbc_attr
 
   ; Load background tiles
-  ld a,bank(stopwatchface_iu)
-  ld [rMBC1BANK1],a
-
   ld a,[initial_a]
   cp $11
   jr nz,.not_plane1

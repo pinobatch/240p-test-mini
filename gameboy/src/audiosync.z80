@@ -58,11 +58,7 @@ activity_audiosync::
   ldh [rNR11],a  ; Duty 50%
   call sgb_set_palette_gray
 
-  ; Turn on rendering (no sprites)
-  xor a
-  call set_bgp
-  call set_obp0
-  call set_obp1
+  ; Turn on rendering
   ld a,$FF
   ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_ON
@@ -86,19 +82,18 @@ activity_audiosync::
   ; A: Toggle pause, and start over if paused
   bit PADB_A,b
   jr z,.not_toggle_pause
-    ld a,[unpaused]
+    ldh a,[unpaused]
     xor $01  ; CPL doesn't set Z
-    ld [unpaused],a
+    ldh [unpaused],a
     jr nz,.startover
   .not_toggle_pause:
-
 
   ld a,[progress]
   cp RISEFALL_FRAMES + BEEP_FRAMES
   jr c,.notstartover
   .startover:
     xor a
-    ld [progress],a
+    ldh [progress],a
 
     ; End beep
     ldh [rNR12],a  ; volume and decay

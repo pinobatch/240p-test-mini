@@ -1133,8 +1133,8 @@ full_stripes_common::
   call clear_gbc_attr
 
   ; Hide background (tile 16) until ready
+;  xor a  ; A is 0 after clear_gbc_attr
   ld hl,CHRRAM0+256
-  xor a
   ld c,16
   call memset_tiny
 
