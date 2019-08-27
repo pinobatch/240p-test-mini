@@ -96,8 +96,25 @@ lame_boy_demo::
   call set_gbc_palette
 
   ; Show vblank counter
-  ld hl,_SCRN0
   ld a,[nmis]
+  push af
+  ld hl,_SCRN0
+  call puthex_raw
+  pop af
+  call bcd8bit
+  ld hl,_SCRN0+32
+  call puthex_raw
+  ld a,c  ; Ones digit
+  and $0F
+  or $10
+  ld [hl],a
+
+  ld a,[new_keys]
+  bit PADB_B,a
+  jr z,.loop
+  ret
+
+puthex_raw:
   push af
   swap a
   and $0F
@@ -107,27 +124,6 @@ lame_boy_demo::
   and $0F
   or $10
   ld [hl],a
-
-  ld a,[nmis]
-  call bcd8bit
-  ld hl,_SCRN0+32
-  ld b,a
-  swap a
-  and $0F
-  or $10
-  ld [hl+],a
-  ld a,b
-  and $0F
-  or $10
-  ld [hl+],a
-  ld a,c
-  and $0F
-  or $10
-  ld [hl],a
-
-  ld a,[new_keys]
-  bit PADB_B,a
-  jr z,.loop
   ret
 
 ; Background drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -152,15 +148,11 @@ draw_bg:
   ld h,$04
   ld de,_SCRN0
   ld bc,32*16
-  ld a,[initial_a]
-  cp $11
-  jr z,.is_gbc_sky
-  ld a, [is_sgb]
+  ldh a, [hw_capability]
   or a
-  jr z,.not_gbc_sky
-  .is_gbc_sky:
+  jr z,.not_color_sky
     ld h,e
-  .not_gbc_sky:
+  .not_color_sky:
   call memset
 
   ; Draw top of floor
@@ -192,20 +184,21 @@ draw_bg:
 
   ; Write initial A and B values and result of Super Game Boy test
   ld hl,help_line_buffer
+  push hl
   ld a,[initial_a]
   ld b,"A"
   call lettercolonhex
   ld a,[initial_b]
   ld b,"B"
   call spacelettercolonhex
-  ld a,[is_sgb]
-  ld b,"S"
+  ldh a,[hw_capability]
+  ld b,"C"
   call spacelettercolonhex
   ld [hl],0
 
   ; Draw the text
   call vwfClearBuf
-  ld hl,help_line_buffer
+  pop hl
   ld b,4
   call vwfPuts
   ld hl,CHRRAM2+$60*16
@@ -274,9 +267,9 @@ draw_bg:
   ldh [rOBP0],a
 
   ; If SGB, send SGB screen layout and palettes
-  ld a, [is_sgb]
-  or a
-  ret z
+  ldh a, [hw_capability]
+  rra
+  ret nc
   ld a, %11100100
   ldh [rBGP],a
   ldh [rOBP0],a
@@ -298,18 +291,18 @@ bg_draw_one_block:
   ld [hl-],a
 
   ; If GBC, set the attributes as well
-  ld a,[initial_a]
-  cp $11
-  jr nz,.not_gbc
-    ldh [rVBK],a
-    ld [hl+],a
-    ld [hl-],a
-    res 5,l
-    ld [hl+],a
-    ld [hl-],a
-    xor a
-    ldh [rVBK],a
-  .not_gbc:
+  ldh a, [hw_capability]
+  add a
+  ret nc
+  ld a, 1
+  ldh [rVBK],a
+  ld [hl+],a
+  ld [hl-],a
+  res 5,l
+  ld [hl+],a
+  ld [hl-],a
+  xor a
+  ldh [rVBK],a
   ret
 
 spacelettercolonhex:

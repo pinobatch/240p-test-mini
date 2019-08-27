@@ -29,7 +29,6 @@ cur_keys:: ds 1
 new_keys:: ds 1
 das_keys:: ds 1
 das_timer:: ds 1
-is_sgb:: ds 1
 
 SECTION "rom_pads", ROM0
 
@@ -89,9 +88,9 @@ read_pad::
   ret
 
 autorepeat_60hz_if_sgb::
-  ld a, [is_sgb]
-  or a
-  jr z, autorepeat
+  ldh a, [hw_capability]
+  rra
+  jr nc, autorepeat
 autorepeat_60hz::
   ld a,[das_timer]
   cp 4
@@ -139,6 +138,8 @@ autorepeat::
 
 ; Super Game Boy detection ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;
+; Sets hw_capability to $01 if on a Super Game Boy.
 detect_sgb::
   ; Try to set the SGB to 2-player mode
   di
@@ -148,7 +149,7 @@ detect_sgb::
 
   ; When the key matrix is released, SGB returns player number in
   ; bits 1-0 (active low).
-  ld a,[rP1]
+  ldh a, [rP1]
   and $03
   xor $03
   jr nz, .isSGB
@@ -156,20 +157,17 @@ detect_sgb::
   ; When the key matrix is asserted and released, such as when one
   ; controller is read, SGB advances to the next controller.
   call read_pad
-  ld a,[rP1]
+  ldh a, [rP1]
   and $03
   xor $03
-  jr z, .haveSGB ; a = 0
-
+  jr z, .notSGB ; a = 0
 .isSGB:
-  ld a, 1
-.haveSGB:
+  ld a, $01
+  ldh [hw_capability],a
+.notSGB:
 
-  ; Save result and turn off 2-player mode
-  ld [is_sgb],a
+  ; Now turn off 2-player mode
   ld b, 0
-  ; fall through
-
 sgb_set_bplus1_players::
   ld hl, help_line_buffer
   push hl
@@ -186,12 +184,14 @@ sgb_set_bplus1_players::
 SIZEOF_SGB_PACKET EQU 16
 CHAR_BIT EQU 8
 
+;;
+; Clears the Super Game Boy attribute table to 0.
 clear_sgb_attr::
   ld hl, sgb_cmd_clear_attrs
 sgb_send_if_sgb::
-  ld a, [is_sgb]
-  or a
-  ret z
+  ldh a, [hw_capability]
+  rra
+  ret nc
 
 ;;
 ; Sends a Super Game Boy packet starting at HL.

@@ -500,9 +500,9 @@ shadow_sprite_bg_loaders:
 
 load_gus_portrait:
   call clear_scrn0_to_0
-  ld a,[initial_a]
-  cp $11
-  jr z,load_gus_portrait_gbc
+  ldh a, [hw_capability]
+  add a
+  jr c,load_gus_portrait_gbc
 
   ld a,%11100100
   call set_bgp

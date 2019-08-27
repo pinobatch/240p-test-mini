@@ -28,9 +28,9 @@ section "main", ROM0
 
 main::
   call clear_gbc_attr
-  ld a, [is_sgb]
-  or a
-  call nz, sgb_load_master_palette
+  ldh a, [hw_capability]
+  rra
+  call c, sgb_load_master_palette
   
   ; Set up vblank handler
   ld a,IEF_VBLANK

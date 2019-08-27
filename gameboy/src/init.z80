@@ -47,6 +47,9 @@ STACK_SIZE EQU 64
 section "stack", WRAM0[$D000-STACK_SIZE]
 stack_top: ds STACK_SIZE
 
+section "bootregs_hram", HRAM
+hw_capability:: ds 1
+
 section "bootregs", WRAM0
 initial_a:: ds 1
 initial_b:: ds 1
@@ -63,22 +66,34 @@ reset_handler::
   ; A=FF: Game Boy Pocket or SGB2
   ; A=11, B.0=0: GBC
   ; A=11, B.0=1: GBA
-  ld [initial_a], a
-  ld c,a
-  ld a,b
-  ld [initial_b], a
+  ; We'll be translating that to a single hardware capability value:
+  ; $00 for mono handheld, $01 for Super Game Boy,
+  ; $80 for GBC, or $C0 for GBA.
+  ; But we also save initial A and B values for machine type
+  ; diagnostic display in "Lame boy".
+  ld hl, initial_a
+  ld [hl+], a
+  ld [hl], b
+  xor $11
+  cp 1  ; Carry true if GBC or GBA, false for mono
 
-  ; Release the key matrix right now
+  ; While carry is set for GBC or clear otherwise, initialize
+  ; controller reading now because SGB detection uses it.
   ld a,P1F_NONE
   ldh [rP1],a
-
-  ; Initialize controller-related variables so that holding a button
-  ; at power-on doesn't produce inconsistent results
-  xor a
+  ld a, 0
   ld [cur_keys],a
   ld [das_keys],a
   ld [das_timer],a
-  ld [is_sgb],a
+
+  jr nc, .not_gba
+    rra
+    bit 0, b
+    scf  ; Keep GBC status in carry for decision on whether to fade
+    jr z, .not_gba
+    ld a, $C0
+  .not_gba:
+  ldh [hw_capability], a
 
   ; To distinguish the SGB models from GB, the game's header must
   ; declare SGB awareness ($0146=$03 and $014B=$33).  Then the game
@@ -92,46 +107,36 @@ reset_handler::
   ; Because SGB detection takes a few frames, fade out the IPL logo
   ; while it's happening.  Skip it on GBC for two reasons:
   ; GBC+SGB is not authentic hardware, and GBC IPL already faded
-  ; out its logo.
-  ld b,1
-  ld a,c
-  cp a,$11
-  jr z,.isgbc
+  ; out its logo.  Carry is still set on GBC.
+  ld b, 1  ; Wait for vblank only once if on GBC
+  jr c,.no_fade
 
   ld a,%00001000  ; bits 3-2: dark gray
   ldh [rBGP],a
   call detect_sgb
   ld a,%00000100  ; bits 3-2: light gray
   ldh [rBGP],a
-
   ld b,10
 .fadelogo:
   call wait_not_vblank
-.isgbc:
+.no_fade:
   call busy_wait_vblank  ; Spin because interrupts are not yet set up
   dec b
   jr nz,.fadelogo
 
   ; Rendering can be turned off only during blanking.  Fortunately
   ; the fadeout loop left us in vblank.  So set up the video
-  ; hardware.  The previous loop left A=0.
+  ; hardware.
   xor a
   ldh [rLCDC], a  ; turn off rendering
   ldh [rSCY], a   ; clear scroll
   ldh [rSCX], a   ; clear scroll
   ldh [rNR52], a  ; disable (and reset) audio
 
-  ; Copy the sprite DMA routine to HRAM
-  ld hl,run_dma_master
-  ld de,run_dma
-  ld bc,run_dma_end-run_dma_master
-  call memcpy
-
   if bgbcompat
     ; BGB triggers spurious "reading uninitialized WRAM" exceptions
     ; when DMAing the X, tile number, and attribute of an OAM entry
     ; whose Y is offscreen.
-    xor a
     ld hl,SOAM
     ld c,160
     call memset_tiny
@@ -149,6 +154,12 @@ reset_handler::
     ld c,136  ; used size plus 8 for the spare tile
     call memset_tiny
   endc
+
+  ; Copy the sprite DMA routine to HRAM
+  ld hl,run_dma_master
+  ld de,run_dma
+  ld bc,run_dma_end-run_dma_master
+  call memcpy
 
   jp main
 

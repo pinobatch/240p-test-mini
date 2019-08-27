@@ -37,18 +37,15 @@ activity_about_gbc_tests:
 ; An additional menu of tests for SGB or GBC
 activity_gbc_tests_menu::
   ; First ensure that the machine is SGB or GBC.
-  ld a,[initial_a]
-  cp $11
-  jr z,.loop
-  ld a,[is_sgb]
+  ldh a,[hw_capability]
   or a
   jr z, activity_about_gbc_tests
 
 .loop:
-  ld a, [is_sgb]
   ld b, helpsect_color_tests_menu
-  or a
-  jr z, .have_help_page_id
+  ldh a, [hw_capability]
+  rra
+  jr nc, .have_help_page_id
     ld b, helpsect_sgb_color_tests_menu
   .have_help_page_id:
   ld a,PADF_A|PADF_B|PADF_START|PADF_DOWN|PADF_UP|PADF_LEFT|PADF_RIGHT
@@ -76,10 +73,10 @@ activity_gbc_tests_menu::
   ; Get the handler for this activity
   ld de,color_handlers
   ld b, a
-  ld a, [is_sgb]
-  or a
+  ldh a, [hw_capability]
+  rra
   ld a, b
-  jr z, .have_activity_id
+  jr nc, .have_activity_id
     add (super_handlers - color_handlers) / 2
   .have_activity_id:
   call jumptable_de_a
@@ -147,9 +144,9 @@ activity_pluge:
 
   ; Load main map
   ld de,pluge_rowmap
-  ld a, [is_sgb]
-  or a
-  jr z,.not_sgb_alt_map
+  ldh a, [hw_capability]
+  rra
+  jr nc,.not_sgb_alt_map
     ld hl, pluge_sgb_rects
     call sgb_send
     ld de, pluge_sgb_rowmap
@@ -184,7 +181,7 @@ activity_pluge:
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ld [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ld a, [is_sgb]
+  ldh a, [hw_capability]
   ldh [need_sgb_update], a
 
 .loop:
@@ -223,7 +220,7 @@ activity_pluge:
     xor a
     ldh [curpalette],a
   .schedule_sgb_update:
-    ld a, [is_sgb]
+    ldh a, [hw_capability]
     ldh [need_sgb_update], a
   .notogglebgtype:
   ldh a,[curvolume]
@@ -256,8 +253,8 @@ activity_pluge:
   call set_gbc_palette
 
   ldh a, [need_sgb_update]
-  or a
-  jr z, .no_sgb_update
+  rra
+  jr nc, .no_sgb_update
     ldh a, [curpalette]
     add 28
     ld b, a
@@ -340,7 +337,7 @@ activity_gradient_bars:
     ld a,[hl]
     or a
     jr nz,.addgridnz
-      ld a,$10  ; grid tile
+      ld a,$0C  ; grid tile
     .addgridnz:
     ld [hl+],a
     inc c
@@ -701,7 +698,7 @@ smpte_bars_engine:
   ld a, %11100100
   ldh [rLYC],a  ; disable lyc irq
   ldh [rBGP],a  ; set SGB internal
-  ld a, [is_sgb]
+  ldh a, [hw_capability]
   ldh [need_sgb_update], a  ; mark as ready for re-send
   ld hl, cbog_sgb_rects
   call sgb_send_if_sgb
@@ -725,7 +722,7 @@ smpte_bars_engine:
     ldh a,[curpalette]
     cpl
     ldh [curpalette],a
-    ld a, [is_sgb]
+    ldh a, [hw_capability]
     ldh [need_sgb_update], a
   .notogglepalette:
   bit PADB_SELECT,b
@@ -760,8 +757,8 @@ smpte_bars_engine:
   call set_gbc_palette
 
   ldh a, [need_sgb_update]
-  or a
-  jr z, .not_send_sgb
+  rra
+  jr nc, .not_send_sgb
     xor a
     ldh [need_sgb_update], a
     ld d, a
@@ -834,9 +831,10 @@ load_color_bleed::
     jr nz,.p0rowgrploop
 
   ; Load attributes
-  ld a, [initial_a]
-  cp $11
-  jr nz, .load_sgb_attrs
+  ldh a, [hw_capability]
+  rra
+  jr c, .load_sgb_attrs
+  ld a, 1
   ldh [rVBK],a
   xor a
   ld hl,_SCRN0

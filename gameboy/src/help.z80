@@ -131,10 +131,12 @@ updowna_msg:  db $86,$87,"A: Go",0
 b_exit_msg:   db 82, "B: Exit",0
 gb_msg:       db 96, "GB",0
 sgb_msg:      db 90, "SGB",0
-gbp_msg:      db 90, "GBp",0  ; lowercase to distinguish from Player
+mgb_msg:      db 82, "pocket",0
 sgb2_msg:     db 85, "SGB2",0
 gbc_msg:      db 90, "GBC",0
 gba_msg:      db 90, "GBA",0
+machine_type_names:
+  dw gb_msg, sgb_msg, mgb_msg, sgb2_msg, gbc_msg, gba_msg
 
 section "help",ROM0
 
@@ -382,9 +384,9 @@ help_load_bg:
   ; Load tiles used by menu
   ld de,helptiles
   ld b,sizeof_helptiles/16
-  ld a,[initial_a]
-  cp $11
-  jr nz,.notgbc1
+  ldh a,[hw_capability]
+  add a
+  jr nc,.notgbc1
     ld de,helptiles_gbc
     ld b,sizeof_helptiles_gbc/16
   .notgbc1:
@@ -402,9 +404,9 @@ help_load_bg:
 
   ; Clear VWF canvas in pattern table
   ld e,0
-  ld a,[initial_a]
-  cp $11
-  jr nz,.notgbc2
+  ldh a,[hw_capability]
+  add a
+  jr nc,.notgbc2
     dec e
   .notgbc2:
   ld hl,CHRRAM0
@@ -528,9 +530,9 @@ help_load_bg:
   ld hl,_SCRN1+16*32+1
   call .draw_wnd_hbar
   
-  ld a,[initial_a]
-  cp $11
-  jr nz,.notgbcfinal
+  ldh a,[hw_capability]
+  add a
+  jr nc,.notgbcfinal
     call .load_gbc_only
     jr .donegbcfinal
   .notgbcfinal:
@@ -1013,42 +1015,24 @@ help_draw_status_line:
   jr nz,.have_type_hl
   
   ; Display machine type
-  ld a,[is_sgb]
-  ld c,a
-  ld a,[initial_b]
-  ld b,a
-  ld a,[initial_a]
-  ; A=$11: Game Boy Color/Advance; $FF: Game Boy Pocket/SGB2;
-  ; others: original/Super Game Boy
-  cp $11
-  jr z,.not_mono
-  cp $FF
-  jr nz,.dmg_or_sgb
-  
-  ; is_sgb distinguishes SGB2 from GB Pocket
-  ld hl,gbp_msg
-  xor a
-  xor c
-  jr z,.have_type_hl
-  ld hl,sgb2_msg
-  jr .have_type_hl
-
-.dmg_or_sgb:
-  ; is_sgb distinguishes SGB from GB
-  ld hl,gb_msg
-  xor a
-  xor c
-  jr z,.have_type_hl
-  ld hl,sgb_msg
-  jr .have_type_hl
-
-.not_mono:
-  ; B bit 0 distinguishes GBA from GBC
-  ld hl,gbc_msg
-  bit 0,b
-  jr z,.have_type_hl
-  ld hl,gba_msg
-.have_type_hl:
+  ldh a, [hw_capability]
+  cp $80
+  jr nc, .identify_color
+    ; $00: DMG/MGB; $01: SGB/SGB2
+    ld hl, initial_a  ; bit 7 true if DMG or MGB
+    bit 7, [hl]
+    jr nz, .type_id_add_2
+    jr .have_type_id
+  .identify_color:
+    ; $80: GBC; $C0: GBA
+    rlca
+    rlca
+  .type_id_add_2:
+    add 2
+  .have_type_id:
+    ld de, machine_type_names
+    call de_index_a
+  .have_type_hl:
   ld a,[hl+]
   ld b,a
   call vwfPuts

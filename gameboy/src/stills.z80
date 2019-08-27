@@ -305,12 +305,10 @@ activity_gray_ramp::
   dec a
   ldh [rLYC],a  ; disable lyc irq
 
-  ld a,[initial_a]
-  cp $11
-  jr z,.load_gbc
-  ld a,[is_sgb]
-  or a
-  jr z,.load_mono
+  ldh a, [hw_capability]
+  add a
+  jr c, .load_gbc
+  jr z, .load_mono
     call load_gray_ramp_sgb
     ld bc, $0809
     ld de, $0A0B
@@ -709,9 +707,9 @@ activity_solid_screen::
   call wait_vblank_irq
 
   ; Write color to both GB and GBC palette ports
-  ld a, [initial_a]
-  cp $11
-  jr nz, .set_color_not_gbc
+  ldh a, [hw_capability]
+  bit 7, a
+  jr z, .set_color_not_gbc
     call calc_custom_color
     ld a,$80
     ldh [rBCPS],a
@@ -721,10 +719,9 @@ activity_solid_screen::
     ldh [rBCPD],a
     jr .custom_color_written
   .set_color_not_gbc:
-  ld a, [is_sgb]
-  or a
+  rra
   ldh a, [curpalette]
-  jr z, .set_color_dmg
+  jr nc, .set_color_dmg
     ; Super Game Boy: Write color only if changed
     ldh a, [lastlcdc]
     or a
@@ -753,14 +750,10 @@ activity_solid_screen::
   ret nz  ; quit now if exit
   ld b,a
   ld c,4
-  ld a,[initial_a]
-  cp $11
-  jr z,.is_5_palettes
-  ld a, [is_sgb]
+  ldh a, [hw_capability]
   or a
   jr z, .not_5_palettes
-  .is_5_palettes:
-    ; A on white screen on GBC only: Toggle custom mode
+    ; A on white screen on GBC or SGB: Toggle custom mode
     bit PADB_A,b
     jr z,.not_toggle_custom
     ldh a,[curpalette]

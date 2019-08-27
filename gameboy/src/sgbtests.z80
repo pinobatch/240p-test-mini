@@ -295,9 +295,9 @@ sgb_set_palette_b::
 ; @param D index into last PAL_TRN for subpalette 2
 ; @param E index into last PAL_TRN for subpalette 3
 sgb_set_palettes_bcde::
-  ld a, [is_sgb]
-  or a
-  ret z
+  ldh a, [hw_capability]
+  rra
+  ret nc
   ld a, $40
   ; fall through
 

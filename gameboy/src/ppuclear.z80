@@ -233,9 +233,10 @@ clear_scrn0_to_h::
 ; @return A=0
 clear_gbc_attr::
   call lcd_off
-  ld a,[initial_a]
-  cp $11
-  jr nz,.return_0
+  ldh a, [hw_capability]
+  add a
+  jr nc,.return_0
+    ld a, 1
     ldh [rVBK],a
     call clear_scrn0_to_0
     ld b, 4

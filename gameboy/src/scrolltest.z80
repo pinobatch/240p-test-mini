@@ -289,9 +289,9 @@ activity_hillzone_scroll::
   ldh a,[cur_x+1]
   ld h,a
   ld de, hillzone_bgp_dmg
-  ld a, [is_sgb]
-  or a
-  jr z, .not_sgb_bgp_sequence
+  ldh a, [hw_capability]
+  rra
+  jr nc, .not_sgb_bgp_sequence
     ld de, hillzone_bgp_sgb
   .not_sgb_bgp_sequence:
   call set_hillzone_scroll_pos_de
@@ -503,13 +503,13 @@ load_hillzone_bg::
   ld [vblank_lcdc_value],a
   ld [stat_lcdc_value],a
 
-  ld a,[initial_a]
-  cp $11
-  jr nz,.not_gbc_attrs
+  ldh a, [hw_capability]
+  add a
+  jr nc,.not_gbc_attrs
+
+  ; Set up attribute table
   ld a,1
   ldh [rVBK],a
-
-  ; Set up approximate attribute table (to be refined later)
   ld hl,_SCRN0
   ld de,.attrstrips
 .attrloop1:
@@ -776,9 +776,9 @@ load_kiki_bg:
   ldh [rBGP],a
   ldh [rLYC],a  ; disable lyc irq
 
-  ld a,[initial_a]
-  cp $11
-  jr nz,.not_gbc
+  ldh a, [hw_capability]
+  add a
+  jr nc,.not_gbc
 
     ld hl,kikibgpalette_gbc
     ld bc,(kikibgpalette_gbc_end-kikibgpalette_gbc) * 256 + low(rBCPS)

@@ -68,15 +68,11 @@ activity_motion_blur::
   ldh [on_time],a
 
   ; Calculate starting on and back shades: 3 and 1 for DMG,
-  ; 31 and 15 for GBC
+  ; 31 and 15 for GBC or SGB
   ld b, 3
-  ld a,[initial_a]
-  cp $11
-  jr z,.init_is_color_shade
-  ld a, [is_sgb]
+  ldh a, [hw_capability]
   or a
   jr z,.init_is_dmg_shade
-  .init_is_color_shade:
     ld b, 31
   .init_is_dmg_shade:
   ld a, b
@@ -148,17 +144,16 @@ activity_motion_blur::
   call motionblur_calc_bgp
   call wait_vblank_irq
 
-  ; Set bg palette
-  ldh a,[bgp_value]
+  ; Set mono palette
+  ld hl, bgp_value
+  ld a, [hl]
   ldh [rBGP],a
-  ld a,[initial_a]
-  cp $11
-  jr nz,.no_write_gbc_palette
-    ld hl,bgp_value
-    ld bc,$0800|low(rBCPS)
-    ld a,$80
-    call set_gbc_palette
-  .no_write_gbc_palette:
+
+  ; Set GBC palette if on GBC
+  ld bc,$0800|low(rBCPS)
+  ldh a, [hw_capability]
+  and $80
+  call nz, set_gbc_palette
 
   ; Blit help map
   ld bc,$0206  ; size
@@ -221,20 +216,16 @@ motionblur_handle_presses:
 
   ; Ranges differ between mono and GBC
   ld de,row_high_low
-  ld a,[initial_a]
-  cp $11
-  jr z,.is_gbc_ranges
-  ld a, [is_sgb]
+  ldh a, [hw_capability]
   or a
   jr z,.not_gbc_ranges
-  .is_gbc_ranges:
     ld de,row_high_low_gbc
   .not_gbc_ranges:
   ld a,[help_cursor_y]
   call de_index_a  ; Valid values are L <= x < H
   ld a,[$FF00+c]
 
-  ; Left/Right: Change value on this row
+  ; Left/Right: Change value on this row.  D = old value
   ld d, a
   bit PADB_LEFT,b
   jr z,.no_cursor_left
@@ -331,9 +322,9 @@ motionblur_calc_bgp:
   ld d,a
   ldh a,[back_shade]
   ld b,a
-  ld a, [is_sgb]
-  or a
-  jr z, .not_sgb
+  ldh a, [hw_capability]
+  rra
+  jr nc, .not_sgb
     ld b, $00
     ld de, $0203
   .not_sgb:
@@ -358,18 +349,18 @@ motionblur_calc_bgp:
   .no_destripe:
   ; b=c=back shade, d=even rows shade, e=odd rows shade
 
-  ld a,[initial_a]
-  cp $11
-  jr z,.is_gbc
+  ldh a,[hw_capability]
+  add a
+  jr c,.is_gbc
 
     ; If not running, use the front shade with the maximum contrast
     ldh a,[is_running]
-    rl a
+    add a
     jr c,.mono_have_text_shade
       ld c, 1
-      ld a, [is_sgb]
-      or a
-      jr nz, .mono_have_text_shade
+      ldh a, [hw_capability]
+      rra
+      jr c, .mono_have_text_shade
       dec c
       bit 1, b
       jr nz, .mono_have_text_shade
