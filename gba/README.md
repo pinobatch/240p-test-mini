@@ -19,11 +19,10 @@ Interface software for GameCube.
 
 Once the suite is running, the credits will appear.  You can navigate
 the menu with the Control Pad and the A and B Buttons.  There are
-three pages of tests: one with mostly still images, one with more
-interactive tests, and one exclusive to Game Boy Color that tests
-color balance.  Each test is controlled with the Control Pad and the
-A and Select Buttons.  To show help for any test, press Start or read
-src/helppages.txt. To leave a test, press the B Button.
+two pages of tests: one with mostly still images and one with more
+interactive tests.  Each test is controlled with the Control Pad and
+the A and Select Buttons.  To show help for any test, press Start or
+read src/helppages.txt. To leave a test, press the B Button.
 
 Because the controls match the Game Boy Color version, the L and R
 (shoulder) buttons are not used.
@@ -55,10 +54,32 @@ Artemio Urbina maintains the upstream suite on five platforms:
 * Sega Dreamcast, as MIL-CD
 * Nintendo GameCube and Wii, as GameCube disc and DOLs for SD loader
 
+The name
+--------
+NTSC analog televisions were designed for interlaced video conforming
+to CCIR [System M and System J], which specify an analog video
+signal with 15.734 kHz by 59.94 Hz sync frequencies and 480 out of
+525 lines.  Most video game consoles before the Dreamcast bent the
+rules, producing progressive video with 240 out of 262 or 263 lines.
+This was out of spec yet within TVs' tolerances.  This sort of signal
+came to be called "240p" video.
+
+Some handhelds drive their internal LCD with System M-like timings.
+For example, the Game Gear's display has 144 active lines, which
+are centered in the 240p output of EvilTim's [Game Gear RGB] mod.
+The GBA, on the other hand, uses an incompatibly slower 13.6 kHz
+horizontal sync.  Game Boy Player has to use a frame buffer to
+convert the timing to 240p or 480i, which adds lag.  This is why
+the GBA port is renamed.
+
+[System M and System J]: https://en.wikipedia.org/wiki/CCIR_System_M
+[Game Gear RGB]: http://members.optusnet.com.au/eviltim/ggrgb/ggrgb.html
+
 Limits
 ------
 * Alternate 240p/480i is omitted because Game Boy Player offers
-  no control over the host system's interlace mode.
+  no control over the host system's interlace mode.  GBI users
+  can use the native GameCube suite instead.
 * The true IRE levels of the GameCube's output when running Game Boy
   Player have not yet been measured.
 
@@ -91,7 +112,7 @@ invited to post in its [gbadev thread].
 [gbadev thread]: http://forum.gbadev.org/viewtopic.php?t=18168
 
 Copyright 2011-2018 Artemio Urbina  
-Copyright 2018 Damian Yerrick
+Copyright 2018-2019 Damian Yerrick
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -62,10 +62,32 @@ Artemio Urbina maintains the upstream suite on five platforms:
 * Sega Dreamcast, as MIL-CD
 * Nintendo GameCube and Wii, as GameCube disc and DOLs for SD loader
 
+The name
+--------
+NTSC analog televisions were designed for interlaced video conforming
+to CCIR [System M and System J], which specify an analog video
+signal with 15.734 kHz by 59.94 Hz sync frequencies and 480 out of
+525 lines.  Most video game consoles before the Dreamcast bent the
+rules, producing progressive video with 240 out of 262 or 263 lines.
+This was out of spec yet within TVs' tolerances.  This sort of signal
+came to be called "240p" video.
+
+Some handhelds drive their internal LCD with System M-like timings.
+For example, the Game Gear's display has 144 active lines, which
+are centered in the 240p output of EvilTim's [Game Gear RGB] mod.
+The Game Boy, on the other hand, uses an incompatibly slower 9.2 kHz
+horizontal sync.  Super Game Boy has to use a frame buffer to
+convert the timing to 240p or 480i, which adds lag.  This is why
+the Game Boy port is renamed.
+
+[System M and System J]: https://en.wikipedia.org/wiki/CCIR_System_M
+[Game Gear RGB]: http://members.optusnet.com.au/eviltim/ggrgb/ggrgb.html
+
 Limits
 ------
 * Linearity: No support for non-square NTSC or PAL pixel aspect
   ratios when used through Super Game Boy.
+* Gradient and SMPTE color bars are not available on SGB.
 * Sound Test: No "Crowd" because GB PCM is limited to 4 bits.
 * Alternate 240p/480i: SGB and GB Player offer no control over
   the host systems' interlace modes except through SGB JUMP.
