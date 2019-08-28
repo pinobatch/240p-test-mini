@@ -88,7 +88,7 @@ activity_shadow_sprite::
   jr nz,.restart
 
   ; Process input
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   ldh a,[held_keys]
   or b
@@ -104,7 +104,7 @@ activity_shadow_sprite::
     ldh [cur_shape],a
   .no_toggle_shape:
 
-  ld a,[cur_keys]
+  ldh a,[cur_keys]
   ld b,a
   bit PADB_A,a
   jr nz,.a_held
@@ -167,7 +167,7 @@ activity_shadow_sprite::
 
     jr .a_done
   .a_held:
-    ld a,[new_keys]
+    ldh a,[new_keys]
     and PADF_UP|PADF_LEFT|PADF_RIGHT
     ld b,a
     jr z,.a_done
@@ -460,10 +460,9 @@ get_shadow_frame_number:
 
   ; If flashing reticle, the chosen frame must match the low bit
   ; of the retrace count
-  ld a,[cur_frame]
-  ld b,a
-  ld a,[nmis]
-  add b
+  ld a, [cur_frame]
+  ld hl, nmis
+  add [hl]
   rra
   ret c
   ; Match? Use frame 0

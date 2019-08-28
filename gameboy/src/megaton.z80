@@ -118,7 +118,7 @@ activity_megaton::
   ; 2. Not enough colors to display
 
   ; Seed the RNG to nmis*257+256
-  ld a,[nmis]
+  ldh a,[nmis]
   ld c,a
   inc a
   ld b,a
@@ -152,7 +152,7 @@ activity_megaton::
   jp nz,.restart
 
   ; Input handling
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_B,a
   jr z,.not_exit
     ; Turn off audio and end test
@@ -161,7 +161,7 @@ activity_megaton::
     ret  
   .not_exit:
   call handle_cursor_move
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_A,a
   jr z,.not_A_press
     call grade_press
@@ -341,14 +341,14 @@ activity_megaton_complete:
   call wait_vblank_irq
   ld a,%01101100
   call set_bgp
-  ld a,[new_keys]
+  ldh a,[new_keys]
   and PADF_B|PADF_START
   jr z,.loop
   ret
 
 
 handle_cursor_move:
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
 
   ; Up/Down: Move cursor

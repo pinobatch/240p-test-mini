@@ -187,7 +187,7 @@ activity_grid_scroll::
   jr nz,.restart
 
   ; Process input
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   ldh a,[held_keys]
   or b
@@ -203,7 +203,7 @@ activity_grid_scroll::
   .not_select:
 
   ; A+Direction: Change direction
-  ld a,[cur_keys]
+  ldh a,[cur_keys]
   bit PADB_A,a
   jr nz,.a_held
     ; If A was pressed and released, toggle pause and clear
@@ -276,7 +276,7 @@ activity_hillzone_scroll::
   call read_pad_help_check
   jr nz,.restart
 
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_B,a
   ret nz
 
@@ -310,7 +310,7 @@ activity_kiki_scroll::
   call read_pad_help_check
   jr nz,.restart
 
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_B,a
   ret nz
 
@@ -343,7 +343,7 @@ init_grid_scroll_vars:
 
 process_1d_input:
   ; Process input
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
 
   ; Left/Right: Change direction

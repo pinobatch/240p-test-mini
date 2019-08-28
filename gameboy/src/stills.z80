@@ -334,7 +334,7 @@ activity_gray_ramp::
   call read_pad_help_check
   jr nz,.restart
   call wait_vblank_irq
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_B,a
   jr z,.loop
   ret
@@ -498,7 +498,7 @@ activity_linearity::
   call set_bgp
 
   ; Process input
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
 
   bit PADB_SELECT,b
@@ -624,7 +624,7 @@ activity_sharpness::
   .no_sgb_palette_change:
 
   ; Process input
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
 
   bit PADB_SELECT,b
@@ -745,7 +745,7 @@ activity_solid_screen::
   ldh [rSCX],a
 
   ; Choose among 5 palettes on GBC or 4 on GB
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_B,a
   ret nz  ; quit now if exit
   ld b,a
@@ -774,7 +774,7 @@ activity_solid_screen::
     ; Autorepeat for left and right keys
     ld b,PADF_LEFT|PADF_RIGHT
     call autorepeat_60hz_if_sgb
-    ld a,[new_keys]
+    ldh a,[new_keys]
     ld b,a
     ldh a,[curscry]
 
@@ -1022,7 +1022,7 @@ activity_cps_grid::
   call set_gbc_palette
 
   ; Process input
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
 
   bit PADB_SELECT,b
@@ -1180,7 +1180,7 @@ full_stripes_common::
   ; Process input
   ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
   call autorepeat_60hz
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   bit PADB_B,b
   ret nz

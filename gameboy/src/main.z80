@@ -27,17 +27,17 @@ jumptable_de_a::
 section "main", ROM0
 
 main::
-  call clear_gbc_attr
-  ldh a, [hw_capability]
-  rra
-  call c, sgb_load_master_palette
-  
   ; Set up vblank handler
   ld a,IEF_VBLANK
   ldh [rIE],a  ; enable IRQs
-  xor a
-  ld [nmis],a  ; avoid uninitialized read warning
+  call clear_gbc_attr
+  ; xor a
+  ldh [nmis],a  ; avoid uninitialized read warning
   ldh [rIF],a  ; Acknowledge any pending IRQs
+
+  ldh a, [hw_capability]
+  rra
+  call c, sgb_load_master_palette
   ei
   call help_init
 

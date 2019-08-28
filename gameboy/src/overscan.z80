@@ -102,26 +102,26 @@ activity_overscan::
   call autorepeat
 
   ; Process input
-  ld a,[new_keys]
-  ld b,a
-  bit PADB_B,b
+  ldh a,[new_keys]
+  bit PADB_B,a
   ret nz
+  ld d,a
 
   ; Select: Invert
-  bit PADB_SELECT,b
+  bit PADB_SELECT,a
   jr z,.not_invert
     ldh a,[cur_palette]
     cpl
     ldh [cur_palette],a
   .not_invert:
 
-  ld a,[cur_keys]
+  ldh a,[cur_keys]
   bit PADB_A,a
   jr nz,.a_held
 
     ; Control Pad: Choose a side
     ld a,PADF_RIGHT|PADF_LEFT|PADF_UP|PADF_DOWN
-    and b
+    and d
     jr z,.a_done
     swap a
     ld [cur_side],a
@@ -132,7 +132,7 @@ activity_overscan::
     call ctz
     ld c,b    ; C: Current side being changed (0-3)
 
-    ld a,[new_keys]
+    ld a, d   ; D: keys Down this frame
     and PADF_RIGHT|PADF_LEFT|PADF_UP|PADF_DOWN
     jr z,.a_done
     swap a
@@ -318,7 +318,7 @@ overscan_draw_sides:
   ret
 
 ;;
-; Sets B to the trailing zero bits in A, trashing A.
+; Sets B to the number of trailing zero bits in A, trashing A.
 ctz::
   ld b,0
 .sidepick:

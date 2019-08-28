@@ -188,10 +188,10 @@ activity_stopwatch::
   jp nz,.restart
 
   ; Process input
-  ld a,[new_keys]
-  ld b,a
+  ldh a,[new_keys]
   bit PADB_B,a
   ret nz
+  ld b,a
 
   ; A: Start/stop
   bit PADB_A,b

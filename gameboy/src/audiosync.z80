@@ -70,7 +70,7 @@ activity_audiosync::
   call read_pad_help_check
   jr nz,.restart
 
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   bit PADB_B,b
   jr z,.not_quit

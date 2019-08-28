@@ -162,7 +162,7 @@ read_pad_help_check::
   pop bc
 
   ; If Start not pressed, return
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_START,a
   ret z
 
@@ -259,7 +259,7 @@ helpscreen::
   call autorepeat
 
   ; Start to handle keypresses
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   ld a,[help_allowed_keys]
   and b

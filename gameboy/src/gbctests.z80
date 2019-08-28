@@ -52,8 +52,9 @@ activity_gbc_tests_menu::
   call helpscreen
 
   ; B to return to the main menu
-  ld hl,new_keys
-  bit PADB_B,[hl]
+  ldh a, [new_keys]
+  ld d, a
+  and PADF_B
   ret nz
 
   ; Save menu selection and get the index into the handler list
@@ -64,7 +65,7 @@ activity_gbc_tests_menu::
   push bc
 
   ; Start does About instead of what is selected
-  bit PADB_START,[hl]
+  bit PADB_START, d
   jr z,.not_start
     call activity_about_gbc_tests
     jr .skip_activity
@@ -189,7 +190,7 @@ activity_pluge:
   call read_pad_help_check
   jr nz,.restart
 
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   bit PADB_B,b  ; B: exit
   ret nz
@@ -368,7 +369,7 @@ activity_gradient_bars:
   call read_pad_help_check
   jr nz,.restart
 
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   bit PADB_B,b
   ret nz
@@ -709,7 +710,7 @@ smpte_bars_engine:
   call read_pad_help_check
   jr nz,.restart
 
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
   bit PADB_B,b
   jr z,.no_quit

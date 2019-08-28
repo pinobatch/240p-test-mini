@@ -26,18 +26,18 @@ section "irqvars",HRAM
 ; Used for bankswitching BG CHR RAM
 vblank_lcdc_value:: ds 1
 stat_lcdc_value:: ds 1
+nmis:: ds 1
 
 ; The display list at $CE00-$CE9F gets DMA'd to OAM after every frame
 ; in which sprites moved.  Also called "shadow OAM".
 section "ram_ppuclear",WRAM0[$CE00]
 SOAM:: ds 160
-nmis:: ds 1
 oam_used:: ds 1  ; How much of the display list is used
 
 SECTION "vblank_handler", ROM0[$0040]
   push af
-  ld a,[nmis]
-  inc a
+  ldh a,[vblank_lcdc_value]
+  ldh [rLCDC],a
   jp vblank_tail
 
 SECTION "stat_handler", ROM0[$0048]
@@ -48,6 +48,13 @@ SECTION "stat_handler", ROM0[$0048]
   reti
 
 SECTION "rom_ppuclear", ROM0
+
+vblank_tail:
+  ldh a,[nmis]
+  inc a
+  ldh [nmis],a
+  pop af
+  reti
 
 ;;
 ; Waits for blanking and turns off rendering.
@@ -139,13 +146,6 @@ lcd_clear_oam::
   inc c
   jr nz, .rowloop
   ret
-
-vblank_tail:
-  ld [nmis],a
-  ldh a,[vblank_lcdc_value]
-  ldh [rLCDC],a
-  pop af
-  reti
 
 ;;
 ; Emulates mono palette feature on Game Boy Color.

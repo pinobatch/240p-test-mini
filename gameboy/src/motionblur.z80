@@ -135,7 +135,7 @@ activity_motion_blur::
   jr nz,.restart
 
   ; Process input
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_B,a
   ret nz
   call motionblur_handle_presses
@@ -183,7 +183,7 @@ activity_motion_blur::
 motionblur_handle_presses:
   ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
   call autorepeat_60hz_if_sgb
-  ld a,[new_keys]
+  ldh a,[new_keys]
   ld b,a
 
   ; Ignore the Control Pad while flicker is running

@@ -42,7 +42,6 @@ def load_syms(filename):
 with open("gb240p.gb", "rb") as infp:
     data = infp.read()
 syms, falsepos_ranges = load_syms("gb240p.sym")
-print(falsepos_ranges)
 
 runthreshold = 32
 runbyte, runlength, runs = 0xC9, 0, []

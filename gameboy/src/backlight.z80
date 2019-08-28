@@ -69,29 +69,38 @@ activity_backlight_zone::
   call read_pad_help_check
   jr nz,.restart
 
-  ; Process input
-  ld a,[new_keys]
-  ld b,a
+  ; Process new presses
+  ldh a,[new_keys]
+  ld c,a
+  bit PADB_B, c  ; B: quit
+  ret nz
+  bit PADB_SELECT, c
+  jr z,.not_select
+    ldh a,[curpalette]
+    cpl
+    ldh [curpalette],a
+  .not_select:
+
+  ; Add new presses to things that can act on release
   ldh a,[held_keys]
-  or b
+  or c
   ldh [held_keys],a
 
-  ld a,[cur_keys]
-  ld b,a
-  bit PADB_A,b
-  jr z,.not_A
+  ldh a,[cur_keys]
+  ld b, a
+  rra
+  jr nc,.not_A
 
     ; A+Up/Down: Change size
-    ld a,[new_keys]
+    ld a, c
     and PADF_UP|PADF_DOWN
     jr z,.size_unchanged
-      ld b,a
       ldh a,[cursize]
-      bit PADB_UP,b
+      bit PADB_UP,c
       jr z,.not_size_up
         inc a
       .not_size_up:
-      bit PADB_DOWN,b
+      bit PADB_DOWN,c
       jr z,.not_size_down
         dec a
       .not_size_down:
@@ -106,7 +115,7 @@ activity_backlight_zone::
     jr .done_A
 
   .not_A:
-    ; B: held keys
+    ; cur_keys in B
     ldh a,[xpos]
     bit PADB_LEFT,b
     jr z,.not_left
@@ -150,16 +159,6 @@ activity_backlight_zone::
       ldh [held_keys],a
     .no_release_A:
   .done_A:
-
-  ld a,[new_keys]
-  bit PADB_B,a
-  ret nz
-  bit PADB_SELECT,a
-  jr z,.not_select
-    ldh a,[curpalette]
-    cpl
-    ldh [curpalette],a
-  .not_select:
 
   ; Move sprite
   ld hl,SOAM

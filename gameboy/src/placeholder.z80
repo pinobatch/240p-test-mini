@@ -96,20 +96,19 @@ lame_boy_demo::
   call set_gbc_palette
 
   ; Show vblank counter
-  ld a,[nmis]
-  push af
+  ldh a,[nmis]
   ld hl,_SCRN0
   call puthex_raw
-  pop af
+  ldh a,[nmis]
   call bcd8bit
-  ld hl,_SCRN0+32
+  ld l, 32
   call puthex_raw
   ld a,c  ; Ones digit
   and $0F
   or $10
   ld [hl],a
 
-  ld a,[new_keys]
+  ldh a,[new_keys]
   bit PADB_B,a
   jr z,.loop
   ret
@@ -123,7 +122,7 @@ puthex_raw:
   pop af
   and $0F
   or $10
-  ld [hl],a
+  ld [hl+],a
   ret
 
 ; Background drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -343,7 +342,7 @@ LEFT_WALL equ 24
 RIGHT_WALL equ 136
 
 move_player::
-  ld a,[cur_keys]
+  ldh a,[cur_keys]
   ld e,a
 
   ; Accelerate to right only if the player is holding right
