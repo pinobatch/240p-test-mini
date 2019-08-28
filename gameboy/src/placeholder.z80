@@ -68,7 +68,7 @@ lame_boy_demo::
 
   ld a,LCDCF_ON|OBJ_ON|BG_NT0|BG_CHR21
   ldh [rLCDC],a
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
 
 .loop:
   ld b,helpsect_lame_boy
@@ -618,7 +618,7 @@ Lx_add                 rb 1
   ld [hl+],a
   ; Go to next tile: add 2 if 8x16 or 1 if not
   inc d
-  ld a,[vblank_lcdc_value]
+  ldh a,[vblank_lcdc_value]
   bit 2,a
   jr z,.not8x16
   inc d

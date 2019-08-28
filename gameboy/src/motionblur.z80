@@ -121,12 +121,11 @@ activity_motion_blur::
     jr nz,.rectrowloop
 
   ; Turn on rendering (no sprites)
-  ld a,255
+  ld a,%10101010
   ldh [rLYC],a  ; disable lyc irq
-  ld a,%01010101  ; Palette all gray until calculated
-  call set_bgp
+  call set_bgp  ; Palette all gray until calculated
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
   call motionblur_update_sgb
 

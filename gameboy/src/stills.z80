@@ -324,7 +324,7 @@ activity_gray_ramp::
   ; Turn on rendering
   call run_dma
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_8X16
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
   ; Now just wait for a B press.  Fortunately, we don't have
@@ -486,7 +486,7 @@ activity_linearity::
   ldh [rLYC],a  ; disable lyc irq
   call set_bgp
   ldh a,[curlcdc]
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:
@@ -577,7 +577,7 @@ activity_sharpness::
   ldh [rLYC],a  ; disable lyc irq
   call set_bgp
   ld a,[curlcdc]
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
   cpl
   ldh [lastlcdc], a
@@ -639,7 +639,7 @@ activity_sharpness::
     ldh a,[curlcdc]
     xor LCDCF_BG9C00
     ldh [curlcdc],a
-    ld [vblank_lcdc_value],a
+    ldh [vblank_lcdc_value],a
   .not_A:
 
   bit PADB_B,b
@@ -697,7 +697,7 @@ activity_solid_screen::
   ld a,%11000000
   call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:
@@ -998,7 +998,7 @@ activity_cps_grid::
   ldh [rLYC],a  ; disable lyc irq
   call set_bgp
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:
@@ -1168,7 +1168,7 @@ full_stripes_common::
 
   ; Turn on LCD
   ldh a,[curlcdc]
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:
@@ -1209,7 +1209,7 @@ full_stripes_common::
     ldh a,[curlcdc]
     xor LCDCF_WINON
     ldh [curlcdc],a
-    ld [vblank_lcdc_value],a
+    ldh [vblank_lcdc_value],a
   .not_select:
 
   call wait_vblank_irq

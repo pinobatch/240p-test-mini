@@ -78,8 +78,8 @@ activity_shadow_sprite::
   call set_obp0
   call set_obp1
   ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR21|OBJ_8X16
-  ld [vblank_lcdc_value],a
-  ld [stat_lcdc_value],a
+  ldh [vblank_lcdc_value],a
+  ldh [stat_lcdc_value],a
   ldh [rLCDC],a
   
 .loop:

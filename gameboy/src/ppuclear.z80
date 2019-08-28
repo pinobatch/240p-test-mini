@@ -34,6 +34,18 @@ SOAM:: ds 160
 nmis:: ds 1
 oam_used:: ds 1  ; How much of the display list is used
 
+SECTION "vblank_handler", ROM0[$0040]
+  push af
+  ld a,[nmis]
+  inc a
+  jp vblank_tail
+
+SECTION "stat_handler", ROM0[$0048]
+  push af
+  ldh a,[stat_lcdc_value]
+  ldh [rLCDC],a
+  pop af
+  reti
 
 SECTION "rom_ppuclear", ROM0
 
@@ -128,19 +140,9 @@ lcd_clear_oam::
   jr nz, .rowloop
   ret
 
-vblank_handler::
-  push af
-  ld a,[nmis]
-  inc a
+vblank_tail:
   ld [nmis],a
-  ld a,[vblank_lcdc_value]
-  ldh [rLCDC],a
-  pop af
-  reti
-
-stat_handler::
-  push af
-  ld a,[stat_lcdc_value]
+  ldh a,[vblank_lcdc_value]
   ldh [rLCDC],a
   pop af
   reti

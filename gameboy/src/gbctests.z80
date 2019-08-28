@@ -179,7 +179,7 @@ activity_pluge:
   ldh [rBGP], a
   ldh [rLYC], a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
   ldh a, [hw_capability]
   ldh [need_sgb_update], a
@@ -228,7 +228,7 @@ activity_pluge:
   add a
   add a  ; bit 3: SCRN0 or SCRN1
   or LCDCF_ON|BG_NT0|BG_CHR01
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
 
   call wait_vblank_irq
 
@@ -359,8 +359,8 @@ activity_gradient_bars:
   call set_gbc_palette
 
   ldh a,[cur_lcdc]
-  ld [vblank_lcdc_value],a
-  ld [stat_lcdc_value],a
+  ldh [vblank_lcdc_value],a
+  ldh [stat_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:
@@ -377,8 +377,8 @@ activity_gradient_bars:
     ldh a,[cur_lcdc]
     xor LCDCF_BG9C00
     ldh [cur_lcdc],a
-    ld [vblank_lcdc_value],a
-    ld [stat_lcdc_value],a
+    ldh [vblank_lcdc_value],a
+    ldh [stat_lcdc_value],a
   .not_toggle_grid:
 
   call wait_vblank_irq
@@ -692,7 +692,7 @@ smpte_bars_engine:
   ldh [rNR34],a
 
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
   ld a, %11100100

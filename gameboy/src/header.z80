@@ -41,10 +41,6 @@ SECTION "rst30", ROM0[$0030]
   ret
 SECTION "rst38", ROM0[$0038]
   ret
-SECTION "rst40", ROM0[$0040]
-  jp vblank_handler
-SECTION "rst48", ROM0[$0048]
-  jp stat_handler
 SECTION "rst50", ROM0[$0050]
   reti  ; jp timer_handler
 SECTION "rst58", ROM0[$0058]

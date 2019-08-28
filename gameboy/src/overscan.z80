@@ -86,11 +86,11 @@ activity_overscan::
   call sgb_set_palette_gray
 
   ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR01|OBJ_ON
-  ld [vblank_lcdc_value],a
-  ld [stat_lcdc_value],a
+  ldh [vblank_lcdc_value],a
+  ldh [stat_lcdc_value],a
   ldh [rLCDC],a
   ld a,STAT_LYCIRQ
-  ld [rSTAT],a
+  ldh [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
 

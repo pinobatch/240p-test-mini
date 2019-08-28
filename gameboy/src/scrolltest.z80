@@ -178,7 +178,7 @@ activity_grid_scroll::
   cpl
   ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:
@@ -269,7 +269,7 @@ activity_hillzone_scroll::
   ld hl, hillzone_sgb_rects
   call sgb_send_if_sgb
 
-  ld a,[vblank_lcdc_value]
+  ldh a,[vblank_lcdc_value]
   ldh [rLCDC],a
 .loop:
   ld b,helpsect_hill_zone_scroll_test
@@ -500,8 +500,8 @@ load_hillzone_bg::
 
   ; Set up palette
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
-  ld [vblank_lcdc_value],a
-  ld [stat_lcdc_value],a
+  ldh [vblank_lcdc_value],a
+  ldh [stat_lcdc_value],a
 
   ldh a, [hw_capability]
   add a
@@ -807,7 +807,7 @@ load_kiki_bg:
   .not_gbc:
 
   ld a,LCDCF_ON|BG_CHR21|BG_NT0
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
   ; Expects palette %11100100 during action
   ret

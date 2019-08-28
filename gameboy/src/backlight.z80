@@ -61,7 +61,7 @@ activity_backlight_zone::
   dec a
   ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21|OBJ_ON
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 
 .loop:

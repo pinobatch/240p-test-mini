@@ -124,14 +124,12 @@ activity_megaton::
   ld b,a
   call srand
 
-  ; Turn on rendering (blank now, run later)
+  ; Turn on rendering
   ld a,255
   ldh [rLYC],a  ; disable lyc irq
-  call set_bgp
-  call set_obp0
-  call set_obp1
+  call set_obp0  ; set sprite palette to all black
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_8X16
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
   call sgb_set_palette_gray
 
@@ -272,7 +270,7 @@ activity_megaton::
 
 activity_megaton_complete:
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
-  ld [vblank_lcdc_value],a
+  ldh [vblank_lcdc_value],a
   
   call vwfClearBuf
   
