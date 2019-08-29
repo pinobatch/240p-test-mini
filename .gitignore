@@ -40,6 +40,8 @@
 /gba/.map
 __pycache__/
 *.pyc
+/common/tools/dte
+/common/tools/dte.exe
 
 # this is NES and Game Boy homebrew, not DSiWare
 *.DS_Store

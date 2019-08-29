@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 #
 # Makefile for Game Boy template
-# Copyright 2014-2018 Damian Yerrick
+# Copyright 2014-2019 Damian Yerrick
 #
 # Copying and distribution of this file, with or without
 # modification, are permitted in any medium without royalty
@@ -23,32 +23,41 @@ objlist = header init \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
   uniur gfxincbins
 
+# Native tools
+CC := gcc
+CFLAGS := -std=gnu99 -Wall -Wextra -DNDEBUG -Os
+
+# Things that depend on Windows vs. not-Windows
 ifdef COMSPEC
   ifndef GBEMU
     GBEMU := start ""
   endif
   PY := py -3
+  DOTEXE:=.exe
 else
   ifndef GBEMU
     GBEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/bgb/bgb.exe
   endif
   PY := python3
+  DOTEXE:=
 endif
 
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 BMP2GB := $(PY) ../common/tools/pilbmp2nes.py --planes "0,1"
 
 .SUFFIXES:
-.PHONY: run all dist zip
+.PHONY: run all dist zip ctools clean
 
 run: $(title).gb
 	$(GBEMU) $<
 all: $(title).gb
+ctools: ../common/tools/dte$(EXE)
 
 clean:
 	-rm obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
 	-rm obj/gb/*.chrgb obj/gb/*.chrgb16 obj/gb/*.nam obj/gb/*.chr1
 	-rm obj/gb/*.iu
+	-rm ../common/tools/dte$(DOTEXE)
 
 # Packaging
 
@@ -142,6 +151,10 @@ obj/gb/Gus_portrait_GBC.z80: tools/gbcnamtool.py \
 	$(PY) $^ --incruniq --pb16-attrs $@
 
 # Help me!
-obj/gb/%.hlp.z80: tools/paginate_help.py src/%.txt
-	$(PY) $^ > $@
+obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
+  ../common/tools/dtefe.py ../common/tools/dte$(DOTEXE)
+	$(PY) tools/paginate_help.py $< > $@
+
+../common/tools/dte$(DOTEXE): ../common/tools/dte.c
+	$(CC) -static $(CFLAGS) -o $@ $^
 
