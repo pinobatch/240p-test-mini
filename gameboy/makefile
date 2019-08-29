@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 #
-# Makefile for Game Boy template
+# Makefile for 144p Test Suite for Game Boy
 # Copyright 2014-2019 Damian Yerrick
 #
 # Copying and distribution of this file, with or without
@@ -23,7 +23,7 @@ objlist = header init \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
   uniur gfxincbins
 
-# Native tools
+# Flags for native tools written in C
 CC := gcc
 CFLAGS := -std=gnu99 -Wall -Wextra -DNDEBUG -Os
 

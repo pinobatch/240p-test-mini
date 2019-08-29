@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 #
-# Makefile for 240p test suite
-# Copyright 2011-2016 Damian Yerrick
+# Makefile for 240p test suite for NES
+# Copyright 2011-2019 Damian Yerrick
 #
 # Copying and distribution of this file, with or without
 # modification, are permitted in any medium without royalty
@@ -30,6 +30,10 @@ srcdir = src
 imgdir = tilesets
 cimgdir = ../common/tilesets
 
+# Flags for native tools written in C
+CC := gcc
+CFLAGS := -std=gnu99 -Wall -Wextra -DNDEBUG -Os
+
 # Windows needs .exe suffixed to the names of executables; UNIX does
 # not.  COMSPEC will be set to the name of the shell on Windows and
 # not defined on UNIX.  Also the Windows Python installer puts
@@ -48,7 +52,7 @@ endif
 DEBUGEMU2 := Mesen.exe
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 
-.PHONY: run runalt debug debug2 debugalt dist zip all clean
+.PHONY: run runalt debug debug2 debugalt dist zip all clean ctools
 
 run: $(title).nes
 	$(EMU) $<
@@ -72,6 +76,7 @@ $(title)-$(version).zip: zip.in all \
 	-advzip -z3 $@
 
 all: $(title)-bnrom.nes $(title).nes
+ctools: ../common/tools/dte$(EXE)
 
 $(objdir)/index.txt: makefile
 	echo "Files produced by build tools go here, but caulk goes where?" > $@
@@ -79,6 +84,7 @@ $(objdir)/index.txt: makefile
 clean:
 	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.?b53
 	-rm $(objdir)/*.sav $(objdir)/*.iu53 map.txt bnmap.txt
+	-rm ../common/tools/dte$(DOTEXE)
 
 # Rules for PRG ROM
 
@@ -169,6 +175,9 @@ $(objdir)/pluge_shark_4color.chr: $(cimgdir)/pluge_shark_4color.png
 	$(BMP2) -H 32 $< $@
 
 # Help me!
-$(objdir)/%.hlp.s: tools/paginate_help.py $(srcdir)/%.txt
-	$(PY) $^ > $@
+$(objdir)/%.hlp.s: $(srcdir)/%.txt tools/paginate_help.py \
+  ../common/tools/dtefe.py ../common/tools/dte$(DOTEXE)
+	$(PY) tools/paginate_help.py $< > $@
 
+../common/tools/dte$(DOTEXE): ../common/tools/dte.c
+	$(CC) -static $(CFLAGS) -o $@ $^

@@ -8,7 +8,7 @@ commontoolspath = os.path.normpath(os.path.join(
 ))
 sys.path.append(commontoolspath)
 from parsepages import lines_to_docs
-from dte import dte_compress
+from dtefe import dte_compress
 import cp240p
 
 def ca65_escape_bytes(blo):
