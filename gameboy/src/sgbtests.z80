@@ -1,8 +1,9 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-section "sgbcolors", ROM0
+section "sgbcolors", ROM0, ALIGN[3]
 sgb_master_palette:
+gbmonopalette::
   ; 0: Grays
   drgb $F8F8F8
   drgb $A8A8A8

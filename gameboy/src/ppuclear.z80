@@ -38,7 +38,7 @@ SECTION "vblank_handler", ROM0[$0040]
   push af
   ldh a,[vblank_lcdc_value]
   ldh [rLCDC],a
-  jp vblank_tail
+  jr vblank_tail
 
 SECTION "stat_handler", ROM0[$0048]
   push af
@@ -47,8 +47,7 @@ SECTION "stat_handler", ROM0[$0048]
   pop af
   reti
 
-SECTION "rom_ppuclear", ROM0
-
+SECTION "vblank_tail", ROM0[$0051]
 vblank_tail:
   ldh a,[nmis]
   inc a
@@ -56,6 +55,11 @@ vblank_tail:
   pop af
   reti
 
+; A lot of this file is broken into little tiny sections, one for
+; each routine, so that the linker can squeeze them into tiny holes
+; between aligned or fixed-address sections
+
+SECTION "lcd_off", ROM0
 ;;
 ; Waits for blanking and turns off rendering.
 ;
@@ -78,6 +82,8 @@ lcd_off::
   res 7, [hl]
   ret
 
+SECTION "wait_vblank_irq", ROM0
+
 ;;
 ; Waits for the vblank ISR to increment the count of vertical blanks.
 ; Will lock up if DI, vblank IRQ off, or LCD off.
@@ -90,6 +96,8 @@ wait_vblank_irq::
   cp [hl]
   jr z,.loop
   ret
+
+SECTION "busy_wait_vblank", ROM0
 
 ;;
 ; Waits for forced blank (rLCDC bit 7 clear) or vertical blank
@@ -111,6 +119,8 @@ busy_wait_vblank::
   jr c, .wait
   ret
 
+SECTION "wait_not_vblank", ROM0
+
 ;;
 ; Busy-wait for being out of vblank.  Use this for game loop timing
 ; if interrupts aren't in use yet.
@@ -120,14 +130,44 @@ wait_not_vblank::
   jr nc, wait_not_vblank
   ret
 
+SECTION "cls", ROM0
+
+clear_scrn0_to_0::
+  ld h, 0
+clear_scrn0_to_h::
+  ld de,_SCRN0
+  ld bc,32*32
+  jp memset
+
+SECTION "load_gbc_palette", ROM0
+
+;;
+; Loads native GBC palette data.
+; @param A offset into palette memory (0, 8, 16, ..., 56) plus $80
+; @param B number of bytes to copy: 8 times number of subpalettes
+; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
+; @param HL data source
+; @return HL at end, C increased by 1, B = 0, DE unchanged
+set_gbc_palette::
+  ld [$FF00+c],a
+  inc c
+.loop:
+  ld a,[hl+]
+  ld [$FF00+c],a
+  dec b
+  jr nz,.loop
+  ret
+
+SECTION "rom_ppuclear", ROM0
+
 ;;
 ; Moves sprites in the display list from SOAM+[oam_used] through
 ; SOAM+$9C offscreen by setting their Y coordinate to 0, which is
 ; completely above the screen top (16).
 lcd_clear_oam::
   ; Destination address in shadow OAM
-  ld h,high(SOAM)
-  ld a,[oam_used]
+  ld hl, oam_used
+  ld a, [hl]
   and $FC
   ld l,a
 
@@ -206,30 +246,6 @@ set_gbc_mono_palette::
   ret
 
 ;;
-; Loads native GBC palette data.
-; @param A offset into palette memory (0, 8, 16, ..., 56) plus $80
-; @param B number of bytes to copy: 8 times number of subpalettes
-; @param C palette port to write: LOW(rBCPS) or LOW(rOCPS)
-; @param HL data source
-; @return HL at end, C increased by 1, B = 0, DE unchanged
-set_gbc_palette::
-  ld [$FF00+c],a
-  inc c
-  .loop:
-    ld a,[hl+]
-    ld [$FF00+c],a
-    dec b
-    jr nz,.loop
-  ret
-
-clear_scrn0_to_0::
-  ld h, 0
-clear_scrn0_to_h::
-  ld de,_SCRN0
-  ld bc,32*32
-  jp memset
-
-;;
 ; Turns off rendering, marks help page as needing to be reloaded,
 ; and clears the attribute plane of the GBC tilemaps.
 ; @return A=0
@@ -277,18 +293,3 @@ load_nam::
   dec c
   jr nz,load_nam
   ret
-
-section "GBMONOPALETTE", ROM0, ALIGN[3]
-GBMONO_GREEN equ 0
-gbmonopalette::
-  if GBMONO_GREEN
-  drgb $E8F840
-  drgb $90C040
-  drgb $408040
-  drgb $004040
-  else
-  drgb $F8F8F8
-  drgb $A8A8A8
-  drgb $585858
-  drgb $000000
-  endc
