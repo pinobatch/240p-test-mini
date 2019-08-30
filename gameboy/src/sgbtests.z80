@@ -208,21 +208,7 @@ pluge_shark_palette::
   drgb $FF0000
   drgb $0000C8
 
-
 sgb_master_palette_end:
-
-sgb_cmd_freeze:
-  db $17*8+1
-  db $01  ; Freeze current screen
-  rept 14
-    db $00
-  endr
-
-sgb_cmd_load_master_palette:
-  db $0B*8+1
-  rept 15
-    db $00
-  endr
 
 ; An activity that uses PAL01 instead of PAL_SET may need to
 ; clear attributes first
@@ -257,8 +243,9 @@ sgb_load_trn_tilemap:
 
 sgb_load_master_palette::
   ; Freeze display while doing transfers
-  ld hl, sgb_cmd_freeze
-  call sgb_send
+  ld a, $17*8+1
+  ld b, $01  ; Freeze current screen
+  call sgb_send_ab
   
   ; Load master palette into CHRRAM0
   call sgb_load_trn_tilemap
@@ -270,8 +257,9 @@ sgb_load_master_palette::
   ; Do the transfer
   ld a, LCDCF_ON|LCDCF_BGON|LCDCF_BG8000|LCDCF_BG9800
   ldh [rLCDC], a
-  ld hl, sgb_cmd_load_master_palette
-  call sgb_send
+  ld a, $0B*8+1
+  ld b, 0
+  call sgb_send_ab
 
   ; Turn LCD back off, unfreeze, and load help palette
   call lcd_off

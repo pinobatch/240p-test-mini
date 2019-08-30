@@ -170,15 +170,35 @@ detect_sgb::
 
   ; Now turn off 2-player mode
   ld b, 0
+  ; fall through
+
+;;
+; Set the number of controllers to read to B + 1, where B is
+; 0, 1, or 3 for 1, 2, or 4 (multitap only) players.
 sgb_set_bplus1_players::
+  ld a, ($11 << 3) + 1
+  ; fall through
+
+;;
+; Send a 1-packet SGB command whose first two bytes are A and B
+; and whose remainder is zero filled.
+sgb_send_ab::
+  ld c, 0
+  ; fall through
+
+;;
+; Send a 1-packet SGB command whose first three bytes are A, B, and C
+; and whose remainder is zero filled.
+sgb_send_abc::
   ld hl, help_line_buffer
   push hl
-  ld a, ($11 << 3) + 1
   ld [hl+], a
   ld a, b
   ld [hl+], a
+  ld a, c
+  ld [hl+], a
   xor a
-  ld c, 14
+  ld c, 13
   call memset_tiny
   pop hl
   jr sgb_send
