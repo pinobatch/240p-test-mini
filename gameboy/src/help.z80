@@ -155,6 +155,8 @@ help_init::
 ; Reads the controller, and if the Start button was pressed,
 ; show help screen B and set Z. Otherwise, set NZ so that
 ; the activity can JP NZ back to its VRAM init.
+; @return A: new_keys (or $FF if help was shown);
+;   Z: clear if help was shown or set otherwise
 read_pad_help_check::
   ; Read the controller
   push bc
@@ -587,10 +589,7 @@ help_load_bg:
   ; Load palette
   ld a,%01101100
   call set_bgp
-  ld a,%01101100
-  call set_obp0
-
-  ret
+  jp set_obp0
 
 .load_gbc_only:
   ; Fill BG attribute with back wall palette number
@@ -702,9 +701,7 @@ help_load_bg:
   call set_gbc_palette
   ld bc,(helpobjpalette_gbc_end-helpobjpalette_gbc) * 256 + low(rOCPS)
   ld a,$80
-  call set_gbc_palette
-
-  ret
+  jp set_gbc_palette
 
 .draw_wnd_hbar:
   ld c,WINDOW_WIDTH
@@ -1071,6 +1068,8 @@ help_put2dig:
 
 ; Navigation of page ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+section "help_get_doc_bounds",ROM0
+
 ;;
 ; Gets the current document's page range.
 ; @param help_cur_doc which document
@@ -1086,6 +1085,8 @@ help_get_doc_bounds:
   ld e,[hl]
   ld d,a
   ret
+
+section "help_de_index_a",ROM0
 
 ;;
 ; Reads element A of an array of unsigned short *.

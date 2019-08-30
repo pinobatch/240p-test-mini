@@ -350,7 +350,7 @@ activity_gradient_bars:
   ldh [rIE],a
   ld a,STATF_LYC
   ldh [rSTAT],a
-  ld a,%11110111
+  ld a,%11110111  ; Set color 0 for backdrop area
   call set_bgp
   ldh [rLYC],a  ; Disable until first vblank
 
@@ -359,12 +359,11 @@ activity_gradient_bars:
   ld a,$80
   call set_gbc_palette
 
+.loop:
   ldh a,[cur_lcdc]
   ldh [vblank_lcdc_value],a
   ldh [stat_lcdc_value],a
   ldh [rLCDC],a
-
-.loop:
   ld b,helpsect_gradient_color_bars
   call read_pad_help_check
   jr nz,.restart
@@ -378,8 +377,6 @@ activity_gradient_bars:
     ldh a,[cur_lcdc]
     xor LCDCF_BG9C00
     ldh [cur_lcdc],a
-    ldh [vblank_lcdc_value],a
-    ldh [stat_lcdc_value],a
   .not_toggle_grid:
 
   call wait_vblank_irq

@@ -62,12 +62,23 @@ for startaddr, endaddr in runs:
 print("total: %d bytes (%.1f KiB)" % (totalsz, totalsz / 1024.0))
 
 optimizable_hram_accesses = [
-    "$%04x: %s"
-    % (i, disassemble_hram_access(d, data[i + 1] + data[i + 2] * 0x100, syms))
+    (i, disassemble_hram_access(d, data[i + 1] + data[i + 2] * 0x100, syms))
     for i, d in enumerate(data[:-2])
     if d in (0xEA, 0xFA) and data[i + 2] == 0xFF
     and not any(l <= i <= h for l, h in falsepos_ranges)
 ]
+
+for i, (addr, inst) in enumerate(optimizable_hram_accesses):
+    # LD A, [aaaa] is $FA.  But a backward conditional branch by
+    # 6 bytes is also $FA.  This can cause a false positive with
+    # JR NZ, .loop RET (FF-padding) which is 20 FA C9 FF.
+    if (addr > 0 and (data[addr - 1] & 0xE7) == 0x20
+        and data[addr + 1] == 0xC9):
+        inst = inst + "  ; false positive? (JR before RET)"
+        optimizable_hram_accesses[i] = (addr, inst)
+
 if optimizable_hram_accesses:
     print("These HRAM accesses can be optimized:")
-    print("\n".join(optimizable_hram_accesses))
+    print("\n".join(
+        "$%04x: %s" % row for row in optimizable_hram_accesses
+    ))

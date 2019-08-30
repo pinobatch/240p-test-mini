@@ -160,11 +160,13 @@ activity_grid_scroll::
   call init_grid_scroll_vars
   ld a,$03
   ldh [curpalette],a
-  call sgb_set_palette_gray
   ld a,PADF_RIGHT
   ld [cur_dir],a
 .restart:
   call clear_gbc_attr
+  cpl
+  ldh [rLYC],a  ; disable lyc irq
+  call sgb_set_palette_gray
   call clear_scrn0_to_0
 
   ; Load grid tile
@@ -173,14 +175,9 @@ activity_grid_scroll::
   ld b,1
   call pb16_unpack_block
 
-  xor a
-  call set_bgp  ; blank the palette
-  cpl
-  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
-
 .loop:
   ld b,helpsect_grid_scroll_test
   call read_pad_help_check
