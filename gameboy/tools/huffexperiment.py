@@ -87,13 +87,12 @@ codes_per_length -- sequence of numbers of codes that have
 getbit -- a function that when called repeatedly returns values 0 and 1
 """
     accumulator = 0
-    first_index = 0
+    range_end = 0
     for ncodesofthislength in codes_per_length:
-        accumulator = (accumulator << 1) | getbit()
-        if accumulator < ncodesofthislength:
-            return accumulator + first_index
-        first_index += ncodesofthislength
-        accumulator -= ncodesofthislength
+        range_end += ncodesofthislength
+        accumulator = ((accumulator << 1) | getbit()) - ncodesofthislength
+        if accumulator < 0:
+            return accumulator + range_end
 
 def biterate_int(bitstring, length):
     """Iterate over the bits in an integer."""
@@ -200,17 +199,17 @@ def main():
 
     with open("../obj/gb/greenhillzone.u.chrgb.pb16", "rb") as infp:
         data = infp.read()
-    print("Stopwtch digits")
+    print("Hill zone tiles")
     saved += nibble_test(data)
 
     with open("../obj/gb/stopwatchdigits.chrgb.pb16", "rb") as infp:
         data = infp.read()
-    print("Stopwtch digits")
+    print("Stopwatch digits")
     saved += nibble_test(data)
 
     with open("../obj/gb/stopwatchhand.chrgb.pb16", "rb") as infp:
         data = infp.read()
-    print("Stopwtch digits")
+    print("Stopwatch hand")
     saved += nibble_test(data)
 
     with open("../obj/gb/linearity-quadrant.iu", "rb") as infp:

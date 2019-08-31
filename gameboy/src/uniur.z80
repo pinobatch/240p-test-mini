@@ -31,6 +31,9 @@
 include "src/hardware.inc"
 include "src/global.inc"
 
+;;
+; 7/8 of the time, it takes 5 cycles
+; The other 1/8, it takes 10 cycles
 getbit: macro
   sla b
   ; Once out of bits, CF is 1 and B is 0

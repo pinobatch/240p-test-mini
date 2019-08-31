@@ -1,0 +1,110 @@
+include "src/global.inc"
+
+
+
+section "huffnib", ROM0
+
+hCodeLengths = hLocals + $00
+hRangeEnd    = hLocals + $0F
+
+;;
+; 7/8 of the time, it takes 5 cycles
+; The other 1/8, it takes 10 cycles
+getbit: macro
+  sla b
+  ; Once out of bits, CF is 1 and B is 0
+  jr nz, .nonewbyte\@
+  ld b, [hl]
+  inc hl
+  rl b
+.nonewbyte\@:
+  endm
+
+;;
+; Incomplete, untested decoder for a canonical Huffman code
+; code_lengths must be in HRAM
+; assume 22 mcycles per input bit plus 31 per symbol.
+huffnib_decode_symbol:
+  ; 10 Set up Canonical Huffman state machine
+  push de
+  xor a
+  ld e, a  ; E: bit accumulator
+  ldh [hRangeEnd], a
+  ld c, low(hCodeLengths)
+.loop:
+  ; 4 Fetch number of codes of this length
+  ld a, [$ff00 + c]
+  inc c
+  ld d, a  ; D: ncodesofthislength
+
+  ; 5 Set range_end to the first index beyond those representable
+  ; by this many bits
+  ldh a, [hRangeEnd]
+  add d
+  ldh [hRangeEnd], a
+  
+  ; ~6 Read a bit from the bit stream
+  getbit
+
+  ; 7 Add it to the bit accumulator and compare to available codes
+  ; of this length
+  ld a, e
+  adc a
+  sub d
+  ld e, a  ; Write back to the bit accumulator
+  jr nc, .loop  ; If beyond available codes, keep getting more bits
+
+  ; We have read a whole symbol.
+  ; Here, E is negative.  It represents
+  ;     bit accumulator - ncodesofthislength
+  ; and range_end represents
+  ;     first_index + ncodesofthislength
+  ; Need to return bit accumulator + first_index
+  ; which equals
+  ;     (bit accumulator - ncodesofthislength) + (first_index + ncodesofthislength)
+  ; that is, E + range_end
+  
+  ; 16 Translate and return the symbol
+  ldh a, [hRangeEnd]
+  add e
+
+  ; Translate this into an actual symbol through the
+  ; "sorted by increasing code length" table
+  ld de, huffnib_symboldefs
+  add e
+  ld e, a
+  ld a, [de]
+  pop de
+  ret
+
+
+; I'm estimating 22 cycles per input bit and 74 per output byte.
+; The largest known message is 10120 bits and 1538 bytes, or
+; 337K cycles.
+huffnib_decode_block:
+
+
+
+.byteloop:
+  ; 74+22n Decode two nibbles and combine them
+  call huffnib_decode_symbol
+  swap a
+  ld [de], a
+  call huffnib_decode_symbol
+  ld c, a
+  ld a, [de]
+  or c
+  ld [de], a
+  inc de
+
+  ; 10 go to next byte
+  ld a, [huffnib_bytecountlo]
+  inc a
+  ld [huffnib_bytecountlo], a
+  jr nz, .byteloop
+  ld a, [huffnib_bytecounthi]
+  inc a
+  ld [huffnib_bytecounthi], a
+  jr nz, .byteloop
+  ret
+  
