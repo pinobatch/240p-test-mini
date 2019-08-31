@@ -68,20 +68,16 @@ activity_shadow_sprite::
   call pb16_unpack_block
   ; Make shadow sprites
   call make_shadow_chr
-
   call load_bg
 
-  xor a
-  ldh [rSCX],a
   dec a
   ldh [rLYC],a  ; disable lyc irq until something needs it
   call set_obp0
   call set_obp1
-  ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR21|OBJ_8X16
-  ldh [vblank_lcdc_value],a
+  ldh a, [vblank_lcdc_value]
   ldh [stat_lcdc_value],a
   ldh [rLCDC],a
-  
+
 .loop:
   ld b,helpsect_shadow_sprite
   call read_pad_help_check
@@ -274,20 +270,20 @@ activity_shadow_sprite::
 ; Fills tiles $D8-$FF with messages about what framestyle is in
 load_frame_type_names:
   ld de,CHRRAM0+$D8*16
-  ld hl,frame_type_msgs
+  ld hl,frame_type_msg0
 .lineloop:
   push de
   push hl
   call vwfClearBuf
   pop hl
-  ld b,6
+  ld b,3
   call vwfPuts
   pop de
 
   push hl
   ld l,e
   ld h,d
-  ld bc,$FF08  ; $FF: use colors 0 and 3; $08: copy 8 half tiles
+  ld bc,$FF08  ; $FF: use colors 0 and 3; $08: copy 8 tiles
   call vwfPutBuf03_lenC
   ld d,h
   ld e,l
@@ -296,15 +292,23 @@ load_frame_type_names:
   or a
   jr nz,.lineloop
 
-  ld a,167-64
+  ld a,167-56
   ldh [rWX],a
   ret
 
 frame_type_msgs:
+  dw frame_type_msg0, frame_type_msg1
+  dw frame_type_msg2, frame_type_msg3, frame_type_msg4
+
+frame_type_msg0:
   db "even frames",10
+frame_type_msg1:
   db "odd frames",10
+frame_type_msg2:
   db "horizontal",10
+frame_type_msg3:
   db "vertical",10
+frame_type_msg4:
   db "diagonal",0
 
 ; Sprite drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -377,20 +381,20 @@ draw_shadow_sprite:
   ldh [Lspriterect_y],a
   ldh a,[xpos]
   ldh [Lspriterect_x],a
-  ld a,16
+  ld a,8
   ldh [Lspriterect_rowht],a
+
+  ; Begin setting up 8-point star sprite
+  rrca
+  ldh [Lspriterect_tilestride],a
+  ldh [Lspriterect_height],a
+  ldh [Lspriterect_width],a
+
   ldh a,[cur_shape]
   or a
   jr nz,.shape_is_hepsie
 
   ; 8-point star
-  ld a,2
-  ldh [Lspriterect_height],a
-  add a
-  ldh [Lspriterect_width],a
-  add a
-  ldh [Lspriterect_tilestride],a
-  xor a
   ldh [Lspriterect_attr],a
 
   ; Choose a starting tile
@@ -403,13 +407,12 @@ draw_shadow_sprite:
 .shape_is_hepsie:
   ld a,3
   ldh [Lspriterect_width],a
-  add a
   ldh [Lspriterect_tilestride],a
   xor a
   ldh [Lspriterect_tile],a
 
   ; Top half: cape
-  ld a,1
+  ld a,2
   ldh [Lspriterect_height],a
   ldh a,[cur_facing]
   or 1|OAMF_PAL1
@@ -419,7 +422,7 @@ draw_shadow_sprite:
   ; Bottom half: skirt
   ldh a,[xpos]
   ldh [Lspriterect_x],a
-  ld a,1
+  ld a,2
   ldh [Lspriterect_height],a
   ldh a,[cur_facing]
   ldh [Lspriterect_attr],a
@@ -432,7 +435,7 @@ draw_shadow_sprite:
   ldh a,[xpos]
   add 8
   ldh [Lspriterect_x],a
-  ld a,2
+  ld a,4
   ldh [Lspriterect_height],a
   ldh a,[cur_facing]
   ldh [Lspriterect_attr],a
@@ -486,6 +489,9 @@ get_shadow_frame_number:
 ; Background loaders ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 load_bg:
+  xor a
+  ldh [rSCY], a
+  ldh [rSCX], a
   ldh a,[cur_bg_style]
   ld de,shadow_sprite_bg_loaders
   call de_index_a
@@ -493,18 +499,33 @@ load_bg:
 
 shadow_sprite_bg_loaders:
   dw load_gus_portrait
-  dw load_hillzone_bg
+  dw load_hillzone_bg_with_lcdc
   dw load_horizontal_stripes
   dw load_diagonal_stripes
 
+Gus_row_top = _SCRN1+14*32
+Gus_topleft = Gus_row_top + 4
+
+clear_scrn1_bottom:
+  ; Clear background
+  ld h, 0
+  ld de, Gus_row_top
+  ld bc, 32*18
+  jp memset
+
 load_gus_portrait:
-  call clear_scrn0_to_0
+  call clear_scrn1_bottom
+  ld a,LCDCF_ON|BG_NT1|WINDOW_NT1|BG_CHR21|OBJ_ON
+  ldh [vblank_lcdc_value], a
+  ld a, 256-144
+  ldh [rSCY], a
+
   ldh a, [hw_capability]
   add a
   jr c,load_gus_portrait_gbc
 
   ld a,%11100100
-  call set_bgp
+  ldh [rBGP], a
 
   ; Load Gus portrait for background
   ld de,portrait_iu
@@ -513,7 +534,7 @@ load_gus_portrait:
   call unpack_iu_file
 .load_nam:
   ld hl,_SCRN0+640
-  ld de,_SCRN0+0*32+4
+  ld de,Gus_topleft
   ld bc,13*256+18
   jp load_nam
 
@@ -522,7 +543,7 @@ load_gus_portrait_gbc:
   ; Prepare plane 1
   ld a,1
   ldh [rVBK],a
-  call clear_scrn0_to_0
+  call clear_scrn1_bottom
   ld hl,_SCRN0+640
   ld de,Gus_portrait_GBC_attr
   ld b,15
@@ -539,6 +560,12 @@ load_gus_portrait_gbc:
   ld a,$80
   ld bc,(Gus_portrait_GBC_pal_end-Gus_portrait_GBC_pal)*256+low(rBCPS)
   jp set_gbc_palette
+
+load_hillzone_bg_with_lcdc:
+  call load_hillzone_bg
+  ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR21|OBJ_ON
+  ldh [vblank_lcdc_value], a
+  ret
 
 load_horizontal_stripes:
   call clear_gbc_attr
@@ -558,6 +585,8 @@ load_shadow_sprite_bg_stripes:
     dec b
     jr nz,.loop
 
+  ld a,LCDCF_ON|BG_NT0|WINDOW_NT1|BG_CHR21|OBJ_ON
+  ldh [vblank_lcdc_value], a
   call clear_scrn0_to_0
   ld a,%11100100
   jp set_bgp

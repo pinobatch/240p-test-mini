@@ -107,7 +107,7 @@ global sizeof_megaton_tiles
 
 section "shadowsprite_gfx0",ROM0
 shadow_reticle_chr::
-  incbin "obj/gb/shadow_reticle.chrgb16.pb16"
+  incbin "obj/gb/shadow_reticle.chrgb.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4
 global sizeof_shadow_reticle_chr
 hepsie_palette_gbc::
@@ -123,7 +123,7 @@ hepsie_palette_gbc_end::
 
 section "shadowsprite_gfx1",ROMX
 hepsie_chr::
-  incbin "obj/gb/hepsie.chrgb16.pb16"
+  incbin "obj/gb/hepsie.chrgb.pb16"
 sizeof_hepsie_chr equ 16*3*4
 global sizeof_hepsie_chr
 
