@@ -24,7 +24,7 @@ getbit: macro
 ; Incomplete, untested decoder for a canonical Huffman code
 ; code_lengths must be in HRAM
 ; assume 22 mcycles per input bit plus 31 per symbol.
-huffnib_decode_symbol:
+canohuff_decode_symbol:
   ; 10 Set up Canonical Huffman state machine
   push de
   xor a
@@ -108,3 +108,48 @@ huffnib_decode_block:
   jr nz, .byteloop
   ret
   
+; 7654 3210  node format
+; |||| ||++- offset in nodes to next 0 node
+; |||| |+--- 01 node is literal
+; |||| +---- 00 node is literal
+; ||++------ offset in nodes to next 1 node
+; |+-------- 11 node is literal
+; +--------- 10 node is literal
+
+; E bits 3-2 store the literalness
+; BHL bit fetching
+
+walk_huff_tree:
+  push de
+  ld c, low(hTree)
+  ; Read initial literal bits from tree header
+  ld a, [$FF00 + c]
+  and $0C  ; only initial literal bits matter
+.get_next_node:
+  ; A.1-0: offset to next node
+  ; A.3: next node literal if 0; A.2: next node literal if 1
+  ; 8 Read next tree node
+  ld e, a
+  and $03
+  add c
+  ld c, a
+  inc c
+  ld a, [$FF00 + c]
+
+  ; A: next node
+  ; 10 Handle next bit
+  getbit
+  jr nc, .bit_was_0
+  swap a
+  rl e
+.bit_was_0:
+
+  ; A.3-0: current node
+  ; E.3: current node is literal
+  ; 5 test for literal
+  bit 3, e
+  jr z, .get_next_node
+
+  and $0F
+  pop de
+  ret
