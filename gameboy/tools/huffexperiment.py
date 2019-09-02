@@ -28,26 +28,17 @@ from PIL import Image
 def hexdump(b, w=32):
     print("\n".join(b[i:i + w].hex() for i in range(0, len(b), w)))
 
-def CH_calc_lengths(freqs):
-    """Calculate lengths of codes for symbols in a Huffman tree.
+def build_huffman_tree(freqs):
+    """Build a parent-linked Huffman tree from an iterable of weights.
 
-freqs -- mapping from symbols to weights or (symbol, weight) iterable
-
-Return a list of (symbol, bit_length) where:
-
-- bit_length is a positive integer
-- Kraft's inequality: Sum of 1/(1 << bit_length) for all lengths is 1
-- Sum of bit_length * weight for each symbol is minimized
-- Symbols appear in same order as input
+After O(n log n) steps, return a list of parent IDs where
+- each element x contains the index of x's parent
+- elements 0 through len(freqs) - 1 are leaves, in the same order
+  as freqs
+- length is len(freqs) * 2 - 1
 """
-    try:
-        freqsitems = list(freqs.items())
-    except AttributeError:
-        freqsitems = list(freqs)
-
-    # Construct a parent-linked Huffman tree: O(n log n)
-    symheap = [(fi[1], i) for i, fi in enumerate(freqsitems)]
-    nodetoparent = list(range(len(freqsitems)))
+    symheap = [(fi, i) for i, fi in enumerate(freqs)]
+    nodetoparent = list(range(len(symheap)))
     heapq.heapify(symheap)
     while len(symheap) > 1:
         lfreq, lsymbol = heapq.heappop(symheap)
@@ -57,17 +48,20 @@ Return a list of (symbol, bit_length) where:
         nodetoparent.append(newnode)
         nodetoparent[lsymbol] = nodetoparent[rsymbol] = newnode
         heapq.heappush(symheap, (newfreq, newnode))
+    return nodetoparent
 
-    # Measure each symbol's length: O(n)
+def CH_calc_lengths(nodetoparent):
+    """Calculate code lengths in a parent-linked Huffman tree.
+
+After O(n) steps, return a list of code lengths for the leaves,
+taken to be the tree's first len(nodetoparent) // 2 + 1 elements.
+"""
     symlengths = [0] * len(nodetoparent)
     for symbol in range(len(nodetoparent))[::-1]:
         parent = nodetoparent[symbol]
         lengthadd = 1 if symbol < parent else 0
         symlengths[symbol] = symlengths[parent] + lengthadd
-    return [
-        (symbol, length)
-        for (symbol, _), length in zip(freqsitems, symlengths)
-    ]
+    return symlengths[0:len(nodetoparent) // 2 + 1]
 
 def CH_assign_bitstrings(codes_per_length):
     """Assign consecutive bit strings for each length."""
@@ -79,12 +73,54 @@ def CH_assign_bitstrings(codes_per_length):
         bitstrings.extend(range(starting_code, ending_code))
     return bitstrings
 
+def CH_build(freqs):
+    """Build a canonical Huffman code for a given tree.
+
+freqs -- mapping from symbols to weights or (symbol, weight) iterable
+
+Return a 2-tuple (symbols_with_lengths, codes_per_length)
+
+symbols_with_lengths is a list of (symbol, length, bitstring) where
+
+- length is a positive integer
+- Symbols are sorted by increasing length then by symbol value
+- Kraft's inequality: Sum of 1/(1 << length) for all lengths is 1
+- Sum of length * weight for each symbol is minimized
+- Values of bitstring form a prefix code, lexicographically sorted
+  by position in the result
+- bitstring >> bit_length == 0
+
+codes_per_length is a list of the number of codes of each bit length
+starting with 1.
+"""
+    try:
+        freqsitems = list(freqs.items())
+    except AttributeError:
+        freqsitems = list(freqs)
+    nodetoparent = build_huffman_tree(fi[1] for fi in freqsitems)
+    symlengths = CH_calc_lengths(nodetoparent)
+    lc = Counter(symlengths)
+    codes_per_length = [lc.get(i + 1, 0) for i in range(max(lc))]
+    bitstrings = CH_assign_bitstrings(codes_per_length)
+    lengths = [
+        (symbol, length)
+        for (symbol, _), length in zip(freqsitems, symlengths)
+    ]
+    lengths.sort(key=lambda row: (row[1], row[0]))
+    lengths = [
+        (symbol, length, bitstring)
+        for (symbol, length), bitstring in zip(lengths, bitstrings)
+    ]
+    return lengths, codes_per_length
+
 def CH_decode(codes_per_length, getbit):
     """Decode one code from a Canonical Huffman code stream.
 
 codes_per_length -- sequence of numbers of codes that have
     1, 2, 3, ... bits
 getbit -- a function that when called repeatedly returns values 0 and 1
+
+Return an index into the list of terminal symbols.
 """
     accumulator = 0
     range_end = 0
@@ -103,25 +139,22 @@ def biterate_int(bitstring, length):
 def txttest(txt, codedisplimit=5):
     # Construct the code
     freqs = Counter(txt)
-    lengths = CH_calc_lengths(freqs)
-    lc = Counter(row[1] for row in lengths)
-    codes_per_length = [lc.get(i + 1, 0) for i in range(max(lc))]
-    bitstrings = CH_assign_bitstrings(codes_per_length)
-    lengths.sort(key=lambda row: (row[1], row[0]))
+    result = CH_build(freqs)
+    lengths, codes_per_length = result
 
     # Count total
     print("\n".join(
         "{0} x{1:3}: {3:0{2}b}".format(symbol, freqs[symbol], length, bitstring)
-        for _, (symbol, length), bitstring
-        in zip(range(codedisplimit), lengths, bitstrings)
+        for symbol, length, bitstring
+        in lengths[:codedisplimit]
     ))
-    weightsum = sum((freqs[s] * length) for s, length in lengths)
+    weightsum = sum((freqs[s] * length) for s, length, _ in lengths)
     print("code counts %s; weightsum %d"
           % (codes_per_length, weightsum))
 
     decode_result = [
-        CH_decode(codes_per_length,  biterate_int(bitstring, length).__next__)
-        for (symbol, length), bitstring in zip(lengths, bitstrings)
+        CH_decode(codes_per_length, biterate_int(bitstring, length).__next__)
+        for symbol, length, bitstring in lengths
     ]
     expected = list(range(len(lengths)))
     print("decode: pass" if decode_result == expected else "decode: fail")
@@ -131,7 +164,7 @@ def rosetta_test():
     txttest("this is an example for huffman encoding")
 
 def nibble_test(data):
-    weightsum = txttest(data.hex())
+    weightsum = txttest(data.hex(), 16)
     afterbytes = 16 + weightsum // 8
     print("would compress %d bytes to %d saving %d"
           % (len(data), afterbytes, len(data) - afterbytes))
