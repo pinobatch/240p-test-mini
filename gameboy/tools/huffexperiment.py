@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Canonical Huffman tools: Because Huffman-Cano is more efficient
-than Shannon-Fano
+Canonical Huffman experiment
 
 Copyright 2019 Damian Yerrick
 
@@ -23,10 +22,8 @@ freely, subject to the following restrictions:
 """
 import heapq
 from collections import Counter
-from PIL import Image
 
-def hexdump(b, w=32):
-    print("\n".join(b[i:i + w].hex() for i in range(0, len(b), w)))
+# Huffman coding core ###############################################
 
 def build_huffman_tree(freqs):
     """Build a parent-linked Huffman tree from an iterable of weights.
@@ -50,7 +47,9 @@ After O(n log n) steps, return a list of parent IDs where
         heapq.heappush(symheap, (newfreq, newnode))
     return nodetoparent
 
-def CH_calc_lengths(nodetoparent):
+# Canonical form (lengths and sorted symbols) #######################
+
+def CH_calc_lengths(nodetoparent, returnall=False):
     """Calculate code lengths in a parent-linked Huffman tree.
 
 After O(n) steps, return a list of code lengths for the leaves,
@@ -61,7 +60,9 @@ taken to be the tree's first len(nodetoparent) // 2 + 1 elements.
         parent = nodetoparent[symbol]
         lengthadd = 1 if symbol < parent else 0
         symlengths[symbol] = symlengths[parent] + lengthadd
-    return symlengths[0:len(nodetoparent) // 2 + 1]
+    if not returnall:
+        del symlengths[len(nodetoparent) // 2 + 1:]
+    return symlengths
 
 def CH_assign_bitstrings(codes_per_length):
     """Assign consecutive bit strings for each length."""
@@ -130,11 +131,25 @@ Return an index into the list of terminal symbols.
         if accumulator < 0:
             return accumulator + range_end
 
+def biterate_bytes_be(data):
+    """Iterate over the bits in a byte string, MSB first"""
+    for b in data:
+        for i in range(7, -1, -1):
+            yield (b >> i) & 1
+
 def biterate_int(bitstring, length):
     """Iterate over the bits in an integer."""
     while length >= 0:
         length -= 1
         yield (bitstring >> length) & 1
+
+# Test framework ####################################################
+
+# ref: https://rosettacode.org/wiki/Huffman_coding
+rosetta_test_text = "this is an example for huffman encoding"
+
+def hexdump(b, w=32):
+    print("\n".join(b[i:i + w].hex() for i in range(0, len(b), w)))
 
 def txttest(txt, codedisplimit=5):
     # Construct the code
@@ -161,9 +176,11 @@ def txttest(txt, codedisplimit=5):
     return weightsum
 
 def rosetta_test():
-    txttest("this is an example for huffman encoding")
+    """Run a Canonical Huffman test on the Rosetta Code test string."""
+    return txttest(rosetta_test_text, codedisplimit=len(rosetta_test_text))
 
 def nibble_test(data):
+    """Run a Huffman compression test on the nibbles in a byte string."""
     weightsum = txttest(data.hex(), 16)
     afterbytes = 16 + weightsum // 8
     print("would compress %d bytes to %d saving %d"
@@ -178,6 +195,7 @@ def popcnt(data):
     return n
 
 def iutest(data):
+    """Run a Canonical Huffman test on the tile data in an incruniq file."""
     num_pb16_packets = data[0] * 2
     startoffset = offset = 1
     for i in range(num_pb16_packets):
@@ -201,6 +219,7 @@ def pixelstom7tiles(im, size=None):
     return out
 
 def m7tileto1btile(tile):
+    """Convert a mode 7 tile to a 1bpp tile."""
     out = bytearray()
     for y in range(0, len(tile), 8):
         row = tile[y:y + 8]
@@ -211,13 +230,16 @@ def m7tileto1btile(tile):
     return bytes(out)
 
 def fonttest():
+    """Run a Canonical Huffman test on the 240p-test-mini font glyphs."""
+    from PIL import Image
+
     im = Image.open("../../common/tilesets/vwf7_cp144p.png")
     imbytes = bytes(1 if c == 1 else 0 for c in im.tobytes())
     tiles = [m7tileto1btile(x) for x in pixelstom7tiles(imbytes, im.size)]
     print("Proportional font data")
     return nibble_test(b"".join(tiles))
 
-def main():
+def CH_main():
     saved = 0
 
     with open("../obj/gb/helptiles.chrgb16.pb16", "rb") as infp:
@@ -270,5 +292,10 @@ def main():
     print("Estimated total savings: %d bytes" % saved)
     print("This is even before counting (e.g.) Gus portrait GBC")
 
+# Experimental tree-reconstruction ##################################
+
+def treemain():
+    """Transform a CH code to Huffman tree form"""
+
 if __name__=='__main__':
-    main()
+    CH_main()
