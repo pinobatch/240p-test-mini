@@ -294,8 +294,83 @@ def CH_main():
 
 # Experimental tree-reconstruction ##################################
 
+def invert_permutation(seq):
+    """Return a list where invert_permutation(seq)[seq[x]] == x
+
+>>> invert_permutation([0, 2, 3, 1, 4])
+[0, 3, 1, 2, 4]
+
+seq must be a permutation, such that set(seq) == set(range(len(seq)))
+"""
+    d = {v: k for k, v in enumerate(seq)}
+    return [d[i] for i in range(len(d))]
+
 def treemain():
     """Transform a CH code to Huffman tree form"""
+    freqs = Counter(rosetta_test_text)
+    syms, cpl = CH_build(freqs)
+    maxdistance = 4
+    terminalvalues = [row[0] for row in syms]
+    node_lenbits = [row[1:3] for row in syms]
+    lenbits_to_node = {v: k for k, v in node_lenbits}
+    node_parent = []
+
+    # Enumerate all nodes in the tree
+    i = 0
+    rootnode = None
+    while i < len(node_lenbits):
+        length, bitstring = node_lenbits[i]
+        if length == 0:
+            rootnode = i
+            parent = None
+        else:
+            parentlb = (length - 1, bitstring >> 1)
+            try:
+                parent = lenbits_to_node[parentlb]
+            except KeyError:
+                lenbits_to_node[parentlb] = parent = len(node_lenbits)
+                node_lenbits.append(parentlb)
+        node_parent.append(parent)
+        i += 1
+
+    # Sort internal nodes by their lenbits value, producing a
+    # level-order tree traversal
+    levelorder = list(range(len(terminalvalues), len(node_lenbits)))
+    levelorder.sort(key=lambda i: node_lenbits[i])
+    print("Levelorder")
+    prlist = [node_lenbits[i] for i in levelorder]
+    print("\n".join(
+        "{1:0{0}b}".format(l, b) if l else "root" for l, b in prlist
+    ))
+
+    # Theoretical maximum index into new tree equals the maximum
+    # length in bits of an internal node times the maximum distance
+    print("maximum internal code length:")
+    maxintlength = max(row[0] for row in node_lenbits[len(terminalvalues):])
+    maxindex = maxdistance * maxintlength)
+    print("maxintlength is %d; maxindex is %d which should be no less than", maxintlength)
+
+    # With distances of 1 to 4 nodes, I foresee congestion in the
+    # level of the tree just above terminals.  To alleviate this,
+    # build special-case encodings for two kinds of trees based on
+    # how many codes of length 1 there are:
+    # - Unary-like codes have rapidly increasing lengths:
+    #   0, 10, 110, 1110, ...
+    #   Encode the number of 1s before the first 0.
+    # - Binary-like codes have flat lengths for the first few codes:
+    #   000, 001, 010, 011, 100, 1010, ...
+    #   Encode the number of 0s before the first nonzero, then
+    #   spend more bits on the offset to each subtree's root.
+
+    # Get children of each node (necessary?)
+    node_child0 = [None] * len(node_parent)
+    node_child1 = [None] * len(node_parent)
+    for i, ((length, bitstring), parent) \
+        in enumerate(zip(node_lenbits, node_parent)):
+        if length < 1: continue
+        target = node_child1 if (bitstring & 1) else node_child0
+        target[parent] = i
 
 if __name__=='__main__':
-    CH_main()
+##    CH_main()
+    treemain()
