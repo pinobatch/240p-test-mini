@@ -59,6 +59,7 @@ help_bg_loaded:: ds 1
 help_show_cursor: ds 1
 help_cursor_y:: ds 1
 help_height: ds 1
+help_font_loaded: ds 1
 
 section "help_map0",ROM0
 helpattrmap_gbc:
@@ -150,6 +151,7 @@ help_init::
   ld [help_wanted_page],a
   ld [help_bg_loaded],a
   ld [help_cursor_y],a
+  ld [help_font_loaded], a
   dec a
   ld [help_cur_page],a
   ret
@@ -867,6 +869,13 @@ wnd_x_sequence_last:
 ; and uploads it over the next 14 hblanks.
 
 help_draw_wanted_page:
+  ; Ensure the font is loaded
+  ld a, [help_font_loaded]
+  or a
+  call z, vwfInit
+  ld a, 1
+  ld [help_font_loaded], a
+
   ; Draw the document's title
   call vwfClearBuf
   ld a,[help_cur_doc]
