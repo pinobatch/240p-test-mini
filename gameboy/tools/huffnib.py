@@ -365,7 +365,7 @@ Nibblewise Huffman compressor""")
         data = infp.read()
     enc = huffnibenc(data)
     with open(outfilename, "wb") as outfp:
-        outfp.write(data)
+        outfp.write(enc)
 
 if __name__=='__main__':
     if "idlelib" in sys.modules:

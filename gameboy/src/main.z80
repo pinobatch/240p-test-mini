@@ -39,6 +39,7 @@ main::
   rra
   call c, sgb_load_master_palette
   ei
+  call vwfInit
   call help_init
 
   if 1

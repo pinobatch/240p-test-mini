@@ -30,7 +30,7 @@ global sizeof_helptiles_gbc
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "grayramp_gfx1",ROM0, align[2]
+section "grayramp_gfx1",ROMX, align[2]
 grayramp_sgb_chr::
   incbin "obj/gb/grayramp-sgb.chrgb", 0, 36
 
@@ -72,7 +72,7 @@ sharpness_brick_tile::
   dw `22221131
   dw `22222211
 
-section "cpsgrid_gfx1",ROM0
+section "cpsgrid_gfx1",ROMX
 cps_grid_chr::
   incbin "obj/gb/cps_grid.chrgb.pb16"
 sizeof_cps_grid_chr equ 128
@@ -83,29 +83,29 @@ global sizeof_cps_grid_chr
 section "stopwatch_gfx1",ROMX
 stopwatchface_iu::
   incbin "obj/gb/stopwatchface.iu"
-stopwatchhand_chr::
-  incbin "obj/gb/stopwatchhand.chrgb.pb16"
+stopwatchhand_huf::
+  incbin "obj/gb/stopwatchhand.chrgb.pb16.huf"
 sizeof_stopwatchhand_chr equ 704
 global sizeof_stopwatchhand_chr
 
 ;section "stopwatch_gfx0",ROM0
 ; This is sometimes temporarily moved into ROM0 while
 ; writing the GBC-exclusive tests' help
-stopwatchdigits_chr::
-  incbin "obj/gb/stopwatchdigits.chrgb.pb16"
+stopwatchdigits_huf::
+  incbin "obj/gb/stopwatchdigits.chrgb.pb16.huf"
 sizeof_stopwatchdigits_chr equ 1024
 global sizeof_stopwatchdigits_chr
 
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "megaton_gfx0",ROMX
+section "megaton_gfx1",ROMX
 megatontiles_chr:: incbin "obj/gb/megatontiles.chrgb16.pb16"
 sizeof_megaton_tiles equ 320
 global sizeof_megaton_tiles
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "shadowsprite_gfx0",ROM0
+section "shadowsprite_gfx1",ROMX
 shadow_reticle_chr::
   incbin "obj/gb/shadow_reticle.chrgb.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4

@@ -44,7 +44,7 @@ section "hram_teststate", HRAM[hTestState]
   ds test_state_size
 
 STACK_SIZE EQU 64
-section "stack", WRAM0[$D000-STACK_SIZE]
+section "stack", WRAM0, ALIGN[2]
 stack_top: ds STACK_SIZE
 
 section "bootregs_hram", HRAM

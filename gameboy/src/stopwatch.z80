@@ -125,17 +125,13 @@ activity_stopwatch::
   ld de,stopwatchface_iu
   ld hl,CHRRAM2
   call unpack_iu_file
-  ld hl,_SCRN0+640
-  ld de,_SCRN0+5*32+4
-  ld bc,12*256+13
-  call load_nam
 
-  ; Load other tiles used by activity
-  ld de,stopwatchhand_chr
-  ld hl,CHRRAM0
-  ld b,sizeof_stopwatchhand_chr/16
-  call pb16_unpack_block
-  ld de,stopwatchdigits_chr
+  ; Load additional background tiles used by activity
+  ld hl,stopwatchdigits_huf
+  ld de,CHRRAM0
+  push de
+  call huffnib_decode_block
+  pop de
   ld hl,CHRRAM1
   push hl
   ld b,sizeof_stopwatchdigits_chr/16
@@ -153,6 +149,19 @@ activity_stopwatch::
     bit 4, h
     jr z, .lightdigitsloop
 
+  ld hl,stopwatchhand_huf
+  ld de,CHRRAM0+$400
+  push de
+  call huffnib_decode_block
+  pop de
+  ld hl,CHRRAM0
+  ld b,sizeof_stopwatchhand_chr/16
+  call pb16_unpack_block
+
+  ld hl,_SCRN0+640
+  ld de,_SCRN0+5*32+4
+  ld bc,12*256+13
+  call load_nam
   ld de,$0970
   ld hl,digits_label_msg
   call vwfDrawLabels

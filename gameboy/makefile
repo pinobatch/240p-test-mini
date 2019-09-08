@@ -56,7 +56,7 @@ ctools: ../common/tools/dte$(EXE)
 clean:
 	-rm obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
 	-rm obj/gb/*.chrgb obj/gb/*.chrgb16 obj/gb/*.nam obj/gb/*.chr1
-	-rm obj/gb/*.iu
+	-rm obj/gb/*.iu obj/gb/*.huf
 	-rm ../common/tools/dte$(DOTEXE)
 
 # Packaging
@@ -85,7 +85,7 @@ obj/gb/index.txt: makefile
 objlisto = $(foreach o,$(objlist),obj/gb/$(o).o)
 
 $(title).gb: $(objlisto)
-	rgblink -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
+	rgblink -w -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
 	rgbfix -p0 -v $@
 
 obj/gb/%.o: obj/gb/%-dedent.z80 src/gb.inc src/hardware.inc src/global.inc
@@ -104,13 +104,14 @@ obj/gb/gfxincbins.o: \
   obj/gb/hepsie.chrgb.pb16 obj/gb/shadow_reticle.chrgb.pb16 \
   obj/gb/Gus_portrait.iu \
   obj/gb/backlightzone.chrgb.pb16 \
-  obj/gb/grayramp-sgb.chrgb obj/gb/grayramp.chrgb obj/gb/cps_grid.chrgb.pb16 \
-  obj/gb/linearity-quadrant.iu obj/gb/sharpness.iu obj/gb/stopwatchface.iu \
+  obj/gb/grayramp-sgb.chrgb obj/gb/grayramp.chrgb \
+  obj/gb/cps_grid.chrgb.pb16 obj/gb/linearity-quadrant.iu \
+  obj/gb/sharpness.iu obj/gb/stopwatchdigits.chrgb.pb16.huf \
+  obj/gb/stopwatchhand.chrgb.pb16.huf obj/gb/stopwatchface.iu \
   obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16 \
   obj/gb/kikimap.chr1 obj/gb/kikitiles.chrgb \
   obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16 \
   obj/gb/smptetiles.chrgb.pb16 obj/gb/megatontiles.chrgb16.pb16 \
-  obj/gb/stopwatchhand.chrgb.pb16 obj/gb/stopwatchdigits.chrgb.pb16 \
   obj/gb/pluge_shark_4color.chrgb.pb16
 
 # Graphics conversion
@@ -144,6 +145,9 @@ obj/gb/%.nam: obj/gb/%.u.chrgb
 	touch $@
 
 %.pb16: tools/pb16.py %
+	$(PY) $^ $@
+
+%.huf: tools/huffnib.py %
 	$(PY) $^ $@
 
 obj/gb/Gus_portrait_GBC.z80: tools/gbcnamtool.py \
