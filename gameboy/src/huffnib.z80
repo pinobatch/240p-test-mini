@@ -1,6 +1,6 @@
 include "src/global.inc"
 
-HUFFNIB_INCLUDE_TESTS = 1
+HUFFNIB_INCLUDE_TESTS = 0
 
 hCodeLengths = hLocals + $00
 hBitAccum    = hLocals + $0F
@@ -106,13 +106,21 @@ huffnib_decode_block::
   ; 4-bit and nearly equiprobable, so just use memcpy.
   ld a, [hl]
   cp $30
-  jr c, .not_4bit_code
+  jr c, huffnib_decode_compressed_block
+  inc hl
+
+;;
+; Copy a string preceded by a 2-byte length from HL to DE.
+; @param HL source address
+; @param DE destination address
+memcpy_pascal16::
   ld a, [hl+]
   ld c, a
   ld a, [hl+]
   ld b, a
   jp memcpy
-.not_4bit_code:
+
+huffnib_decode_compressed_block:
 
   ; So we have 3 to 16 distinct codes, with up to 13 of any given
   ; length, and the longest length shorter than the total number of
@@ -149,8 +157,6 @@ huffnib_decode_block::
 
   pop de
   ld b, $80  ; initialize state for getbit
-
-  ld b, b
 
 .byteloop:
   ; 74+22n Decode two nibbles and combine them

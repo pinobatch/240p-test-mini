@@ -14,43 +14,7 @@ import sys
 import argparse
 from pb16 import pb16
 from uniq import uniq
-
-class BitByteInterleave(object):
-    def __init__(self):
-        self.out = bytearray(1)
-        self.bitsindex, self.bitsleft = 0, 8
-
-    def putbyte(self, c):
-        self.out.append(c)
-
-    def putbytes(self, c):
-        self.out.extend(c)
-
-    def putbits(self, value, length=1):
-        while length > 0:
-            # Make room for at least 1 more bit
-            if self.bitsleft == 0:
-                self.bitsindex, self.bitsleft = len(self.out), 8
-                self.out.append(0)
-
-            # How much of this value can we pack?
-            value &= (1 << length) - 1
-            length -= self.bitsleft
-            if length >= 0:
-                self.bitsleft = 0  # squeeze as many bits as we can
-                self.out[self.bitsindex] |= value >> length
-            else:
-                self.bitsleft = -length  # space left for more bits
-                self.out[self.bitsindex] |= value << -length
-
-    def __len__(self):
-        return len(self.out)
-
-    def __bytes__(self):
-        return bytes(self.out)
-
-    def __iter__(self):
-        return iter(self.out)
+from bitbyte import BitByteInterleave
 
 def iur_encode(chrdata):
     """Test experimental IUR tilemap codec

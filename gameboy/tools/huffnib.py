@@ -20,8 +20,11 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 """
+import sys
+import argparse
 import heapq
 from collections import Counter
+from bitbyte import BitByteInterleave
 
 # Huffman coding core ###############################################
 
@@ -239,7 +242,7 @@ def fonttest():
     print("Proportional font data")
     return nibble_test(b"".join(tiles))
 
-def CH_main():
+def CH_test():
     saved = 0
 
     with open("../obj/gb/helptiles.chrgb16.pb16", "rb") as infp:
@@ -292,85 +295,80 @@ def CH_main():
     print("Estimated total savings: %d bytes" % saved)
     print("This is even before counting (e.g.) Gus portrait GBC")
 
-# Experimental tree-reconstruction ##################################
+# Actual encoding ###################################################
 
-def invert_permutation(seq):
-    """Return a list where invert_permutation(seq)[seq[x]] == x
+def huffnibenc(data):
+    """Compress a byte sequence using nibble-wise Huffman coding.
 
->>> invert_permutation([0, 2, 3, 1, 4])
-[0, 3, 1, 2, 4]
+Each compressed stream begins with a decoding table, whose length
+is the same as the number of distinct nibbles in the decompressed
+data.  The low nibble of each byte represents the nibbles sorted
+by increasing code length, and the upper nibble of each byte is the
+number of codes of each length.  The last byte is OR'd with $F0.
 
-seq must be a permutation, such that set(seq) == set(range(len(seq)))
+The decoding table for a stream that could not be compressed is
+a single byte with value $FF (or any byte at least $30).
+
+In either case, the decoding table is followed by a 2-byte
+little-endian length of the decompressed data in bytes, then the
+compressed or uncompressed data.
 """
-    d = {v: k for k, v in enumerate(seq)}
-    return [d[i] for i in range(len(d))]
+    freqs = Counter(b & 0x0F for b in data)
+    freqs.update(b >> 4 for b in data)
+    syms, codes_per_length = CH_build(freqs)
+    assert 2 < len(codes_per_length) < len(syms)
+    is_huffman = all(b < 15 for b in codes_per_length)
 
-def treemain():
-    """Transform a CH code to Huffman tree form"""
-    freqs = Counter(rosetta_test_text)
-    syms, cpl = CH_build(freqs)
-    maxdistance = 4
-    terminalvalues = [row[0] for row in syms]
-    node_lenbits = [row[1:3] for row in syms]
-    lenbits_to_node = {v: k for k, v in node_lenbits}
-    node_parent = []
+    # Build header
+    out = bytearray()
+    if is_huffman:
+        out.extend(row[0] for row in syms)
+        out[-1] |= 0xF0  # last symbol
+        for i, ncodes in enumerate(codes_per_length):
+            out[i] |= ncodes << 4
+    else:
+        print("huff: warning: binary with codes_per_length %s"
+              % repr(codes_per_length), file=sys.stderr)
+        out.append(0xFF)
+    out.append(len(data) & 0xFF)
+    out.append(len(data) >> 8)
+    if is_huffman:
+        bits = BitByteInterleave()
+        symtolb = {s: (length, value) for s, length, value in syms}
+        for b in data:
+            length, value = symtolb[b >> 4]
+            bits.putbits(value, length)
+            length, value = symtolb[b & 0x0F]
+            bits.putbits(value, length)
+        out.extend(bytes(bits))
+    else:
+        out.extend(data)
+    return bytes(out)
 
-    # Enumerate all nodes in the tree
-    i = 0
-    rootnode = None
-    while i < len(node_lenbits):
-        length, bitstring = node_lenbits[i]
-        if length == 0:
-            rootnode = i
-            parent = None
-        else:
-            parentlb = (length - 1, bitstring >> 1)
-            try:
-                parent = lenbits_to_node[parentlb]
-            except KeyError:
-                lenbits_to_node[parentlb] = parent = len(node_lenbits)
-                node_lenbits.append(parentlb)
-        node_parent.append(parent)
-        i += 1
+def test_huffnibenc():
+    data = bytes.fromhex("6969556778556778")
+    enc = huffnibenc(data)
+    expect = bytes.fromhex("05362708F908007bc1ac0d60")
+    print(data.hex())
+    print(enc.hex())
+    print(expect.hex())
+    print("Match" if enc == expect else "No match")
 
-    # Sort internal nodes by their lenbits value, producing a
-    # level-order tree traversal
-    levelorder = list(range(len(terminalvalues), len(node_lenbits)))
-    levelorder.sort(key=lambda i: node_lenbits[i])
-    print("Levelorder")
-    prlist = [node_lenbits[i] for i in levelorder]
-    print("\n".join(
-        "{1:0{0}b}".format(l, b) if l else "root" for l, b in prlist
-    ))
-
-    # Theoretical maximum index into new tree equals the maximum
-    # length in bits of an internal node times the maximum distance
-    print("maximum internal code length:")
-    maxintlength = max(row[0] for row in node_lenbits[len(terminalvalues):])
-    maxindex = maxdistance * maxintlength)
-    print("maxintlength is %d; maxindex is %d which should be no less than", maxintlength)
-
-    # With distances of 1 to 4 nodes, I foresee congestion in the
-    # level of the tree just above terminals.  To alleviate this,
-    # build special-case encodings for two kinds of trees based on
-    # how many codes of length 1 there are:
-    # - Unary-like codes have rapidly increasing lengths:
-    #   0, 10, 110, 1110, ...
-    #   Encode the number of 1s before the first 0.
-    # - Binary-like codes have flat lengths for the first few codes:
-    #   000, 001, 010, 011, 100, 1010, ...
-    #   Encode the number of 0s before the first nonzero, then
-    #   spend more bits on the offset to each subtree's root.
-
-    # Get children of each node (necessary?)
-    node_child0 = [None] * len(node_parent)
-    node_child1 = [None] * len(node_parent)
-    for i, ((length, bitstring), parent) \
-        in enumerate(zip(node_lenbits, node_parent)):
-        if length < 1: continue
-        target = node_child1 if (bitstring & 1) else node_child0
-        target[parent] = i
+def main(argv=None):
+    argv = argv or sys.argv
+    if len(argv) > 1 and argv[1] in ['--help', '-h', '-?', '/?']:
+        print("""usage: huffnib.py INFILE OUTFILE
+Nibblewise Huffman compressor""")
+        return
+    infilename, outfilename = argv[1:3]
+    with open(infilename, "rb") as infp:
+        data = infp.read()
+    enc = huffnibenc(data)
+    with open(outfilename, "wb") as outfp:
+        outfp.write(data)
 
 if __name__=='__main__':
-##    CH_main()
-    treemain()
+    if "idlelib" in sys.modules:
+        test_huffnibenc()
+    else:
+        main()
