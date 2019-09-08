@@ -37,14 +37,17 @@ CHARACTER_OBJ_COUNT EQU 16
 HELP_CURSOR_Y_BASE EQU 24
 MENU_INDENT_WIDTH EQU 6
 
+; Character constants
 LF EQU 10
 GL_RIGHT EQU $84
 GL_LEFT EQU $85
 GL_UP EQU $86
 GL_DOWN EQU $87
 
-section "help_vars",WRAM0
+section "help_line_buffer", WRAM0, align[4]
 help_line_buffer:: ds 32
+
+section "help_vars",WRAM0
 wnd_x: ds 1
 wnd_progress: ds 1
 help_allowed_keys: ds 1

@@ -1,11 +1,15 @@
 include "src/global.inc"
 
-
-
-section "huffnib", ROM0
+HUFFNIB_INCLUDE_TESTS = 1
 
 hCodeLengths = hLocals + $00
-hRangeEnd    = hLocals + $0F
+hBitAccum    = hLocals + $0F
+
+huffnib_bytecountlo equs "(help_line_buffer + 30)"
+huffnib_bytecounthi equs "(help_line_buffer + 31)"
+huffnib_symboldefs equs "(help_line_buffer)"
+
+section "huffnib", ROM0
 
 ;;
 ; 7/8 of the time, it takes 5 cycles
@@ -23,52 +27,56 @@ getbit: macro
 ;;
 ; Incomplete, untested decoder for a canonical Huffman code
 ; code_lengths must be in HRAM
-; assume 22 mcycles per input bit plus 31 per symbol.
+; assume 23 mcycles per input bit plus 30 per symbol.
 canohuff_decode_symbol:
+  ; Regmap:
+  ; B  remaining bits in this byte of input
+  ; C  pointer into bit lengths
+  ; D  current code length
+  ; E  range end (total number of code lengths so far)
+  ; HL pointer to next byte of input
+
   ; 10 Set up Canonical Huffman state machine
   push de
   xor a
-  ld e, a  ; E: bit accumulator
-  ldh [hRangeEnd], a
-  ld c, low(hCodeLengths)
+  ld e, a  ; E: range end
+  ldh [hBitAccum], a
+  ld c, low(hCodeLengths) - 1
 .loop:
   ; 4 Fetch number of codes of this length
-  ld a, [$ff00 + c]
   inc c
+  ld a, [$ff00 + c]
   ld d, a  ; D: ncodesofthislength
 
-  ; 5 Set range_end to the first index beyond those representable
-  ; by this many bits
-  ldh a, [hRangeEnd]
-  add d
-  ldh [hRangeEnd], a
+  ; 2 Set range_end to the total number of codes seen so far,
+  ; or the first index not representable by this many bits
+  add e
+  ld e, a
   
   ; ~6 Read a bit from the bit stream
   getbit
 
-  ; 7 Add it to the bit accumulator and compare to available codes
+  ; 11 Add it to the bit accumulator and compare to available codes
   ; of this length
-  ld a, e
+  ldh a, [hBitAccum]
   adc a
   sub d
-  ld e, a  ; Write back to the bit accumulator
+  ldh [hBitAccum], a
   jr nc, .loop  ; If beyond available codes, keep getting more bits
 
   ; We have read a whole symbol.
-  ; Here, E is negative.  It represents
+  ; Here, A is negative.  It represents
   ;     bit accumulator - ncodesofthislength
-  ; and range_end represents
+  ; and E represents
   ;     first_index + ncodesofthislength
   ; Need to return bit accumulator + first_index
   ; which equals
   ;     (bit accumulator - ncodesofthislength) + (first_index + ncodesofthislength)
-  ; that is, E + range_end
-  
-  ; 16 Translate and return the symbol
-  ldh a, [hRangeEnd]
+  ; that is, A + E
+  ; Free because last jr was not taken
   add e
 
-  ; Translate this into an actual symbol through the
+  ; 14 Translate to actual symbol through the
   ; "sorted by increasing code length" table
   ld de, huffnib_symboldefs
   add e
@@ -81,16 +89,75 @@ canohuff_decode_symbol:
 ; I'm estimating 22 cycles per input bit and 74 per output byte.
 ; The largest known message is 10120 bits and 1538 bytes, or
 ; 337K cycles.
-huffnib_decode_block:
 
+;;
+; @param HL start of interleaved code length counts and symbols,
+; followed by length in bytes, followed by codes
+; @param DE destination address
+huffnib_decode_block::
+  ; Upper nibbles are counts of codes of length 1-15.
+  ; Lower nibbles are values for each code in increasing code length.
+  ; In a valid Canonical Huffman code length table, the number of
+  ; codes with length 1 can validly be only 3 things:
+  ; 0: First code is at least 2 bits
+  ; 1: First code is 1 bit, following codes are longer
+  ; 2: Only 2 symbols exist
+  ; 3+: Not possible. The encoder writes $FF for all symbols being
+  ; 4-bit and nearly equiprobable, so just use memcpy.
+  ld a, [hl]
+  cp $30
+  jr c, .not_4bit_code
+  ld a, [hl+]
+  ld c, a
+  ld a, [hl+]
+  ld b, a
+  jp memcpy
+.not_4bit_code:
 
+  ; So we have 3 to 16 distinct codes, with up to 13 of any given
+  ; length, and the longest length shorter than the total number of
+  ; codes.  Thus we can use code length $F as a terminator.
+  ; Read (codes of this length, symbol) pairs until the terminator.
+  push de  ; Save destination address
+  ld c, low(hCodeLengths)
+  ld de, huffnib_symboldefs
+.headerloop:
+  ; Write symbols in order to huffnib_symboldefs
+  ld a, [hl]
+  and $0F
+  ld [de], a
+  inc de
+
+  ; Write number of codes of each length
+  ld a, [hl+]
+  swap a
+  and $0F
+  ld [$FF00 + c], a
+  inc c
+  cp $0F
+  jr c, .headerloop
+
+  ; Read length and negate it
+  ld a, [hl+]
+  cpl
+  add 1
+  ld [huffnib_bytecountlo], a
+  ld a, [hl+]
+  cpl
+  adc 0
+  ld [huffnib_bytecounthi], a
+
+  pop de
+  ld b, $80  ; initialize state for getbit
+
+  ld b, b
 
 .byteloop:
   ; 74+22n Decode two nibbles and combine them
-  call huffnib_decode_symbol
+  call canohuff_decode_symbol
   swap a
   ld [de], a
-  call huffnib_decode_symbol
+  call canohuff_decode_symbol
   ld c, a
   ld a, [de]
   or c
@@ -107,6 +174,10 @@ huffnib_decode_block:
   ld [huffnib_bytecounthi], a
   jr nz, .byteloop
   ret
+
+; Unused, untested non-canonical version ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  if 0  ; Not using non-canonical version
   
 ; 7654 3210  node format
 ; |||| ||++- offset in nodes to next 0 node
@@ -153,3 +224,30 @@ walk_huff_tree:
   and $0F
   pop de
   ret
+
+  endc  ; End of unused non-canonical version
+
+; Tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  if HUFFNIB_INCLUDE_TESTS
+
+huffnib_test::
+  ld hl, huffnib_data1
+  ld de, $8000
+  call huffnib_decode_block
+  ret
+
+huffnib_data1:
+  ; 00: 5, 01: 6, 10: 7, 110: 8, 111: 9
+  db $05, $36, $27, $08, $F9
+  dw 8
+  ; 69 69 55 67 78 55 67 78
+  db %01111011  ; 696[9
+  db %11000001  ; 9]556
+  db %10101100  ; 778[5
+  db %00001101  ; 5]67[7
+  db %01100000  ; 7]8|55
+
+; TODO: Add more tests
+
+  endc

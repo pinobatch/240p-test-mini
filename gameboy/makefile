@@ -21,7 +21,7 @@ objlist = header init \
   megaton stopwatch soundtest audiosync sgbtests gbctests \
   Gus_portrait_GBC \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
-  uniur gfxincbins
+  uniur huffnib gfxincbins
 
 # Flags for native tools written in C
 CC := gcc

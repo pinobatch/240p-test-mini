@@ -107,6 +107,8 @@ vwfPutTile_shifter:
 
 ;;
 ; Draws the tile for glyph A at horizontal position B
+; using the font at vwfChrData, which must be aligned to
+; GLYPH_HEIGHT bits
 vwfPutTile::
 
   ; Calculate address of glyph
