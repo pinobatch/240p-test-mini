@@ -490,9 +490,9 @@ load_hillzone_bg::
   call pb16_unpack_block
 
   ; Load tiles
+  ld l, 3
+  call allhuffdata_fetch_file_l
   ld hl,CHRRAM2
-  ld de,hillzone_chr
-  ld b,sizeof_hillzone_chr/16
   call pb16_unpack_block
 
   ; Set up palette

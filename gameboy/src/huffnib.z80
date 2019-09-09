@@ -341,7 +341,7 @@ allhuffdata_fetch_file_l::
   ld a, [hl+]
   or a
   jr z, .not_gbc_pair
-  ld a, [hw_capability]
+  ldh a, [hw_capability]
   add a
   jr nc, .not_gbc_pair
   ld de, 8

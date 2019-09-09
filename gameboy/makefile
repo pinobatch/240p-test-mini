@@ -24,7 +24,9 @@ objlist := header init \
 
 huffdata := \
   obj/gb/stopwatchhand.chrgb.pb16 \
-  obj/gb/stopwatchdigits.chrgb.pb16
+  obj/gb/stopwatchdigits.chrgb.pb16 \
+  obj/gb/spritegfx.chrgb.pb16 \
+  obj/gb/greenhillzone.u.chrgb.pb16
 
 # Flags for native tools written in C
 CC := gcc

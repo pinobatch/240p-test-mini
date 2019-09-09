@@ -84,23 +84,6 @@ section "stopwatch_gfx1",ROMX
 stopwatchface_iu::
   incbin "obj/gb/stopwatchface.iu"
 
-  if 0
-
-stopwatchhand_huf::
-  incbin "obj/gb/stopwatchhand.chrgb.pb16.huf"
-sizeof_stopwatchhand_chr equ 704
-global sizeof_stopwatchhand_chr
-
-;section "stopwatch_gfx0",ROM0
-; This is sometimes temporarily moved into ROM0 while
-; writing the GBC-exclusive tests' help
-stopwatchdigits_huf::
-  incbin "obj/gb/stopwatchdigits.chrgb.pb16.huf"
-sizeof_stopwatchdigits_chr equ 1024
-global sizeof_stopwatchdigits_chr
-
-  endc
-
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "megaton_gfx1",ROMX
@@ -142,10 +125,6 @@ portrait_pal::
 ; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "scrolltest_gfx1",ROMX
-hillzone_chr::
-  incbin "obj/gb/greenhillzone.u.chrgb.pb16"
-sizeof_hillzone_chr equ 1648
-global sizeof_hillzone_chr
 hillzone_nam::
   incbin "obj/gb/greenhillzone.nam.pb16"
 kikitiles_chr::
@@ -167,12 +146,10 @@ backlight_chr::
 section "lameboy_gfx1",ROMX
 bggfx_chr::
   incbin "obj/gb/bggfx.chrgb.pb16"
-spritegfx_chr::
-  incbin "obj/gb/spritegfx.chrgb.pb16"
 
 ; GBC exclusive tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "smptebars_gfx0",ROM0
+section "smptebars_gfx1",ROMX
 smptetiles_chr::
   incbin "obj/gb/smptetiles.chrgb.pb16"
 

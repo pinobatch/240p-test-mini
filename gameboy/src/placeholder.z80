@@ -513,9 +513,9 @@ load_player_cels::
   ld [player_dxsub],a
   ld [player_facing],a
 
-  ld de,spritegfx_chr
+  ld l, 2
+  call allhuffdata_fetch_file_l
   ld hl,CHRRAM0+PLAYER_TILE_BASE*16
-  ld b,48
   jp pb16_unpack_block
 
 
