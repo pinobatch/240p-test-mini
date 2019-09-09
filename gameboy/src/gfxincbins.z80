@@ -28,6 +28,12 @@ helptiles_gbc:: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
 sizeof_helptiles_gbc equ 960
 global sizeof_helptiles_gbc
 
+; Super Game Boy border ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+section "sgbborder_gfx0", ROM0
+sgbborder::
+  incbin "obj/gb/sgbborder.border"
+
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "grayramp_gfx1",ROM0, align[2]
