@@ -265,11 +265,17 @@ helpscreen::
   ld b,PADF_UP|PADF_DOWN
   call autorepeat
 
-  ; Start to handle keypresses
-  ldh a,[new_keys]
-  ld b,a
-  ld a,[help_allowed_keys]
-  and b
+  ; Handle keypresses, but ignore tuem until Huffman predecoding
+  ; finishes so that the copyright notice is displayed.
+  ; 0: none loaded; 1: font loaded; 2: font and predecodes loaded
+  ld a, [help_font_loaded]
+  srl a
+  jr z, .no_keys
+    ldh a,[new_keys]
+    ld b,a
+    ld a,[help_allowed_keys]
+    and b
+  .no_keys:
   ld b,a
 
   ; Page to page navigation
@@ -807,9 +813,18 @@ help_move_window:
   ld a,[hl]
   cp 128
   jr nc,.is_leaving
-  cp wnd_x_sequence_last-wnd_x_sequence
+  cp wnd_x_sequence_last-wnd_x_sequence + 1
   jr c,.is_entering
-  ld a,WXBASE
+
+  ; If the transition is finished, check for Huffman preloading
+  ld hl, help_font_loaded
+  ld a, [hl]
+  cp 2
+  jr nc, .already_preloaded
+    ld [hl], 2
+    call allhuffdata_predecode
+  .already_preloaded:
+  ld a, WXBASE
   jr .have_wnd_x
 
   .is_leaving:
@@ -870,11 +885,13 @@ wnd_x_sequence_last:
 
 help_draw_wanted_page:
   ; Ensure the font is loaded
-  ld a, [help_font_loaded]
+  ld hl, help_font_loaded
+  ld a, [hl]
   or a
-  call z, vwfInit
-  ld a, 1
-  ld [help_font_loaded], a
+  jr nz, .vwfAlreadyInit
+    inc [hl]
+    call vwfInit
+  .vwfAlreadyInit:
 
   ; Draw the document's title
   call vwfClearBuf

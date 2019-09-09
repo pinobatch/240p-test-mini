@@ -83,6 +83,9 @@ global sizeof_cps_grid_chr
 section "stopwatch_gfx1",ROMX
 stopwatchface_iu::
   incbin "obj/gb/stopwatchface.iu"
+
+  if 0
+
 stopwatchhand_huf::
   incbin "obj/gb/stopwatchhand.chrgb.pb16.huf"
 sizeof_stopwatchhand_chr equ 704
@@ -95,6 +98,8 @@ stopwatchdigits_huf::
   incbin "obj/gb/stopwatchdigits.chrgb.pb16.huf"
 sizeof_stopwatchdigits_chr equ 1024
 global sizeof_stopwatchdigits_chr
+
+  endc
 
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

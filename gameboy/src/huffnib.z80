@@ -257,3 +257,108 @@ huffnib_data1:
 ; TODO: Add more tests
 
   endc
+
+; Directory ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; 0   0: use for both DMG and GBC; 1: use this for DMG and next for GBC
+; 1   Additional data (such as PB16 tile count)
+; 2-3 ROM address of start of Huffman data
+; 4-5 WRAM address of start of unpacked data
+; 6-7 ROM address of end of Huffman data (e.g. associated nametable)
+
+;;
+; Decodes all nibble-wise Huffman compressed data to WRAM
+; at program start
+allhuffdata_predecode::
+  ld hl, allhuffdata_dir
+.blockloop:
+
+  ; Is this a pair of assets decoded to the same WRAM address,
+  ; one for DMG and one for GBC?
+  ld a, [hl+]  ; nonzero if DMG/GBC pair
+  inc hl
+  or a
+  jr z, .not_gbc_pair
+  ; 1: Load this if DMG or next if GBC
+  ldh a, [hw_capability]  ; D7 set if GBC
+  add a
+  jr c, .gbc_pair_is_gbc
+  ; DMG/GBC pair: Decode this one, skip next one
+  ld de, 14
+  jr .have_hl_de
+.gbc_pair_is_gbc:
+  ld de, 8    ; Skip to next entry
+  add hl, de
+.not_gbc_pair:
+  ld de, 6
+.have_hl_de:
+
+  ; HL: pointer to source field of this record
+  ; DE: distance to start of next record
+  push de
+  push hl
+
+  ; Load source and destination addresses
+  ld a, [hl+]  ; BA: source
+  ld b, [hl]
+  inc hl
+  ld e, [hl]   ; DE: destination
+  inc hl
+  ld d, [hl]
+  ld h, b
+  ld l, a
+  call huffnib_decode_block
+
+  ; Move to next block
+  pop hl
+  pop de
+  add hl, de
+
+  ; Get the next block
+  ld a, l
+  sub low(allhuffdata_dir_end)
+  ld a, h
+  sbc high(allhuffdata_dir_end)
+  jr c, .blockloop
+  ret
+
+;;
+; Fetches a predecoded file
+; @param L file ID
+; @return B: tile count; DE: decompressed data;
+; HL: data following Huffman block
+allhuffdata_fetch_file_l::
+  ; Seek to the directory entry
+  ld h, 0
+  add hl, hl
+  add hl, hl
+  add hl, hl  ; HL: index into huffdir
+  ld de, allhuffdata_dir
+  add hl, de  ; HL: pointer to entry
+
+  ; If this is a DMG/GBC pair, and this is a GBC,
+  ; return the following entry
+  ld a, [hl+]
+  or a
+  jr z, .not_gbc_pair
+  ld a, [hw_capability]
+  add a
+  jr nc, .not_gbc_pair
+  ld de, 8
+  add hl, de
+.not_gbc_pair:
+
+  ; Read bytes 1 (tile count), 4-5 (decompressed data pointer),
+  ; and 6-7 (ancillary data pointer) from directory entry
+  ld a, [hl+]
+  ld b, a
+  inc hl
+  inc hl
+  ld a, [hl+]
+  ld e, a
+  ld a, [hl+]
+  ld d, a
+  ld a, [hl+]
+  ld h, [hl]
+  ld l, a
+  ret

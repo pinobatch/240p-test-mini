@@ -127,16 +127,13 @@ activity_stopwatch::
   call unpack_iu_file
 
   ; Load additional background tiles used by activity
-  ld hl,stopwatchdigits_huf
-  ld de,CHRRAM0
-  push de
-  call huffnib_decode_block
-  pop de
-  ld hl,CHRRAM1
-  push hl
-  ld b,sizeof_stopwatchdigits_chr/16
+  ld l, 1  ; stopwatchdigits
+  call allhuffdata_fetch_file_l
+  ld hl, CHRRAM1
   call pb16_unpack_block
-  pop de
+
+  ld de, CHRRAM1
+  ld hl, CHRRAM1 + $0400
 
   ; Lighter version of digits used for SGB blue/red
   ; from DE to HL
@@ -149,13 +146,9 @@ activity_stopwatch::
     bit 4, h
     jr z, .lightdigitsloop
 
-  ld hl,stopwatchhand_huf
-  ld de,CHRRAM0+$400
-  push de
-  call huffnib_decode_block
-  pop de
-  ld hl,CHRRAM0
-  ld b,sizeof_stopwatchhand_chr/16
+  ld l, 0  ; stopwatchhand
+  call allhuffdata_fetch_file_l
+  ld hl, CHRRAM0
   call pb16_unpack_block
 
   ld hl,_SCRN0+640

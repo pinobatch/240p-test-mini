@@ -20,7 +20,7 @@ objlist := header init \
   stills shadowsprite backlight scrolltest motionblur overscan \
   megaton stopwatch soundtest audiosync sgbtests gbctests \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
-  uniur huffnib gfxincbins
+  uniur huffnib gfxincbins allhuffdata
 
 huffdata := \
   obj/gb/stopwatchhand.chrgb.pb16 \
