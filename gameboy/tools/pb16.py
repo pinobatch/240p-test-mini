@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 PB16 encoder
 Copyright 2018 Damian Yerrick
@@ -51,18 +51,40 @@ def pb16(data):
                 prev[i % 2] = value
         yield packet
 
+def unpb16(data, offset=0, npackets=None):
+    """Decompress PB16 data"""
+    prev = [0, 0]
+    packets = []
+    while (npackets is None or npackets > 0) and offset < len(data):
+        ctrl = data[offset]
+        offset += 1
+        out = bytearray(8)
+        for i in range(8):
+            if offset < len(data) and not (ctrl & (0x80 >> i)):
+                prev[i % 2] = data[offset]
+                offset += 1
+            out[i] = prev[i % 2]
+        packets.append(bytes(out))
+        if npackets is not None: npackets -= 1
+    return packets, offset
+
 def parse_argv(argv):
     p = argparse.ArgumentParser()
     p.add_argument("infile")
     p.add_argument("outfile")
+    p.add_argument("-d", "--decompress", action="store_true")
     return p.parse_args(argv[1:])
 
 def main(argv=None):
     args = parse_argv(argv or sys.argv)
     with open(args.infile, "rb") as infp:
         data = infp.read()
+    if args.decompress:
+        cdata, _ = unpb16(data)
+    else:
+        cdata = pb16(data)
     with open(args.outfile, "wb") as outfp:
-        outfp.writelines(pb16(data))
+        outfp.writelines(cdata)
 
 def test():
     tests = [

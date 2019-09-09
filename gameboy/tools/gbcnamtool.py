@@ -3,8 +3,6 @@ import sys
 import os
 import argparse
 from PIL import Image, ImageChops
-import pb16
-from vwfbuild import rgbasm_bytearray
 
 # Find common tools
 commontoolspath = os.path.normpath(os.path.join(
@@ -130,6 +128,7 @@ def vflipGB(tile):
     return b"".join(tile[i:i + 2] for i in range(len(tile) - 2, -2, -2))
 
 def flipuniq(it):
+    """Convert list of tiles to unique tiles and 16-bit tilemap"""
     tiles = []
     tile2id = {}
     tilemap = []
@@ -153,12 +152,27 @@ def color_tuple_to_bgr5(rgb):
         (b & 0xF8) << (10 - 3) | (g & 0xF8) << (5 - 3) | (r & 0xF8) >> 3
     )
 
-def subpalette_to_asm(row):
+def subpalette_to_bgr5(row):
+    """Convert the first 4 color tuples in a list to 5 bits per channel"""
     row = [color_tuple_to_bgr5(x) for x in list(row)[:4]]
     if len(row) < 4:
         row.extend([row[0]] * (4 - len(row)))
-    return "  dw " + ",".join("$%04x" % x for x in row)
-    
+    return row
+
+def subpalette_to_asm(row):
+    """Convert the first 4 color tuples in a list to a DW statement"""
+    return "  dw " + ",".join("$%04x" % x for x in subpalette_to_bgr5(row))
+
+def im_to_gbc(im, palettes):
+    imfinal, attrs = colorround(im, palettes, (8, 8), 4)
+    gbformat = lambda im: formatTilePlanar(im, "0,1")
+    tiles = pilbmp2chr(imfinal, formatTile=formatTileGB)
+    utiles, tilemap = flipuniq(tiles)
+    assert len(tilemap) == len(attrs)
+    tilemap_hi = bytearray((t >> 8) | c for t, c in zip(tilemap, attrs))
+    tilemap_lo = bytearray(t & 0xFF for t in tilemap)
+    return imfinal, utiles, tilemap_lo, tilemap_hi
+
 # Input parsing #####################################################
 
 def hextotuple(color):
@@ -189,6 +203,14 @@ def path_to_symbol_name(imagename):
 
     return alnum_basename
 
+def load_palette_spec(lines):
+    lines = [l.split("//", 1)[0].strip() for l in lines]
+    return [
+        [hextotuple(c) for c in l.split()]
+        for l in lines
+        if l
+    ]
+
 def parse_argv(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("image",
@@ -212,32 +234,25 @@ def parse_argv(argv):
     return parser.parse_args(argv[1:])
 
 def main(argv=None):
+    import pb16
+    from vwfbuild import rgbasm_bytearray
     args = parse_argv(argv or sys.argv)
 
-    # Read palette spec file
+    # Read input files
     with open(args.paltxtfile, "r") as infp:
-        lines = [l.split("//", 1)[0].strip() for l in infp]
-    palettes = [
-        [hextotuple(c) for c in l.split()]
-        for l in lines
-        if l
-    ]
-
+        lines = list(infp)
+    palettes = load_palette_spec(lines)
     im = Image.open(args.image)
-    imfinal, attrs = colorround(im, palettes, (8, 8), 4)
+
+    result = im_to_gbc(im, palettes)
+    imfinal, utiles, tilemap_lo, tilemap_hi = result
     if args.preview:
         imfinal.save(args.preview)
-    gbformat = lambda im: formatTilePlanar(im, "0,1")
-    tiles = pilbmp2chr(imfinal, formatTile=formatTileGB)
-    utiles, tilemap = flipuniq(tiles)
-    assert len(tilemap) == len(attrs)
-    tilemap_hi = bytearray((t >> 8) | c for t, c in zip(tilemap, attrs))
-    tilemap_lo = bytearray(t & 0xFF for t in tilemap)
 
     # If singleton optimization was requested, perform it
+    tiles = [utiles[x] for x in tilemap_lo]
     if args.incruniq:
         import incruniq
-        tiles = [utiles[x] for x in tilemap_lo]
         utiles, ctilemap_lo = incruniq.iur_encode(tiles)
 
     ctiles = b"".join(pb16.pb16(b"".join(utiles)))
