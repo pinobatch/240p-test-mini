@@ -122,9 +122,9 @@ activity_stopwatch::
   call memset
 
   ; Load background tilemap to SCRN0
-  ld de,stopwatchface_iu
-  ld hl,CHRRAM2
-  call unpack_iu_file
+  ld l,6
+  ld bc,CHRRAM2
+  call allhuffdata_unpack_iu_file_l
 
   ; Load additional background tiles used by activity
   ld l, 1  ; stopwatchdigits

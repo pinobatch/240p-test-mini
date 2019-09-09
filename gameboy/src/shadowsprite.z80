@@ -528,10 +528,10 @@ load_gus_portrait:
   ldh [rBGP], a
 
   ; Load Gus portrait for background
-  ld de,portrait_iu
-.from_de:
-  ld hl,CHRRAM2
-  call unpack_iu_file
+  ld l, 7
+.from_l:
+  ld bc,CHRRAM2
+  call allhuffdata_unpack_iu_file_l
   ; fall through
 
 ;;
@@ -556,8 +556,8 @@ load_gus_portrait_gbc:
   ldh [rVBK],a
 
   ; Prepare plane 0
-  ld de,portrait_iuc
-  call load_gus_portrait.from_de
+  ld l, 8
+  call load_gus_portrait.from_l
 
   ; Prepare plane 1
   ld d, h

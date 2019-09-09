@@ -51,6 +51,7 @@ hPrevTile    = hLocals + $03
 
 SECTION "incruniq", ROM0
 
+  if 0
 ;;
 ; Unpack IU file at DE to tiles at HL and map at _SCRN0+640
 unpack_iu_file::
@@ -59,16 +60,22 @@ unpack_iu_file::
   ld b,a
   call pb16_unpack_block
 
-  ld a,[de]  ; Fetch tilemap size
-  inc de
+  ld h, d
+  ld l, e
+  endc
+
+iur_unpack_2hl_bytes::
+  ld a, [hl+]  ; Fetch tilemap size
+
+;;
+; Unpack 2*A bytes of IUR map data from HL to _SCRN0+640
+iur_unpack_2a_bytes::
   ld c, a    ; and double it
   xor a
   sla c
   adc a
   ld b, a
 
-  ld h, d
-  ld l, e
   ld de, _SCRN0+640
   xor a
   ; fall through

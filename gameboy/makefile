@@ -11,7 +11,7 @@
 
 # Used in the title of the zipfile and .gb executable
 title:=gb240p
-version:=0.18
+version:=0.19pre
 
 # Space-separated list of asm files without .z80 extension
 # (use a backslash to continue on the next line)
@@ -26,7 +26,11 @@ huffdata := \
   obj/gb/stopwatchhand.chrgb.pb16 \
   obj/gb/stopwatchdigits.chrgb.pb16 \
   obj/gb/spritegfx.chrgb.pb16 \
-  obj/gb/greenhillzone.u.chrgb.pb16
+  obj/gb/greenhillzone.u.chrgb.pb16 \
+  obj/gb/sharpness.iu \
+  obj/gb/linearity-quadrant.iu \
+  obj/gb/stopwatchface.iu \
+  DMG? obj/gb/Gus_portrait.iu obj/gb/Gus_portrait-GBC.iuc
 
 # Flags for native tools written in C
 CC := gcc

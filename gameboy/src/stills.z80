@@ -355,9 +355,9 @@ activity_linearity::
   cpl
   ld [rLYC], a  ; activity does not use STAT LYC IRQ
 
-  ld de,linearity_quadrant_iu
-  ld hl,CHRRAM2
-  call unpack_iu_file
+  ld l,5
+  ld bc,CHRRAM2
+  call allhuffdata_unpack_iu_file_l
   ld hl,_SCRN0+640
   ld de,_SCRN0
   ld bc,256*10+9
@@ -545,6 +545,22 @@ load_pb16_nam::
   jp load_nam
   endc
 
+;;
+; @param BC tile data base address
+; @param L file ID
+allhuffdata_unpack_iu_file_l::
+  push bc
+  call allhuffdata_fetch_file_l
+  ld a, b
+  pop bc
+  push hl
+  ld h, b
+  ld l, c
+  ld b, a
+  call pb16_unpack_block
+  pop hl
+  jp iur_unpack_2hl_bytes
+
 activity_sharpness::
   ld a,%00011011
   ldh [curpalette],a
@@ -557,9 +573,9 @@ activity_sharpness::
   ldh [rLYC], a  ; disable lyc irq
 
   ; Load primary picture
-  ld de,sharpness_iu
-  ld hl,CHRRAM2
-  call unpack_iu_file
+  ld bc, CHRRAM2
+  ld l, 4
+  call allhuffdata_unpack_iu_file_l
   ld hl,_SCRN0+640
   ld de,_SCRN0
   call load_full_nam

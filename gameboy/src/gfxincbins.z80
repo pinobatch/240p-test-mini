@@ -20,7 +20,7 @@ include "src/gb.inc"
 
 ; Help ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "helptiles",ROM0
+section "helptiles",ROMX
 helptiles:: incbin "obj/gb/helptiles.chrgb16.pb16"
 sizeof_helptiles equ 672
 global sizeof_helptiles
@@ -30,7 +30,7 @@ global sizeof_helptiles_gbc
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "grayramp_gfx1",ROMX, align[2]
+section "grayramp_gfx1",ROM0, align[2]
 grayramp_sgb_chr::
   incbin "obj/gb/grayramp-sgb.chrgb", 0, 36
 
@@ -55,13 +55,8 @@ grayramp_chr_gbc::
   db %11111111  ; tile 5: full
   db %11111111
 
-section "linearity_gfx0",ROM0
-linearity_quadrant_iu::
-  incbin "obj/gb/linearity-quadrant.iu"
-
 section "sharpness_gfx0",ROM0
-sharpness_iu::
-  incbin "obj/gb/sharpness.iu"
+
 sharpness_brick_tile::
   dw `11222222
   dw `22112222
@@ -72,32 +67,34 @@ sharpness_brick_tile::
   dw `22221131
   dw `22222211
 
-section "cpsgrid_gfx1",ROMX
+section "cpsgrid_gfx0",ROM0
 cps_grid_chr::
   incbin "obj/gb/cps_grid.chrgb.pb16"
 sizeof_cps_grid_chr equ 128
 global sizeof_cps_grid_chr
 
-; Stopwatch (Lag test) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-section "stopwatch_gfx1",ROMX
-stopwatchface_iu::
-  incbin "obj/gb/stopwatchface.iu"
-
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "megaton_gfx1",ROMX
+section "megaton_gfx0",ROM0
 megatontiles_chr:: incbin "obj/gb/megatontiles.chrgb16.pb16"
 sizeof_megaton_tiles equ 320
 global sizeof_megaton_tiles
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "shadowsprite_gfx1",ROMX
+section "shadowsprite_gfx0",ROM0
 shadow_reticle_chr::
   incbin "obj/gb/shadow_reticle.chrgb.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4
 global sizeof_shadow_reticle_chr
+hepsie_chr::
+  incbin "obj/gb/hepsie.chrgb.pb16"
+sizeof_hepsie_chr equ 16*3*4
+global sizeof_hepsie_chr
+portrait_pal::
+  incbin "obj/gb/Gus_portrait-GBC.pal"
+
+section "shadowsprite_gfx1",ROMX
 hepsie_palette_gbc::
   drgb $FF00FF
   drgb $000000
@@ -109,19 +106,6 @@ hepsie_palette_gbc::
   drgb $FFAA55
 hepsie_palette_gbc_end::
 
-section "shadowsprite_gfx1",ROMX
-hepsie_chr::
-  incbin "obj/gb/hepsie.chrgb.pb16"
-sizeof_hepsie_chr equ 16*3*4
-global sizeof_hepsie_chr
-
-portrait_iu::
-  incbin "obj/gb/Gus_portrait.iu"
-portrait_iuc::
-  incbin "obj/gb/Gus_portrait-GBC.iuc"
-portrait_pal::
-  incbin "obj/gb/Gus_portrait-GBC.pal"
-
 ; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "scrolltest_gfx1",ROMX
@@ -129,8 +113,6 @@ hillzone_nam::
   incbin "obj/gb/greenhillzone.nam.pb16"
 kikitiles_chr::
   incbin "obj/gb/kikitiles.chrgb"
-
-section "scrolltest_gfx1",ROMX
 kikimap::
   incbin "obj/gb/kikimap.chr1"
 
@@ -143,7 +125,7 @@ backlight_chr::
 ; Lame boy demo ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Tiles also used by overscan and motion blur
 
-section "lameboy_gfx1",ROMX
+section "lameboy_gfx0",ROM0
 bggfx_chr::
   incbin "obj/gb/bggfx.chrgb.pb16"
 
@@ -153,6 +135,6 @@ section "smptebars_gfx1",ROMX
 smptetiles_chr::
   incbin "obj/gb/smptetiles.chrgb.pb16"
 
-section "pluge_shark_gfx1",ROMX
+section "pluge_shark_gfx0",ROM0
 pluge_shark_chr::
   incbin "obj/gb/pluge_shark_4color.chrgb.pb16"
