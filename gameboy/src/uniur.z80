@@ -81,6 +81,7 @@ unpack_iu_file::
 ; @param DE destination address (usually in VRAM)
 ; @param BC number of bytes in tilemap
 ; @param A starting tile ID (e.g. $80 for $8800 VRAM)
+; @return HL: end of source; DE: end of destination
 iur_unpack::
 
   ; Initial codec state

@@ -532,11 +532,19 @@ load_gus_portrait:
 .from_de:
   ld hl,CHRRAM2
   call unpack_iu_file
+  ; fall through
+
+;;
+; Draw the rectangle of Gus's portrait.
+; HL (end of IU decoding) is left unchanged.
 .load_nam:
+  push hl
   ld hl,_SCRN0+640
   ld de,Gus_topleft
   ld bc,13*256+18
-  jp load_nam
+  call load_nam
+  pop hl
+  ret
 
 load_gus_portrait_gbc:
   ; Load Gus portrait for background
@@ -544,21 +552,27 @@ load_gus_portrait_gbc:
   ld a,1
   ldh [rVBK],a
   call clear_scrn1_bottom
-  ld hl,_SCRN0+640
-  ld de,Gus_portrait_GBC_attr
-  ld b,15
-  call pb16_unpack_block
-  call load_gus_portrait.load_nam
   xor a
   ldh [rVBK],a
 
   ; Prepare plane 0
   ld de,Gus_portrait_GBC_iu
   call load_gus_portrait.from_de
-  
+
+  ; Prepare plane 1
+  ld d, h
+  ld e, l
+  ld hl,_SCRN0+640
+  ld b,15
+  ld a,b
+  ldh [rVBK],a
+  call pb16_unpack_block
+  call load_gus_portrait.load_nam
+
   ld hl,Gus_portrait_GBC_pal
   ld a,$80
-  ld bc,(Gus_portrait_GBC_pal_end-Gus_portrait_GBC_pal)*256+low(rBCPS)
+  ldh [rVBK],a
+  ld bc,(8*4*2)*256+low(rBCPS)
   jp set_gbc_palette
 
 load_hillzone_bg_with_lcdc:

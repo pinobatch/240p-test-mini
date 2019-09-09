@@ -270,7 +270,6 @@ def main(argv=None):
     ]
     if args.incruniq:
         halfnamsize = -(-len(tilemap_lo) // 2)
-        print("tilemap_lo size is", tilemap_lo)
         lines.extend([
             '%s_iu::' % outsymbolname,
             "  db %d  ; tile count" % len(utiles),
@@ -288,13 +287,13 @@ def main(argv=None):
     if args.pb16_attrs:
         tilemap_hi = b"".join(pb16.pb16(tilemap_hi))
     lines.extend([
-        '%s_attr::' % outsymbolname,
+##        '%s_width equ %d' % (outsymbolname, im.size[0] // 8),
+##        '%s_height equ %d' % (outsymbolname, im.size[1] // 8),
+##        '%s_utiles equ %d' % (outsymbolname, len(utiles)),
+##        'global %s_width, %s_height, %s_utiles'
+##        % (outsymbolname, outsymbolname, outsymbolname),
+##        '%s_attr::' % outsymbolname,
         rgbasm_bytearray(tilemap_hi),
-        '%s_width equ %d' % (outsymbolname, im.size[0] // 8),
-        '%s_height equ %d' % (outsymbolname, im.size[1] // 8),
-        '%s_utiles equ %d' % (outsymbolname, len(utiles)),
-        'global %s_width, %s_height, %s_utiles'
-        % (outsymbolname, outsymbolname, outsymbolname),
         ""
     ])
     lines = "\n".join(lines)
