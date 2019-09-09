@@ -163,6 +163,13 @@ def subpalette_to_asm(row):
     """Convert the first 4 color tuples in a list to a DW statement"""
     return "  dw " + ",".join("$%04x" % x for x in subpalette_to_bgr5(row))
 
+def subpalette_to_bin(row):
+    out = bytearray()
+    for i in subpalette_to_bgr5(row):
+        out.append(i & 0xFF)
+        out.append(i >> 8)
+    return out
+
 def im_to_gbc(im, palettes):
     imfinal, attrs = colorround(im, palettes, (8, 8), 4)
     gbformat = lambda im: formatTilePlanar(im, "0,1")
@@ -214,34 +221,31 @@ def load_palette_spec(lines):
 def parse_argv(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("image",
-                        help="image file to convert")
+                        help="image file to convert, or blank to write "
+                        "palette instead")
     parser.add_argument("paltxtfile",
                         help="file containing newline-separated list of "
                         "space-separated hex color codes, one line per "
                         "subpalette")
-    parser.add_argument("outasm")
-    parser.add_argument("--symbol-name", default=None,
-                        help="name to be followed by _pb16, _map, _attr, "
-                        "_pal, _pal_end, _width, _height; "
-                        "default: generate from image file name")
-    parser.add_argument("--bank", default="ROMX",
-                        help="RGBDS memory area (ROMX or ROM0)")
-    parser.add_argument("--incruniq", action="store_true",
-                        help="Store tiles+map as IU file")
-    parser.add_argument("--pb16-attrs", action="store_true",
-                        help="Compress attributes")
-    parser.add_argument("--preview")
+    parser.add_argument("outfile",
+                        help="output (IUC or palette) written here")
+    parser.add_argument("--preview", metavar="IMAGENAME",
+                        help="write palette conversion result as image")
     return parser.parse_args(argv[1:])
 
 def main(argv=None):
-    import pb16
-    from vwfbuild import rgbasm_bytearray
+    import pb16, incruniq
+
     args = parse_argv(argv or sys.argv)
 
     # Read input files
     with open(args.paltxtfile, "r") as infp:
         lines = list(infp)
     palettes = load_palette_spec(lines)
+    if not args.image:
+        with open(args.outfile, "wb") as outfp:
+            outfp.writelines(subpalette_to_bin(row) for row in palettes)
+        return
     im = Image.open(args.image)
 
     result = im_to_gbc(im, palettes)
@@ -249,59 +253,21 @@ def main(argv=None):
     if args.preview:
         imfinal.save(args.preview)
 
-    # If singleton optimization was requested, perform it
+    # Compress tiles with PB16, nametable with IUR, and
+    # attributes with PB16
     tiles = [utiles[x] for x in tilemap_lo]
-    if args.incruniq:
-        import incruniq
-        utiles, ctilemap_lo = incruniq.iur_encode(tiles)
-
+    utiles, ctilemap_lo = incruniq.iur_encode(tiles)
     ctiles = b"".join(pb16.pb16(b"".join(utiles)))
-    print("%d tiles, %d unique, %d pb16 bytes"
-          % (len(tiles), len(utiles), len(ctiles)), file=sys.stderr)
+    ctilemap_hi = b"".join(pb16.pb16(tilemap_hi))
 
-    outsymbolname = args.symbol_name or path_to_symbol_name(args.image)
-
-    lines = [
-        "; generated with gbcnamtool",
-        'section "%s",%s,align[1]' % (outsymbolname, args.bank),
-        '%s_pal::' % outsymbolname,
-        "\n".join(subpalette_to_asm(row) for row in palettes),
-        '%s_pal_end::' % outsymbolname,
-    ]
-    if args.incruniq:
-        halfnamsize = -(-len(tilemap_lo) // 2)
-        lines.extend([
-            '%s_iu::' % outsymbolname,
-            "  db %d  ; tile count" % len(utiles),
-            rgbasm_bytearray(ctiles),
-            "  db %d  ; map data size / 16" % halfnamsize,
-            rgbasm_bytearray(ctilemap_lo),
-        ])
-    else:
-        lines.extend([
-            '%s_pb16::' % outsymbolname,
-            rgbasm_bytearray(ctiles),
-            '%s_map::' % outsymbolname,
-            rgbasm_bytearray(tilemap_lo),
-        ])
-    if args.pb16_attrs:
-        tilemap_hi = b"".join(pb16.pb16(tilemap_hi))
-    lines.extend([
-##        '%s_width equ %d' % (outsymbolname, im.size[0] // 8),
-##        '%s_height equ %d' % (outsymbolname, im.size[1] // 8),
-##        '%s_utiles equ %d' % (outsymbolname, len(utiles)),
-##        'global %s_width, %s_height, %s_utiles'
-##        % (outsymbolname, outsymbolname, outsymbolname),
-##        '%s_attr::' % outsymbolname,
-        rgbasm_bytearray(tilemap_hi),
-        ""
-    ])
-    lines = "\n".join(lines)
-    if args.outasm == '-':
-        sys.stdout.write(lines)
-    else:
-        with open(args.outasm, 'w') as outfp:
-            outfp.write(lines)
+    halfnamsize = -(-len(tilemap_lo) // 2)
+    out = bytearray([len(utiles)])
+    out.extend(ctiles)
+    out.append(halfnamsize)
+    out.extend(ctilemap_lo)
+    out.extend(ctilemap_hi)
+    with open(args.outfile, 'wb') as outfp:
+        outfp.write(out)
 
 if __name__=='__main__':
     is_IDLE = 'idlelib.run' in sys.modules or 'idlelib.__main__' in sys.modules
@@ -309,7 +275,7 @@ if __name__=='__main__':
         main("""
 gbcnamtool.py
 ../tilesets/Gus_portrait-GBC.png ../tilesets/Gus_portrait-GBC.pal.txt
-out.asm
+out.iuc
 --preview imfinal.png
 """.split())
     else:

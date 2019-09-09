@@ -556,7 +556,7 @@ load_gus_portrait_gbc:
   ldh [rVBK],a
 
   ; Prepare plane 0
-  ld de,Gus_portrait_GBC_iu
+  ld de,portrait_iuc
   call load_gus_portrait.from_de
 
   ; Prepare plane 1
@@ -569,7 +569,7 @@ load_gus_portrait_gbc:
   call pb16_unpack_block
   call load_gus_portrait.load_nam
 
-  ld hl,Gus_portrait_GBC_pal
+  ld hl,portrait_pal
   ld a,$80
   ldh [rVBK],a
   ld bc,(8*4*2)*256+low(rBCPS)

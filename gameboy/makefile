@@ -15,13 +15,16 @@ version:=0.18
 
 # Space-separated list of asm files without .z80 extension
 # (use a backslash to continue on the next line)
-objlist = header init \
+objlist := header init \
   main help helppages.hlp placeholder \
   stills shadowsprite backlight scrolltest motionblur overscan \
   megaton stopwatch soundtest audiosync sgbtests gbctests \
-  Gus_portrait_GBC \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
   uniur huffnib gfxincbins
+
+huffdata := \
+  obj/gb/stopwatchhand.chrgb.pb16 \
+  obj/gb/stopwatchdigits.chrgb.pb16
 
 # Flags for native tools written in C
 CC := gcc
@@ -82,7 +85,7 @@ obj/gb/index.txt: makefile
 
 # The ROM
 
-objlisto = $(foreach o,$(objlist),obj/gb/$(o).o)
+objlisto := $(foreach o,$(objlist),obj/gb/$(o).o)
 
 $(title).gb: $(objlisto)
 	rgblink -w -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
@@ -103,6 +106,7 @@ obj/gb/gfxincbins.o: \
   obj/gb/helptiles.chrgb16.pb16 obj/gb/helptiles-gbc.chrgb16.pb16 \
   obj/gb/hepsie.chrgb.pb16 obj/gb/shadow_reticle.chrgb.pb16 \
   obj/gb/Gus_portrait.iu \
+  obj/gb/Gus_portrait-GBC.iuc obj/gb/Gus_portrait-GBC.pal \
   obj/gb/backlightzone.chrgb.pb16 \
   obj/gb/grayramp-sgb.chrgb obj/gb/grayramp.chrgb \
   obj/gb/cps_grid.chrgb.pb16 obj/gb/linearity-quadrant.iu \
@@ -150,9 +154,14 @@ obj/gb/%.nam: obj/gb/%.u.chrgb
 %.huf: tools/huffnib.py %
 	$(PY) $^ $@
 
-obj/gb/Gus_portrait_GBC.z80: tools/gbcnamtool.py \
-  tilesets/Gus_portrait-GBC.png tilesets/Gus_portrait-GBC.pal.txt
-	$(PY) $^ --incruniq --pb16-attrs $@
+obj/gb/%.iuc: tools/gbcnamtool.py tilesets/%.png tilesets/%.pal.txt
+	$(PY) $^ $@
+
+obj/gb/%.pal: tools/gbcnamtool.py tilesets/%.pal.txt
+	$(PY) $< '' $(word 2,$^) $@
+
+obj/gb/allhuffdata.z80: tools/allhuffdata.py $(filter-out DMG?,$(huffdata))
+	$(PY) $< $(huffdata) -o $@
 
 # Help me!
 obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
@@ -161,4 +170,3 @@ obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
 
 ../common/tools/dte$(DOTEXE): ../common/tools/dte.c
 	$(CC) -static $(CFLAGS) -o $@ $^
-

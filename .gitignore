@@ -15,6 +15,8 @@
 /gameboy/obj/gb/*.z80
 /gameboy/obj/gb/*.nam
 /gameboy/obj/gb/*.iu
+/gameboy/obj/gb/*.iuc
+/gameboy/obj/gb/*.pal
 /gameboy/obj/gb/*.huf
 /gba/build
 /240p-test-mini-*.zip

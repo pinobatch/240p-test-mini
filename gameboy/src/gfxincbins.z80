@@ -129,6 +129,10 @@ global sizeof_hepsie_chr
 
 portrait_iu::
   incbin "obj/gb/Gus_portrait.iu"
+portrait_iuc::
+  incbin "obj/gb/Gus_portrait-GBC.iuc"
+portrait_pal::
+  incbin "obj/gb/Gus_portrait-GBC.pal"
 
 ; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

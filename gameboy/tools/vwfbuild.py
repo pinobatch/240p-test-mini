@@ -4,6 +4,7 @@ from PIL import Image
 from huffnib import huffnibenc
 
 def rgbasm_bytearray(s):
+    """Produce db statements for a constant array in rgbasm"""
     s = ['  db ' + ','.join("%3d" % ch for ch in s[i:i + 16])
          for i in range(0, len(s), 16)]
     return '\n'.join(s)
