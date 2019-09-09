@@ -255,8 +255,7 @@ def main(argv=None):
 
     # Compress tiles with PB16, nametable with IUR, and
     # attributes with PB16
-    tiles = [utiles[x] for x in tilemap_lo]
-    utiles, ctilemap_lo = incruniq.iur_encode(tiles)
+    ctilemap_lo = incruniq.iur_encode_tilemap(tilemap_lo)
     ctiles = b"".join(pb16.pb16(b"".join(utiles)))
     ctilemap_hi = b"".join(pb16.pb16(tilemap_hi))
 

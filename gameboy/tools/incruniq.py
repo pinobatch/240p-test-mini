@@ -16,19 +16,14 @@ from pb16 import pb16
 from uniq import uniq
 from bitbyte import BitByteInterleave
 
-def iur_encode(chrdata):
-    """Test experimental IUR tilemap codec
+def iur_encode_tilemap(tilemap):
 
-chrdata -- a list of bytes objects or other hashables
-
-"""
-    utiles, tilemap = uniq(chrdata)
-
-    # Test type stickiness (brand new uniques vs. horizontal runs)
+    # Type stickiness (brand new uniques vs. horizontal runs)
+    # was the key to making IUR efficient
     lastwasnew, lastbyte, maxsofar = False, 0, 0
     out = BitByteInterleave()
     for i, t in enumerate(tilemap):
-        isnew = t > maxsofar
+        isnew = t == maxsofar + 1
         eqlast = t == lastbyte
         ismatch = isnew if lastwasnew else eqlast
         if ismatch:
@@ -45,9 +40,16 @@ chrdata -- a list of bytes objects or other hashables
             out.putbits(0b11, 2)
             out.putbyte(t)
         lastbyte, lastwasnew = t, isnew
-        maxsofar = max(t, maxsofar)
+        if isnew: maxsofar += 1
+    return bytes(out)
 
-    return utiles, bytes(out)
+def iur_encode(chrdata):
+    """Encode with incremental uniques and runs
+
+chrdata -- a list of bytes objects or other hashables
+"""
+    utiles, tilemap = uniq(chrdata)
+    return utiles, iur_encode_tilemap(tilemap)
 
 def parse_argv(argv):
     p = argparse.ArgumentParser()
