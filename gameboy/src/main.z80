@@ -37,7 +37,10 @@ main::
 
   ldh a, [hw_capability]
   rra
-  call c, sgb_load_master_palette
+  jr nc, .skip_sgb_loading
+    call sgb_load_master_palette
+    call sgb_load_border
+  .skip_sgb_loading:
   ei
   call help_init
 

@@ -81,7 +81,8 @@ def main(argv=None):
         snespalette.append(bgr >> 8)
 
     out = b"".join((
-        bytes([len(utiles) * 2]), pbtiles, iutmrows,
+        bytes([len(utiles) * 2]), pbtiles,
+        bytes([16 * len(utmrows)]), iutmrows,
         bytes(tmrowmap), snespalette
     ))
     with open(outfilename, "wb") as outfp:

@@ -184,6 +184,8 @@ memset::
 
 ;;
 ; Copies BC bytes from HL to DE.
+; @return A: last byte copied; HL at end of source;
+; DE at end of destination; B=C=0
 memcpy::
   ; Increment B if C is nonzero
   dec bc

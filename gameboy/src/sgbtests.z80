@@ -211,6 +211,7 @@ pluge_shark_palette::
 
 sgb_master_palette_end:
 
+section "sgbcode", ROM0
 ; An activity that uses PAL01 instead of PAL_SET may need to
 ; clear attributes first
 sgb_cmd_clear_attrs::
@@ -242,12 +243,27 @@ sgb_load_trn_tilemap:
   ld de, _SCRN0
   jp load_full_nam
 
-sgb_load_master_palette::
+sgb_freeze:
   ; Freeze display while doing transfers
+  call busy_wait_vblank
   ld a, $17*8+1
   ld b, $01  ; Freeze current screen
+  jp sgb_send_ab
+
+;;
+; Turns on rendering, sends a *_TRN packet with first two bytes
+; A and B, and turns rendering back off.
+sgb_send_trn_ab:
+  ld l, a
+  ld a,LCDCF_ON|LCDCF_BGON|LCDCF_BG8000|LCDCF_BG9800
+  ldh [rLCDC],a
+  ld a, l
   call sgb_send_ab
-  
+  jp lcd_off
+
+sgb_load_master_palette::
+  call sgb_freeze
+
   ; Load master palette into CHRRAM0
   call sgb_load_trn_tilemap
   ld hl, sgb_master_palette
@@ -256,16 +272,9 @@ sgb_load_master_palette::
   call memcpy
 
   ; Do the transfer
-  ld a, LCDCF_ON|LCDCF_BGON|LCDCF_BG8000|LCDCF_BG9800
-  ldh [rLCDC], a
   ld a, $0B*8+1
   ld b, 0
-  call sgb_send_ab
-
-  ; Turn LCD back off, unfreeze, and load help palette
-  call lcd_off
-  ld b, 1
-  jr sgb_set_palette_b
+  jp sgb_send_trn_ab
 
 sgb_set_palette_gray::
   ld b, 0
@@ -334,3 +343,77 @@ sgb_set_palettes_bcde_attr_a::
   ; And send it to the SGB
   pop hl
   jp sgb_send
+
+
+; The border consists
+; Up to 64 tiles in Super NES format, compressed with PB16
+; A number of rows of tilemap data, compressed with IUR
+; 28 bytes: in what order the rows are stored
+; 16 bytes: palette
+
+bordersrcbase = _SCRN0+640
+
+sgb_load_border::
+  call sgb_freeze
+  call sgb_load_trn_tilemap
+
+  ; Load tiles
+  ld de, sgbborder
+  ld a, [de]
+  inc de
+  ld b, a
+  ld hl, CHRRAM0
+  call pb16_unpack_block
+  ; ld b, 0  ; guaranteed by pb16_unpack_block
+  push de
+  ld a, $13<<3|1
+  call sgb_send_trn_ab
+  pop hl
+
+  ; Load map rows
+  call iur_unpack_2hl_bytes
+  ld b, 28
+  ld de, CHRRAM0
+  .rowloop:
+    ld a, [hl+]
+    push hl
+
+    ; calculate start of row
+    ld hl, bordersrcbase>>5
+    add l
+    ld l, a
+    ; Need not worry about carry because the next carry is at A000
+    add hl, hl
+    add hl, hl
+    add hl, hl
+    add hl, hl
+    add hl, hl
+
+    ; Expand each tilemap byte on this row to a tile number and
+    ; a flip attribute
+    ld c, 32
+    .tileloop:
+      ld a, [hl]
+      and $3F
+      ld [de], a  ; tile number
+      inc de
+      xor [hl]
+      inc l
+      or $10
+      ld [de], a  ; attributes: VH001PP0
+      inc de
+      dec c
+      jr nz, .tileloop
+    pop hl
+    dec b
+    jr nz, .rowloop
+
+  ; And last: the palette
+  ld bc, 32
+  ld de, CHRRAM1
+  call memcpy
+  ; ld b, 0  ; guaranteed by memcpy
+
+  ; Push tilemap and palette to the SGB
+  ld a, $14<<3|1
+  jp sgb_send_trn_ab

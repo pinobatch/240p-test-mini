@@ -72,6 +72,7 @@ pb16_unpack_packet:
 ; Unpacks 2*B packets from DE to HL, producing 8 bytes per packet.
 ; About 127 cycles (2 scanlines) per 8-byte packet; filling CHR RAM
 ; thus takes (6144/8)*127 = about 97536 cycles or 93 ms
+; @return B: 0; DE: end of source; HL: end of destination
 pb16_unpack_block::
   ; Prefill with zeroes
   xor a
