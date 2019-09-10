@@ -1,11 +1,15 @@
-0.19
-* Super Game Boy enhancement
+0.19 (2019-09-1x)
+* Super Game Boy colorization and border
 * Stopwatch: Bolder digits
-* Standardize phrasing in help text: "stuck pixels", "hide or show",
+* Help: Standardize phrasing: "stuck pixels", "hide or show",
   "start or stop"
+* Help: List patrons as of release time
+* README: Explain rationale behind "144p" title
 * Linearity: Compress with reflection
 * Improve incruniq tilemap compression
-* Code size optimizations
+* Compress font and large graphics with nibble-wise Huffman coding
+* Move variables to HRAM; other code size optimizations
+* Integrate Johnathan Roatch's faster DTE compressor written in C
 
 0.18 (2019-05-02)
 * PLUGE: Add PLUGE Contrast sub-test with shark graphic

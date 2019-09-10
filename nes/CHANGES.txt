@@ -1,7 +1,9 @@
-0.19
+0.19 (2019-09-1x)
 * Stopwatch: Bolder digits
-* Standardize phrasing in help text: "stuck pixels", "hide or show",
+* Help: Standardize phrasing: "stuck pixels", "hide or show",
   "start or stop"
+* Help: List patrons as of release time
+* Integrate Johnathan Roatch's faster DTE compressor written in C
 
 0.18 (2019-05-02)
 * Help: Compress text with DTE

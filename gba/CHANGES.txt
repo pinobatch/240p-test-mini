@@ -1,8 +1,10 @@
-0.19
+0.19 (2019-09-1x)
 * Stopwatch: Bolder digits
 * Color bleed: Fix frame # covering everything
-* Standardize phrasing in help text: "stuck pixels", "hide or show",
+* Help: Standardize phrasing: "stuck pixels", "hide or show",
   "start or stop"
+* Help: List patrons as of release time
+* README: Explain rationale behind "160p" title
 * Use a more common makefile
 * Specify each PNG's conversion settings in a grit file
 
