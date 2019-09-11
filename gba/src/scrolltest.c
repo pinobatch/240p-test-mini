@@ -212,7 +212,7 @@ void activity_kiki_scroll(void) {
     VBlankIntrWait();
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_64|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
     BG_OFFSET[0].y = scrolltest_y >> 1;
-    BG_OFFSET[0].x = 0;
+    BG_OFFSET[0].x = 8;
     REG_DISPCNT = MODE_0 | BG0_ON;
     dmaCopy(kikipalette0, BG_COLORS+0, sizeof(kikipalette0));
     dmaCopy(kikipalette1, BG_COLORS+16, sizeof(kikipalette1));

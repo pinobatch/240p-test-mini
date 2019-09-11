@@ -312,7 +312,7 @@ void activity_pluge(void) {
   LZ77UnCompVram(pluge_shark_6color_chrTiles, PATRAM4(0, 640));
   for (unsigned int y = 0; y < 20; ++y) {
     for (unsigned int x = 0; x < 30; ++x) {
-      MAP[PFOVERLAY][y][x] = 640 + ((y & 0x03) << 2) + (x & 0x03);
+      MAP[PFOVERLAY][y][x] = 640 + ((y & 0x03) << 2) + ((x + 1) & 0x03);
     }
   }
 
@@ -332,7 +332,7 @@ void activity_pluge(void) {
 
     VBlankIntrWait();
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(shark ? PFOVERLAY : PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    BG_OFFSET[0].y = BG_OFFSET[0].x = 0;
     if (shark) {
       dmaCopy(pluge_shark_palettes[bright], BG_COLORS+0x00, sizeof(pluge_shark_6color_chrPal));
     } else {
