@@ -689,7 +689,7 @@ Color bleed
 
 == 144p Test Suite ==
 
-Ver. 0.19wip (2019-09-12)
+Ver. 0.19 (2019-09-12)
 Super Game Boy enhanced
 
 © 2011-2016
