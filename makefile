@@ -1,5 +1,5 @@
 title := 240p-test-mini
-version := 0.18
+version := 0.19
 
 # Make $(MAKE) work correctly even when Make is installed inside
 # C:\Program Files
@@ -31,7 +31,7 @@ gba/240pee_mb.gba:
 $(title)-$(version).zip: zip.in all makefile README.md
 	zip -9 -u $@ -@ < $<
 
-zip.in:
+zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
 	git ls-files | grep -e "^[^.]" > $@
 	echo nes/240pee.nes >> $@
 	echo nes/240pee-bnrom.nes >> $@

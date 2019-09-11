@@ -1,5 +1,6 @@
-0.19 (2019-09-1x)
+0.19 (2019-09-12)
 * Stopwatch: Bolder digits
+* Backlight zone: Increase starting size to 2 pixels
 * Help: Standardize phrasing: "stuck pixels", "hide or show",
   "start or stop"
 * Help: List patrons as of release time
