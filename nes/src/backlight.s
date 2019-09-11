@@ -27,7 +27,7 @@ sprite_x = test_state+0
 sprite_y = test_state+1
 sprite_size = test_state+2
 sprite_hide = test_state+3
-  lda #$FC
+  lda #$FD
   sta sprite_size
   lda #128
   sta sprite_x

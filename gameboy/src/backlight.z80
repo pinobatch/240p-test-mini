@@ -40,9 +40,10 @@ activity_backlight_zone::
   ldh [ypos],a
   xor a
   ldh [is_hidden],a
-  ldh [cursize],a
   dec a
   ldh [curpalette],a
+  ld a, 1
+  ldh [cursize],a
 
 .restart:
   call clear_gbc_attr
