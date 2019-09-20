@@ -81,7 +81,7 @@ global sizeof_cps_grid_chr
 
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "megaton_gfx0",ROM0
+section "megaton_gfx1",ROMX
 megatontiles_chr:: incbin "obj/gb/megatontiles.chrgb16.pb16"
 sizeof_megaton_tiles equ 320
 global sizeof_megaton_tiles
@@ -114,7 +114,7 @@ hepsie_palette_gbc_end::
 
 ; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "scrolltest_gfx1",ROMX
+section "scrolltest_gfx0",ROM0
 hillzone_nam::
   incbin "obj/gb/greenhillzone.nam.pb16"
 kikitiles_chr::
@@ -131,7 +131,7 @@ backlight_chr::
 ; Lame boy demo ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Tiles also used by overscan and motion blur
 
-section "lameboy_gfx0",ROM0
+section "lameboy_gfx1",ROMX
 bggfx_chr::
   incbin "obj/gb/bggfx.chrgb.pb16"
 

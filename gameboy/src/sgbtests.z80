@@ -417,3 +417,10 @@ sgb_load_border::
   ; Push tilemap and palette to the SGB
   ld a, $14<<3|1
   jp sgb_send_trn_ab
+
+; Mystery test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+sgb_ntsc_test::
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_chroma_crosstalk
+  jp helpscreen

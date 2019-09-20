@@ -101,6 +101,7 @@ super_handlers:
   dw activity_pluge
   dw activity_barsongray
   dw activity_color_bleed
+  dw sgb_ntsc_test
 
 ; PLUGE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

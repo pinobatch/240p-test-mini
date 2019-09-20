@@ -686,6 +686,34 @@ Select: Show or hide
 PLUGE
 Color bars on gray
 Color bleed
+Mystery test!
+
+== Chroma crosstalk ==
+
+This pattern shows
+colored stripes arranged
+to show crosstalk
+between the luma and
+chroma of the composite
+video output of an
+NTSC Super NES.
+
+On composite, the word
+"Pass" flickers.
+Through S-Video or RGB,
+the stripes won't spell
+anything.
+----
+The S-ENC or S-RGB chip
+encodes the S-PPU's RGB
+output to composite video,
+taking shortcuts to save
+cost. Because it doesn't
+filter chroma before
+adding it to luma, diagonal
+stripes and checkerboard
+patterns often produce
+crosstalk artifacts.
 
 == 144p Test Suite ==
 
