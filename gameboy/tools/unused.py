@@ -6,7 +6,7 @@ insert zlib license here
 """
 import string
 
-def disassemble_hram_access(opcode, operand, syms):
+def disassemble_inst(opcode, operand, syms):
     def addrtosym(s):
         try:
             return syms[s]
@@ -16,6 +16,8 @@ def disassemble_hram_access(opcode, operand, syms):
         return "ld [%s], a" % addrtosym(operand)
     if opcode == 0xFA:
         return "ld a, [%s]" % addrtosym(operand)
+    if opcode == 0xCD:
+        return "call %s" % addrtosym(operand)
 
 def load_syms(filename):
     with open(filename, "r") as infp:
@@ -62,7 +64,7 @@ for startaddr, endaddr in runs:
 print("total: %d bytes (%.1f KiB)" % (totalsz, totalsz / 1024.0))
 
 optimizable_hram_accesses = [
-    (i, disassemble_hram_access(d, data[i + 1] + data[i + 2] * 0x100, syms))
+    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
     for i, d in enumerate(data[:-2])
     if d in (0xEA, 0xFA) and data[i + 2] == 0xFF
     and not any(l <= i <= h for l, h in falsepos_ranges)
@@ -77,8 +79,20 @@ for i, (addr, inst) in enumerate(optimizable_hram_accesses):
         inst = inst + "  ; false positive? (JR before RET)"
         optimizable_hram_accesses[i] = (addr, inst)
 
-if optimizable_hram_accesses:
-    print("These HRAM accesses can be optimized:")
+rstable_calls = [
+    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
+    for i, d in enumerate(data[:-2])
+    if d == 0xCD and data[i + 2] == 0 and (data[i + 1] & 0xC7) == 0
+    and not any(l <= i <= h for l, h in falsepos_ranges)
+]
+
+optimizable = []
+optimizable.extend(optimizable_hram_accesses)
+optimizable.extend(rstable_calls)
+optimizable.sort()
+
+if optimizable:
+    print("These instructions can be optimized:")
     print("\n".join(
-        "$%04x: %s" % row for row in optimizable_hram_accesses
+        "$%04x: %s" % row for row in optimizable
     ))

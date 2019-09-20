@@ -139,7 +139,7 @@ reset_handler::
     ; whose Y is offscreen.
     ld hl,SOAM
     ld c,160
-    call memset_tiny
+    rst memset_tiny
 
     ; The VWF engine always modifies the tile overlapping the right
     ; half of a glyph, even if the glyph's opaque area doesn't extend
@@ -152,7 +152,7 @@ reset_handler::
     ; spurious "reading unitialized WRAM" exceptions.
     ld hl,lineImgBuf
     ld c,136  ; used size plus 8 for the spare tile
-    call memset_tiny
+    rst memset_tiny
   endc
 
   ld a, $80
@@ -222,10 +222,11 @@ run_dma_end:
 ; pack them between the unused IRQ/RST vectors, at least until we
 ; figure out which to make into RSTs.
 
-section "memset_tiny",ROM0
+
+section "memset_tiny",ROM0[memset_tiny]
 ;;
 ; Writes C bytes of value A starting at HL.
-memset_tiny::
+memset_tiny_impl::
   ld [hl+],a
   dec c
   jr nz,memset_tiny

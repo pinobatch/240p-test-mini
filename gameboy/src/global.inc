@@ -73,6 +73,9 @@ locals_size EQU 16
 hTestState EQU $FF90
 test_state_size EQU 16
 
+; RGBASM requires that RST arguments be constexpr, not imported
+memset_tiny EQU $0008
+
 ; Arguments for draw_spriterect
   rsset hLocals
 Lspriterect_y          rb 1

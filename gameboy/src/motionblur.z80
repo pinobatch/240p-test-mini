@@ -115,7 +115,7 @@ activity_motion_blur::
   ld de,32-8
   .rectrowloop:
     ld c,8
-    call memset_tiny
+    rst memset_tiny
     add hl,de
     dec b
     jr nz,.rectrowloop

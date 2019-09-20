@@ -287,7 +287,7 @@ oneblanktilerow:
   xor a
 oneconsttilerow:
   ld c,20
-  call memset_tiny
+  rst memset_tiny
 add_hl_12:
   ld de,12
   add hl,de
@@ -301,7 +301,7 @@ activity_gray_ramp::
   xor a
   ld hl,CHRRAM0
   ld c,16
-  call memset_tiny
+  rst memset_tiny
   dec a
   ldh [rLYC],a  ; disable lyc irq
 
@@ -688,12 +688,12 @@ activity_solid_screen::
   ld hl,CHRRAM2
   ld c,16
   xor a
-  call memset_tiny
+  rst memset_tiny
   dec a
   ldh [lastlcdc], a  ; lastlcdc: true if color changed
   ldh [rLYC],a  ; disable lyc irq
   ld c,9*16
-  call memset_tiny
+  rst memset_tiny
 
   ; Create VWF canvas at X=160-184, which only GBC/SGB will display
   call clear_scrn0_to_0
@@ -899,7 +899,7 @@ sgb_send_solid_color:
   ld [hl+], a
   xor a
   ld c, 9
-  call memset_tiny
+  rst memset_tiny
   ld hl, help_line_buffer
   jp sgb_send
 
@@ -1142,13 +1142,13 @@ full_stripes_common::
 ;  xor a  ; A is 0 after clear_gbc_attr
   ld hl,CHRRAM0+256
   ld c,16
-  call memset_tiny
+  rst memset_tiny
 
   ; Make VWF window for frame number at (0, 0) on window
   ld hl,CHRRAM0
   ld c,112  ; 6 tiles window, 1 tile blank (for color bleed)
   ; A is still 0
-  call memset_tiny
+  rst memset_tiny
   ld hl,_SCRN1
   ld c,6
   ; A is still 0

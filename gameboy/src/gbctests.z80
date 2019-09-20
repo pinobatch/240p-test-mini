@@ -811,43 +811,38 @@ load_color_bleed::
   ld hl,_SCRN0
   ld a,$06  ; blank tile
   ld c,32*2+2
-  call memset_tiny
+  rst memset_tiny
   ld b,4
   .p0rowgrploop:
     ld d,3
     .p0rowloop:
       ld a,$10  ; pattern tile
       ld c,16
-      call memset_tiny
+      rst memset_tiny
       ld a,$06  ; blank tile
       ld c,16
-      call memset_tiny
+      rst memset_tiny
       dec d
       jr nz,.p0rowloop
     ld c,32  ; blank row
-    call memset_tiny
+    rst memset_tiny
     dec b
     jr nz,.p0rowgrploop
 
-  ; Load attributes
+  ; Load GBC attributes
   ldh a, [hw_capability]
   rra
   jr c, .load_sgb_attrs
   ld a, 1
   ldh [rVBK],a
   xor a
-  ld hl,_SCRN0
-  ld c,6*32
-  call memset_tiny
-  inc a
-  ld c,4*32
-  call memset_tiny
-  inc a
-  ld c,4*32
-  call memset_tiny
-  inc a
-  ld c,4*32
-  call memset_tiny
+  ld hl,_SCRN0 + 2*32
+  .gbcattrloop:
+    ld c,4*32
+    rst memset_tiny
+    inc a
+    cp 4
+    jr nz, .gbcattrloop
   xor a
   ldh [rVBK],a
   

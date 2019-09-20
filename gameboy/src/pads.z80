@@ -20,6 +20,7 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
 include "src/gb.inc"
+include "src/global.inc"
 
 DAS_DELAY = 15
 DAS_SPEED = 3
@@ -199,7 +200,7 @@ sgb_send_abc::
   ld [hl+], a
   xor a
   ld c, 13
-  call memset_tiny
+  rst memset_tiny
   pop hl
   jr sgb_send
 

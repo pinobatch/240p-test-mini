@@ -515,7 +515,7 @@ load_hillzone_bg::
   ld c,a
   ld a,[de]
   inc de
-  call memset_tiny
+  rst memset_tiny
   jr .attrloop1
 .attrstrips:
   db 32*2,0  ; sky
@@ -567,7 +567,7 @@ load_hillzone_bg::
   ld c,a
   ld a,[de]
   inc de
-  call memset_tiny
+  rst memset_tiny
   jr .attrloop2
 .attrloop2end:
 
@@ -614,7 +614,7 @@ load_kiki_bg:
   ld hl,help_line_buffer
   ld c,20
   ld a,KT_SAND0
-  call memset_tiny
+  rst memset_tiny
 
   ; Bad hack: Approximate the right edges of bottom row
   ; for correct wrapping to the top row

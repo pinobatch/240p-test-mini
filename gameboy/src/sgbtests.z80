@@ -318,7 +318,7 @@ sgb_set_palettes_bcde_attr_a::
   push hl
   xor a
   ld c, 16
-  call memset_tiny
+  rst memset_tiny
   pop hl
 
   ; Populate packet

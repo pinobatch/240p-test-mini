@@ -51,7 +51,7 @@ activity_audiosync::
   ld hl,_SCRN0+32*(FLOOR_Y / 8)
   ld a,FLOOR_TILE
   ld c,20
-  call memset_tiny
+  rst memset_tiny
 
   call init_apu
   ld a,$80

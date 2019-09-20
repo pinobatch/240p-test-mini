@@ -159,12 +159,12 @@ draw_bg:
   ld l,e
   ld a,$0B
   ld c,32
-  call memset_tiny
+  rst memset_tiny
   
   ; Draw bottom of floor
   ld a,$01
   ld c,20
-  call memset_tiny
+  rst memset_tiny
 
   ld hl,_SCRN0+32*12+1
   call bg_draw_one_block

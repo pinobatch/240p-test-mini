@@ -68,7 +68,7 @@ activity_overscan::
   ld hl,_SCRN0
   .initrowloop:
     ld c,20
-    call memset_tiny
+    rst memset_tiny
     add hl,de
     dec b
     jr nz,.initrowloop

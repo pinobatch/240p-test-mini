@@ -108,7 +108,7 @@ activity_stopwatch::
     ldh [rVBK],a
     .frameattrloop:
       ld c,4
-      call memset_tiny
+      rst memset_tiny
       add hl,de
       dec b
       jr nz,.frameattrloop

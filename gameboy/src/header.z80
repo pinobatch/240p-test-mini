@@ -21,14 +21,15 @@
 ;
 include "src/gb.inc"
 
-; Instead of vectors, LR35902 has RSTs ("reset trampolines"?) spaced
-; 8 bytes apart.  There are eight for short encodings of CALL with
-; specific addresses ($C7, $CF, ..., $FF) and five for interrupt
-; service routines (ISR).  Fill them with JPs to the actual handlers.
+; Instead of vectors, 8080 family CPUs (including Z80 in Game Gear
+; SM83 in Game Boy) have RSTs ("reset trampolines"?) spaced 8 bytes
+; apart.  There are eight for short encodings of CALL with specific
+; addresses ($C7, $CF, ..., $FF for CALL $0000, CALL $0008, ...,
+; CALL $0038) and five for interrupt service routines (ISR).
+; Fill them with JPs to the actual handlers.
 SECTION "rst00", ROM0[$0000]
   ret
-SECTION "rst08", ROM0[$0008]
-  ret
+; $08: memset_tiny
 SECTION "rst10", ROM0[$0010]
   ret
 SECTION "rst18", ROM0[$0018]

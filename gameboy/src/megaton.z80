@@ -322,7 +322,7 @@ activity_megaton_complete:
   xor a
   ld hl,_SCRN0+32*15
   ld c,32*2+20
-  call memset_tiny
+  rst memset_tiny
   ld hl,_SCRN0+32*14+1
   ld a,$80
   ld c,16
