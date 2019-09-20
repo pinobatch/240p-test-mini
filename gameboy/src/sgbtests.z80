@@ -420,7 +420,193 @@ sgb_load_border::
 
 ; Mystery test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+pass_pattern:
+  db %01111111
+  db %00001001
+  db %00001001
+  db %00001001
+  db %00000110
+  db %00100000
+  db %01010100
+  db %01010100
+  db %01111000
+  db %00000000
+  db %01001000
+  db %01010100
+  db %01010100
+  db %00100100
+  db %00000000
+  db %01001000
+  db %01010100
+  db %01010100
+  db %00100100
+
+nes_palette_11to1c:
+  if 0
+  ; NES palette made with bisqwit's tool
+  ; Not ideal for Super NES, but better than nothing
+  drgb $0f63b3
+  drgb $4051d0
+  drgb $7841cc
+  drgb $a736a9
+  drgb $c03470
+  drgb $bd3c30
+  drgb $9f4a00
+  drgb $6d5c00
+  drgb $366d00
+  drgb $077704
+  drgb $00793d
+  drgb $00727d
+  else
+  ; 12 evenly spaced YUV points
+  drgb $8067ff
+  drgb $a358ed
+  drgb $bd54bf
+  drgb $c75b80
+  drgb $bd6c40
+  drgb $a38312
+  drgb $809800
+  drgb $5ca712
+  drgb $42ab40
+  drgb $38a47f
+  drgb $4293bf
+  drgb $5c7ced
+  endc
+
+  rsset hTestState
+hIncTime    rb 1
+hCurPalette rb 1
+
 sgb_ntsc_test::
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
-  ld b,helpsect_chroma_crosstalk
-  jp helpscreen
+  call clear_gbc_attr
+  ld a, %11100100
+  ldh [rBGP], a
+  ldh [rLYC], a  ; disable lyc irq
+  ld a, 4
+  ldh [hIncTime], a
+  ldh [rSCX], a
+  ldh [hCurPalette], a
+
+  ; Load tiles
+  ld hl, CHRRAM0
+  ld b, 48
+  ld a, %11011011
+  or a
+  .chrloop:
+    ld [hl+], a
+    adc a
+    dec b
+    jr nz, .chrloop
+
+  ; Load map background
+  ld hl, _SCRN0
+  ; ld b, 0
+  .mapfill3loop:
+    ld a, 3
+    .mapfillloop:
+      dec a
+      ld [hl+], a
+      jr nz, .mapfillloop
+      ld a, 3
+      dec b
+      jr nz, .mapfill3loop
+
+  ; Load map foreground
+  ld de, pass_pattern
+  ld a, 1
+  .mapcolloop:
+    ; Seek to start of column
+    ld hl, _SCRN0+11*32
+    or l
+    ld l, a
+
+    ; Grab a column byte
+    ld a, [de]
+    ld b, a
+    inc de
+    push de
+    ld de, -32
+    .mapcellloop:
+      sla b
+      jr nc, .mapnobyte
+        ld a, [hl]
+        inc a
+        cp 3
+        jr c, .mapno3wrap
+          xor a
+        .mapno3wrap:
+        ld [hl], a
+      .mapnobyte:
+      add hl, de
+      inc b
+      dec b
+      jr nz, .mapcellloop
+
+    pop de
+    ld a, l
+    and $1F
+    inc a
+    cp 20
+    jr nz, .mapcolloop
+
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01
+  ldh [vblank_lcdc_value],a
+  ldh [rLCDC],a
+.loop:
+  ld b, helpsect_chroma_crosstalk
+  call read_pad_help_check
+  jr nz, sgb_ntsc_test
+  call wait_vblank_irq
+
+  ld a, [hIncTime]
+  dec a
+  jr nz, .no_new_palette
+    ld hl, help_line_buffer
+    push hl
+    ld a, $00*8+1
+    ld [hl+], a
+    ld [hl+], a
+    ld [hl+], a
+    call wr1color
+    call wr1color
+    call wr1color
+    ld c, 1
+    call add_c_to_curpalette
+
+    pop hl
+    call sgb_send
+
+    ld a, 12
+  .no_new_palette:
+  ldh [hIncTime], a
+
+  ldh a, [new_keys]
+  bit PADB_B, a
+  jr z, .loop
+  ret
+
+wr1color:
+  ld c, 4
+  call add_c_to_curpalette
+  add a
+  add low(nes_palette_11to1c)
+  ld e, a
+  ld a, 0
+  add high(nes_palette_11to1c)
+  ld d, a
+  ld a, [de]
+  ld [hl+], a
+  inc de
+  ld a, [de]
+  ld [hl+], a
+  ret
+
+add_c_to_curpalette:
+  ldh a, [hCurPalette]
+  add c
+  cp 12
+  jr c, .nowrap
+    sub 12
+  .nowrap:
+  ldh [hCurPalette], a
+  ret

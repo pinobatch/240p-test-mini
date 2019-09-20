@@ -686,7 +686,7 @@ Select: Show or hide
 PLUGE
 Color bars on gray
 Color bleed
-Mystery test!
+Chroma crosstalk
 
 == Chroma crosstalk ==
 
@@ -699,10 +699,9 @@ video output of an
 NTSC Super NES.
 
 On composite, the word
-"Pass" flickers.
+"Pass" fades in and out.
 Through S-Video or RGB,
-the stripes won't spell
-anything.
+the stripes are indistinct.
 ----
 The S-ENC or S-RGB chip
 encodes the S-PPU's RGB
@@ -711,14 +710,14 @@ taking shortcuts to save
 cost. Because it doesn't
 filter chroma before
 adding it to luma, diagonal
-stripes and checkerboard
+lines and checkerboard
 patterns often produce
 crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.19 (2019-09-12)
-Super Game Boy enhanced
+Ver. 0.20wip (2019-09-19)
+Chroma crosstalk
 
 © 2011-2016
   Artemio Urbina
