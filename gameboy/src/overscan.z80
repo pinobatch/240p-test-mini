@@ -186,7 +186,7 @@ activity_overscan::
   ldh [rWX],a
   .lycdone:
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   call run_dma
 
   ; Set the borders using scrolling, window, and rLYC IRQ.

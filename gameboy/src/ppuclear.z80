@@ -55,6 +55,13 @@ vblank_tail:
   pop af
   reti
 
+SECTION "wait_vblank_irq_tail", ROM0[$0059]
+wait_vblank_irq_tail:
+  halt
+  cp [hl]
+  jr z, wait_vblank_irq_tail
+  ret
+
 ; A lot of this file is broken into little tiny sections, one for
 ; each routine, so that the linker can squeeze them into tiny holes
 ; between aligned or fixed-address sections
@@ -82,20 +89,15 @@ lcd_off::
   res 7, [hl]
   ret
 
-SECTION "wait_vblank_irq", ROM0
-
+SECTION "wait_vblank_irq", ROM0[wait_vblank_irq]
 ;;
 ; Waits for the vblank ISR to increment the count of vertical blanks.
 ; Will lock up if DI, vblank IRQ off, or LCD off.
 ; Clobbers A, HL
-wait_vblank_irq::
+wait_vblank_irq_impl::
   ld hl,nmis
   ld a,[hl]
-.loop:
-  halt
-  cp [hl]
-  jr z,.loop
-  ret
+  jr wait_vblank_irq_tail
 
 SECTION "busy_wait_vblank", ROM0
 

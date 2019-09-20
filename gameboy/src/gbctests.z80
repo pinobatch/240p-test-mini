@@ -232,7 +232,7 @@ activity_pluge:
   or LCDCF_ON|BG_NT0|BG_CHR01
   ldh [vblank_lcdc_value],a
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
 
   ; Load palette and tiles
   ld de,pluge_palette_ntsc
@@ -380,7 +380,7 @@ activity_gradient_bars:
     ldh [cur_lcdc],a
   .not_toggle_grid:
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   ld a,8
   ld de,%000000000000001
   call gradient_push_palette
@@ -731,7 +731,7 @@ smpte_bars_engine:
     ldh [curvolume],a
   .notogglevol:
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   ; load volume after vsync to ensure the sound starts at the
   ; same time as the picture
   ldh a,[curvolume]

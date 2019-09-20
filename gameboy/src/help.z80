@@ -381,7 +381,7 @@ helpscreen::
   call lcd_clear_oam
 
   ; Wait for next frame
-  call wait_vblank_irq
+  rst wait_vblank_irq
   call run_dma
   ld a,[wnd_x]
   ldh [rWX],a

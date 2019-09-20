@@ -293,7 +293,7 @@ activity_stopwatch::
   .skipping_convert_for_lap:
   call sw_draw_ruler
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   call run_dma
   call sw_blit
 

@@ -183,7 +183,7 @@ wait30frames:
 
   ld b,30
   .frameloop:
-    call wait_vblank_irq
+    rst wait_vblank_irq
     dec b
     jr nz,.frameloop
   ; Restore GB mono palette

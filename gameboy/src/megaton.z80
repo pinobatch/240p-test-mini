@@ -197,7 +197,7 @@ activity_megaton::
   .novreticle:
   call lcd_clear_oam
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   call run_dma
 
   ; Draw checkbox for direction: horizontal
@@ -318,7 +318,7 @@ activity_megaton_complete:
   call vwfPuts
 
   ; Blank the area below the average
-  call wait_vblank_irq
+  rst wait_vblank_irq
   xor a
   ld hl,_SCRN0+32*15
   ld c,32*2+20
@@ -338,7 +338,7 @@ activity_megaton_complete:
 
 .loop:
   call read_pad
-  call wait_vblank_irq
+  rst wait_vblank_irq
   ld a,%01101100
   call set_bgp
   ldh a,[new_keys]

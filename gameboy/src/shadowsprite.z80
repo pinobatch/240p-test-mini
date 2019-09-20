@@ -203,7 +203,7 @@ activity_shadow_sprite::
   call draw_shadow_sprite
   call lcd_clear_oam
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   call run_dma
 
   ld a,%00101100  ; palette for bottom half of Hepsie

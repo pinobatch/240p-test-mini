@@ -29,9 +29,7 @@ include "src/gb.inc"
 ; Fill them with JPs to the actual handlers.
 SECTION "rst00", ROM0[$0000]
   ret
-; $08: memset_tiny
-SECTION "rst10", ROM0[$0010]
-  ret
+; $08, $10 used for RSTs
 SECTION "rst18", ROM0[$0018]
   ret
 SECTION "rst20", ROM0[$0020]

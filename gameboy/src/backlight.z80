@@ -175,7 +175,7 @@ activity_backlight_zone::
   xor a
   ld [hl+],a  ; 3: Palette and flip
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   call run_dma
   ldh a,[curpalette]
   call set_bgp

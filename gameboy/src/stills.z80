@@ -333,7 +333,7 @@ activity_gray_ramp::
   ld b,helpsect_gray_ramp
   call read_pad_help_check
   jr nz,.restart
-  call wait_vblank_irq
+  rst wait_vblank_irq
   ldh a,[new_keys]
   bit PADB_B,a
   jr z,.loop
@@ -492,7 +492,7 @@ activity_linearity::
   ld b,helpsect_linearity
   call read_pad_help_check
   jp nz,.restart
-  call wait_vblank_irq
+  rst wait_vblank_irq
   ldh a,[curpalette]
   call set_bgp
 
@@ -600,7 +600,7 @@ activity_sharpness::
   ld b,helpsect_sharpness
   call read_pad_help_check
   jr nz,.restart
-  call wait_vblank_irq
+  rst wait_vblank_irq
 
   ; Load the appropriate GB/GBC palette for what is showing
   ldh a,[curlcdc]
@@ -718,7 +718,7 @@ activity_solid_screen::
   ld b,helpsect_solid_screen
   call read_pad_help_check
   jr nz,.restart
-  call wait_vblank_irq
+  rst wait_vblank_irq
 
   ; Write color to both GB and GBC palette ports
   ldh a, [hw_capability]
@@ -1018,7 +1018,7 @@ activity_cps_grid::
   ld b,helpsect_grid
   call read_pad_help_check
   jr nz,.restart
-  call wait_vblank_irq
+  rst wait_vblank_irq
 
   ; Set GB palette
   ldh a,[curpalette]
@@ -1225,7 +1225,7 @@ full_stripes_common::
     ldh [vblank_lcdc_value],a
   .not_select:
 
-  call wait_vblank_irq
+  rst wait_vblank_irq
   ldh a,[curpalette]
   ld b,a
   ld a,[curtileid]

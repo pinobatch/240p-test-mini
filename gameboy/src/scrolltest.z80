@@ -242,7 +242,7 @@ activity_grid_scroll::
   .a_done:
 
   call move_by_speed
-  call wait_vblank_irq
+  rst wait_vblank_irq
   ldh a,[curpalette]
   call set_bgp
   ldh a,[cur_y]
@@ -270,7 +270,7 @@ activity_hillzone_scroll::
   jr nz,.restart
 
   call process_1d_input
-  call wait_vblank_irq
+  rst wait_vblank_irq
   xor a
   ldh [rSCY],a
   ldh a,[cur_x]
@@ -302,7 +302,7 @@ activity_kiki_scroll::
   jr nz,.restart
 
   call process_1d_input
-  call wait_vblank_irq
+  rst wait_vblank_irq
   xor a
   ldh [rSCX],a
   ldh a,[cur_x+1]

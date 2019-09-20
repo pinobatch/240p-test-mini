@@ -141,7 +141,7 @@ activity_motion_blur::
   call motionblur_handle_presses
   call make_help_vram
   call motionblur_calc_bgp
-  call wait_vblank_irq
+  rst wait_vblank_irq
 
   ; Set mono palette
   ld hl, bgp_value
