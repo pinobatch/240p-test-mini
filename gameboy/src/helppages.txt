@@ -200,9 +200,9 @@ A: Toggle brick wall
 ----
 Modern TVs' "sharpness"
 control performs edge
-enhancement, which is
-designed for live action
-SDTV or VHS sources.
+enhancement, intended
+for live action SDTV or
+VHS sources.
 Most TVs have zero as
 no change and high as
 enhancement. A few have
@@ -268,11 +268,11 @@ These shouldn't happen:
 - Thin horizontal stripes
   in flicker pattern
 ----
-Some handhelds' LCD
-driver circuits use a
-technique similar to
-interlacing to improve
-pixel response time.
+Handhelds' LCD driver
+circuits use a technique
+similar to interlacing
+to improve pixel
+response time.
 
 Portrait of Gus by
   darryl.revok
@@ -698,13 +698,13 @@ chroma of the composite
 video output of an
 NTSC Super NES.
 
-On composite, the word
-"Pass" fades in and out.
+On composite, "NTSC"
+fades in and out.
 Through S-Video or RGB,
 the stripes are indistinct.
 ----
 The S-ENC or S-RGB chip
-encodes the S-PPU's RGB
+encodes the PPU's RGB
 output to composite video,
 taking shortcuts to save
 cost. Because it doesn't

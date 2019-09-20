@@ -479,6 +479,8 @@ hCurPalette rb 1
 
 sgb_ntsc_test::
   call clear_gbc_attr
+  ld hl, sgb_cmd_clear_attrs
+  call sgb_send
   ld a, %11100100
   ldh [rBGP], a
   ldh [rLYC], a  ; disable lyc irq
@@ -500,7 +502,6 @@ sgb_ntsc_test::
 
   ; Load map background
   ld hl, _SCRN0
-  ; ld b, 0
   .mapfill3loop:
     ld a, 3
     .mapfillloop:

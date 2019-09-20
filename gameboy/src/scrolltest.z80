@@ -24,9 +24,9 @@ curpalette rb 1
 held_keys rb 1
 cur_x rb 2
 cur_y rb 2
+unpaused rb 1
 cur_speed rb 1
 cur_dir rb 1
-unpaused rb 1
 
 
 KT_SAND0 equ $00
@@ -160,8 +160,6 @@ activity_grid_scroll::
   call init_grid_scroll_vars
   ld a,$03
   ldh [curpalette],a
-  ld a,PADF_RIGHT
-  ld [cur_dir],a
 .restart:
   call clear_gbc_attr
   cpl
@@ -255,16 +253,14 @@ activity_grid_scroll::
 
 activity_hillzone_scroll::
   call init_grid_scroll_vars
-  ld a,PADF_RIGHT
-  ld [cur_dir],a
 .restart:
   call load_hillzone_bg
 
+  ld hl, hillzone_sgb_rects
+  call sgb_send_if_sgb
   ld bc, $2122
   ld de, $2324
   call sgb_set_palettes_bcde
-  ld hl, hillzone_sgb_rects
-  call sgb_send_if_sgb
 
   ldh a,[vblank_lcdc_value]
   ldh [rLCDC],a
@@ -272,10 +268,6 @@ activity_hillzone_scroll::
   ld b,helpsect_hill_zone_scroll_test
   call read_pad_help_check
   jr nz,.restart
-
-  ldh a,[new_keys]
-  bit PADB_B,a
-  ret nz
 
   call process_1d_input
   call wait_vblank_irq
@@ -292,12 +284,14 @@ activity_hillzone_scroll::
     ld de, hillzone_bgp_sgb
   .not_sgb_bgp_sequence:
   call set_hillzone_scroll_pos_de
-  jp .loop
+
+  ldh a,[new_keys]
+  bit PADB_B,a
+  jr z, .loop
+  ret
 
 activity_kiki_scroll::
   call init_grid_scroll_vars
-  ld a,PADF_RIGHT
-  ld [cur_dir],a
 .restart:
   call load_kiki_bg
   ld b, 19
@@ -306,10 +300,6 @@ activity_kiki_scroll::
   ld b,helpsect_vertical_scroll_test
   call read_pad_help_check
   jr nz,.restart
-
-  ldh a,[new_keys]
-  bit PADB_B,a
-  ret nz
 
   call process_1d_input
   call wait_vblank_irq
@@ -321,21 +311,29 @@ activity_kiki_scroll::
   rra
   ldh [rSCY],a
 
-  jp .loop
+  ldh a,[new_keys]
+  bit PADB_B,a
+  jr z, .loop
+  ret
 
 ; Scroll test movement ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 init_grid_scroll_vars:
   xor a
-  ldh [cur_x],a
-  ldh [cur_x+1],a
-  ldh [cur_y],a
-  ldh [cur_y+1],a
-  ldh [held_keys],a
+  ld hl, held_keys
+  ; clear held_keys, cur_x (16 bits), cur_y (16 bits)
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  ; unpaused=$FF, cur_speed=$01, cur_dir=right
   dec a
-  ldh [unpaused],a
+  ld [hl+], a
   ld a,$01
-  ld [cur_speed],a
+  ld [hl+], a
+  ld a,PADF_RIGHT
+  ld [hl],a
   ret
 
 process_1d_input:
@@ -581,16 +579,13 @@ load_hillzone_bg::
   call set_gbc_palette
 .not_gbc_attrs:
 
-  xor a
-  ldh [rBGP],a  ; blank initial DMG palette
   ; Enable rSTAT IRQ on rLY=rLYC but put it on hold
-  dec a
+  ld a, $FF
   ldh [rLYC],a  ; disable lyc irq
   ld a,STAT_LYCIRQ
   ld [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
-
   ret
 
 ; Kiki's tilemap is compressed. Hard.
@@ -806,5 +801,4 @@ load_kiki_bg:
   ld a,LCDCF_ON|BG_CHR21|BG_NT0
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
-  ; Expects palette %11100100 during action
   ret
