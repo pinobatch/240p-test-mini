@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Long run detector for binary files
-Copyright 2018 Damian Yerrick
+Copyright 2018-2019 Damian Yerrick
 insert zlib license here
 """
 import string
@@ -19,6 +19,13 @@ def disassemble_inst(opcode, operand, syms):
     if opcode == 0xCD:
         return "call %s" % addrtosym(operand)
 
+falsepos_starts = {
+    'soundtest_handlers', 'helppage_000',
+}
+falsepos_ends = {
+    'soundtest_8k', 'help_cumul_pages'
+}
+
 def load_syms(filename):
     with open(filename, "r") as infp:
         lines = [s.split() for s in infp]
@@ -33,11 +40,11 @@ def load_syms(filename):
         k = int(k, 16)
         syms[k] = v
 
-        # Compressed help text contains byte sequences that
-        # resemble optimizable opcodes
-        if v == 'helppage_000':
+        # Compressed help text and other big data areas may contain
+        # byte sequences that resemble optimizable opcodes
+        if v in falsepos_starts:
             falsepos_ranges.append((k, k))
-        if v == 'help_cumul_pages':
+        if v in falsepos_ends:
             falsepos_ranges[-1] = (falsepos_ranges[-1][0], k)
     return syms, falsepos_ranges
 

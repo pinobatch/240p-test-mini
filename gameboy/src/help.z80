@@ -823,6 +823,7 @@ help_move_window:
   jr nc, .already_preloaded
     ld [hl], 2
     call allhuffdata_predecode
+    call help_draw_status_line
   .already_preloaded:
   ld a, WXBASE
   jr .have_wnd_x
@@ -995,7 +996,14 @@ help_draw_multiline:
   ld a,b
   cp c
   jr c,.erase_trailing
-  ; fall through to help_draw_status_line
+
+  ; Until the Huffman objects are decompressed, the buttons are
+  ; unresponsive, so don't draw B: Exit
+  ld a, [help_font_loaded]
+  cp 2
+  ret c
+
+  ; Otherwise, fall through to help_draw_status_line
 
 help_draw_status_line:
   ; If at least 2 pages, draw page count
