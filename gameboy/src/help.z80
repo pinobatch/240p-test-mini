@@ -496,14 +496,10 @@ help_load_bg:
     ; Destination address is
     ; (_SCRN1 / 32 + row + (row>=1) + (row>=15)) * 32 + 1
     ld a,b
-    cp 15
-    jr c,.textrowloop_addrcalc1
-      inc a
-    .textrowloop_addrcalc1:
+    cp 15    ; C = A<15
+    sbc $FF  ; A += 1 - C
     cp 1
-    jr c,.textrowloop_addrcalc2
-      inc a
-    .textrowloop_addrcalc2:
+    sbc $FF
     add low(_SCRN1/32)
     ld l,a
     ld h,high(_SCRN1/32)
@@ -518,13 +514,8 @@ help_load_bg:
     ld a,b
     swap a
     and $70
-
     ld c,WINDOW_WIDTH
-    .texttileloop:
-      ld [hl+],a
-      inc a
-      dec c
-      jr nz,.texttileloop
+    call memset_inc
 
     inc b
     ld a,16
@@ -538,10 +529,13 @@ help_load_bg:
   ld [help_bg_loaded],a
 
   ; Window map: Draw top and bottom horizontal bars
+  ld a,WINDOW_HLINE_TILE
   ld hl,_SCRN1+1*32+1
-  call .draw_wnd_hbar
+  ld c,WINDOW_WIDTH
+  rst memset_tiny
   ld hl,_SCRN1+16*32+1
-  call .draw_wnd_hbar
+  ld c,WINDOW_WIDTH
+  rst memset_tiny
   
   ldh a,[hw_capability]
   add a
@@ -713,15 +707,6 @@ help_load_bg:
   ld bc,(helpobjpalette_gbc_end-helpobjpalette_gbc) * 256 + low(rOCPS)
   ld a,$80
   jp set_gbc_palette
-
-.draw_wnd_hbar:
-  ld c,WINDOW_WIDTH
-  ld a,WINDOW_HLINE_TILE
-  .wnd_hbar_loop:
-    ld [hl+],a
-    dec c
-    jr nz, .wnd_hbar_loop
-  ret
 
 .whitecol:
   ld a,WHITE_TILE
