@@ -1,3 +1,9 @@
+0.20
+* Add SGB-only Chroma crosstalk test
+* Help: Wait to draw status line until Huffman decoding finishes
+* Help: Blink Gus's eyes
+* Move common routines to RSTs
+
 0.19 (2019-09-12)
 * Super Game Boy colorization and border
 * Stopwatch: Bolder digits

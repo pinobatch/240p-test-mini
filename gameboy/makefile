@@ -110,6 +110,7 @@ obj/gb/%-dedent.z80: src/%.z80
 
 obj/gb/gfxincbins.o: \
   obj/gb/helptiles.chrgb16.pb16 obj/gb/helptiles-gbc.chrgb16.pb16 \
+  obj/gb/helpblink.chrgb \
   obj/gb/hepsie.chrgb.pb16 obj/gb/shadow_reticle.chrgb.pb16 \
   obj/gb/Gus_portrait.iu \
   obj/gb/Gus_portrait-GBC.iuc obj/gb/Gus_portrait-GBC.pal \

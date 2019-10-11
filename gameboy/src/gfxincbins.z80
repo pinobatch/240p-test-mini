@@ -20,13 +20,18 @@ include "src/gb.inc"
 
 ; Help ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "helptiles",ROMX
+section "helptiles_gfx1",ROMX
 helptiles:: incbin "obj/gb/helptiles.chrgb16.pb16"
 sizeof_helptiles equ 672
 global sizeof_helptiles
 helptiles_gbc:: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
 sizeof_helptiles_gbc equ 960
 global sizeof_helptiles_gbc
+
+section "sgbborder_gfx0", ROM0
+helpblink_chr::
+  incbin "obj/gb/helpblink.chrgb"  ; copied to $88C6
+
 
 ; Super Game Boy border ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

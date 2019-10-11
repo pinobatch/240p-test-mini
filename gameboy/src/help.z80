@@ -60,6 +60,7 @@ help_show_cursor: ds 1
 help_cursor_y:: ds 1
 help_height: ds 1
 help_font_loaded: ds 1
+help_blink_timer: ds 1
 
 section "help_map0",ROM0
 helpattrmap_gbc:
@@ -234,6 +235,7 @@ helpscreen::
     ; Request the wanted page by invalidating the current page
     ld a,$FF
     ld [help_cur_page],a
+    ld [help_blink_timer], a
 
     ; Schedule inward transition
     xor a
@@ -385,6 +387,30 @@ helpscreen::
   call run_dma
   ld a,[wnd_x]
   ldh [rWX],a
+
+  ; While still, close Gus's eyes at 8 and open them at 0
+  ld hl, help_blink_timer
+  dec [hl]
+  ld a, [hl]
+  jr z, .have_new_blink
+  cp 8
+  jr nz, .no_blink
+  .have_new_blink:
+    ; GBC or DMG?
+    ld e, a
+    ldh a, [hw_capability]
+    add a
+    jr nc, .blink_not_gbc
+      set 4, e  ; Bit 4: GBC; bit 3: closed
+    .blink_not_gbc:
+
+    ld d, 0
+    ld hl, helpblink_chr
+    add hl, de
+    ld de, $88C6
+    ld bc, 8
+    call memcpy
+  .no_blink:
   jp .loop
 
 ; VRAM preparation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
