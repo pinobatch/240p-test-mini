@@ -56,6 +56,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CHARACTER_VRAM_BASE 956
 #define ARROW_TILE 1020
+#define BLINK_TILE 1021
 
 #define FG_BGCOLOR 6
 #define FG_FGCOLOR 2
@@ -66,6 +67,7 @@ unsigned char help_bg_loaded;
 unsigned char help_wanted_page;
 unsigned char help_cursor_y;
 unsigned char help_height;
+unsigned char blink_time;
 // Set this to 0 for no cursor and no indent or the indent depth
 // for cursor and indent
 unsigned char help_show_cursor;
@@ -124,7 +126,7 @@ static void load_help_bg(void) {
     MAP[BGMAP][SHADOW_Y + 1][SHADOW_X + x] = TILE_FLOOR_SHADOW + 0x0800 + x;
     MAP[BGMAP][SHADOW_Y + 1][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0C03 - x;
   }
-
+  
   // Clear window nametable
   dma_memset16(MAP[FGMAP], TILE_FG_BLANK, 32*21*2);
   dma_memset16(MAP[FGMAP + 1], TILE_FG_XPARENT, 32*21*2);
@@ -156,8 +158,19 @@ static void load_help_bg(void) {
   help_wnd_progress = 0;  // Schedule inward transition
 }
 
-static void help_draw_character() {
+static void help_draw_character(void) {
   unsigned int ou = oam_used;
+  
+  if (++blink_time < 8) {
+    SOAM[ou].attr0 = 49 | OBJ_16_COLOR | ATTR0_SQUARE;
+    SOAM[ou].attr1 = 48 | ATTR1_SIZE_8;
+    SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALETTE(0);
+    ++ou;
+    SOAM[ou].attr0 = 49 | OBJ_16_COLOR | ATTR0_SQUARE;
+    SOAM[ou].attr1 = 41 | ATTR1_SIZE_8 | OBJ_HFLIP;
+    SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALETTE(0);
+    ++ou;
+  }
   for (unsigned int i = 0; i < 2; ++i) {
     unsigned int a0 = (18 + i * 64) | OBJ_16_COLOR | ATTR0_TALL;
     unsigned int a1 = 16 | ATTR1_SIZE_64;
