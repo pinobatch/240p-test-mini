@@ -101,7 +101,7 @@ activity_stopwatch::
   ldh a, [hw_capability]
   add a
   jr nc,.not_plane1
-    ld hl, _SCRN0+1*32+15
+    ldxy hl, 15, 1
     ld de,32-4
     ld b,3
     ld a,1
@@ -151,8 +151,8 @@ activity_stopwatch::
   ld hl, CHRRAM0
   call pb16_unpack_block
 
-  ld hl,_SCRN0+640
-  ld de,_SCRN0+5*32+4
+  ld hl,SCRN_TMP
+  ldxy de, 4, 5
   ld bc,12*256+13
   call load_nam
   ld de,$0970
@@ -346,11 +346,11 @@ sw_convert:
   ret
 
 ;;
-; Write the converted digits at (1,2)
+; Write the converted digits at (2, 1)
 sw_blit:
   ; B: amount to add (0, 2, 4); C: colon tile ($00 or $BC)
   ld bc,$0000
-  ld hl,_SCRN0+32*1+2
+  ldxy hl, 2, 1
 .rowloop:
   ld de,help_line_buffer
   ld a,[de]  ; hours digit: $80 + 6 * hours
@@ -415,7 +415,7 @@ sw_blit:
   jr c,.rowloop
 
   ; Draw lap indicator
-  ld hl,_SCRN0+32*4+17
+  ldxy hl, 17, 4
   ldh a,[is_lap]
   or a
   jr z,.nolap1

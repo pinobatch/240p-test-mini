@@ -226,13 +226,14 @@ sgb_cmd_clear_attrs::
 
 ;;
 ; Turns off the LCD, sets scroll to 0, sets BGP to identity ($E4),
-; and sets up the _SCRN0 tilemap for Super Game Boy *_TRN commands.
+; and sets up an identity tilemap in _SCRN0 for Super Game Boy
+; *_TRN commands.  (Clobbers SCRN_TMP.)
 sgb_load_trn_tilemap:
   call lcd_off
   ld a, %11100100
   ldh [rBGP], a
   call clear_scrn0_to_0
-  ld hl, _SCRN0+640
+  ld hl, SCRN_TMP
   push hl
   xor a
   ld c, a
@@ -351,8 +352,6 @@ sgb_set_palettes_bcde_attr_a::
 ; 28 bytes: in what order the rows are stored
 ; 16 bytes: palette
 
-bordersrcbase = _SCRN0+640
-
 sgb_load_border::
   call sgb_freeze
   call sgb_load_trn_tilemap
@@ -371,6 +370,9 @@ sgb_load_border::
   pop hl
 
   ; Load map rows
+  ; IUR unpacked unique rows, but the border duplicates entire rows:
+  ; the blank rows at top and bottom and the left and right borders
+  ; beside the GB screen.
   call iur_unpack_2hl_bytes
   ld b, 28
   ld de, CHRRAM0
@@ -379,7 +381,7 @@ sgb_load_border::
     push hl
 
     ; calculate start of row
-    ld hl, bordersrcbase>>5
+    ld hl, SCRN_TMP>>5
     add l
     ld l, a
     ; Need not worry about carry because the next carry is at A000
@@ -516,8 +518,8 @@ sgb_ntsc_test::
   ld de, pass_pattern
   ld a, 1
   .mapcolloop:
-    ; Seek to start of column
-    ld hl, _SCRN0+11*32
+    ; Seek to start (bottom) of column
+    ldxy hl, 0, 11
     or l
     ld l, a
 

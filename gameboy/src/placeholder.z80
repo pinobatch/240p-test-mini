@@ -166,18 +166,18 @@ draw_bg:
   ld c,20
   rst memset_tiny
 
-  ld hl,_SCRN0+32*12+1
+  ldxy hl, 1, 12
   call bg_draw_one_block
-  ld hl,_SCRN0+32*14+1
+  ldxy hl, 1, 14
   call bg_draw_one_block
-  ld hl,_SCRN0+32*12+17
+  ldxy hl, 17, 12
   call bg_draw_one_block
-  ld hl,_SCRN0+32*14+17
+  ldxy hl, 17, 14
   call bg_draw_one_block
 
   ; Make VWF window
   ld a,$60
-  ld hl,_SCRN0+32*0+8
+  ldxy hl, 8, 0
   ld c,12
   call memset_inc
 
@@ -210,7 +210,7 @@ draw_bg:
 
   ; Make the window on the tilemap
   ld a,$70
-  ld hl,_SCRN0+32*1+4
+  ldxy hl, 4, 1
 .vwffill2:
   ld [hl+],a
   inc a

@@ -53,7 +53,7 @@ SECTION "incruniq", ROM0
 
   if 0
 ;;
-; Unpack IU file at DE to tiles at HL and map at _SCRN0+640
+; Unpack IU file at DE to tiles at HL and map at SCRN_TMP
 unpack_iu_file::
   ld a,[de]  ; Fetch tile count
   inc de
@@ -68,7 +68,7 @@ iur_unpack_2hl_bytes::
   ld a, [hl+]  ; Fetch tilemap size
 
 ;;
-; Unpack 2*A bytes of IUR map data from HL to _SCRN0+640
+; Unpack 2*A bytes of IUR map data from HL to SCRN_TMP
 iur_unpack_2a_bytes::
   ld c, a    ; and double it
   xor a
@@ -76,7 +76,7 @@ iur_unpack_2a_bytes::
   adc a
   ld b, a
 
-  ld de, _SCRN0+640
+  ld de, SCRN_TMP
   xor a
   ; fall through
 

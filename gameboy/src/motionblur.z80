@@ -105,11 +105,11 @@ activity_motion_blur::
   ; Load label map
   ld bc,$0606  ; size
   ld hl,wndmap
-  ld de,_SCRN0+32*11+6
+  ldxy de, 6, 11
   call load_nam
 
   ; Draw 8x8-tile rect of solid $0A (striped tile) starting at (6, 2)
-  ld hl,_SCRN0+32*2+6
+  ldxy hl, 6, 2
   ld a,$0A
   ld b,8
   ld de,32-8
@@ -157,11 +157,11 @@ activity_motion_blur::
   ; Blit help map
   ld bc,$0206  ; size
   ld hl,help_line_buffer
-  ld de,_SCRN0+32*11+12
+  ldxy de, 12, 11
   call load_nam
 
   ; Draw cursor
-  ld hl,_SCRN0+32*11+5
+  ldxy hl, 5, 11
   ld a,[help_cursor_y]
   inc a
   ld c,a

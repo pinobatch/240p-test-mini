@@ -83,7 +83,7 @@ activity_megaton::
   call vwfDrawLabels
 
   ; Draw stationary reticle with its top left at (64, 48)
-  ld hl,_SCRN0+32*6+8
+  ldxy hl, 8, 6
   ld a,$04
   call draw_still_reticle_piece
   ld a,$05
@@ -102,7 +102,7 @@ activity_megaton::
   ; Draw space for digits in tilemap
   ld a,DIGITSPACE_TILE
   ld b,MAX_TESTS
-  ld hl,_SCRN0+32*1+1
+  ldxy hl, 1, 1
   ld de,30
   .digitspaceloop:
     ld [hl+],a
@@ -205,7 +205,7 @@ activity_megaton::
   rra
   ld b,CHECKBOXTILE>>1
   rl b
-  ld hl,_SCRN0+32*15+9
+  ldxy hl, 9, 15
   ld [hl],b
 
   ; Draw checkbox for direction: vertical
@@ -216,20 +216,20 @@ activity_megaton::
 
   ; Draw checkbox for randomize
   ld a,[enableflags]
-  ld hl,_SCRN0+32*16+9
+  ldxy hl, 9, 16
   rra
   push af
   call write_carry_boolean
   pop af
 
   ; Draw checkbox for audio
-  ld hl,_SCRN0+32*17+9
+  ldxy hl, 9, 17
   rra
   call write_carry_boolean
 
   ; Draw cursor
   ld de,32
-  ld hl,_SCRN0+32*15+1
+  ldxy hl, 1, 15
   ldh a,[cursor_y]
   ld c,a
   inc c
@@ -320,10 +320,10 @@ activity_megaton_complete:
   ; Blank the area below the average
   rst wait_vblank_irq
   xor a
-  ld hl,_SCRN0+32*15
+  ldxy hl, 0, 15
   ld c,32*2+20
   rst memset_tiny
-  ld hl,_SCRN0+32*14+1
+  ldxy hl, 1, 14
   ld a,$80
   ld c,16
   call memset_inc

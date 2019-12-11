@@ -48,7 +48,7 @@ activity_audiosync::
   ; Load map
   ld h,4
   call clear_scrn0_to_h
-  ld hl,_SCRN0+32*(FLOOR_Y / 8)
+  ldxy hl, 0, FLOOR_Y / 8
   ld a,FLOOR_TILE
   ld c,20
   rst memset_tiny
@@ -173,7 +173,7 @@ audiosync_draw_row:
   ldh [dtr_t3],a
 
   ld b,CEILING_HT / 8
-  ld hl,_SCRN0+32*(CEILING_Y / 8)
+  ldxy hl, 0, CEILING_Y / 8
   ld de,12
 .rowloop:
   ldh a,[dtr_t0]

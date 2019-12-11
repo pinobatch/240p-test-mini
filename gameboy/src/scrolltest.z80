@@ -518,6 +518,7 @@ load_hillzone_bg::
   rst memset_tiny
   jr .attrloop1
 .attrstrips:
+  ; Full horizontal lines (bytecount, attribute value)
   db 32*2,0  ; sky
   db 32*5,1  ; peaks
   db 32*2,3  ; foliage
@@ -528,28 +529,29 @@ load_hillzone_bg::
   db 32*2,1  ; squares
   db 0       ; separator
 
+  ; Horizontal strip patches (address, width, attribute value)
   ; Top of waterfall
-  dw _SCRN0+7*32+16
+  dwxy 16, 7
   db 8,0
-  dw _SCRN0+8*32+16
+  dwxy 16, 8
   db 8,0
-  dw _SCRN0+9*32+8
   ; Bushes near shore
+  dwxy 8, 9
   db 4,3
-  dw _SCRN0+10*32+8
+  dwxy 8, 10
   db 4,5
-  dw _SCRN0+9*32+26
+  dwxy 26, 9
   db 4,3
-  dw _SCRN0+10*32+26
+  dwxy 26, 10
   db 4,5
   ; Near low grass
-  dw _SCRN0+16*32+3
+  dwxy 3, 16
   db 5,3
-  dw _SCRN0+16*32+15
+  dwxy 15,16
   db 3,3
-  dw _SCRN0+16*32+23
+  dwxy 23, 16
   db 7,3
-  dw $0000   ; Terminator  
+  dw $0000   ; Terminator
 .attrloop1end:
 
   ; Correct areas not matching the rest of the horizontal strip

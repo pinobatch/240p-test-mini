@@ -454,70 +454,51 @@ help_load_bg:
   call clear_canvas
 
   ; Background map: Draw back wall
-  ld a,20
-  ld de,32
-  .bgcolloop:
-    dec a
-    ld l,a
-    ; Back wall
-    ld h,high(_SCRN0)
-    ld a,WALL_TILE
-    ld c,WALL_HEIGHT-1
-    .wallloop:
-      ld [hl],a
-      add hl,de
-      dec c
-      jr nz,.wallloop
+  ld hl, _SCRN0
+  ld a, WALL_TILE
+  ld c, 32 * (WALL_HEIGHT - 9)
+  rst memset_tiny
+  rst memset_tiny
+  ld a, WALLBOTTOM_TILE
+  ld c, 32
+  rst memset_tiny
+  ld a, FLOORTOP_TILE
+  ld c, 32
+  rst memset_tiny
+  ld a, FLOOR_TILE
+  ld c, 32 * (17 - WALL_HEIGHT)
+  rst memset_tiny
 
-    ; Border between wall and floor
-    ld [hl],WALLBOTTOM_TILE
-    add hl,de
-    ld [hl],FLOORTOP_TILE
-
-    ; Floor
-    ld a,FLOOR_TILE
-    ld c,18-WALL_HEIGHT-1
-    .floorloop:
-      add hl,de
-      ld [hl],a
-      dec c
-      jr nz,.floorloop
-
-    ; Move to top of column and stop if it's the first
-    ld a,l
-    and $1F
-    jr nz,.bgcolloop
-    
   ; Background map: Draw right half of character
-  ld hl,_SCRN0+32*CHARACTER_Y+3
+  ldxy hl, 3, CHARACTER_Y
   ld a,$86
   ld c,12/2
   call .righthalfcol
-  ld hl,_SCRN0+32*CHARACTER_Y+4
+  ldxy hl, 4, CHARACTER_Y
   ld a,$88
   ld c,12/2
   call .righthalfcol
-  ld hl,_SCRN0+32*(CHARACTER_Y+4)+5
+  ldxy hl, 5, CHARACTER_Y + 4
   ld a,$96
   ld c,8/2
   call .righthalfcol
 
   ; Window map: Divider column at left
-  ld hl,_SCRN1
+  ldxy hl, 0, 0, _SCRN1
   ld [hl],WINDOW_TL_TILE
-  ld hl,_SCRN1+32
+  ldxy hl, 0, 1, _SCRN1
   ld c,16
   ld a,WINDOW_LEFT_TILE
   call .solidcol
   ld [hl],WINDOW_BL_TILE
 
   ; Window map: Overscroll bounce margin
-  ld hl,_SCRN1+WINDOW_WIDTH+1
+  ldxy hl, WINDOW_WIDTH+1, 0, _SCRN1
   ld c,18
-  call .whitecol
+  call .whitecol  ; guarantees C=0
 
   ; Window map: Draw text area
-  ld b,0  ; b: rownumber
+  ld b, c  ; B: row number; start at row 0
   .textrowloop:
     ; Destination address is
     ; (_SCRN1 / 32 + row + (row>=1) + (row>=15)) * 32 + 1
@@ -556,10 +537,10 @@ help_load_bg:
 
   ; Window map: Draw top and bottom horizontal bars
   ld a,WINDOW_HLINE_TILE
-  ld hl,_SCRN1+1*32+1
+  ldxy hl, 1, 1, _SCRN1
   ld c,WINDOW_WIDTH
   rst memset_tiny
-  ld hl,_SCRN1+16*32+1
+  ldxy hl, 1, 16, _SCRN1
   ld c,WINDOW_WIDTH
   rst memset_tiny
   
@@ -590,14 +571,13 @@ help_load_bg:
 .load_mono_only:
   ; Background map: Cut out area for left half of character
   ; so that it can be drawn with flipped tiles
-  ld hl,_SCRN0+32*(CHARACTER_Y+4)+0
+  ldxy hl, 0, CHARACTER_Y+4
   ld c,8
-  ld a,WHITE_TILE
   call .whitecol
-  ld hl,_SCRN0+32*CHARACTER_Y+1
+  ldxy hl, 1, CHARACTER_Y
   ld c,12
   call .solidcol
-  ld hl,_SCRN0+32*CHARACTER_Y+2
+  ldxy hl, 2, CHARACTER_Y
   ld c,12
   call .solidcol
 
@@ -642,7 +622,7 @@ help_load_bg:
   call memset
 
   ; Draw palette and flipping for character
-  ld de,_SCRN0+32*CHARACTER_Y+0
+  ldxy de, 0, CHARACTER_Y
   ld bc,6*256+12
   ld hl,helpattrmap_gbc
   call load_nam
@@ -652,15 +632,15 @@ help_load_bg:
   ldh [rVBK],a
 
   ; Background map: Draw left half of character
-  ld hl,_SCRN0+32*CHARACTER_Y+2
+  ldxy hl, 2, CHARACTER_Y
   ld a,$86
   ld c,12/2
   call .righthalfcol
-  ld hl,_SCRN0+32*CHARACTER_Y+1
+  ldxy hl, 1, CHARACTER_Y
   ld a,$88
   ld c,12/2
   call .righthalfcol
-  ld hl,_SCRN0+32*(CHARACTER_Y+4)+0
+  ldxy hl, 0, CHARACTER_Y+4
   ld a,$96
   ld c,8/2
   call .righthalfcol
@@ -689,40 +669,12 @@ help_load_bg:
   call .objcol
 
   ; Bottom
-  ld a,CHARACTER_Y*8+90
-  ld [hl+],a
-  ld a,8+8
-  ld [hl+],a
-  ld a,$AE
-  ld [hl+],a
-  ld a,OAMF_PRI|OAMF_XFLIP|1
-  ld [hl+],a
-  ld a,CHARACTER_Y*8+90
-  ld [hl+],a
-  ld a,16+8
-  ld [hl+],a
-  ld a,$B4
-  ld [hl+],a
-  ld a,OAMF_PRI|OAMF_XFLIP|1
-  ld [hl+],a
-  ld a,CHARACTER_Y*8+90
-  ld [hl+],a
-  ld a,24+8
-  ld [hl+],a
-  ld a,$B4
-  ld [hl+],a
-  ld a,OAMF_PRI|1
-  ld [hl+],a
-  ld a,CHARACTER_Y*8+90
-  ld [hl+],a
-  ld a,32+8
-  ld [hl+],a
-  ld a,$AE
-  ld [hl+],a
-  ld a,OAMF_PRI|1
-  ld [hl+],a
-
-  ld a,l
+  ld d, h
+  ld e, l
+  ld bc, gbc_bottom_oam_end-gbc_bottom_oam
+  ld hl, gbc_bottom_oam
+  call memcpy
+  ld a,e
   ld [oam_used],a
 
   ; Load palette
@@ -774,6 +726,25 @@ help_load_bg:
   dec c
   jr nz,.objcol
   ret
+
+gbc_bottom_oam:
+  db CHARACTER_Y*8+90
+  db 8+8
+  db $AE
+  db OAMF_PRI|OAMF_XFLIP|1
+  db CHARACTER_Y*8+90
+  db 16+8
+  db $B4
+  db OAMF_PRI|OAMF_XFLIP|1
+  db CHARACTER_Y*8+90
+  db 24+8
+  db $B4
+  db OAMF_PRI|1
+  db CHARACTER_Y*8+90
+  db 32+8
+  db $AE
+  db OAMF_PRI|1
+gbc_bottom_oam_end:
 
 ;;
 ; Clear 2048 bytes of VWF canvas to plane1 = 0, plane1 = E
