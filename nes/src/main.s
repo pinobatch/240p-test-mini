@@ -123,6 +123,7 @@ routines:
   .addr do_zapper_test-1
   .addr do_sound_test-1
   .addr do_audiosync-1
+  .addr do_mdfourier-1
 ::about_item = (* - routines)/2
   .addr do_about-1
   .addr do_credits-1

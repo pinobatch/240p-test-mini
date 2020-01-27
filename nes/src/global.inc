@@ -141,5 +141,12 @@ bcd_highdigits = $0000
 ; zapper.s
 .global do_zapper_test, vwfPut3Digits
 
+; mdfourierfe.s and mdfourier.s
+.global do_mdfourier, mdfourier_present
+.global mdfourier_init_apu, mdfourier_run, mdfourier_push_apu
+
+; ntscPeriods.s
+.global periodTableLo, periodTableHi
+
 .endif
 

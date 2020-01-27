@@ -26,6 +26,7 @@ Backlight zone test
 Zapper test
 Sound test
 Audio sync test
+MDFourier
 About
 Credits
 
@@ -703,6 +704,26 @@ main(t) { for (;;t++) putchar(
 
 http://canonical.org
   /~kragen/bytebeat
+
+== MDFourier ==
+
+This tool plays a series of
+tones to generate an audio
+signature for the MDFourier
+analysis tool available at
+junkerhq.net/MDFourier
+
+Record the NES's audio
+output using a sound card and
+compare it to other systems
+using the NES v6 profile.
+
+A: Play tones   B: Stop
+[Coming soon]
+←→: Change video background
+  to test A/V crosstalk
+  (menu, below black, black,
+  white, 15k, or 8k)
 
 == Audio sync test ==
 

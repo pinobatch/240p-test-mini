@@ -18,9 +18,10 @@ version = 0.18
 # (the \ character) at the end of the line and continue on the next.
 objlist = vwf7 zappertest overclock paldetect vwf_draw init \
   main help helppages.hlp stills linearity stopwatch backlight scrolltest \
-  kiki audiosync soundtest crowd overscan megaton shadowsprite \
+  kiki audiosync soundtest crowd mdfourierfe mdfourier \
+  overscan megaton shadowsprite \
   pads ppuclear unpb53 uniu undte bcd random rectfill muldiv \
-  pb53files rectfiles
+  pb53files rectfiles ntscPeriods
 
 AS65 = ca65
 LD65 = ld65
@@ -112,6 +113,7 @@ $(objdir)/shadowsprite.o: \
   $(objdir)/shadow_reticle.chr.pb53 $(objdir)/hepsie.chr.pb53
 $(objdir)/kiki.o: \
   $(objdir)/kikimap.chr.pb53
+$(objdir)/mdfourier.o: audio/instsamp1.dmc
 # Most of the compressed CHR data is grouped into "files" so that
 # I can move them from bank to bank more easily
 $(objdir)/pb53files.o: \
@@ -124,6 +126,10 @@ $(objdir)/pb53files.o: \
   $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
   $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
   $(objdir)/fizzter_digits.chr.pb53
+
+# MDFourier needs the period lookup table
+$(objdir)/ntscPeriods.s: tools/mktables.py
+	$(PY) $< period $@
 
 # Generic rules for CHR
 
