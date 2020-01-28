@@ -1,3 +1,6 @@
+0.20 (2020-01-xx)
+* Help: Blink Gus's eyes
+
 0.19 (2019-09-12)
 * Stopwatch: Bolder digits
 * Color bleed: Fix frame # covering everything

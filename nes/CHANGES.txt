@@ -1,3 +1,6 @@
+0.20 (2020-01-xx)
+* Add MDFourier tone generator
+
 0.19 (2019-09-12)
 * Stopwatch: Bolder digits
 * Backlight zone: Increase starting size to 2 pixels
