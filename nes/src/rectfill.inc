@@ -11,6 +11,7 @@
 RECTFILL_INC = 1
 
 ; rectfill layout API
+; engine in rectfill.s; layouts are defined in rectfiles.s
 .global rf_load_layout
 
 ; used internally by bank switch driver

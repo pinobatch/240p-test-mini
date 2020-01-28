@@ -719,7 +719,6 @@ compare it to other systems
 using the NES v6 profile.
 
 A: Play tones   B: Stop
-[Coming soon]
 ←→: Change video background
   to test A/V crosstalk
   (menu, below black, black,

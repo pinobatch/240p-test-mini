@@ -1,12 +1,11 @@
 .include "nes.inc"
 .include "global.inc"
 
-.zeropage
-test_section:    .res 1
-test_row:        .res 1
-test_ticksleft:  .res 1
-test_subtype:    .res 1
-test_lastpulsehi:.res 1
+test_section     = test_state+1
+test_row         = test_state+2
+test_ticksleft   = test_state+3
+test_subtype     = test_state+4
+test_lastpulsehi = test_state+5
 
 apu_addressbuf = $0100
 apu_databuf    = $0120

@@ -42,6 +42,8 @@ rectfill_layouts:
   rectfile RF_zapper, zapper_rects, $20, $20
 
   rectfile RF_crowd, crowd_labels, $20, $20
+  rectfile RF_mdfourier, mdfourier_labels, $20, $20
+  rectfile RF_mdfourier_15k, mdfourier_15k_rects, $2C
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
@@ -391,3 +393,28 @@ crowd_labels:
   rf_label  80,144, 3, 0
   .byte "Reset: exit",0
   .byte $00
+
+mdfourier_labels:
+  rf_rect   0,  0,256,240,$00, 0  ; blank the screen
+  .byte $00
+  rf_attr  0,  0,256, 240, 0
+  .byte $00
+  rf_label  80, 96, 3, 0
+  .byte "MDFourier v6",0
+  rf_label  80,112, 2, 0
+  .byte "tone generator",0
+  rf_label  80,128, 3, 0
+  .byte "A: Start   B: Stop",0
+  rf_label  80,136, 2, 0
+  .byte $86,$87,": Change background",0
+  .byte $00
+
+mdfourier_15k_rects:
+  rf_rect   0,  0,256,240,$04, 0
+  rf_rect  40,  0,216,240,$08, 0
+  rf_rect  80,  0,176,240,$0C, 0
+  .byte $00
+  rf_attr   0,  0,256,240, 0
+  .byte $00
+  .byte $00  ; no labels
+

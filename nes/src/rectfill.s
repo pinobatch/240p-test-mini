@@ -296,7 +296,10 @@ bmask     = $08
 ; B: Color XOR
 ; The XOR value is the background color, and the AND value is
 ; the foreground color XOR the background color.
-
+;
+; The public API is rf_load_layout(file_id) which is part of the
+; mapper driver.  It switches to the PB53 data bank and calls this
+; function, which refers to rectfill_layouts in rectfiles.s.
 .proc rf_load_layout_cb
   asl a
   asl a
