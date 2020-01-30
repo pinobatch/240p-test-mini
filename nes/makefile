@@ -125,7 +125,7 @@ $(objdir)/pb53files.o: \
   $(objdir)/stdtiles.chr.pb53 $(objdir)/backlight_sprites.chr.pb53 \
   $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
   $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
-  $(objdir)/fizzter_digits.chr.pb53
+  $(objdir)/fizzter_digits.chr.pb53 $(objdir)/convergence.chr.pb53
 
 # MDFourier needs the period lookup table
 $(objdir)/ntscPeriods.s: tools/mktables.py

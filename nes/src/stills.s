@@ -25,7 +25,7 @@
 .importzp helpsect_pluge, helpsect_grid, helpsect_gradient_color_bars
 .importzp helpsect_gray_ramp, helpsect_color_bleed
 .importzp helpsect_full_screen_stripes, helpsect_solid_color_screen
-.importzp helpsect_chroma_crosstalk
+.importzp helpsect_chroma_crosstalk, helpsect_convergence
 .importzp RF_ire, RF_smpte, RF_cbgray, RF_pluge
 .importzp RF_gcbars, RF_gcbars_labels, RF_gcbars_grid, RF_cpsgrid_224
 .importzp RF_cpsgrid_240, RF_gray_ramp, RF_bleed, RF_fullstripes
@@ -1280,3 +1280,168 @@ done:
   adc #'0'
   jmp vwfPutTile
 .endproc
+
+; CONVERGENCE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.proc do_convergence
+gridlinestype = test_state+0
+gridinvert = test_state+1  ; 0F or 20
+colorsborder = test_state+2  ; 00 or 0F
+cur_side = test_state+3
+  lda #0
+  sta colorsborder
+  sta gridlinestype
+  sta cur_side
+  lda #$0F
+  sta gridinvert
+restart:
+  lda #VBLANK_NMI
+  ldy #0
+  sta help_reload
+  sta PPUCTRL
+  sty PPUMASK
+
+  ; First nametable: Gridlines
+  lda #4
+  ldx #$20
+  jsr ppu_clear_nt
+  ; address is now $2400
+
+rowsleft = $00
+blocksleft = $01
+  ldy #30
+  rside_rowloop:
+    tya
+    and #$03
+    cmp #$03
+    beq :+
+      lda #0
+    :
+    and #2
+    ldx #8
+    rside_tileloop:
+      sta PPUDATA
+      sta PPUDATA
+      sta PPUDATA
+      eor #1
+      sta PPUDATA
+      eor #1
+      dex
+      bne rside_tileloop
+    dey
+    bne rside_rowloop
+  ldy #8
+  lda #$00
+  rside_attrrowloop:
+    ldx #8
+    rside_attrtileloop:
+      sta PPUDATA
+      eor #$55
+      dex
+      bne rside_attrtileloop
+    eor #$AA
+    dey
+    bne rside_attrrowloop
+
+  ; Load pattern table to $0000 (both X and Y are 0 at this point)
+  lda #11
+  jsr unpb53_file
+
+loop:
+  lda #helpsect_convergence
+  jsr read_pads_helpcheck
+  bcc not_help
+    jmp restart
+  not_help:
+  
+  lda new_keys+0
+  and #KEY_SELECT
+  beq not_invert_grays
+    lda #$2F
+    eor gridinvert
+    sta gridinvert
+  not_invert_grays:
+
+  lda new_keys+0
+  bpl not_invert_side
+    lda #1
+    eor cur_side
+    sta cur_side
+  not_invert_side:
+
+  lda new_keys+0
+  and #KEY_UP|KEY_DOWN
+  beq not_updown
+  ldy cur_side
+  beq updown_lside
+    lda #$0F
+    eor colorsborder
+    sta colorsborder
+    jmp not_updown
+  updown_lside:
+    cmp #KEY_UP
+    lda #1
+    adc gridlinestype
+    cmp #3
+    bcc :+
+      sbc #3
+    :
+    sta gridlinestype
+  is_down:
+  
+  
+  not_updown:  
+
+  jsr ppu_wait_vblank
+  lda #$3F
+  ldx #$00
+  sta PPUADDR
+  stx PPUADDR
+  lda cur_side
+  lsr a
+  bcc load_palette_lside
+    ; right side
+    ldx #3
+    ldy colorsborder
+    rpalloop:
+      lda #$0F
+      sta PPUDATA
+      sta PPUDATA
+      tya
+      ora convergence_rside_palette,x
+      sta PPUDATA
+      lda convergence_rside_palette,x
+      sta PPUDATA
+      dex
+      bpl rpalloop
+    bmi load_palette_done
+  load_palette_lside:
+    ldx gridlinestype
+    lda gridinvert
+    lpalloop1:
+      sta PPUDATA
+      dex
+      bpl lpalloop1
+    ldx #3
+    eor #$2F
+    lpalloop2:
+      sta PPUDATA
+      dex
+      bpl lpalloop2
+  load_palette_done:
+  lda cur_side
+  ora #VBLANK_NMI
+  clc
+  jsr ppu_screen_on_xy0
+
+  lda new_keys
+  and #KEY_B
+  bne done
+  jmp loop
+done:
+  rts
+.endproc
+
+.rodata
+convergence_rside_palette:
+  .byte $16, $2A, $12, $20

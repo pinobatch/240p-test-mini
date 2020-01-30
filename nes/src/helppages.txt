@@ -7,14 +7,15 @@ Color bars on gray
 Color bleed
 Grid
 Linearity
+Convergence
 Gray ramp
 Solid color screen
 IRE
 Sharpness
 Chroma crosstalk
+Overscan
 CPU clock speed
 ----
-Overscan
 Shadow sprite
 Stopwatch
 Manual lag test
@@ -220,6 +221,22 @@ should be the same.
 
 A: Hide or show a
    square grid
+
+== Convergence ==
+
+Use these patterns to adjust
+a CRT's color convergence.
+
+Fine grid
+↑↓: Change grid pattern
+  (lines, dots, crosses)
+Select: Invert grays
+A: Go to colors
+
+Color transition boundaries
+↑↓: Hide or show
+  black borders
+A: Go to fine grid
 
 == Gray ramp ==
 
@@ -774,7 +791,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.19 (2019-09-12)
+Version 0.20wip (2020-01-30)
 
 Concept: Artemio Urbina
   🐦 @Artemio

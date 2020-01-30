@@ -76,7 +76,7 @@ GATEDATA_BANK = 1
 ; stills.s
 .global do_linearity, do_sharpness, do_ire, do_smpte, do_601bars
 .global do_pluge, do_gcbars, do_cpsgrid, do_gray_ramp, do_color_bleed
-.global do_full_stripes, do_solid_color, do_crosstalk
+.global do_full_stripes, do_solid_color, do_crosstalk, do_convergence
 .global tvSystemFPS
 SIZEOF_TEST_STATE = 24
 .globalzp test_state

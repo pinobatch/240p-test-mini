@@ -104,14 +104,15 @@ routines:
   .addr do_color_bleed-1
   .addr do_cpsgrid-1
   .addr do_new_linearity-1
+  .addr do_convergence-1
   .addr do_gray_ramp-1
   .addr do_solid_color-1
   .addr do_ire-1
   .addr do_sharpness-1
   .addr do_crosstalk-1
+  .addr do_overscan-1
   .addr do_overclock-1
 ::page2start = (* - routines)/2
-  .addr do_overscan-1
   .addr do_drop_shadow_sprite-1
   .addr do_stopwatch-1
   .addr do_manual_lag-1
