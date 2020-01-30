@@ -420,60 +420,7 @@ sgb_load_border::
   ld a, $14<<3|1
   jp sgb_send_trn_ab
 
-; Mystery test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-pass_pattern:
-  db %01111111
-  db %00000110
-  db %00001000
-  db %00110000
-  db %01111111
-  db %00000000
-  db %00000001
-  db %01111111
-  db %00000001
-  db %00000000
-  db %00100110
-  db %01001001
-  db %01001001
-  db %00110010
-  db %00000000
-  db %00111110
-  db %01000001
-  db %01000001
-  db %00100010
-
-nes_palette_11to1c:
-  if 0
-  ; NES palette made with bisqwit's tool
-  ; Not ideal for Super NES, but better than nothing
-  drgb $0f63b3
-  drgb $4051d0
-  drgb $7841cc
-  drgb $a736a9
-  drgb $c03470
-  drgb $bd3c30
-  drgb $9f4a00
-  drgb $6d5c00
-  drgb $366d00
-  drgb $077704
-  drgb $00793d
-  drgb $00727d
-  else
-  ; 12 evenly spaced YUV points
-  drgb $8067ff
-  drgb $a358ed
-  drgb $bd54bf
-  drgb $c75b80
-  drgb $bd6c40
-  drgb $a38312
-  drgb $809800
-  drgb $5ca712
-  drgb $42ab40
-  drgb $38a47f
-  drgb $4293bf
-  drgb $5c7ced
-  endc
+; NTSC chroma crosstalk test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   rsset hTestState
 hIncTime    rb 1
@@ -594,8 +541,8 @@ wr1color:
   add a
   add low(nes_palette_11to1c)
   ld e, a
-  ld a, 0
-  add high(nes_palette_11to1c)
+  adc high(nes_palette_11to1c)
+  sub e
   ld d, a
   ld a, [de]
   ld [hl+], a
@@ -613,3 +560,60 @@ add_c_to_curpalette:
   .nowrap:
   ldh [hCurPalette], a
   ret
+
+; The needed alignment is not fully understood.
+; If "Chroma crosstalk" produces noticeable diagonal stripes even
+; on S-Video or RGB, revisit this and wr1color.
+section "crosstalkcolors",ROM0,ALIGN[1]
+nes_palette_11to1c:
+  if 0
+  ; NES palette made with bisqwit's tool
+  ; Not ideal for Super NES, but better than nothing
+  drgb $0f63b3
+  drgb $4051d0
+  drgb $7841cc
+  drgb $a736a9
+  drgb $c03470
+  drgb $bd3c30
+  drgb $9f4a00
+  drgb $6d5c00
+  drgb $366d00
+  drgb $077704
+  drgb $00793d
+  drgb $00727d
+  else
+  ; 12 evenly spaced YUV points
+  drgb $8067ff
+  drgb $a358ed
+  drgb $bd54bf
+  drgb $c75b80
+  drgb $bd6c40
+  drgb $a38312
+  drgb $809800
+  drgb $5ca712
+  drgb $42ab40
+  drgb $38a47f
+  drgb $4293bf
+  drgb $5c7ced
+  endc
+
+pass_pattern:
+  db %01111111
+  db %00000110
+  db %00001000
+  db %00110000
+  db %01111111
+  db %00000000
+  db %00000001
+  db %01111111
+  db %00000001
+  db %00000000
+  db %00100110
+  db %01001001
+  db %01001001
+  db %00110010
+  db %00000000
+  db %00111110
+  db %01000001
+  db %01000001
+  db %00100010

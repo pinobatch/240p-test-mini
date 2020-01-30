@@ -206,7 +206,7 @@ void activity_kiki_scroll(void) {
   scrolltest_dy = 1;
   load_kiki_bg();
   do {
-    read_pad_help_check(helpsect_hill_zone_scroll_test);
+    read_pad_help_check(helpsect_vertical_scroll_test);
     move_1d_scroll();
 
     VBlankIntrWait();

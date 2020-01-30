@@ -133,8 +133,11 @@ ppu_loaders:
   ldx #$3F
   sty PPUMASK
   stx PPUADDR
+  ldy #0
   sty PPUADDR
   sta PPUDATA
+  sty PPUADDR
+  sty PPUADDR
   rts
 .endproc
 

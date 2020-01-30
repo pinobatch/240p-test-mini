@@ -716,12 +716,12 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.20wip (2019-09-19)
+Ver. 0.20 (2020-01-30)
 Chroma crosstalk
 
 © 2011-2016
   Artemio Urbina
-© 2015-2019
+© 2015-2020
   Damian Yerrick
 This is free software; see
 the source for copying

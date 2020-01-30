@@ -1,4 +1,4 @@
-0.20 (2020-01-xx)
+0.20 (2020-01-30)
 * Add SGB-only Chroma crosstalk test
 * Help: Wait to draw status line until Huffman decoding finishes
 * Help: Blink Gus's eyes

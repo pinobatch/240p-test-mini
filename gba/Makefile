@@ -129,6 +129,15 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 .PHONY: $(BUILD) clean
 
 #---------------------------------------------------------------------------------
+# This sets up the dependencies for the first build if the user runs
+#     make 240pee_mb.gba
+# instead of running
+#     make
+#---------------------------------------------------------------------------------
+$(TARGET).gba $(TARGET).elf: $(BUILD)
+	echo hello...
+
+#---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile

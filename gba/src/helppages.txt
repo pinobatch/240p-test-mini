@@ -517,7 +517,7 @@ A: Start or stop the test
 
 == Lame boy ==
 
-This test serves as a
+This test served as a
 placeholder in early versions
 of 160p Test Suite for tests
 that have not yet been ported
@@ -634,7 +634,8 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.20wip (2020-01-30)
+Version 0.20 (2020-01-30)
+Convergence
 
 © 2011-2016 Artemio Urbina
 © 2015-2020 Damian Yerrick
