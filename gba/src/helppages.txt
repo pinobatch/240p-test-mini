@@ -7,6 +7,7 @@ Color bars on gray
 Color bleed
 Grid
 Linearity
+Convergence
 Gray ramp
 Solid color screen
 Motion blur
@@ -97,6 +98,22 @@ distortion of a CRT.
 A: Hide or show grid
 Select: Invert grays
 
+== Convergence ==
+
+Use these patterns to adjust
+a CRT's color convergence.
+
+Fine grid
+↑↓: Change grid pattern
+  (lines, dots, crosses)
+Select: Invert grays
+A: Go to colors
+
+Color transition boundaries
+↑↓: Hide or show
+  black borders
+A: Go to fine grid
+
 == Gray ramp ==
 
 Use this pattern to
@@ -109,7 +126,7 @@ Cheap color LCDs may
 have different gamma
 curves per component.
 
-== Solid screen ==
+== Solid color screen ==
 
 Some displays and scalers
 have problems with sudden
@@ -617,10 +634,10 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.19 (2019-09-12)
+Version 0.20wip (2020-01-30)
 
 © 2011-2016 Artemio Urbina
-© 2015-2019 Damian Yerrick
+© 2015-2020 Damian Yerrick
 This is free software; see
 the source for copying
 conditions. The program

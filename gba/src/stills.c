@@ -35,9 +35,10 @@ extern const unsigned char helpsect_color_bars_on_gray[];
 extern const unsigned char helpsect_color_bleed[];
 extern const unsigned char helpsect_grid[];
 extern const unsigned char helpsect_linearity[];
+extern const unsigned char helpsect_convergence[];
 extern const unsigned char helpsect_gray_ramp[];
 extern const unsigned char helpsect_sharpness[];
-extern const unsigned char helpsect_solid_screen[];
+extern const unsigned char helpsect_solid_color_screen[];
 extern const unsigned char helpsect_sharpness[];
 extern const unsigned char helpsect_full_screen_stripes[];
 
@@ -48,6 +49,7 @@ extern const VBTILE linearity_chrTiles[27];
 extern const unsigned int linearity_chrMap[];
 extern const VBTILE sharpness_chrTiles[48];
 extern const unsigned int sharpness_chrMap[];
+extern const VBTILE convergence_chrTiles[5];
 
 extern const unsigned char pluge_shark_6color_chrTiles[];
 extern const unsigned short pluge_shark_6color_chrPal[6];
@@ -655,7 +657,7 @@ void activity_solid_color(void) {
   loadMapRowMajor(&(MAP[PFMAP][1][26]), 0x0001, 3, 3);
 
   while (1) {
-    read_pad_help_check(helpsect_solid_screen);
+    read_pad_help_check(helpsect_solid_color_screen);
     if ((new_keys & KEY_A) && (x == 4)) {
       showeditbox = !showeditbox;
     }
@@ -695,4 +697,63 @@ void activity_solid_color(void) {
     BG_COLORS[2] = RGB5(0, 0, 0);
     REG_DISPCNT = showeditbox ? (MODE_0 | BG0_ON) : 0;
   }
+}
+
+void activity_convergence(void) {
+  unsigned char cur_side = 0;
+  unsigned char gridinvert = 0;
+  unsigned char griddepth = 0;
+  unsigned char colors_border = 0;
+
+  bitunpack2(PATRAM4(0, 0), convergence_chrTiles, sizeof(convergence_chrTiles));
+  dma_memset16(MAP[PFMAP], 0x04, 32*20*2); 
+  for (unsigned int y = 0; y < 20; ++y) {
+    unsigned int rowtilebase = (((y & 3) == 3) << 1) | ((y & 4) ? 0x2000 : 0);
+    for (unsigned int x = 0; x < 30; ++x) {
+      unsigned int tile = ((x & 3) == 3) | ((x & 4) ? 0x1000 : 0) | rowtilebase;
+      MAP[PFOVERLAY][y][x] = tile;
+    }
+  }
+
+  while (1) {
+    read_pad_help_check(helpsect_convergence);
+
+    if (new_keys & KEY_A) cur_side = !cur_side;
+    if (new_keys & KEY_SELECT) gridinvert = !gridinvert;
+    if (new_keys & KEY_B) return;
+    if (cur_side != 0) {
+      // Color transition boundary: Toggle border
+      if (new_keys & (KEY_UP | KEY_DOWN)) {
+        colors_border = !colors_border;
+      }
+    } else {
+      if (new_keys & KEY_UP) griddepth += 2;
+      if (new_keys & KEY_DOWN) griddepth += 1;
+      if (griddepth >= 3) griddepth -= 3;
+    }
+
+    VBlankIntrWait();
+    BGCTRL[0] = (BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)
+                 |SCREEN_BASE(PFMAP-cur_side));
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    REG_DISPCNT = MODE_0 | BG0_ON;
+    if (cur_side != 0) {
+      BG_COLORS[0x03] = RGB5(31,31,31);
+      BG_COLORS[0x13] = RGB5( 0, 0,31);
+      BG_COLORS[0x23] = RGB5( 0,31, 0);
+      BG_COLORS[0x33] = RGB5(31, 0, 0);
+      BG_COLORS[0x02] = colors_border ? 0 : RGB5(31,31,31);
+      BG_COLORS[0x12] = colors_border ? 0 : RGB5( 0, 0,31);
+      BG_COLORS[0x22] = colors_border ? 0 : RGB5( 0,31, 0);
+      BG_COLORS[0x32] = colors_border ? 0 : RGB5(31, 0, 0);
+    } else {
+      // Set palette for grid
+      unsigned int color = gridinvert ? 0x7FFF : 0;
+      for (unsigned int i = 0; i < 4; ++i) {
+        BG_COLORS[i] = color;
+        if (i == griddepth) color = color ^ 0x7FFF;
+      }
+    }
+  }
+
 }

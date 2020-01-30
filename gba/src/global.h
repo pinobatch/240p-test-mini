@@ -57,6 +57,7 @@ void activity_cps_grid(void);
 void activity_full_stripes(void);
 void activity_color_bleed(void);
 void activity_solid_color(void);
+void activity_convergence(void);
 
 // scrolltest.c
 void activity_grid_scroll(void);
