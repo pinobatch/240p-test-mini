@@ -402,10 +402,10 @@ mdfourier_labels:
   .byte $00
 
   ; Overprint two messages to allocate space for both in CHR RAM.
-  rf_label  80,160, 2, 0
+  rf_label  80,160, 3, 0
   .byte "OK", 0
   rf_label  80,160, 3, 0
-  .byte "Trash. Volumes may be wrong.",0
+  .byte "Trash. Results may be wrong.",0
   rf_label  80,168, 3, 0
   .byte "Hold Start and press Reset.",0
 

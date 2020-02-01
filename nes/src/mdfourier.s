@@ -6,6 +6,7 @@ test_row         = test_state+2
 test_ticksleft   = test_state+3
 test_subtype     = test_state+4
 test_lastpulsehi = test_state+5
+test_good_phase  = test_state+6
 
 apu_addressbuf = $0100
 apu_databuf    = $0120
@@ -29,6 +30,9 @@ apu_databuf    = $0120
 .endproc
 
 .proc mdfourier_run
+  lda mdfourier_good_phase
+  sta test_good_phase
+  jsr pattern_trash_beep
   jsr pattern_sync
   inc test_section
 
@@ -44,7 +48,14 @@ apu_databuf    = $0120
   inc test_section
   lda #$80  ; 50% pulse
   jsr chromatic_scale_subtype_A
+
+  ; Past this phase, the triangle wave's phase gets corrupted.
   inc test_section
+  bit new_keys
+  bvs skip_all
+  lda #0
+  sta mdfourier_good_phase
+
   lda #$C0  ; triangle
   jsr chromatic_scale_subtype_A
   inc test_section
@@ -78,7 +89,35 @@ apu_databuf    = $0120
   jsr pattern_dmc_fading
 
   inc test_section
-  ; fall through to pattern_sync
+  jsr pattern_sync
+skip_all:
+  ; fall through to pattern_trash_beep
+.endproc
+
+.proc pattern_trash_beep
+  ldx test_good_phase
+  bne skip_trash_beep
+
+  rowloop:
+    stx test_row
+    ldy #volramp_data - pattern_y_data
+    jsr load_pattern_y
+    ldx test_row
+    ldy trash_beep_pitches,x
+    lda periodTableLo,y
+    sta apu_databuf+1
+    lda periodTableHi,y
+    sta apu_databuf+2
+    lda trash_beep_durations,x
+    jsr wait_a_ticks
+    ldx test_row
+    inx
+    cpx #TRASH_BEEP_LEN
+    bcc rowloop
+  lda #5
+  jsr silence_a_ticks
+skip_trash_beep:
+  rts
 .endproc
 
 .proc pattern_sync
@@ -565,6 +604,12 @@ dmc_fading_step4_data:
 
 .out .sprintf("%d of 256 pattern_y_data bytes used", * - pattern_y_data)
 
+.segment "DMC"
+.align 64
+instsamp1_dmc:    .incbin "audio/instsamp1.dmc"
+instsamp1_dmc_end:
+
+; there are 64 bytes usable for anything
 volramp_periods:
   .byte 255, 223, 111, 223, 111
 volramp_addamounts:
@@ -573,9 +618,11 @@ volramp_addamounts:
 dmc_fading_values:  ; in reverse order
   .byte $00, $7F, $6F, $5F, $4F, $3F, $2F, $1F, $0F, $00
 
-.segment "DMC"
-.align 64
-instsamp1_dmc:    .incbin "audio/instsamp1.dmc"
-instsamp1_dmc_end:
+trash_beep_pitches:
+  .byte 34, 39, 43, 34, 37, 41
+TRASH_BEEP_LEN = * - trash_beep_pitches
+trash_beep_durations:
+  .byte 3, 3, 4, 3, 3, 9
+
 .align 64
 homeposition_dmc: .res 17, $00

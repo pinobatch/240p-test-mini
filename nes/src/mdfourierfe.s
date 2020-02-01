@@ -21,6 +21,39 @@ restart:
   jsr rf_load_yrgb_palette
   lda #RF_mdfourier
   jsr rf_load_layout
+
+  ; Replace bad phase message with good phase if good
+  lda mdfourier_good_phase
+  beq dont_write_good_phase
+    ; Erase "Trash. Press Reset" message
+    ldy #$22
+    lda #$80
+    sty PPUADDR
+    sta PPUADDR
+    asl a
+    ldx #64
+    :
+      sta PPUDATA
+      dex
+      bne :-
+
+    ; Write "OK"
+    lda #$8A
+    sty PPUADDR
+    sta PPUADDR
+    ldx #$20
+    stx PPUDATA
+    inx
+    stx PPUDATA
+
+    ; Change message color to green (attribute 2)
+    iny
+    lda #$EA
+    sty PPUADDR
+    sta PPUADDR
+    sta PPUDATA
+  dont_write_good_phase:
+
   jsr mdfourier_init_apu
   lda #0
   sta test_section
@@ -71,8 +104,6 @@ wait_for_start:
   jsr mdfourier_run
 
   ; Need to redraw the screen in case triangle test began
-  lda #0
-  sta mdfourier_good_phase
   jmp restart
 done:
   rts
