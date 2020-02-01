@@ -1,6 +1,6 @@
 0.20 (2020-01-30)
 * Add Convergence test
-* Vertical scroll test: Display correct help page
+* Vertical scroll test: Display the correct help page
 * Help: Blink Gus's eyes
 
 0.19 (2019-09-12)

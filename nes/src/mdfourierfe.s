@@ -9,6 +9,10 @@ test_section     = test_state+1
 NUM_PPU_LOADERS = 6
 crosstalk8k_chr = $01B0
 
+.bss
+mdfourier_good_phase: .res 1
+
+.code
 .proc do_mdfourier
   lda #0
   sta skip_ppu
@@ -17,12 +21,17 @@ restart:
   jsr rf_load_yrgb_palette
   lda #RF_mdfourier
   jsr rf_load_layout
-another_run:
   jsr mdfourier_init_apu
   lda #0
   sta test_section
-  jsr read_pads
-  jsr mdfourier_present
+
+  ; Wait for B Button release before resuming menu loop so that
+  ; the packet to silence the APU isn't skipped
+  another_run_wait_b:
+    jsr read_pads
+    jsr mdfourier_present
+    bit cur_keys
+    bvs another_run_wait_b
 
 wait_for_start:
   lda #helpsect_mdfourier
@@ -60,7 +69,11 @@ wait_for_start:
   beq wait_for_start
   bpl done
   jsr mdfourier_run
-  jmp another_run
+
+  ; Need to redraw the screen in case triangle test began
+  lda #0
+  sta mdfourier_good_phase
+  jmp restart
 done:
   rts
 .endproc

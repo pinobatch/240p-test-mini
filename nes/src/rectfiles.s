@@ -397,16 +397,29 @@ crowd_labels:
 mdfourier_labels:
   rf_rect   0,  0,256,240,$00, 0  ; blank the screen
   .byte $00
-  rf_attr  0,  0,256, 240, 0
+  rf_attr   0,  0,256,240, 0
+  rf_attr   0,160,256,192, 1
   .byte $00
-  rf_label  80, 96, 3, 0
+
+  ; Overprint two messages to allocate space for both in CHR RAM.
+  rf_label  80,160, 2, 0
+  .byte "OK", 0
+  rf_label  80,160, 3, 0
+  .byte "Trash. Volumes may be wrong.",0
+  rf_label  80,168, 3, 0
+  .byte "Hold Start and press Reset.",0
+
+  rf_label  80, 80, 3, 0
   .byte "MDFourier v6",0
-  rf_label  80,112, 2, 0
+  rf_label  80, 96, 2, 0
   .byte "tone generator",0
-  rf_label  80,128, 3, 0
+  rf_label  80,112, 3, 0
   .byte "A: Start   B: Stop",0
-  rf_label  80,136, 2, 0
+  rf_label  80,120, 2, 0
   .byte $86,$87,": Change background",0
+
+  rf_label  80,152, 2, 0
+  .byte "Triangle phase:",0
   .byte $00
 
 mdfourier_15k_rects:

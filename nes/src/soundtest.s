@@ -107,6 +107,7 @@ done:
   jsr beepdelay
   lda #$00
   sta $4008
+  sta mdfourier_good_phase
   lda #$FF
   sta $400B
   rts

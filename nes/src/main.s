@@ -24,6 +24,10 @@
 
 OAM = $0200
 
+.rodata
+warmbootsig: .byte 240, "pTV"
+WARMBOOTSIGLEN = * - warmbootsig
+
 .segment "ZEROPAGE"
 nmis:          .res 1
 oam_used:      .res 1  ; starts at 0
@@ -32,6 +36,10 @@ new_keys:      .res 2
 das_keys:      .res 2
 das_timer:     .res 2
 tvSystem:      .res 1
+
+.bss
+; Default crt0 clears ZP but not BSS
+is_warm_boot: .res WARMBOOTSIGLEN
 
 .code
 
@@ -43,6 +51,44 @@ tvSystem:      .res 1
   sta SNDCHN
   jsr getTVSystem
   sta tvSystem
+
+  ; Check for a warm boot
+  lda #INITIAL_GOOD_PHASE
+  sta mdfourier_good_phase
+  ldx #WARMBOOTSIGLEN - 1
+  warmbootcheckloop:
+    lda warmbootsig,x
+    cmp is_warm_boot,x
+    bne is_cold_boot
+    dex
+    bpl warmbootcheckloop
+
+  ; It's a warm boot. X=$FF
+  stx mdfourier_good_phase
+is_cold_boot:
+  ldx #WARMBOOTSIGLEN - 1
+  warmbootsetloop:
+    lda warmbootsig,x
+    sta is_warm_boot,x
+    dex
+    bpl warmbootsetloop
+
+  ; Hold Start for 15 frames to go straight to MDFourier
+  lda #15
+  sta oam_used
+  lda #VBLANK_NMI
+  sta PPUCTRL
+  mdfourier_skip_loop:
+    jsr read_pads
+    lda cur_keys+0
+    and #KEY_START
+    beq start_not_held
+    jsr ppu_wait_vblank
+    dec oam_used
+    bne mdfourier_skip_loop
+  jsr do_mdfourier
+  start_not_held:
+
   .if 1
     jsr do_credits
   .else
