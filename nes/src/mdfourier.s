@@ -395,7 +395,6 @@ PHASE_SLIDE_START_PERIOD = 268
 .endproc
 
 .proc long_slide_channel_A  ; $04 or $08
-    sta $4444
   sta test_subtype
   sta apu_addressbuf+0
   ora #$02

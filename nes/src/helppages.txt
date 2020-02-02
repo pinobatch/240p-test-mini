@@ -792,7 +792,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.20 (2020-01-30)
+Version 0.20+ (2020-01-30)
 Convergence & MDFourier
 
 Concept: Artemio Urbina

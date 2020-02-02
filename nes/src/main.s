@@ -39,7 +39,13 @@ tvSystem:      .res 1
 
 .bss
 ; Default crt0 clears ZP but not BSS
-is_warm_boot: .res WARMBOOTSIGLEN
+; Currently used only by multicarts
+is_warm_boot:  .res WARMBOOTSIGLEN
+
+; Save which activity the user was in
+help_last_page: .res 1
+help_last_y:    .res 1
+
 
 .code
 
@@ -52,29 +58,41 @@ is_warm_boot: .res WARMBOOTSIGLEN
   jsr getTVSystem
   sta tvSystem
 
+  ; 1. Set triangle phase quality to good iff not a multicart
+  ; 2. Check whether this was a warm boot
+  ; 3. If this was a warm boot, set triangle phase quality to good
+  ; 4. If triangle phase quality is good and Start is held,
+  ;    skip to MDFourier
+  ; 5. If Reset was pressed
+
   ; Check for a warm boot
   lda #INITIAL_GOOD_PHASE
   sta mdfourier_good_phase
-  ldx #WARMBOOTSIGLEN - 1
-  ldy #0
-  warmbootcheckloop:
-    lda warmbootsig,x
-    cmp is_warm_boot,x
-    sta is_warm_boot,x
+
+  .if ::IS_MULTICART
+    ldy #0
+    ldx #WARMBOOTSIGLEN - 1
+    warmbootcheckloop:
+      lda warmbootsig,x
+      cmp is_warm_boot,x
+      sta is_warm_boot,x
+      beq :+
+        iny
+      :
+      dex
+      bpl warmbootcheckloop
+    ; At this point, X=$FF, and Y=0 iff warm boot.
+    ; Save Y in help_last_y temporarily during boot
+    sty help_last_y
+    tya
     bne :+
-      iny
+      ; On a warm boot, phase is also good
+      stx mdfourier_good_phase
     :
-    dex
-    bpl warmbootcheckloop
-  ; At this point, X=$FF, and Y=0 iff warm boot.
-  cpy #0
-  beq :+
-    ; On a warm boot, phase is also good
-    stx mdfourier_good_phase
-  :
-  ; Start to skip to MDFourier only if the triangle phase is OK
-  lda mdfourier_good_phase
-  beq start_not_held
+    ; Start to skip to MDFourier only if the triangle phase is OK
+    lda mdfourier_good_phase
+    beq start_not_held
+  .endif
 
   ; Hold Start for 15 frames to go straight to MDFourier
   lda #15
@@ -89,19 +107,32 @@ is_warm_boot: .res WARMBOOTSIGLEN
     jsr ppu_wait_vblank
     dec oam_used
     bne mdfourier_skip_loop
-  jsr do_mdfourier
-  start_not_held:
+  ; and place the cursor there
+  ldy #<mdfourier_item_id - page2start
+  lda #1
+  sta help_cur_page
+  bne have_help_result
+start_not_held:
 
-  .if 1
-    jsr do_credits
-  .else
-    jsr do_fc_mic_test
+  .if ::IS_MULTICART
+    ; If this was a cold boot, it is not a double reset
+    lda help_last_y
+    bne not_double_reset
+    ; If an activity page was selected, it is not a double reset
+    lda help_last_page
+    bpl not_double_reset
+      jmp do_a53_exit
+    not_double_reset:
+    lda #$FF
+    sta help_last_page
   .endif
 
+  jsr do_credits
 forever:
   ldx #helpsect_240p_test_suite_menu
   lda #KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
   jsr helpscreen
+have_help_result:
 
   ; The user chose line Y of (relative) page A of the menu document
   lsr a  ; carry clear for 0 or set for 1
@@ -109,11 +140,11 @@ forever:
   ; Save position on menu to be restored even if the user views
   ; a different help page, Sound test, About, or Credits.
   lda help_cur_page
-  pha
-  tya
-  pha
+  sta help_last_page
+  sty help_last_y
 
   ; Calculate which routine to call
+  tya
   bcc :+
     adc #page2start-1
   :
@@ -124,16 +155,20 @@ forever:
   lda new_keys
   and #KEY_START
   beq not_force_about
-    ldx #about_item * 2
+    ldx #about_item_id * 2
   not_force_about:
 
   jsr main_dispatch
 
   ; Restore position on menu
-  pla
+  lda help_last_y
   sta help_cursor_y
-  pla
+  lda help_last_page
   sta help_cur_page
+  .if ::IS_MULTICART
+    lda #$FF
+    sta help_last_page
+  .endif
   jmp forever
 .endproc
 
@@ -173,8 +208,9 @@ routines:
   .addr do_zapper_test-1
   .addr do_sound_test-1
   .addr do_audiosync-1
+::mdfourier_item_id = (* - routines)/2
   .addr do_mdfourier-1
-::about_item = (* - routines)/2
+::about_item_id = (* - routines)/2
   .addr do_about-1
   .addr do_credits-1
   .addr do_a53_exit-1
