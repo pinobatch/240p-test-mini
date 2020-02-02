@@ -33,6 +33,9 @@ more interactive tests.  Each test is controlled with the Control Pad
 and the A and Select Buttons.  To show help for any test, press Start
 or read `src/helppages.txt`.  To leave a test, press the B Button.
 
+To skip straight to MDFourier tone generator, hold the Start Button
+while turning on the power or while pressing the Reset Button.
+
 Versions
 --------
 The Nintendo Entertainment System (NES) can output 240 picture

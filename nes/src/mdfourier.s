@@ -260,9 +260,31 @@ skip_trash_beep:
   rts
 .endproc
 
+TRASH_SHORT_BEEP_PERIOD = 932-1
+
 .proc noise_steady
-  lda #20
+  ; In the v5/v6 profile, this padding was longer (20 frames) than
+  ; other paddings.  This let me add another indication of whether
+  ; the starting phase of the triangle channel was valid or not.
+  ; https://github.com/pinobatch/240p-test-mini/issues/23
+  lda #8
   jsr silence_a_ticks
+
+  ; High pitch for good tri phase, low pitch for trashed
+  ldy #volramp_data - pattern_y_data
+  jsr load_pattern_y
+  lda test_good_phase
+  bne keep_tone_high_for_valid_phase
+    lda #<TRASH_SHORT_BEEP_PERIOD
+    sta apu_databuf+1
+    lda #>TRASH_SHORT_BEEP_PERIOD
+    sta apu_databuf+2
+  keep_tone_high_for_valid_phase:
+  lda #2
+  jsr wait_a_ticks
+
+  jsr silence_10_ticks
+
   ldy #noisenote_data - pattern_y_data
   jsr load_pattern_y
   lda #88
