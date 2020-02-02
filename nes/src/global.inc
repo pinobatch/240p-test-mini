@@ -20,6 +20,8 @@
 .ifndef GLOBAL_INC
 .define GLOBAL_INC
 
+IS_MULTICART = 0
+
 ; init.s
 .global reset_handler
 
@@ -145,7 +147,7 @@ bcd_highdigits = $0000
 .global do_mdfourier, mdfourier_present
 .global mdfourier_init_apu, mdfourier_run, mdfourier_push_apu
 .global mdfourier_good_phase
-INITIAL_GOOD_PHASE = 0
+INITIAL_GOOD_PHASE = (IS_MULTICART = 0)
 
 ; ntscPeriods.s
 .global periodTableLo, periodTableHi

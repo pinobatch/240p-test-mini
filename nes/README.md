@@ -86,6 +86,14 @@ of the output from the TV.  And if the mic is turned up high enough,
 a feedback whine can be heard.  So the automatic audio lag detection
 must remain exclusive to the Dreamcast.
 
+The phase of the triangle channel affects the volumes of the noise
+and DPCM channels in the MDFourier tone generator.  Playing a note
+on the triangle channel alters this phase, possibly rendering
+MDFourier analysis results invalid.  This includes the Select button
+in SMPTE color bars and Color bars on gray, as well as most options
+in Sound test.  If the triangle phase has been trashed, MDFourier
+will instruct you to press the Reset Button on the Control Deck.
+
 Contributors
 ------------
 * Concept: Artemio Urbina [@Artemio]

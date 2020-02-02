@@ -79,8 +79,17 @@ Why BNROM when only _Deadly Towers_ uses it?
    that Rare was unlucky enough to be involved in.
 3. Repro boards for BNROM don't need the 74HC32.  Save money!
 
+If you are including 240p Test Suite in an [Action 53] compilation,
+do this to ensure accuracy of MDFourier results:
+
+1. In `nes/src/global.inc`, set `IS_MULTICART` to nonzero
+2. In your compilation's `a53.cfg`, set `exitmethod=none` for the
+   240p Test Suite ROM so that Start+Reset can work.
+
+
 [Ice Man's post]: http://forums.nesdev.com/viewtopic.php?p=159747#p159747
 [UNROM board]: http://bootgod.dyndns.org:7777/pcb.php?PcbID=425+426+427+428+429+430+432+433+434
 [game using UNROM]: http://bootgod.dyndns.org:7777/search.php?keywords=unrom&kwtype=pcb&group=groupid
 [discrete repro board]: http://www.retrostage.net/nes_discretes.htm
 [CrackOut prototype]: http://bootgod.dyndns.org:7777/profile.php?id=4618
+[Action 53]: https://github.com/pinobatch/action53

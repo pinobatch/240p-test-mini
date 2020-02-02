@@ -326,9 +326,23 @@ not_pagenum_line:
   cmp #22
   bcs page_done
 
+  ; 0: End of page
+  ; 1: End of page if not multicart
   ldy #0
   lda (ciSrc),y
-  beq is_null_line
+
+  .if ::IS_MULTICART
+    beq is_null_line
+    lsr a
+    bne not_multicart_only_line
+      inc ciSrc
+      bne not_multicart_only_line
+      inc ciSrc+1
+    not_multicart_only_line:
+  .else
+    lsr a
+    beq is_null_line
+  .endif
 
   ; Mark this line as having something on it
   ; prev_nonblank is how many lines are actually not blank

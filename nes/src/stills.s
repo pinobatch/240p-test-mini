@@ -483,6 +483,8 @@ loop:
     lda #1
     eor smpte_level
     sta smpte_level
+    lda #0
+    sta mdfourier_good_phase
   not_beep:
 
   lda new_keys+0

@@ -56,22 +56,25 @@ is_warm_boot: .res WARMBOOTSIGLEN
   lda #INITIAL_GOOD_PHASE
   sta mdfourier_good_phase
   ldx #WARMBOOTSIGLEN - 1
+  ldy #0
   warmbootcheckloop:
     lda warmbootsig,x
     cmp is_warm_boot,x
-    bne is_cold_boot
+    sta is_warm_boot,x
+    bne :+
+      iny
+    :
     dex
     bpl warmbootcheckloop
-
-  ; It's a warm boot. X=$FF
-  stx mdfourier_good_phase
-is_cold_boot:
-  ldx #WARMBOOTSIGLEN - 1
-  warmbootsetloop:
-    lda warmbootsig,x
-    sta is_warm_boot,x
-    dex
-    bpl warmbootsetloop
+  ; At this point, X=$FF, and Y=0 iff warm boot.
+  cpy #0
+  beq :+
+    ; On a warm boot, phase is also good
+    stx mdfourier_good_phase
+  :
+  ; Start to skip to MDFourier only if the triangle phase is OK
+  lda mdfourier_good_phase
+  beq start_not_held
 
   ; Hold Start for 15 frames to go straight to MDFourier
   lda #15
@@ -174,6 +177,7 @@ routines:
 ::about_item = (* - routines)/2
   .addr do_about-1
   .addr do_credits-1
+  .addr do_a53_exit-1
 .popseg
 .endproc
 
@@ -187,4 +191,38 @@ routines:
   ldx #helpsect_about
   lda #KEY_LEFT|KEY_RIGHT|KEY_B|KEY_A|KEY_START
   jmp helpscreen
+.endproc
+
+;;
+; Exit to Action 53 menu
+.proc do_a53_exit
+.if ::IS_MULTICART
+  lda #0
+  sta PPUMASK
+  sta PPUCTRL
+  sta SNDCHN
+  ldx #exitcode_end-exitcode
+  copyloop:
+    lda exitcode,x
+    sta OAM,x
+    dex
+    bpl copyloop
+
+  ; Write sequence:
+  ; 80=02 (NROM-256), 81=FF (Last outer bank)
+  ; ldx #$FF
+  ldy #$80
+  lda #$02
+  sty $5000
+  iny
+  jmp OAM
+exitcode:
+  sta $8000
+  sty $5000
+  stx $8000
+  jmp ($FFFC)
+exitcode_end:
+.else
+  rts
+.endif
 .endproc
