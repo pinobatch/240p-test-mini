@@ -28,7 +28,7 @@ helptiles_gbc:: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
 sizeof_helptiles_gbc equ 960
 global sizeof_helptiles_gbc
 
-section "sgbborder_gfx0", ROM0
+section "helptiles_gfx0", ROM0
 helpblink_chr::
   incbin "obj/gb/helpblink.chrgb"  ; copied to $88C6
 

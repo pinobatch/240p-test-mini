@@ -734,7 +734,7 @@ junkerhq.net/MDFourier
 Record the NES's audio
 output using a sound card and
 compare it to other systems
-using the NES v6 profile.
+using the NES v7 profile.
 
 A: Play tones   B: Stop
 ←→: Change video background
@@ -792,7 +792,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.20+ (2020-01-30)
+Version 0.20+ (2020-02-02)
 Convergence & MDFourier
 
 Concept: Artemio Urbina
