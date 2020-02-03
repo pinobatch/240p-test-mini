@@ -20,7 +20,7 @@
 .ifndef GLOBAL_INC
 .define GLOBAL_INC
 
-IS_MULTICART = 0
+IS_MULTICART = 1
 
 ; init.s
 .global reset_handler

@@ -398,7 +398,7 @@ mdfourier_labels:
   rf_rect   0,  0,256,240,$00, 0  ; blank the screen
   .byte $00
   rf_attr   0,  0,256,240, 0
-  rf_attr   0,160,256,192, 1
+  rf_attr   0,160,256,192, 1  ; make the "phase is trash" message red
   .byte $00
 
   ; Overprint two messages to allocate space for both in CHR RAM.
@@ -410,12 +410,12 @@ mdfourier_labels:
   .byte "Hold Start and press Reset.",0
 
   rf_label  80, 80, 3, 0
-  .byte "MDFourier v6",0
+  .byte "MDFourier v7",0
   rf_label  80, 96, 2, 0
   .byte "tone generator",0
-  rf_label  80,112, 3, 0
+  rf_label  80,120, 3, 0
   .byte "A: Start   B: Stop",0
-  rf_label  80,120, 2, 0
+  rf_label  80,128, 2, 0
   .byte $86,$87,": Change background",0
 
   rf_label  80,152, 2, 0
