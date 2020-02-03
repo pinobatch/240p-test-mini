@@ -1,3 +1,11 @@
+0.21
+* Option to exit to menu if included in Action 53 multicart,
+  either from menu or pressing Reset twice
+* MDFourier: Hold Start at boot to skip to this activity
+* MDFourier: Warn for reduced precision (triangle phase differs
+  from power-up state) and add tones to indicate it for profile v7
+* MDFourier: Fix stuck note after pressing B to stop
+
 0.20 (2020-01-30)
 * Add Convergence test
 * Add MDFourier tone generator

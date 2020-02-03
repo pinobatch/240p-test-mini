@@ -30,7 +30,7 @@ Audio sync test
 MDFourier
 About
 Credits
-Exit to Action 53
+Exit 240p Test Suite
 
 == About ==
 
@@ -792,8 +792,8 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.21a53 (2020-02-02)
-For Action 53 vol. 4
+Version 0.21wip (2020-02-02)
+MDFourier phase improvement
 
 Concept: Artemio Urbina
   🐦 @Artemio
@@ -812,7 +812,6 @@ PARTICULAR PURPOSE.
 Thank you to my patrons:
   Johnathan Roatch
   Joe Parsell
-  Bassil S.
 
 You can help this project by
 running the test on authentic
