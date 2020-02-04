@@ -32,8 +32,13 @@ huffdata := \
   obj/gb/stopwatchface.iu \
   DMG? obj/gb/Gus_portrait.iu obj/gb/Gus_portrait-GBC.iuc
 
+# Paths to executables
+RGBASM  := rgbasm
+RGBLINK := rgblink
+RGBFIX  := rgbfix
+CC      := gcc
+
 # Flags for native tools written in C
-CC := gcc
 CFLAGS := -std=gnu99 -Wall -Wextra -DNDEBUG -Os
 
 # Things that depend on Windows vs. not-Windows
@@ -65,7 +70,8 @@ ctools: ../common/tools/dte$(EXE)
 clean:
 	-rm obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
 	-rm obj/gb/*.chrgb obj/gb/*.chrgb16 obj/gb/*.nam obj/gb/*.chr1
-	-rm obj/gb/*.iu obj/gb/*.huf
+	-rm obj/gb/*.iu obj/gb/*.iuc obj/gb/*.huf obj/gb/*.pal
+	-rm obj/gb/*.border
 	-rm ../common/tools/dte$(DOTEXE)
 
 # Packaging
@@ -94,14 +100,14 @@ obj/gb/index.txt: makefile
 objlisto := $(foreach o,$(objlist),obj/gb/$(o).o)
 
 $(title).gb: $(objlisto)
-	rgblink -w -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
-	rgbfix -p0 -v $@
+	$(RGBLINK) -w -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
+	$(RGBFIX) -p0 -v $@
 
 obj/gb/%.o: obj/gb/%-dedent.z80 src/gb.inc src/hardware.inc src/global.inc
-	rgbasm -o $@ $<
+	$(RGBASM) -o $@ $<
 
 obj/gb/%.o: obj/gb/%.z80
-	rgbasm -o $@ $<
+	$(RGBASM) -o $@ $<
 
 obj/gb/%-dedent.z80: src/%.z80
 	$(PY) tools/bgrdedent.py -o $@ $<
@@ -154,7 +160,7 @@ obj/gb/%.u.chrgb: obj/gb/%.chrgb
 	$(PY) tools/uniq.py $< $@ $(<:.chrgb=.nam)
 
 obj/gb/%.nam: obj/gb/%.u.chrgb
-	touch $@
+	-touch $@
 
 %.pb16: tools/pb16.py %
 	$(PY) $^ $@
