@@ -97,6 +97,23 @@ on NTSC or 38% on PAL.
 A: Hide or show grid
 Select: Invert grays
 
+== Convergence ==
+
+Use these to adjust a
+CRT's color convergence.
+
+Fine grid
+↑↓: Change grid pattern
+  (lines, dots, crosses)
+Select: Invert grays
+A: Go to colors
+
+Color transition
+boundaries (SGB/GBC)
+↑↓: Hide or show
+  black borders
+A: Go to fine grid
+
 == Gray ramp ==
 
 Use this pattern to

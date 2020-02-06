@@ -63,7 +63,6 @@ section "helppages",ROMX
     dtepages = list(allpages)
     dtepages.extend(helptitledata)
     oldsize = sum(len(x) for x in dtepages)
-    print(dtepages[0:10], file=sys.stderr)
     result = dte_compress(dtepages, mincodeunit=DTE_MIN_CODEUNIT, compctrl=FIRST_PRINTABLE_CU)
     dtepages, replacements, pairfreqs = result
     newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)

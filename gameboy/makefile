@@ -122,6 +122,7 @@ obj/gb/gfxincbins.o: \
   obj/gb/Gus_portrait-GBC.iuc obj/gb/Gus_portrait-GBC.pal \
   obj/gb/pluge_shark_4color.chrgb.pb16 obj/gb/backlightzone.chrgb.pb16 \
   obj/gb/grayramp-sgb.chrgb obj/gb/grayramp.chrgb \
+  obj/gb/convergence.chrgb.pb16 \
   obj/gb/cps_grid.chrgb.pb16 obj/gb/linearity-quadrant.iu \
   obj/gb/sharpness.iu obj/gb/stopwatchdigits.chrgb.pb16.huf \
   obj/gb/stopwatchhand.chrgb.pb16.huf obj/gb/stopwatchface.iu \
