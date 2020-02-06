@@ -37,7 +37,9 @@ CHAR_BIT EQU 8
 LOG_GLYPH_HEIGHT EQU 3
 GLYPH_HEIGHT EQU (1 << LOG_GLYPH_HEIGHT)
 GLYPH_HEIGHT_MINUS_1 EQU 7
+
 NUM_GLYPHS EQU 112
+FIRST_PRINTABLE_CU EQU $18
 
 section "vwfHuffUnComp", wram0, align[LOG_GLYPH_HEIGHT]
 vwfChrData: ds NUM_GLYPHS * GLYPH_HEIGHT
@@ -119,7 +121,7 @@ vwfPutTile::
   ; Calculate address of glyph
   ld h,0
   ld l,a
-  ld de,vwfChrData - (" "*GLYPH_HEIGHT)
+  ld de,vwfChrData - (FIRST_PRINTABLE_CU*GLYPH_HEIGHT)
   rept LOG_GLYPH_HEIGHT
     add hl,hl
   endr
@@ -176,10 +178,11 @@ vwfPuts::
 .chloop:
   ; Load character, stopping at control character
   ld a,[hl+]
-  cp 32
+  cp FIRST_PRINTABLE_CU
   jr c,.decret
 
   ; Save position, draw glyph, load position
+  cp 32
   jr z,.nodrawspace
   ld c,a
   push hl
@@ -191,7 +194,7 @@ vwfPuts::
 .nodrawspace:
   
   ; Add up the width of the glyph
-  ld de,vwfChrWidths-" "
+  ld de,vwfChrWidths-FIRST_PRINTABLE_CU
   add e
   ld e,a
   jr nc,.gwnowrap
@@ -219,10 +222,10 @@ vwfStrWidth::
   ld b,0
 .loop:
   ld a,[hl+]
-  cp 32
+  sub FIRST_PRINTABLE_CU
   jr c,vwfPuts.decret
   
-  ld de,vwfChrWidths-32
+  ld de,vwfChrWidths
   add e
   ld e,a
   jr nc,.gwnowrap

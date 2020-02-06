@@ -95,9 +95,11 @@ const unsigned char vwfGlyphWidths[] = {
 };
 */
 
+#define FIRST_PRINTABLE_CU 0x18
+
 void vwf8PutTile(uint32_t *dst, unsigned int glyphnum,
                  unsigned int x, unsigned int color) {
-  const unsigned char *glyph = vwfChrData[glyphnum - 32];
+  const unsigned char *glyph = vwfChrData[glyphnum - FIRST_PRINTABLE_CU];
   unsigned int startmask = 0x0F << ((x & 0x07) * 4);
   dst += (x >> 3) << 3;
   color = (color & 0x0F) * 0x11111111;
@@ -128,10 +130,10 @@ const char *vwf8Puts(uint32_t *restrict dst, const char *restrict s,
                      unsigned int x, unsigned int color) {
   while (x < 240) {
     unsigned char c = *s & 0xFF;
-    if (c < 32) return s;
+    if (c < FIRST_PRINTABLE_CU) return s;
     ++s;
     vwf8PutTile(dst, c, x, color);
-    x += vwfChrWidths[c - 32];
+    x += vwfChrWidths[c - FIRST_PRINTABLE_CU];
   }
   return s;
 }
@@ -141,9 +143,9 @@ unsigned int vwf8StrWidth(const char *s) {
 
   while (x < 240) {
     unsigned char c = *s & 0xFF;
-    if (c < 32) return x;
+    if (c < FIRST_PRINTABLE_CU) return x;
     ++s;
-    x += vwfChrWidths[c - 32];
+    x += vwfChrWidths[c - FIRST_PRINTABLE_CU];
   }
   return x;
 }

@@ -11,6 +11,10 @@ from parsepages import lines_to_docs
 from dtefe import dte_compress
 import cp144p  # registers encoding "cp144p" used by GB and GBA suites
 
+# must match src/undte.z80
+DTE_MIN_CODEUNIT = 128
+FIRST_PRINTABLE_CU = 24
+
 # Converting lines to documents #####################################
 
 # Encoding for RGBDS assembler ######################################
@@ -59,7 +63,9 @@ section "helppages",ROMX
     dtepages = list(allpages)
     dtepages.extend(helptitledata)
     oldsize = sum(len(x) for x in dtepages)
-    dtepages, replacements, pairfreqs = dte_compress(dtepages, mincodeunit=136)
+    print(dtepages[0:10], file=sys.stderr)
+    result = dte_compress(dtepages, mincodeunit=DTE_MIN_CODEUNIT, compctrl=FIRST_PRINTABLE_CU)
+    dtepages, replacements, pairfreqs = result
     newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
     print("compressed help from %d bytes to %d bytes"
           % (oldsize, newsize), file=sys.stderr)

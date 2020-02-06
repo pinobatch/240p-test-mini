@@ -607,8 +607,8 @@ megaton_labels:
   db  84,136,"on",10
   db   8,112,"Press A when reticles align",10
   db  20,120,"Direction",10
-  db  83,120,$85,$84,10   ; Left/Right
-  db 115,120,$86,$87,10   ; Up/Down
+  db  83,120,GL_LEFT,GL_RIGHT,10
+  db 115,120,GL_UP,GL_DOWN,10
   db  20,128,"Randomize",10
   db  20,136,"Audio",0
 

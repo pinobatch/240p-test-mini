@@ -41,8 +41,8 @@ static const char megaton_labels[] =
   "\x84""\x90""on\n"
   "\x38""\x78""Press A when reticles align\n"
   "\x44""\x80""Direction\n"
-  "\x83""\x80""\x85\x84\n"  // Left/Right
-  "\xA3""\x80""\x86\x87\n"  // Up/Down
+  "\x83""\x80""\x1D\x1C\n"  // Left/Right
+  "\xA3""\x80""\x1E\x1F\n"  // Up/Down
   "\x44""\x88""Randomize\n"
   "\x44""\x90""Audio";
 
@@ -187,7 +187,7 @@ void activity_megaton() {
     megaton_draw_boolean(17, randomize);
     megaton_draw_boolean(18, with_audio);
 
-    // TODO: beep
+    // beep
     REG_SOUND1CNT_H = (x == 128 && with_audio) ? 0xA080 : 0x0000;
     REG_SOUND1CNT_X = (2048 - 131) | 0x8000;
   } while (!(new_keys & KEY_B) && (progress < NUM_TRIALS));

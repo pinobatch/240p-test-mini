@@ -5,16 +5,28 @@ license: zlib
 """
 import sys, os, subprocess
 
-def dte_compress(lines, compctrl=False, mincodeunit=128):
+def dte_compress(lines, compctrl=32, mincodeunit=128):
+    """Compress a set of byte strings with DTE.
+
+lines -- a list of byte strings to compress, where no code unit
+    is greater than mincodeunit
+compctrl -- if an integer, exclude control characters less than this;
+    if False, exclude control characters less than '\x20';
+    otherwise, exclude only '\x00'
+from compression; if True, compress them as any other
+
+"""
     dte_path = os.path.join(os.path.dirname(__file__), "dte")
     delimiter = b'\0'
+    if not isinstance(compctrl, int):
+        compctrl = 1 if compctrl else 32
     if len(lines) > 1:
-        unusedvalues = set(range(1 if compctrl else 32))
+        unusedvalues = set(range(compctrl))
         for line in lines:
             unusedvalues.difference_update(line)
         delimiter = min(unusedvalues)
         delimiter = bytes([delimiter])
-    excluderange = "0x00-0x00" if compctrl else "0x00-0x1F"
+    excluderange = "0x00-0x%02x" % (compctrl - 1,)
     digramrange = "0x%02x-0xFF" % mincodeunit
     compress_cmd_line = [
         dte_path, "-c", "-e", excluderange, "-r", digramrange

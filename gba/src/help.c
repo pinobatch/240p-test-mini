@@ -238,7 +238,7 @@ static void help_draw_page(unsigned int doc_num, unsigned int left, unsigned int
   dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
 
   if (help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num] > 1) {
-    posprintf(help_line_buffer, "\x85 %d/%d \x84",
+    posprintf(help_line_buffer, "\x1D %d/%d \x1C",
               help_wanted_page - help_cumul_pages[doc_num] + 1, 
               help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num]);
     vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
@@ -246,7 +246,7 @@ static void help_draw_page(unsigned int doc_num, unsigned int left, unsigned int
   }
   if (keymask & KEY_UP) {
     vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
-             "\x86\x87""A: Select", 40, FG_FGCOLOR);
+             "\x1E\x1F""A: Select", 40, FG_FGCOLOR);
   }
   if (keymask & KEY_B) {
     vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),

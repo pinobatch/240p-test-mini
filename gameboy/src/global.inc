@@ -130,3 +130,9 @@ dwxy: macro
   endm
 
   ENDC
+
+; Glyphs
+GL_RIGHT EQU $1C
+GL_LEFT EQU $1D
+GL_UP EQU $1E
+GL_DOWN EQU $1F

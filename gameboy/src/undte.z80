@@ -21,8 +21,8 @@
 include "src/global.inc"
 
 DTE_STACK_SIZE equ 8
-DTE_MIN_CODEUNIT equ 136
-MIN_PRINTABLE equ 32
+DTE_MIN_CODEUNIT equ 128
+FIRST_PRINTABLE_CU equ 24
 
 section "dtestack",WRAM0,align[3]
 dtestack: ds DTE_STACK_SIZE
@@ -31,7 +31,7 @@ section "undte",ROM0
 
 ;;
 ; Decompresses digram tree encoded (DTE) text from HL to DE.
-; Stops at the first code unit less than MIN_PRINTABLE.
+; Stops at the first code unit less than FIRST_PRINTABLE_CU.
 ; @param HL source address
 ; @param DE destination address
 ; @return HL after a low code unit in src;
@@ -57,7 +57,7 @@ undte_line::
   jr nc,.code_is_pair
   ld [de],a
   ; If not a control, advance to the next code
-  cp MIN_PRINTABLE
+  cp FIRST_PRINTABLE_CU
   ret c
   inc de
   jr .charloop

@@ -39,10 +39,6 @@ MENU_INDENT_WIDTH EQU 6
 
 ; Character constants
 LF EQU 10
-GL_RIGHT EQU $84
-GL_LEFT EQU $85
-GL_UP EQU $86
-GL_DOWN EQU $87
 
 section "help_line_buffer", WRAM0, align[4]
 help_line_buffer:: ds 32
@@ -132,7 +128,7 @@ helpobjpalette_gbc:
   drgb $FFFFFF
 helpobjpalette_gbc_end:
 
-updowna_msg:  db $86,$87,"A: Go",0
+updowna_msg:  db GL_UP, GL_DOWN, "A: Go",0
 b_exit_msg:   db 82, "B: Exit",0
 gb_msg:       db 96, "GB",0
 sgb_msg:      db 90, "SGB",0

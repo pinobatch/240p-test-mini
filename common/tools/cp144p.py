@@ -66,7 +66,7 @@ def register():
 ### Translate the decoding
 
 decoding_table = list(range(128))
-decoding_table.extend(extra_codepoints)
+decoding_table[24:32] = extra_codepoints
 decoding_table.extend([0xFFFE] * (256 - len(decoding_table)))
 decoding_table = ''.join(chr(x) for x in decoding_table)
 encoding_table=codecs.charmap_build(decoding_table)
