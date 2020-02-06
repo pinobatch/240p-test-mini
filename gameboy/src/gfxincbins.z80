@@ -41,7 +41,7 @@ sgbborder::
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "convergence_gfx0",ROM0
+section "convergence_gfx1",ROMX
 convergence_chr::
   incbin "obj/gb/convergence.chrgb.pb16"
 
@@ -50,6 +50,8 @@ grayramp_sgb_chr::
   incbin "obj/gb/grayramp-sgb.chrgb", 0, 36
 grayramp_chr::
   incbin "obj/gb/grayramp.chrgb"
+grayramp_bottomhalfmap::
+  db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
 grayramp_chr_gbc::
   db %01111111  ; tile 1
   db %00000111
@@ -65,10 +67,6 @@ grayramp_chr_gbc::
   db %11111111
   db %11111111  ; tile 5: full
   db %11111111
-
-section "grayramp_gfx0",ROM0, align[2]
-grayramp_bottomhalfmap::
-  db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
 
 section "sharpness_gfx0",ROM0
 

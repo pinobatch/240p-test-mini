@@ -98,6 +98,7 @@ page_one_handlers:
   
   dw activity_cps_grid
   dw activity_linearity
+  dw activity_convergence
   dw activity_gray_ramp
   dw activity_solid_screen
   dw activity_motion_blur  ; Replaces "100 IRE"

@@ -3,6 +3,7 @@
 Color tests
 Grid
 Linearity
+Convergence
 Gray ramp
 Solid screen
 Motion blur
@@ -84,6 +85,9 @@ size ratio setting of
 your display or scaler
 or to measure distortion
 on a CRT.
+
+A: Hide or show grid
+Select: Invert grays
 ----
 On handhelds and
 Game Boy Player, the
@@ -93,9 +97,6 @@ directions. Super Game
 Boy stretches them
 horizontally by 14%
 on NTSC or 38% on PAL.
-
-A: Hide or show grid
-Select: Invert grays
 
 == Convergence ==
 
@@ -228,11 +229,11 @@ in the chassis. This can
 cast shadows on the
 screen's edges depending
 on the lighting angle.
-----
+
 ↑↓←→: Choose an edge
 Hold A + ↑↓←→:
   Move that edge
-
+----
 Move each edge inward
 until you see the border,
 then go back one pixel.
@@ -432,9 +433,7 @@ each one pixel wide.
 ↑↓←→: Move the
   pattern by one pixel
 Hold: Move every frame
-A: Switch among
-  horizontal, vertical,
-  and checkerboard
+A: Rotate stripes
 Select: Show or hide
   frame counter
 ----
@@ -518,10 +517,10 @@ or buzz (127 steps).
 == Audio sync test ==
 
 This test flashes the
-whole screen for two
-frames along with a
-1 kHz test tone when
-the dot hits the floor.
+screen for two frames
+along with a 1 kHz
+tone when the dot
+hits the floor.
 
 You can verify the sync
 between audio and video
@@ -534,10 +533,10 @@ A: Start or stop the test
 
 This served as a
 placeholder in early
-versions of the Suite
-for tests that had not
-yet been ported to
-Game Boy. It's still cute.
+versions of the Suite for
+tests that had yet to
+be ported to Game Boy.
+It's still cute.
 
 ←→: Move
 ----
@@ -665,9 +664,7 @@ Concept by Konsolkongen
 ↑↓←→: Move the
   pattern by one pixel
 Hold: Move every frame
-A: Switch among
-  horizontal, vertical,
-  and checkerboard
+A: Rotate stripes
 Select: Show or hide
   frame counter
 
@@ -706,8 +703,8 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.20 (2020-01-30)
-Chroma crosstalk
+Ver. 0.21wip (2020-02-06)
+Road to Convergence
 
 © 2011-2016
   Artemio Urbina

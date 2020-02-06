@@ -1286,3 +1286,12 @@ stpcpy::
   .done:
   ld [hl],a
   ret
+
+; Convergence ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+activity_convergence::
+
+  ; Not yet implemented
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+  ld b,helpsect_convergence
+  jp helpscreen
