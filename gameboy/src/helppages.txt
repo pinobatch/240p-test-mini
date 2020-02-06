@@ -32,31 +32,27 @@ has two goals:
    video processors for
    ability to handle retro
    console video signals.
-2. Turn a Super NES or
-   GameCube into a test
-   signal generator to help
-   in calibrating the black,
-   white, and color levels
-   of a display.
+2. Provide a test signal
+   generator to help
+   in calibrating the
+   levels of a display.
 ----
-The Game Boy outputs a
-progressive video signal
-with 144 lines of picture.
-The original Game Boy and
-Game Boy Pocket have
-a passive matrix STN
-LCD panel that displays
-four shades of gray.
+The Game Boy outputs
+144 lines of progressive
+video. The original
+Game Boy and Game Boy
+Pocket have a passive
+matrix STN LCD panel
+with four shades of gray.
 The Super Game Boy
 accessory maps these
-gray shades to colors.
+shades to colors.
 The Game Boy Color has
 a TFT panel with 32
 levels per RGB channel.
 ----
 Press Start in any test
-pattern to show help for
-that pattern.
+to show relevant help.
 
 The test suite is also
 available for several
@@ -68,11 +64,10 @@ http://junkerhq.net/240p
 
 This grid uses the
 screen's full resolution.
-Use it to verify that
-the entire picture is
-visible, including the
-shaded border, with
-no distortion.
+Use it to verify that the
+entire picture is visible,
+including the border,
+with no distortion.
 
 Select: Invert grays
 
@@ -85,10 +80,10 @@ the Game Boy screen.
 
 Use it to verify the
 horizontal to vertical
-size ratio setting of your
-display or scaler or to
-verify the lack of barrel
-distortion of a CRT.
+size ratio setting of
+your display or scaler
+or to measure distortion
+on a CRT.
 ----
 On handhelds and
 Game Boy Player, the
@@ -107,9 +102,8 @@ Select: Invert grays
 Use this pattern to
 check color balance.
 This gray ramp should
-not have a red, green,
-or blue tint to it. On
-Game Boy or Game Boy
+not have a colored tint.
+On Game Boy or Game Boy
 Pocket, four shades
 should be distinct.
 
@@ -122,9 +116,8 @@ curves per component.
 Some displays and
 scalers have problems
 with sudden changes
-between deep black
-and a white screen.
-Other displays may have
+between deep black and
+white. Others may have
 stuck or damaged pixels.
 
 ←→: Change gray level
@@ -159,11 +152,11 @@ A: Start or stop the test
 ----
 The STN display in the
 original Game Boy and
-Game Boy Pocket has
-a fairly slow response,
-which blurs fast motion.
-Game Boy Color's TFT
-dramatically improves
+Game Boy Pocket has a
+slow response, which
+blurs fast motion.
+Game Boy Color's
+TFT greatly improves
 response time.
 All Game Boy displays
 have an interlace-like
@@ -173,15 +166,12 @@ in alternate frames.
 ----
 STN smearing:
 
-Passive matrix LCDs in
-Game Boy and especially
-Game Boy Pocket have
-artifacts. Because there's
-no transistor to block
+Passive matrix LCDs lack
+a transistor to block
 crosstalk from other
-lines of pixels, the image
-on each line leaks a
-fraction into other lines.
+scanlines. Thus the
+image on each line leaks
+a bit into other lines.
 Dark areas end up with
 vertical stripes above
 and below them.
@@ -192,8 +182,7 @@ Set the sharpness of
 your TV to a value that
 shows clean black and
 gray transitions without
-white ghost lines on
-the side.
+white lines on the side.
 
 Select: Invert grays
 A: Toggle brick wall
@@ -217,12 +206,11 @@ can discover how much
 of the picture edge your
 Game Boy's lens hides.
 
-The LCD is slightly
-recessed in the chassis.
-This can block light from
-reaching the screen's
-edges depending on the
-angle of the light source.
+The LCD is recessed
+in the chassis. This can
+cast shadows on the
+screen's edges depending
+on the lighting angle.
 ----
 ↑↓←→: Choose an edge
 Hold A + ↑↓←→:
@@ -250,8 +238,7 @@ Some deinterlacers show
 drop shadows OK but
 still interpret 240p as
 480i. The striped sprite
-should make attempted
-deinterlacing easy
+should make this easy
 to spot.
 ----
 ↑↓←→: Move sprite
@@ -271,8 +258,7 @@ These shouldn't happen:
 Handhelds' LCD driver
 circuits use a technique
 similar to interlacing
-to improve pixel
-response time.
+to improve response time.
 
 Portrait of Gus by
   darryl.revok
@@ -284,9 +270,7 @@ Hill zone by mikejmoffitt
 This stopwatch helps
 you measure a TV's lag,
 detect dropped frames,
-or just count how long
-your spouse has been
-on the phone.
+time a workout, etc.
 
 A: Start or stop
 Select stopped: Reset
@@ -302,11 +286,10 @@ frame even when the
 numbers above are
 blurry.
 
-The stopwatch assumes
-60 Hz. This means it
-runs slightly slow on a
-handheld (1 part in 219)
-or more noticeably fast
+Because the stopwatch
+assumes 60 Hz, it runs
+a bit slow on a handheld
+(1 part in 219) or faster
 on Super Game Boy
 (1 part in 51).
 ----
@@ -323,11 +306,10 @@ your scaler to AV out.
 ----
 Then photograph both
 screens at once.
-The picture will show the
-difference in processing
-latency between them.
-Some consumer LCD TVs
-exceed five frames.
+The picture will show
+the latency difference
+between them. Some LCD
+TVs exceed five frames.
 
 The ruler helps count
 scanlines of lag. Use a
@@ -335,11 +317,10 @@ short exposure on your
 camera and divide lines by
 15.7 to get milliseconds.
 ----
-Tests on Super Game Boy
-should be repeated
-several times because
-SGB drops a lot of
-frames. It runs the GB
+Tests on SGB should be
+repeated several times
+because SGB drops a lot
+of frames. It runs the GB
 at 61.18 Hz but itself
 outputs video at 60.10
 Hz, dropping one frame
@@ -360,9 +341,8 @@ Press A when the moving
 and still reticles align
 to display the offset in
 frames from the actual
-intersection and whether
-it was early or late. After
-ten non-early presses,
+intersection. After ten
+non-early presses,
 their average is shown.
 ----
 ↑↓: Choose a setting
@@ -370,14 +350,12 @@ their average is shown.
 
 Settings include the
 direction of the moving
-reticle (horizontal,
-vertical, or both),
-whether to randomize
-timing of movement, and
-whether to beep when A
-is pressed or beep and
-flash when the reticles
-align.
+reticle, whether to
+randomize timing of
+movement, and whether to
+beep when A is pressed
+or beep and flash when
+the reticles align.
 
 == Hill zone scroll test ==
 
@@ -447,15 +425,12 @@ While you hold Up, the
 lines should flicker.
 If holding Up makes a
 still image, your scaler
-is treating the signal
-as interlaced and either
-discarding every other
-frame or weaving them
-incorrectly.
-If holding Up makes
-a solid gray image,
-you're probably seeing
-slow LCD response time.
+is treating the signal as
+interlaced and dropping
+or weaving frames.
+A solid gray image
+probably means slow
+LCD response.
 
 == Backlight zone test ==
 
@@ -508,8 +483,8 @@ The Game Boy has stereo
 audio output. Each voice
 (pulse 1, pulse 2,
 wavetable, and noise)
-can be panned hard left,
-center, or hard right.
+can be panned left,
+center, or right.
 ----
 Most options in the menu
 use the wavetable with
@@ -540,11 +515,11 @@ A: Start or stop the test
 
 == Lame boy ==
 
-This test served as a
+This served as a
 placeholder in early
-versions of 144p Test
-Suite for tests that had
-not yet been ported to
+versions of the Suite
+for tests that had not
+yet been ported to
 Game Boy. It's still cute.
 
 ←→: Move
@@ -552,10 +527,9 @@ Game Boy. It's still cute.
 Counter counts frames
 in hex and decimal.
 A, B: Initial register
-  values, used to
-  determine machine model
-S: 00 for handheld or
-  01 for Super Game Boy
+  values to determine
+  machine model
+C: Capability flags
 
 == Color tests: Menu ==
 
@@ -588,7 +562,7 @@ visible.
 
 A: Toggle levels between
   NTSC and NTSC-J
-Select: Open PLUGE
+Select: Go to PLUGE
   Contrast
 ----
 The 32 shades on
@@ -617,15 +591,14 @@ contrast and brightness.
 A: Switch palette among
   color, dark, darker,
   light, or lighter
-Select: Return to PLUGE
+Select: Go to PLUGE
 
 == Gradient color bars ==
 
 This pattern lets you
-calibrate red, green,
-and blue colors on
+calibrate colors on
 your TV. Increase the
-"contrast" until C and
+contrast until C and
 E in the white ramp
 look the same, then
 decrease it slowly until
@@ -740,7 +713,6 @@ Special thanks:
 Thank you to my patrons:
   Johnathan Roatch
   Joe Parsell
-  Bassil S.
 ----
 You can help:
 - Run tests on authentic
