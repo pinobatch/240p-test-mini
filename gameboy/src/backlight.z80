@@ -20,9 +20,9 @@ include "src/gb.inc"
 include "src/global.inc"
 
   rsset hTestState
+curpalette rb 1
 xpos rb 1
 ypos rb 1
-curpalette rb 1
 held_keys rb 1
 is_hidden rb 1
 cursize rb 1
@@ -72,36 +72,31 @@ activity_backlight_zone::
 
   ; Process new presses
   ldh a,[new_keys]
-  ld c,a
-  bit PADB_B, c  ; B: quit
+  ld b,a
+  bit PADB_B, b  ; B: quit
   ret nz
-  bit PADB_SELECT, c
-  jr z,.not_select
-    ldh a,[curpalette]
-    cpl
-    ldh [curpalette],a
-  .not_select:
+  call select_inverts_palette
 
   ; Add new presses to things that can act on release
   ldh a,[held_keys]
-  or c
+  or b
   ldh [held_keys],a
 
   ldh a,[cur_keys]
-  ld b, a
+  ld c, a
   rra
   jr nc,.not_A
 
     ; A+Up/Down: Change size
-    ld a, c
+    ld a, b
     and PADF_UP|PADF_DOWN
     jr z,.size_unchanged
       ldh a,[cursize]
-      bit PADB_UP,c
+      bit PADB_UP,b
       jr z,.not_size_up
         inc a
       .not_size_up:
-      bit PADB_DOWN,c
+      bit PADB_DOWN,b
       jr z,.not_size_down
         dec a
       .not_size_down:
@@ -116,16 +111,16 @@ activity_backlight_zone::
     jr .done_A
 
   .not_A:
-    ; cur_keys in B
+    ; cur_keys in C
     ldh a,[xpos]
-    bit PADB_LEFT,b
+    bit PADB_LEFT,c
     jr z,.not_left
       dec a
       cp 8
       jr c,.not_left
       ldh [xpos],a
     .not_left:
-    bit PADB_RIGHT,b
+    bit PADB_RIGHT,c
     jr z,.not_right
       inc a
       cp 168
@@ -134,14 +129,14 @@ activity_backlight_zone::
     .not_right:
 
     ldh a,[ypos]
-    bit PADB_UP,b
+    bit PADB_UP,c
     jr z,.not_up
       dec a
       cp 16
       jr c,.not_up
       ldh [ypos],a
     .not_up:
-    bit PADB_DOWN,b
+    bit PADB_DOWN,c
     jr z,.not_down
       inc a
       cp 160

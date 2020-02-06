@@ -498,13 +498,7 @@ activity_linearity::
   ; Process input
   ldh a,[new_keys]
   ld b,a
-
-  bit PADB_SELECT,b
-  jr z,.not_select
-    ldh a,[curpalette]
-    cpl
-    ldh [curpalette],a
-  .not_select:
+  call select_inverts_palette
 
   bit PADB_A,b
   jr z,.not_A
@@ -640,13 +634,7 @@ activity_sharpness::
   ; Process input
   ldh a,[new_keys]
   ld b,a
-
-  bit PADB_SELECT,b
-  jr z,.not_select
-    ldh a,[curpalette]
-    cpl
-    ldh [curpalette],a
-  .not_select:
+  call select_inverts_palette
 
   bit PADB_A,b
   jr z,.not_A
@@ -659,6 +647,19 @@ activity_sharpness::
   bit PADB_B,b
   jr z,.loop
   ret
+
+;;
+; If Select, invert curpalette
+; @param B a bitfield made of PADF_ constants
+; @return A: new curpalette
+select_inverts_palette::
+  ldh a,[curpalette]
+  bit PADB_SELECT,b
+  ret z
+  cpl
+  ldh [curpalette],a
+  ret
+  
 
 ; Solid screen ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1037,13 +1038,7 @@ activity_cps_grid::
   ; Process input
   ldh a,[new_keys]
   ld b,a
-
-  bit PADB_SELECT,b
-  jr z,.not_select
-    ldh a,[curpalette]
-    cpl
-    ldh [curpalette],a
-  .not_select:
+  call select_inverts_palette
 
   bit PADB_B,b
   jr z,.loop
@@ -1399,17 +1394,11 @@ activity_convergence::
     ldh [curtileid], a
   .not_up_down:
 
-  ; Select: invert grays
-  bit PADB_SELECT, b
-  jr z, .no_invert
-    ld a, [curpalette]
-    cpl
-    ld [curpalette], a
-  .no_invert:
+  call select_inverts_palette
 
   ; A: switch between patterns
   ldh a, [hw_capability]
-  or a  ; Dummy out half-finished SGB and GBC tests
+  or a
   jr z, .no_switch
   bit PADB_A, b
   jr z, .no_switch

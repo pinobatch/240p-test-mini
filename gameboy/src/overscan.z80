@@ -32,12 +32,12 @@ include "src/global.inc"
 ; rLYC=144-bottom_border
 
   rsset hTestState
+cur_palette   rb 1  ; must be first for compatibility with stills
 right_border  rb 1
 left_border   rb 1
 top_border    rb 1
 bottom_border rb 1
 cur_side      rb 1
-cur_palette   rb 1
 
 section "overscan",ROM0
 activity_overscan::
@@ -106,14 +106,8 @@ activity_overscan::
   bit PADB_B,a
   ret nz
   ld d,a
-
-  ; Select: Invert
-  bit PADB_SELECT,a
-  jr z,.not_invert
-    ldh a,[cur_palette]
-    cpl
-    ldh [cur_palette],a
-  .not_invert:
+  ld b,a
+  call select_inverts_palette
 
   ldh a,[cur_keys]
   bit PADB_A,a

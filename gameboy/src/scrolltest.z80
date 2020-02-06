@@ -190,12 +190,7 @@ activity_grid_scroll::
   
   bit PADB_B,b
   ret nz
-  bit PADB_SELECT,b
-  jr z,.not_select
-    ldh a,[curpalette]
-    cpl
-    ldh [curpalette],a
-  .not_select:
+  call select_inverts_palette
 
   ; A+Direction: Change direction
   ldh a,[cur_keys]
