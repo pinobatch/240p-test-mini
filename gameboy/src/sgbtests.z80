@@ -34,19 +34,19 @@ color_bleed_palette::
   drgb $000000
   drgb $FF0000
   drgb $000000
-  drgb $000000
+  drgb $FF0000
   drgb $000000
   drgb $00FF00
   drgb $000000
-  drgb $000000
+  drgb $00FF00
   drgb $000000
   drgb $0000FF
   drgb $000000
-  drgb $000000
+  drgb $0000FF
   drgb $000000
   drgb $FFFFFF
   drgb $000000
-  drgb $000000
+  drgb $FFFFFF
 color_bleed_palette_end::
 
   ; 8-11: 12-step gray ramp

@@ -1290,8 +1290,252 @@ stpcpy::
 ; Convergence ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 activity_convergence::
+  xor a
+  ldh [curtileid], a   ; grid style (dot, cross, line)
+  dec a
+  ldh [curpalette], a  ; grid: invert grays
+  ldh [curscry], a     ; bit 4: color transitions show line or not
+  ; 9800: grid; 9C00: color transitions
+  ld a,LCDCF_ON|LCDCF_BGON|LCDCF_BG9800|LCDCF_BG8000
+  ldh [curlcdc], a
 
-  ; Not yet implemented
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
+.restart:
+  call clear_gbc_attr
+  cpl
+  ldh [rLYC], a  ; activity does not use STAT LYC IRQ or window
+  ldh [rWX], a
+
+  ; Load tiles
+  ld hl,CHRRAM0
+  ld de,convergence_chr
+  ld b,sizeof_convergence_chr/16
+  call pb16_unpack_block
+
+  ; Load grid background
+  ld h, $04
+  call clear_scrn0_to_h
+
+  ; TODO: Load CGB background to _SCRN1
+  ldh a, [hw_capability]
+  add a
+  jr c, .load_plane1_gbc
+  jr z, .loaded_plane1
+    ; TODO: Load plane 1 for SGB
+    call convergence_load_sgb_attr
+    jr .loaded_plane1
+  .load_plane1_gbc:
+    ld hl, _SCRN1
+    ld a, 1
+    ldh [rVBK], a
+    dec a
+    ld c, 6
+    .load_ctb_gbcplane1_loop:
+      call convergenceB_p1_onerow
+      call convergenceB_p1_onerow
+      call convergenceB_p1_onerow
+      xor $02
+      dec c
+      jr nz, .load_ctb_gbcplane1_loop
+    xor a
+    ldh [rVBK], a
+  .loaded_plane1:
+
+  ld hl, _SCRN1
+  ld c, 6
+  .load_ctb_loop:
+    xor a
+    call convergenceB_p0_onerow
+    call convergenceB_p0_onerow
+    ld a, 2
+    call convergenceB_p0_onerow
+    dec c
+    jr nz, .load_ctb_loop
+
+.load_new_sgb_palette:
+  ldh a, [curlcdc]
+  and LCDCF_BG9C00
+  jr z, .sgb_palette_is_gray
+    call sgb_set_palette_bleed
+    jr .sgb_palette_loaded
+  .sgb_palette_is_gray:
+    call sgb_set_palette_gray
+  .sgb_palette_loaded:
+
+  ldh a, [curlcdc]
+  ldh [vblank_lcdc_value],a
+  ldh [rLCDC],a
+
+.loop:
   ld b,helpsect_convergence
-  jp helpscreen
+  call read_pad_help_check
+  jr nz,.restart
+
+  ldh a, [new_keys]
+  ld b, a
+  bit PADB_B, b
+  ret nz
+
+  ; up/down: toggle line style
+  and PADF_DOWN|PADF_UP
+  jr z, .not_up_down
+    ld a, [curlcdc]
+    and LCDCF_BG9C00
+    jr z, .up_down_on_grid
+    ldh a, [curscry]
+    xor $10
+    ldh [curscry], a
+    jr .not_up_down
+  .up_down_on_grid:
+    ld a, [curtileid]
+    inc a
+    bit PADB_UP, b
+    jr z, .only_one_inc
+      inc a
+    .only_one_inc:
+    cp 3
+    jr c, .updown_nowrap
+      sub 3
+    .updown_nowrap:
+    ldh [curtileid], a
+  .not_up_down:
+
+  ; Select: invert grays
+  bit PADB_SELECT, b
+  jr z, .no_invert
+    ld a, [curpalette]
+    cpl
+    ld [curpalette], a
+  .no_invert:
+
+  ; A: switch between patterns
+  ldh a, [hw_capability]
+  or a  ; Dummy out half-finished SGB and GBC tests
+  jr z, .no_switch
+  bit PADB_A, b
+  jr z, .no_switch
+    ldh a, [curlcdc]
+    xor LCDCF_BG9C00
+    ldh [curlcdc], a
+    ldh [vblank_lcdc_value], a
+    ldh a, [hw_capability]
+    rra
+    jr c, .load_new_sgb_palette
+  .no_switch:
+
+  rst wait_vblank_irq
+
+  ; Set color palette
+  ldh a, [curlcdc]
+  and LCDCF_BG9C00
+  jr z, .set_grid_palette
+    ldh a, [curscry]
+    ldh [rBGP], a  ; Show/hide lines on Super Game Boy
+    and $10
+    ld a, $80
+    jr nz, .gbc_have_bcps
+      ld a, $82
+    .gbc_have_bcps:
+    ld hl, convergence_gbc_palette
+    ld bc, $0400 + low(rBCPS)
+    ld [$FF00+c], a
+    inc c
+    .gbcpalloop:
+      xor a
+      ld [$FF00+c], a
+      ld [$FF00+c], a
+      ld [$FF00+c], a
+      ld [$FF00+c], a
+      ld a, [hl+]
+      ld [$FF00+c], a
+      ld a, [hl-]
+      ld [$FF00+c], a
+      ld a, [hl+]
+      ld [$FF00+c], a
+      ld a, [hl+]
+      ld [$FF00+c], a
+      dec b
+      jr nz, .gbcpalloop
+    jr .palette_done
+  .set_grid_palette:
+    ldh a,[curpalette]
+    ld c, a
+    ldh a,[curtileid]
+    ld b, a
+    inc b
+    ld a, $FF
+    .shiftloop:
+      add a
+      add a
+      dec b
+      jr nz, .shiftloop
+    xor c
+    call set_bgp
+  .palette_done:
+  jp .loop
+
+;;
+; Write 01110001110001110001
+convergenceB_p1_onerow:
+  ld d, $00
+  jr convergenceB_draw_onerow
+
+;;
+; Write 10010010010010010010
+convergenceB_p0_onerow:
+  ld d, $01
+convergenceB_draw_onerow:
+  ld e, 8
+  .loop:
+    xor d
+    ld [hl+], a
+    xor $01
+    ld [hl+], a
+    ld [hl+], a
+    dec e
+    jr nz, .loop
+  ld de, 8
+  add hl, de
+  ret
+
+; The data starts at lineImgBuf+6
+convergence_load_sgb_attr:
+  ld de, lineImgBuf
+  ld hl, convergence_sgb_attrs
+  ld bc, 11
+  call memcpy
+  ld hl, lineImgBuf+6
+  ld c, 2*5
+  call memcpy
+
+  ; Make odd rows
+  ld c, 3*5
+  ld l, low(lineImgBuf+6)
+  .oddrowloop:
+    ld a, [hl+]
+    xor %10101010
+    ld [de], a
+    inc e
+    dec c
+    jr nz, .oddrowloop
+
+  ; Make other 2 rows
+  ld l, low(lineImgBuf+6)
+  ld c, 12*5
+  call memcpy
+
+  ld hl, lineImgBuf
+  jp sgb_send
+
+convergence_sgb_attrs:
+  db $07*8+6  ; ATTR_CHR
+  db 0  ; starting x
+  db 0  ; starting y
+  dw 360  ; 2-byte count
+  db 0  ; row major
+  db %00010101,%00000001,%01010000,%00010101,%00000001
+
+convergence_gbc_palette:
+  drgb $FF0000
+  drgb $00FF00
+  drgb $0000FF
+  drgb $FFFFFF

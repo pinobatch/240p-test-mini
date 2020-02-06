@@ -857,6 +857,8 @@ load_color_bleed::
   ldh [rBGP], a
   ld hl, sgb_bleed_rects
   call sgb_send
+  ; fall through
+sgb_set_palette_bleed::
   ld bc, $0405
   ld de, $0607
   jp sgb_set_palettes_bcde

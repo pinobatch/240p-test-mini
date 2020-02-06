@@ -704,7 +704,7 @@ crosstalk artifacts.
 == 144p Test Suite ==
 
 Ver. 0.21wip (2020-02-06)
-Road to Convergence
+Convergence
 
 © 2011-2016
   Artemio Urbina
