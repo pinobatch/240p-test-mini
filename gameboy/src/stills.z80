@@ -1270,15 +1270,13 @@ update_bcd_frame_counter:
 ; @param HL destination pointer
 ; @param DE source string, NUL-terminated
 ; @return DE and HL both point to the trailing NUL
+stpcpyloop:
+  inc de
+  ld [hl+],a
 stpcpy::
-  .loop:
-    ld a,[de]
-    and a
-    jr z,.done
-    ld [hl+],a
-    inc de
-    jr .loop
-  .done:
+  ld a,[de]
+  and a
+  jr nz,stpcpyloop
   ld [hl],a
   ret
 
