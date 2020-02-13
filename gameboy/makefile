@@ -41,6 +41,12 @@ CC      := gcc
 # Flags for native tools written in C
 CFLAGS := -std=gnu99 -Wall -Wextra -DNDEBUG -Os
 
+# Disable -static on OS X
+UNAME := $(shell uname)
+ifneq ($(UNAME),Darwin)
+CFLAGS := $(CFLAGS) -static 
+endif
+
 # Things that depend on Windows vs. not-Windows
 ifdef COMSPEC
   ifndef GBEMU
@@ -187,4 +193,4 @@ obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
 	$(PY) tools/paginate_help.py $< > $@
 
 ../common/tools/dte$(DOTEXE): ../common/tools/dte.c
-	$(CC) -static $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
