@@ -403,7 +403,9 @@ mdfourier_labels:
 
   ; Overprint two messages to allocate space for both in CHR RAM.
   rf_label  80,160, 3, 0
-  .byte "OK", 0
+  .byte "OK", 0  ; tiles $20-$21
+  rf_label  80,160, 3, 0
+  .byte "Complete. If testing again:", 0  ; tiles $22-$2F
   rf_label  80,160, 3, 0
   .byte "Trash. Results may be wrong.",0
   rf_label  80,168, 3, 0

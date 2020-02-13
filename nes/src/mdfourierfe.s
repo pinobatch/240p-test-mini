@@ -5,6 +5,7 @@
 
 skip_ppu         = test_state+0
 test_section     = test_state+1
+test_good_phase  = test_state+6  ; from the previously run test
 
 NUM_PPU_LOADERS = 6
 crosstalk8k_chr = $01B0
@@ -19,41 +20,11 @@ mdfourier_good_phase: .res 1
 restart:
   jsr rf_load_tiles
   jsr rf_load_yrgb_palette
-  lda #RF_mdfourier
-  jsr rf_load_layout
-
-  ; Replace bad phase message with good phase if good
+test_interrupted:
   lda mdfourier_good_phase
-  beq dont_write_good_phase
-    ; Erase "Trash. Press Reset" message
-    ldy #$22
-    lda #$80
-    sty PPUADDR
-    sta PPUADDR
-    asl a
-    ldx #64
-    :
-      sta PPUDATA
-      dex
-      bne :-
-
-    ; Write "OK"
-    lda #$8A
-    sty PPUADDR
-    sta PPUADDR
-    ldx #$20
-    stx PPUDATA
-    inx
-    stx PPUDATA
-
-    ; Change message color to green (attribute 2)
-    iny
-    lda #$EA
-    sty PPUADDR
-    sta PPUADDR
-    sta PPUDATA
-  dont_write_good_phase:
-
+  sta test_good_phase
+test_finished:
+  jsr write_phase_ok
   jsr mdfourier_init_apu
   lda #0
   sta test_section
@@ -66,46 +37,109 @@ restart:
     bit cur_keys
     bvs another_run_wait_b
 
-wait_for_start:
-  lda #helpsect_mdfourier
-  jsr read_pads_helpcheck
-  bcs restart
+  wait_for_start:
+    lda #helpsect_mdfourier
+    jsr read_pads_helpcheck
+    bcs restart
 
-  lda new_keys
-  and #KEY_LEFT
-  beq not_left
-    dec skip_ppu
-    bpl :+
-      lda #NUM_PPU_LOADERS-1
-      sta skip_ppu
-    :
-    jsr run_ppu_loader
-    jsr mdfourier_present
-  not_left:
-  
-  lda new_keys
-  and #KEY_RIGHT
-  beq not_right
-    inc skip_ppu
-    lda skip_ppu
-    cmp #NUM_PPU_LOADERS
-    bcc :+
-      lda #0
-      sta skip_ppu
-    :
-    jsr run_ppu_loader
-    jsr mdfourier_present
-  not_right:
+    lda new_keys
+    and #KEY_LEFT
+    beq not_left
+      dec skip_ppu
+      bpl :+
+        lda #NUM_PPU_LOADERS-1
+        sta skip_ppu
+      :
+      jsr run_ppu_loader
+      jsr mdfourier_present
+    not_left:
+    lda new_keys
+    and #KEY_RIGHT
+    beq not_right
+      inc skip_ppu
+      lda skip_ppu
+      cmp #NUM_PPU_LOADERS
+      bcc :+
+        lda #0
+        sta skip_ppu
+      :
+      jsr run_ppu_loader
+      jsr mdfourier_present
+    not_right:
 
-  lda new_keys
-  and #KEY_A|KEY_B
-  beq wait_for_start
-  bpl done
+    bit new_keys
+    bvs done
+    bpl wait_for_start
+
   jsr mdfourier_run
 
-  ; Need to redraw the screen in case triangle test began
-  jmp restart
+  ; If B was pressed to interrupt, transition from "OK" to based
+  ; on the phase. Otherwise, transition from "OK" to "Complete".
+  bit new_keys
+  bvc test_finished
+  bvs test_interrupted
 done:
+  rts
+.endproc
+
+.proc write_phase_ok
+  lda #0
+  sta PPUMASK
+  lda #RF_mdfourier
+  jsr rf_load_layout
+
+  ; Replace bad phase message with good phase if good
+  ; MGP nonzero and TGP nonzero: OK
+  ; TGP nonzero, MGP zero: Complete
+  ; TGP zero: Trash
+;  sta $4444
+  lda test_good_phase
+  beq dont_write_good_phase
+    ; Erase "Trash. Press Reset" message
+    ldy #$22
+    lda #$80
+    sty PPUADDR
+    sta PPUADDR
+    asl a
+    ldx #32
+    :
+      sta PPUDATA
+      dex
+      bne :-
+
+    ; Write "OK" or "Complete"
+    lda #$8A
+    sty PPUADDR
+    sta PPUADDR
+    lda mdfourier_good_phase
+    bne write_phase_ok
+    ldx #$22
+    :
+      stx PPUDATA
+      inx
+      cpx #$30
+      bcc :-
+    rts
+  write_phase_ok:
+    ; Write "OK"
+    ldx #$20
+    stx PPUDATA
+    inx
+    stx PPUDATA
+    ldx #48
+    lda #0
+    :
+      sta PPUDATA
+      dex
+      bne :-
+
+    ; Change message color to green (attribute 2)
+    iny
+    lda #$EA
+    sty PPUADDR
+    sta PPUADDR
+    sta PPUDATA
+  dont_write_good_phase:
   rts
 .endproc
 
