@@ -35,6 +35,14 @@ cimgdir = ../common/tilesets
 CC := gcc
 CFLAGS := -std=gnu99 -Wall -Wextra -DNDEBUG -Os
 
+# Disable -static on macOS, whose system libraries are not provided
+# in static form
+# https://stackoverflow.com/a/3801032
+UNAME := $(shell uname)
+ifneq ($(UNAME),Darwin)
+CFLAGS := $(CFLAGS) -static 
+endif
+
 # Windows needs .exe suffixed to the names of executables; UNIX does
 # not.  COMSPEC will be set to the name of the shell on Windows and
 # not defined on UNIX.  Also the Windows Python installer puts
@@ -186,4 +194,4 @@ $(objdir)/%.hlp.s: $(srcdir)/%.txt tools/paginate_help.py \
 	$(PY) tools/paginate_help.py $< > $@
 
 ../common/tools/dte$(DOTEXE): ../common/tools/dte.c
-	$(CC) -static $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^

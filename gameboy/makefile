@@ -41,7 +41,9 @@ CC      := gcc
 # Flags for native tools written in C
 CFLAGS := -std=gnu99 -Wall -Wextra -DNDEBUG -Os
 
-# Disable -static on OS X
+# Disable -static on macOS, whose system libraries are not provided
+# in static form
+# https://stackoverflow.com/a/3801032
 UNAME := $(shell uname)
 ifneq ($(UNAME),Darwin)
 CFLAGS := $(CFLAGS) -static 
