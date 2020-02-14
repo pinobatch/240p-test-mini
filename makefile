@@ -8,7 +8,8 @@ MAKE:="$(MAKE)"
 endif
 
 alltargets:=\
-  nes/240pee.nes nes/240pee-bnrom.nes gameboy/gb240p.gb gba/240pee_mb.gba
+  nes/240pee.nes nes/240pee-bnrom.nes nes/mdfourier.nsf \
+  gameboy/gb240p.gb gba/240pee_mb.gba
 
 .PHONY: all dist zip clean $(alltargets)
 all: $(alltargets)
@@ -21,6 +22,8 @@ zip: $(title)-$(version).zip
 nes/240pee.nes:
 	$(MAKE) -C nes $(notdir $@)
 nes/240pee-bnrom.nes: nes/240pee.nes
+	$(MAKE) -C nes $(notdir $@)
+nes/mdfourier.nsf: nes/240pee.nes
 	$(MAKE) -C nes $(notdir $@)
 gameboy/gb240p.gb:
 	$(MAKE) -C gameboy $(notdir $@)
@@ -35,6 +38,7 @@ zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
 	git ls-files | grep -e "^[^.]" > $@
 	echo nes/240pee.nes >> $@
 	echo nes/240pee-bnrom.nes >> $@
+	echo nes/mdfourier.nsf >> $@
 	echo gameboy/gb240p.gb >> $@
 	echo gba/240pee_mb.gba >> $@
 	echo $@ >> $@

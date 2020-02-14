@@ -22,6 +22,7 @@ objlist = vwf7 zappertest overclock paldetect vwf_draw init \
   overscan megaton shadowsprite \
   pads ppuclear unpb53 uniu undte bcd random rectfill muldiv \
   pb53files rectfiles ntscPeriods
+objlistnsf := mdfouriernsf mdfourier ntscPeriods
 
 AS65 = ca65
 LD65 = ld65
@@ -61,11 +62,13 @@ endif
 DEBUGEMU2 := Mesen.exe
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 
-.PHONY: run runalt debug debug2 debugalt dist zip all clean ctools
+.PHONY: run runalt runnsf debug debug2 debugalt debugnsf nsf dist zip all clean ctools
 
 run: $(title).nes
 	$(EMU) $<
 runalt: $(title)-bnrom.nes
+	$(EMU) $<
+runnsf: mdfourier.nsf
 	$(EMU) $<
 debug: $(title).nes
 	$(DEBUGEMU) $<
@@ -73,6 +76,8 @@ debug2: $(title).nes
 	$(DEBUGEMU2) $<
 debugalt: $(title)-bnrom.nes
 	$(DEBUGEMU2) $<
+debugnsf: mdfourier.nsf
+	$(DEBUGEMU) $<
 
 # Rule to create or update the distribution zipfile by adding all
 # files listed in zip.in.  Use changes to the compiled program and
@@ -84,7 +89,7 @@ $(title)-$(version).zip: zip.in all \
 	zip -9 -u $@ -@ < $<
 	-advzip -z3 $@
 
-all: $(title)-bnrom.nes $(title).nes
+all: $(title)-bnrom.nes $(title).nes mdfourier.nsf
 ctools: ../common/tools/dte$(EXE)
 
 $(objdir)/index.txt: makefile
@@ -92,18 +97,22 @@ $(objdir)/index.txt: makefile
 
 clean:
 	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.?b53
-	-rm $(objdir)/*.sav $(objdir)/*.iu53 map.txt bnmap.txt
+	-rm $(objdir)/*.sav $(objdir)/*.iu53 map.txt bnmap.txt nsfmap.txt
 	-rm ../common/tools/dte$(DOTEXE)
 
 # Rules for PRG ROM
 
 objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
+objlistnsfo = $(foreach o,$(objlistnsf),$(objdir)/$(o).o)
 
 map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
 	$(LD65) -o $(title).nes -m map.txt --dbgfile $(title).dbg -C $^
 
 bnmap.txt $(title)-bnrom.nes: bnrom512kbit.cfg $(objlisto) $(objdir)/bnrom.o
 	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
+
+nsfmap.txt mdfourier.nsf: nsf.cfg $(objlistnsfo)
+	$(LD65) -o mdfourier.nsf -m nsfmap.txt --dbgfile mdfourier.dbg -C $^
 
 $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 	$(AS65) $(CFLAGS65) $< -o $@
