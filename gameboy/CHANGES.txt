@@ -1,3 +1,10 @@
+0.21
+* Add Convergence pattern
+* Help: Make some descriptions more concise (with Artemio's help)
+* Help: Move non-ASCII symbols to $18-$1F to free DTE codes
+* Share code for "Select: Invert grays"
+* Disable -static in compilation of DTE encoder on macOS (#24)
+
 0.20 (2020-01-30)
 * Add SGB-only Chroma crosstalk test
 * Help: Wait to draw status line until Huffman decoding finishes

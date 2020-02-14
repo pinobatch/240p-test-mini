@@ -5,6 +5,8 @@
 * MDFourier: Warn for reduced precision (triangle phase differs
   from power-up state) and add tones to indicate it for profile v7
 * MDFourier: Fix stuck note after pressing B to stop
+* Build MDFourier by itself as an NSF
+* Disable -static when building DTE encoder on macOS (#24)
 
 0.20 (2020-01-30)
 * Add Convergence test
