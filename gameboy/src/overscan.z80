@@ -176,6 +176,10 @@ activity_overscan::
     ldh a,[rLY]
     cp b
     jr c,.lycwait
+  ld hl,rSTAT
+  .lycwait2:
+    bit 1, [hl]  ; wait for transition from mode 2/3 to 0 (hblank)
+    jr nz, .lycwait2
   ld a,7
   ldh [rWX],a
   .lycdone:
