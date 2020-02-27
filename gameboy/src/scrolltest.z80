@@ -696,7 +696,7 @@ load_kiki_bg:
         cp KT_WALL
         jr nz,.not4to5
           ld a,KT_SHADOW_UL_U
-          jr .mcb_have
+          db $01  ; was jr .mcb_have but is now LD BC, (the next instruction)
         .not4to5:
         ld a,KT_SHADOW_U
       .mcb_have:      

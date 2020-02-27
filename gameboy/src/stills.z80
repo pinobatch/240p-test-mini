@@ -1463,24 +1463,24 @@ activity_convergence::
 ;;
 ; Write 01110001110001110001
 convergenceB_p1_onerow:
-  ld d, $00
+  ld e, $00
   jr convergenceB_draw_onerow
 
 ;;
 ; Write 10010010010010010010
 convergenceB_p0_onerow:
-  ld d, $01
+  ld e, $01
 convergenceB_draw_onerow:
-  ld e, 8
+  ld d, 8
   .loop:
-    xor d
+    xor e
     ld [hl+], a
     xor $01
     ld [hl+], a
     ld [hl+], a
-    dec e
+    dec d
     jr nz, .loop
-  ld de, 8
+  ld e, 8
   add hl, de
   ret
 

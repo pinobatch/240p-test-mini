@@ -217,8 +217,7 @@ soundtest_1kpulse:
 
 soundtest_hiss:
   ld a,$24
-  jr soundtest_noise_a
-
+  db $01 ; was jr soundtest_noise_a but is now LD BC, (the next instruction)
 soundtest_buzz:
   ld a,$2C
 soundtest_noise_a:

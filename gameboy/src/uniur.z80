@@ -88,6 +88,7 @@ iur_unpack_2a_bytes::
 ; @param DE destination address (usually in VRAM)
 ; @param BC number of bytes in tilemap
 ; @param A starting tile ID (e.g. $80 for $8800 VRAM)
+; (N.B.: this is broken, but fixed in the SMS version)
 ; @return HL: end of source; DE: end of destination
 iur_unpack::
 

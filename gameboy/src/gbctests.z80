@@ -652,7 +652,7 @@ load_smpte_tiles:
 
 activity_barsongray:
   ld a,helpsect_color_bars_on_gray
-  jr smpte_bars_engine
+  db $01  ; was jr smpte_bars_engine but is now LD BC, (the next instruction)
 activity_smpte_bars:
   ld a,helpsect_smpte_color_bars
 smpte_bars_engine:
