@@ -146,7 +146,7 @@ activity_overscan::
     jr nz,.a_done
     jr c,.dir_is_increase
       dec a
-      jr .writeback_c
+      db $FE  ; turns jr .writeback_c into cp dontcare
     .dir_is_increase:
       inc a
     .writeback_c:

@@ -188,7 +188,7 @@ activity_shadow_sprite::
     bit PADB_RIGHT,b
     jr nz,.next_bg_style
       dec a
-      jr .have_bg_style
+      db $fe  ; short for jr .have_bg_style
     .next_bg_style:
       inc a
     .have_bg_style:

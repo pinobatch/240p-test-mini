@@ -47,7 +47,7 @@ undte_line::
   jr z,.stack_empty
   dec bc
   ld a,[bc]
-  jr .print_code_a
+  db $fe  ; short for jr .print_code_a
 .stack_empty:
   ; Otherwise, retrieve a code from the compressed text
   ld a,[hl+]
