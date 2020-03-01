@@ -129,7 +129,7 @@ hillzone_nam::
 kikitiles_chr::
   incbin "obj/gb/kikitiles.chrgb"
 kikimap::
-  incbin "obj/gb/kikimap.chr1"
+  incbin "obj/gb/kikimap.chr1.pb16"
 
 ; Backlight zone ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

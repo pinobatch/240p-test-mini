@@ -135,7 +135,7 @@ obj/gb/gfxincbins.o: \
   obj/gb/sharpness.iu obj/gb/stopwatchdigits.chrgb.pb16.huf \
   obj/gb/stopwatchhand.chrgb.pb16.huf obj/gb/stopwatchface.iu \
   obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16 \
-  obj/gb/kikimap.chr1 obj/gb/kikitiles.chrgb \
+  obj/gb/kikimap.chr1.pb16 obj/gb/kikitiles.chrgb \
   obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16 \
   obj/gb/smptetiles.chrgb.pb16 obj/gb/megatontiles.chrgb16.pb16 \
   obj/gb/sgbborder.border

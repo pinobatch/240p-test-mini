@@ -602,10 +602,10 @@ load_kiki_bg:
   call memcpy
 
   ; Copy packed map into an aligned buffer; possibly decompress later
-  ld hl,kikimap
-  ld de,lineImgBuf
-  ld bc,128
-  call memcpy
+  ld de,kikimap
+  ld hl,lineImgBuf
+  ld b,128/16
+  call pb16_unpack_block
   
   ; Clear row history
   ld hl,help_line_buffer
