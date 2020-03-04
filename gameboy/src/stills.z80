@@ -539,22 +539,6 @@ load_pb16_nam::
   jp load_nam
   endc
 
-;;
-; @param BC tile data base address
-; @param L file ID
-allhuffdata_unpack_iu_file_l::
-  push bc
-  call allhuffdata_fetch_file_l
-  ld a, b
-  pop bc
-  push hl
-  ld h, b
-  ld l, c
-  ld b, a
-  call pb16_unpack_block
-  pop hl
-  jp iur_unpack_2hl_bytes
-
 activity_sharpness::
   ld a,%00011011
   ldh [curpalette],a

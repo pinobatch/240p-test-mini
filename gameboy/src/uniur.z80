@@ -51,7 +51,26 @@ hPrevTile    = hLocals + $03
 
 SECTION "incruniq", ROM0
 
+
+;;
+; @param BC tile data base address
+; @param L file ID
+allhuffdata_unpack_iu_file_l::
+  push bc
+  call allhuffdata_fetch_file_l
+  ld a, b
+  pop bc
+  push hl
+  ld h, b
+  ld l, c
+  ld b, a
+  call pb16_unpack_block
+  pop hl
+
   if 0
+  ; this can just fall through if unpack_iu_file does not exist
+  jr iur_unpack_2hl_bytes
+
 ;;
 ; Unpack IU file at DE to tiles at HL and map at SCRN_TMP
 unpack_iu_file::
@@ -131,10 +150,10 @@ iur_unpack::
   rra
   jr nc, .is_repeat
   ; Runtype 1: Write 1 more than last runtype 1 tile
-  ld a, [hMaxTile]
+  ldh a, [hMaxTile]
   inc a
   ldh [hMaxTile], a
-  jr .write_byte_a
+  db $D2 ; was jr .write_byte_a, now jp nc, dont_care
 
 .is_repeat:
   ldh a, [hPrevTile]
