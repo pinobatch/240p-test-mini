@@ -104,22 +104,24 @@ lame_boy_demo::
   ld l, 32
   call puthex_raw
   ld a,c  ; Ones digit
-  and $0F
-  or $10
-  ld [hl],a
+  call putnibble_raw
 
   ldh a,[new_keys]
   bit PADB_B,a
   jr z,.loop
   ret
 
+;;
+; Writes a byte as two values in $10-$1F to HL, high nibble first
 puthex_raw:
   push af
   swap a
-  and $0F
-  or $10
-  ld [hl+],a
+  call putnibble_raw
   pop af
+
+;;
+; Writes bits 3-0 of A OR $10 to HL
+putnibble_raw:
   and $0F
   or $10
   ld [hl+],a
@@ -324,7 +326,7 @@ puthex::
   ; fall through
 
 ;;
-; Writes bits 3-0 of a hex nibble to HL
+; Writes bits 3-0 as an ASCII hex digit to HL
 ; @param A nibble to write (bits 7-4 ignored)
 ; @param HL destination address
 ; @return A: ASCII character written; HL: increased by 1
