@@ -574,7 +574,7 @@ draw_player_sprite:
 .not_frame_7:
 
   .no_adjust_hotspot:
-  jp draw_spriterect
+  ; Fall through to draw_spriterect
 
 draw_spriterect::
   rsset hLocals+8

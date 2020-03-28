@@ -27,6 +27,7 @@ global sizeof_helptiles
 helptiles_gbc:: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
 sizeof_helptiles_gbc equ 960
 global sizeof_helptiles_gbc
+helptiles_end::
 
 section "helptiles_gfx0", ROM0
 helpblink_chr::

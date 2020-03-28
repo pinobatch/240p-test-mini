@@ -12,21 +12,42 @@ def addrtosym(s, syms):
     except KeyError:
         return "$%04x" % s
 
+def opcodetocond(opcode):
+    """Extract a condition code from a JR, JP, RET, or CALL opcode"""
+    condcode = (opcode & 0x18) >> 3
+    return ['nz', 'z', 'nc', 'c'][condcode]
+
 def disassemble_inst(opcode, operand, syms):
     if opcode == 0xEA:
         return "ld [%s], a" % addrtosym(operand, syms)
     if opcode == 0xFA:
         return "ld a, [%s]" % addrtosym(operand, syms)
+    if opcode == 0xC3:
+        return "jp %s" % addrtosym(operand, syms)
+    if opcode in (0xC2, 0xCA, 0xD2, 0xDA):
+        return "jp %s, %s" % (opcodetocond(opcode), addrtosym(operand, syms))
     if opcode == 0xCD:
         return "call %s" % addrtosym(operand, syms)
     if opcode == 0x18:
         return "jr %s" % addrtosym(operand, syms)
+    if opcode in (0x20, 0x28, 0x30, 0x38):
+        return "jr %s, %s" % (opcodetocond(opcode), addrtosym(operand, syms))
 
+def relative_ea(addr, offset):
+    if offset >= 0x80: offset -= 0x100
+    return (addr + offset) % 0x10000
+
+def jr_target(addr, operand):
+    return relative_ea(addr + 2, operand)
+
+# Start and end of especially false-alarmy parts of the ROM
 falsepos_starts = {
     'soundtest_handlers', 'helppage_000', 'grayramp_bottomhalfmap',
+    'allhuffdata', 'helptiles',
 }
 falsepos_ends = {
     'soundtest_8k', 'help_cumul_pages', 'grayramp_chr_gbc',
+    'allhuffdata_end', 'helptiles_end',
 }
 
 def load_syms(filename):
@@ -97,7 +118,7 @@ rstable_calls = [
 ]
 
 jr_forward_1 = [
-    (i, disassemble_inst(d, data[i + 1] + i + 2, syms))
+    (i, disassemble_inst(d, jr_target(i, data[i + 1]), syms))
     for i, d in enumerate(data[:-2])
     if d == 0x18 and data[i + 1] == 0x01
     and not any(l <= i <= h for l, h in falsepos_ranges)
@@ -108,17 +129,67 @@ jr_forward_1 = [
 ]
 
 for i, (addr, inst) in enumerate(jr_forward_1):
-    # JR *+3 is $18 $01.  But CALL $18xx followed by LD BC, aaaa
+    # JR @+3 is $18 $01.  But CALL $18xx followed by LD BC, aaaa
     # is $CD xx $18 $01 xx xx.  This can cause a false alarm.
     if addr >= 2 and data[addr - 2] == 0xCD:
         callarg = (data[addr] << 8) | (data[addr - 1])
         inst = inst + "  ; false alarm? (CALL $%04x then LD BC)" % callarg
         jr_forward_1[i] = (addr, inst)
 
+jp_opcodes = (0xC2, 0xC3, 0xCA, 0xD2, 0xDA)
+jr_opcodes = (0x18, 0x20, 0x28, 0x30, 0x38)
+
+jp_forward_0 = [
+    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
+    for i, d in enumerate(data[:-3])
+    if (d in jp_opcodes
+        and data[i + 1] == (i + 3) & 0x00FF
+        and data[i + 2] == (i + 3) >> 8)
+]
+
+jp_to_ret = [
+    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
+    for i, d in enumerate(data[:-3])
+    if (d in jp_opcodes
+        and data[i + 2] < 0x80
+        and data[data[i + 1] + data[i + 2] * 0x100] == 0xC9
+        and not any(l <= i <= h for l, h in falsepos_ranges))
+]
+
+jr_instructions = [
+    (i, jr_target(i, data[i + 1]))
+    for i, d in enumerate(data[:-3])
+    if (d in jr_opcodes
+        and not any(l <= i <= h for l, h in falsepos_ranges))
+]
+
+# The 6502 lacks conditional return.  It's easy for people going
+# from 6502 to 8080 family to forget it exists.
+jr_to_ret = [
+    (i, disassemble_inst(data[i], target, syms))
+    for i, target in jr_instructions
+    if target in syms and data[target] == 0xC9
+]
+print(jr_to_ret)
+
+# This attempt to detect no-op JRs was all false alarms.  First off,
+# an ASCII space followed by a NUL terminator is JR NZ, @+2.
+# And even that proved too prone to false alarms.
+if False:
+    jr_forward_0 = [
+        (i, disassemble_inst(data[i], target, syms))
+        for i, target in jr_instructions
+        if target == i + 2
+    ]
+    print(jr_forward_0)
+
 optimizable = []
 optimizable.extend(optimizable_hram_accesses)
 optimizable.extend(rstable_calls)
 optimizable.extend(jr_forward_1)
+optimizable.extend(jp_to_ret)
+optimizable.extend(jr_to_ret)
+optimizable.extend(jp_forward_0)
 optimizable.sort()
 
 if optimizable:

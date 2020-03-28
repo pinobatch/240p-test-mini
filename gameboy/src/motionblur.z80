@@ -247,15 +247,13 @@ motionblur_handle_presses:
 
 .no_cursor_control:
   bit PADB_A,b
-  jr z,.no_toggle_running
-    ldh a,[is_running]
-    and $80
-    xor $80
-    ldh [is_running],a
-    ld a,1
-    ld [frames_left],a
-  .no_toggle_running:
-
+  ret z
+  ldh a,[is_running]
+  and $80
+  xor $80
+  ldh [is_running],a
+  ld a,1
+  ld [frames_left],a
   ret
 
 make_help_vram:

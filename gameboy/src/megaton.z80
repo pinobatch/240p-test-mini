@@ -377,7 +377,7 @@ handle_cursor_move:
   .not_decrease_setting:
   
   bit PADB_RIGHT,b
-  jr z,.not_increase_setting
+  ret z
     or a
     jr nz,.xor_setting_a
     ld c,1
@@ -389,13 +389,12 @@ handle_cursor_move:
       sub 3
     .not_dir_wrap:
     ldh [reticledir],a
-    jr .not_increase_setting
+    ret
   .xor_setting_a:
     ld c,a
     ldh a,[enableflags]
     xor c
     ldh [enableflags],a
-  .not_increase_setting:
   ret
 
 grade_press:
@@ -433,16 +432,16 @@ grade_press:
   ld [$FF00+c],a
   call draw_result_b
 
-  ; Accept this result if it was not early or way late (>25 frames)
+  ; Reject this result if it was early or way late (>25 frames).
+  ; Early is negative ($80-$FF); both early and way late appear
+  ; as an unsigned value greater than 25.
   ldh a,[lastrawlag]
-  bit 7,a
-  jr nz,.last_was_early
   cp 26
-  jr nc,.last_was_early
-    ldh a,[num_tests]
-    inc a
-    ldh [num_tests],a
-  .last_was_early:
+  ret nc
+
+  ; Otherwise accept it
+  ld hl, num_tests
+  inc [hl]
   ret
 
 move_reticle:

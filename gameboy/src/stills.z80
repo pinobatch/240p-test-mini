@@ -263,11 +263,11 @@ load_gray_ramp_gbc:
     add 2
     cp 8
     jr c,.have_new_oam_attr
-      ; Prepare for next row
+      ; Prepare for next row, or return if there isn't one
       ld a,16
       add b
       cp 24+128
-      jr nc,.filloamdone
+      ret nc
       ld b,a
       cp 24+64
       jr nz,.oamnothalfway
@@ -275,12 +275,10 @@ load_gray_ramp_gbc:
       .oamnothalfway:
       ld c,24
       xor a
-      
+
     .have_new_oam_attr:
     ld d,a
     jr .filloamloop
-  .filloamdone:
-  ret
 
 oneblanktilerow:
   xor a

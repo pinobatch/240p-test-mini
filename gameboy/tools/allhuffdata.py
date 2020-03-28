@@ -95,6 +95,7 @@ def main(argv=None):
     lines.append('section "allhuffdata", ROMX  ; %d bytes' % len(allhuffdata))
     lines.append("allhuffdata:")
     lines.append(rgbasm_bytearray(allhuffdata))
+    lines.append("allhuffdata_end::")
     lines.append("")
     lines = "\n".join(lines)
     if outfilename == '-':
