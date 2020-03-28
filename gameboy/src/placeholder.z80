@@ -319,11 +319,17 @@ lettercolonhex:
 puthex::
   push af
   swap a
-  and $0F
   call putnibble
   pop af
-  and $0F
+  ; fall through
+
+;;
+; Writes bits 3-0 of a hex nibble to HL
+; @param A nibble to write (bits 7-4 ignored)
+; @param HL destination address
+; @return A: ASCII character written; HL: increased by 1
 putnibble::
+  and $0F
   cp $0A
   jr c,.not_letter
   add ("A"-"9"-1)
