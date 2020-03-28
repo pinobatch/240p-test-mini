@@ -20,6 +20,7 @@
 ;
 section "bcd",ROM0
 
+if 0
 bcd8bit_iter: macro
   cp \1
   jr c,.nope\@
@@ -44,4 +45,47 @@ bcd8bit::
   ld a,b
   cpl  ; correct for 8080 use of borrow flag instead of carry
   and $3F
+  ret
+endc
+
+;;
+; Converts an 8-bit value to 3 binary-coded decimal digits.
+; @param A the value
+; @return A: tens and ones digits; B[1:0]: hundreds digit;
+; B[7:2]: unspecified
+bcd8bit_baa::
+
+  swap a
+  ld b,a
+  and $0F  ; bits 3-0 in A, range $00-$0F
+  or a     ; for some odd reason, AND sets half carry to 1
+  daa      ; A=$00-$15
+
+  sla b
+  adc a
+  daa
+  sla b
+  adc a
+  daa      ; A=$00-$63
+  rl b
+  adc a
+  daa
+  rl b
+  adc a
+  daa
+  rl b
+  ret
+
+;;
+; Converts an 8-bit value to 2 separate decimal digits.
+; @param A the value
+; @return A: tens digit; C: ones digit; B: tens and ones digits;
+; Z set if A == 0 (that is, if value was less than 10)
+bcd8bit_ac::
+  call bcd8bit_baa
+  ld b, a
+  and $0F  ; A: 0000dcbz
+  ld c, a  ; C: 0000dcba
+  xor b    ; A: hgfe0000
+  swap a   ; A: 0000hgfe
   ret

@@ -263,8 +263,7 @@ make_help_vram:
   .loop:
     ld a,[$FF00+c]
     push bc
-    call bcd8bit
-    or a
+    call bcd8bit_ac
     jr nz,.has_tens
       ld a,$10
     .has_tens:

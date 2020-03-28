@@ -289,24 +289,22 @@ activity_megaton_complete:
     inc c
     dec b
     jr nz,.sumloop
-  call bcd8bit
-  cp $10
-  jr c,.no_tens
-    ld b,a
-    swap a
-    and $0F
+
+  call bcd8bit_baa ; B: tens of frames; A: ones and hundredths
+  ld c, a
+  ld a, b
+  and $03
+  jr z,.no_tens
     or "0"
     ld [hl+],a
-    ld a,b
-    and $0F
   .no_tens:
-  or "0"
-  ld [hl+],a
+  ld a, c
+  swap a
+  call putnibble
   ld a,"."
   ld [hl+],a
   ld a,c
-  or "0"
-  ld [hl+],a
+  call putnibble
 
   ld de,avglag_epilog
   call stpcpy
@@ -345,7 +343,6 @@ activity_megaton_complete:
   and PADF_B|PADF_START
   jr z,.loop
   ret
-
 
 handle_cursor_move:
   ldh a,[new_keys]
@@ -553,22 +550,15 @@ draw_result_b:
   and $7F
 
   ; Convert to decimal
-  call bcd8bit
-  ld b,a
-
-  ; Draw digits that exist
-  or a
+  call bcd8bit_ac
   jr z,.no_tens
-    push bc  ; Stack: tens and ones, index of result
-    ld a,b
-    and $0F
-    or "0"
+    push bc  ; Stack: ones, index of result
     ld b,6
+    or "0"
     call vwfPutTile
     pop bc
   .no_tens:
   ld a,c
-  and $0F
   or "0"
   ld b,11
   call vwfPutTile

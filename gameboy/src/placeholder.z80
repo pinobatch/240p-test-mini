@@ -100,11 +100,13 @@ lame_boy_demo::
   ld hl,_SCRN0
   call puthex_raw
   ldh a,[nmis]
-  call bcd8bit
+  call bcd8bit_baa
+  push af
+  ld a, b
   ld l, 32
-  call puthex_raw
-  ld a,c  ; Ones digit
   call putnibble_raw
+  pop af
+  call puthex_raw
 
   ldh a,[new_keys]
   bit PADB_B,a

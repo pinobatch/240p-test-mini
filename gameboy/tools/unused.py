@@ -43,11 +43,11 @@ def jr_target(addr, operand):
 # Start and end of especially false-alarmy parts of the ROM
 falsepos_starts = {
     'soundtest_handlers', 'helppage_000', 'grayramp_bottomhalfmap',
-    'allhuffdata', 'helptiles',
+    'allhuffdata', 'helptiles', 'waveram_sinx',
 }
 falsepos_ends = {
     'soundtest_8k', 'help_cumul_pages', 'grayramp_chr_gbc',
-    'allhuffdata_end', 'helptiles_end',
+    'allhuffdata_end', 'helptiles_end', 'waveram_end',
 }
 
 def load_syms(filename):

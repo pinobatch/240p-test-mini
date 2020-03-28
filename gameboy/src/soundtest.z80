@@ -32,6 +32,8 @@ waveram_sin8x:
   db $cc,$33,$cc,$33,$cc,$33,$cc,$33,$cc,$33,$cc,$33,$cc,$33,$cc,$33
 waveram_sin16x:
   db $c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3,$c3
+  ; end label because JMPs in sin16x cause false alarms in unused.py
+waveram_end::
 
 init_apu::
   ld a,$80

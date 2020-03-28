@@ -917,15 +917,15 @@ solid_update_rgb:
   push de
   ld c,e
   ld a,[$FF00+c]
-  call bcd8bit  ; A: tens; C: ones
+  call bcd8bit_ac  ; A: tens; C: ones
   jr z,.lessthanten
     push bc
     add "0"
     ld l,a
     ld a,d
     sub 5
-    ld b,a  ; B:x, L: ascii, stack: ones digit, Y and hramptr
-	ld a,l
+    ld b,a  ; B:x, L: ascii tens, stack: ones digit, Y and hramptr
+    ld a,l
     call vwfPutTile
     pop bc   ; Restore ones
     pop de   ; Restore Y and hramptr
