@@ -251,17 +251,6 @@ sgb_freeze:
   ld b, $01  ; Freeze current screen
   jp sgb_send_ab
 
-;;
-; Turns on rendering, sends a *_TRN packet with first two bytes
-; A and B, and turns rendering back off.
-sgb_send_trn_ab:
-  ld l, a
-  ld a,LCDCF_ON|LCDCF_BGON|LCDCF_BG8000|LCDCF_BG9800
-  ldh [rLCDC],a
-  ld a, l
-  call sgb_send_ab
-  jp lcd_off
-
 sgb_load_master_palette::
   call sgb_freeze
 
@@ -275,7 +264,18 @@ sgb_load_master_palette::
   ; Do the transfer
   ld a, $0B*8+1
   ld b, 0
-  jp sgb_send_trn_ab
+  ; fall through to sgb_send_trn_ab
+
+;;
+; Turns on rendering, sends a *_TRN packet with first two bytes
+; A and B, and turns rendering back off.
+sgb_send_trn_ab:
+  ld l, a
+  ld a,LCDCF_ON|LCDCF_BGON|LCDCF_BG8000|LCDCF_BG9800
+  ldh [rLCDC],a
+  ld a, l
+  call sgb_send_ab
+  jp lcd_off
 
 sgb_set_palette_gray::
   ld b, 0

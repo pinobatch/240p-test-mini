@@ -102,19 +102,6 @@ load_gray_ramp_tiles:
   jr nz,load_gray_ramp_tiles
   ret
 
-gray_ramp_row_cmp_d_sub_e:
-  ld b, 20
-  .byteloop:
-    ld [hl+], a
-    inc a
-    cp d
-    jr c,.nosube
-      sub e
-    .nosube:
-    dec b
-    jr nz, .byteloop
-  jp add_hl_12
-
 load_gray_ramp_sgb:
   ld de, grayramp_sgb_chr
   ld a, 9
@@ -184,8 +171,30 @@ load_gray_ramp_mono:
     jr nz,.bottomhalfrowloop
   ld a,%00011011
   ldh [rBGP], a
-  ; Row 19
-  jp oneblanktilerow
+  ; Row 19: Fall through to oneblanktilerow
+
+oneblanktilerow:
+  xor a
+oneconsttilerow:
+  ld c,20
+  rst memset_tiny
+add_hl_12:
+  ld de,12
+  add hl,de
+  ret
+
+gray_ramp_row_cmp_d_sub_e:
+  ld b, 20
+  .byteloop:
+    ld [hl+], a
+    inc a
+    cp d
+    jr c,.nosube
+      sub e
+    .nosube:
+    dec b
+    jr nz, .byteloop
+  jr add_hl_12
 
 load_gray_ramp_gbc:
 
@@ -279,16 +288,6 @@ load_gray_ramp_gbc:
     .have_new_oam_attr:
     ld d,a
     jr .filloamloop
-
-oneblanktilerow:
-  xor a
-oneconsttilerow:
-  ld c,20
-  rst memset_tiny
-add_hl_12:
-  ld de,12
-  add hl,de
-  ret
 
 activity_gray_ramp::
 .restart:

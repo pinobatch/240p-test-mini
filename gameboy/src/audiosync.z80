@@ -134,7 +134,7 @@ activity_audiosync::
   call set_bgp
   call set_obp0
 
-  jp .loop
+  jr .loop
 
 
   rsset hLocals

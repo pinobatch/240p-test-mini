@@ -94,6 +94,8 @@ for startaddr, endaddr in runs:
     print("%04x-%04x: %d" % (startaddr, endaddr - 1, sz))
 print("total: %d bytes (%.1f KiB)" % (totalsz, totalsz / 1024.0))
 
+# Optimizable memory accesses #######################################
+
 optimizable_hram_accesses = [
     (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
     for i, d in enumerate(data[:-2])
@@ -117,43 +119,20 @@ rstable_calls = [
     and not any(l <= i <= h for l, h in falsepos_ranges)
 ]
 
-jr_forward_1 = [
-    (i, disassemble_inst(d, jr_target(i, data[i + 1]), syms))
-    for i, d in enumerate(data[:-2])
-    if d == 0x18 and data[i + 1] == 0x01
-    and not any(l <= i <= h for l, h in falsepos_ranges)
-    and not (
-        addr >= 2 and data[i - 2] == 0xCD
-        and (0x1800 | data[i - 1]) in syms
-    )
-]
-
-for i, (addr, inst) in enumerate(jr_forward_1):
-    # JR @+3 is $18 $01.  But CALL $18xx followed by LD BC, aaaa
-    # is $CD xx $18 $01 xx xx.  This can cause a false alarm.
-    if addr >= 2 and data[addr - 2] == 0xCD:
-        callarg = (data[addr] << 8) | (data[addr - 1])
-        inst = inst + "  ; false alarm? (CALL $%04x then LD BC)" % callarg
-        jr_forward_1[i] = (addr, inst)
+# Optimizable jumps #################################################
 
 jp_opcodes = (0xC2, 0xC3, 0xCA, 0xD2, 0xDA)
 jr_opcodes = (0x18, 0x20, 0x28, 0x30, 0x38)
 
-jp_forward_0 = [
-    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
+jp_instructions = [
+    (i, data[i + 1] + data[i + 2] * 0x100)
     for i, d in enumerate(data[:-3])
     if (d in jp_opcodes
-        and data[i + 1] == (i + 3) & 0x00FF
-        and data[i + 2] == (i + 3) >> 8)
-]
-
-jp_to_ret = [
-    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
-    for i, d in enumerate(data[:-3])
-    if (d in jp_opcodes
-        and data[i + 2] < 0x80
-        and data[data[i + 1] + data[i + 2] * 0x100] == 0xC9
         and not any(l <= i <= h for l, h in falsepos_ranges))
+]
+jp_instructions = [
+    row for row in jp_instructions
+    if not any(l <= row[1] <= h for l, h in falsepos_ranges)
 ]
 
 jr_instructions = [
@@ -163,14 +142,12 @@ jr_instructions = [
         and not any(l <= i <= h for l, h in falsepos_ranges))
 ]
 
-# The 6502 lacks conditional return.  It's easy for people going
-# from 6502 to 8080 family to forget it exists.
-jr_to_ret = [
+# Forward 0
+jp_forward_0 = [
     (i, disassemble_inst(data[i], target, syms))
-    for i, target in jr_instructions
-    if target in syms and data[target] == 0xC9
+    for i, target in jp_instructions
+    if target == i + 3
 ]
-print(jr_to_ret)
 
 # This attempt to detect no-op JRs was all false alarms.  First off,
 # an ASCII space followed by a NUL terminator is JR NZ, @+2.
@@ -183,6 +160,50 @@ if False:
     ]
     print(jr_forward_0)
 
+# The 6502 lacks conditional return.  It's easy for people going
+# from 6502 to 8080 family to forget it exists.  Instead, they
+# end up pointing a JR at a RET.
+jp_to_ret = [
+    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
+    for i, d in enumerate(data[:-3])
+    if (d in jp_opcodes
+        and data[i + 2] < 0x80
+        and data[data[i + 1] + data[i + 2] * 0x100] == 0xC9
+        and not any(l <= i <= h for l, h in falsepos_ranges))
+]
+
+jr_to_ret = [
+    (i, disassemble_inst(data[i], target, syms))
+    for i, target in jr_instructions
+    if target in syms and data[target] == 0xC9
+]
+
+# JR over a 1-byte instruction is $18 $01.  It can often be replaced
+# with an instruction that just ignores that byte, such as CP imm or
+# LD reg, imm.  But there is one false alarm: CALL $18xx followed by
+# by LD BC, aaaa is $CD xx $18 $01 xx xx.  Reject the CALL if $18xx
+# is a known symbol; mark it with a comment otherwise.
+jr_forward_1 = [
+    (i, disassemble_inst(data[i], target, syms))
+    for i, target in jr_instructions
+    if data[i] == 0x18 and target == i + 3
+    and not (
+        addr >= 2 and data[i - 2] == 0xCD
+        and (0x1800 | data[i - 1]) in syms
+    )
+]
+for i, (addr, inst) in enumerate(jr_forward_1):
+    if addr >= 2 and data[addr - 2] == 0xCD:
+        callarg = (data[addr] << 8) | (data[addr - 1])
+        inst = inst + "  ; false alarm? (CALL $%04x then LD BC)" % callarg
+        jr_forward_1[i] = (addr, inst)
+
+jp_in_jr_range = [
+    (i, disassemble_inst(data[i], target, syms))
+    for i, target in jp_instructions
+    if -126 <= target - i <= 129
+]
+
 optimizable = []
 optimizable.extend(optimizable_hram_accesses)
 optimizable.extend(rstable_calls)
@@ -190,6 +211,7 @@ optimizable.extend(jr_forward_1)
 optimizable.extend(jp_to_ret)
 optimizable.extend(jr_to_ret)
 optimizable.extend(jp_forward_0)
+optimizable.extend(jp_in_jr_range)
 optimizable.sort()
 
 if optimizable:
