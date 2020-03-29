@@ -385,7 +385,7 @@ drops in frame rate.
 
 ↑↓: Change speed
 ←→: Change direction
-A: Stop or start
+A: Start or stop
 
 Hill zone by mikejmoffitt
   & Damian Yerrick
@@ -502,16 +502,16 @@ wavetable, and noise)
 can be panned left,
 center, or right.
 ----
-Most options in the menu
-use the wavetable with
-an approximate sine wave.
+Most choices use the
+wavetable with an
+approximate sine wave.
 It has a prominent
 overtone 5 octaves up.
 
 The CPU generates noise
 with a polynomial counter
-that can operate in two
-modes: hiss (32767 steps)
+in one of two modes:
+hiss (32767 steps)
 or buzz (127 steps).
 
 == Audio sync test ==
@@ -522,12 +522,12 @@ along with a 1 kHz
 tone when the dot
 hits the floor.
 
-You can verify the sync
+You can verify sync
 between audio and video
 with recording equipment
 or an oscilloscope.
 
-A: Start or stop the test
+A: Start or stop
 
 == Lame boy ==
 

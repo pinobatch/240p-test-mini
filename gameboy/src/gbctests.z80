@@ -280,20 +280,22 @@ activity_pluge:
 ; Gradient color bars ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "gradientbars", ROM0
+; The left three steps of the gradient are drawn with sprites
+; because the background palette is full
 gradient_objpalette:
-  drgb $000000
+;  drgb $000000
   drgb $080000
   drgb $100000
   drgb $180000
-  drgb $000000
+  drgb $FFFFFF
   drgb $000800
   drgb $001000
   drgb $001800
-  drgb $000000
+  drgb $FFFFFF
   drgb $000008
   drgb $000010
   drgb $000018
-  drgb $000000
+  drgb $FFFFFF
   drgb $080808
   drgb $101010
   drgb $181818
@@ -355,7 +357,7 @@ activity_gradient_bars:
 
   ld hl,gradient_objpalette
   ld bc,32*256+low(rOCPS)
-  ld a,$80
+  ld a,$82
   call set_gbc_palette
 
 .loop:

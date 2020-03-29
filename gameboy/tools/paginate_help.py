@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, sys, os
+import sys, os, argparse
 from vwfbuild import rgbasm_bytearray
 
 # Find common tools
@@ -36,7 +36,7 @@ def rgbasm_escape_bytes(blo):
             for r in runs]
     return ','.join(runs)
 
-def render_help(docs):
+def render_help(docs, verbose=False):
     lines = ["""
 ; Help data generated with paginate_help.py - do not edit
 
@@ -66,8 +66,6 @@ section "helppages",ROMX
     result = dte_compress(dtepages, mincodeunit=DTE_MIN_CODEUNIT, compctrl=FIRST_PRINTABLE_CU)
     dtepages, replacements, pairfreqs = result
     newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
-    print("compressed help from %d bytes to %d bytes"
-          % (oldsize, newsize), file=sys.stderr)
     helptitledata = dtepages[len(allpages):]
     del dtepages[len(allpages):]
 
@@ -90,23 +88,48 @@ section "helppages",ROMX
     lines.append("dte_replacements::")
     lines.extend("  db %s" % rgbasm_escape_bytes(r) for r in replacements)
 
+    lines.append("; compressed help from %d bytes to %d bytes"
+                 % (oldsize, newsize))
+    if verbose:
+        for i, r in enumerate(replacements):
+            stack = bytearray(reversed(r))
+            out = bytearray()
+            while stack:
+                c = stack.pop()
+                if c < DTE_MIN_CODEUNIT:
+                    out.append(c)
+                else:
+                    stack.extend(reversed(replacements[c - DTE_MIN_CODEUNIT]))
+            out = out.decode("cp144p")
+            lines.append("; $%02X: %s" % (i + DTE_MIN_CODEUNIT, repr(out)))
+
+    lines.append("")
     return "\n".join(lines)
 
-def main(argv=None):
-    argv = argv or sys.argv
-    if len(argv) > 1 and argv[1] == '--help':
-        print("usage: paginate_help.py INFILE.txt")
-        return
-    if len(argv) != 2:
-        print("paginate_help.py: wrong number of arguments; try paginate_help.py --help")
-        sys.exit(1)
+def parse_argv(argv):
+    p = argparse.ArgumentParser()
+    p.add_argument("INFILE")
+    p.add_argument("-o", "--output", metavar="OUTFILE", default='-',
+                   help="write asm output here instead of standard output")
+    p.add_argument("-v", "--verbose", action="store_true",
+                   help="write replacements")
+    return p.parse_args(argv[1:])
 
-    filename = argv[1]
-    with open(filename, 'r', encoding="utf-8") as infp:
+def main(argv=None):
+    args = parse_argv(argv or sys.argv)
+
+    with open(args.INFILE, 'r', encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
-    docs = lines_to_docs(filename, lines, maxpagelen=14)
-    print(render_help(docs))
+    docs = lines_to_docs(args.INFILE, lines, maxpagelen=14)
+    help_asm = render_help(docs, verbose=args.verbose)
+    if args.output != '-':
+        with open(args.output, "w") as outfp:
+            outfp.write(help_asm)
+    else:
+        sys.stdout.write(help_asm)
 
 if __name__=='__main__':
-##    main(['paginate_help.py', '../src/helppages.txt'])
-    main()
+    if 'idlelib' in sys.modules:
+        main(['paginate_help.py', '../src/helppages.txt'])
+    else:
+        main()

@@ -210,7 +210,7 @@ activity_shadow_sprite::
   ldh [rOBP0],a
   ld a,%00011100  ; palette for top half of Hepsie
   ldh [rOBP1],a
-  ld a,$80
+  ld a,$82
   ld bc,(hepsie_palette_gbc_end - hepsie_palette_gbc) * 256 + LOW(rOCPS)
   ld hl,hepsie_palette_gbc
   call set_gbc_palette

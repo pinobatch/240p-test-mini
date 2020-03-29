@@ -42,7 +42,7 @@ sgbborder::
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "convergence_gfx1",ROMX
+section "convergence_gfx0",ROM0
 convergence_chr::
   incbin "obj/gb/convergence.chrgb.pb16"
 sizeof_convergence_chr equ 80
@@ -71,7 +71,7 @@ grayramp_chr_gbc::
   db %11111111  ; tile 5: full
   db %11111111
 
-section "sharpness_gfx0",ROM0
+section "sharpness_gfx1",ROMX
 
 sharpness_brick_tile::
   dw `11222222
@@ -83,7 +83,7 @@ sharpness_brick_tile::
   dw `22221131
   dw `22222211
 
-section "cpsgrid_gfx0",ROM0
+section "cpsgrid_gfx1",ROMX
 cps_grid_chr::
   incbin "obj/gb/cps_grid.chrgb.pb16"
 sizeof_cps_grid_chr equ 128
@@ -112,11 +112,10 @@ portrait_pal::
 
 section "shadowsprite_gfx1",ROMX
 hepsie_palette_gbc::
-  drgb $FF00FF
   drgb $000000
   drgb $00FF00  ; skirt
   drgb $FFFF00
-  drgb $FF00FF
+  drgb $FFFFFF
   drgb $000000
   drgb $FF00DD  ; cape
   drgb $FFAA55

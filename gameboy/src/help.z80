@@ -117,12 +117,12 @@ helpbgpalette_gbc::
 helpbgpalette_gbc_end:
 helpobjpalette_gbc:
   ; Palette 0: Vest and arrow
-  drgb $FF00FF
+;  drgb $FF00FF
   drgb $AA5500
   drgb $AA8877
   drgb $000000
   ; Palette 1: Bottom of sack
-  drgb $FF00FF
+  drgb $FFFFFF
   drgb $131F7F
   drgb $B2B2B2
   drgb $FFFFFF
@@ -679,7 +679,7 @@ help_load_bg:
   ld a,$80
   call set_gbc_palette
   ld bc,(helpobjpalette_gbc_end-helpobjpalette_gbc) * 256 + low(rOCPS)
-  ld a,$80
+  ld a,$82
   jp set_gbc_palette
 
 .whitecol:
