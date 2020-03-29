@@ -1,9 +1,18 @@
 0.21
 * Add Convergence pattern
+* Overscan: Change WX in hblank to hide a 1-line-tall glitch
+  (reported by LIJI32)
+* Manual lag test: Compress tilemap with PB16
+* Lame boy: Glove contrast; vest and sleeve trail; squash bottom
+  when on ground; involve the abdominal and back muscles
 * Help: Make some descriptions more concise (with Artemio's help)
 * Help: Move non-ASCII symbols to $18-$1F to free DTE codes
+* Simplify title in SGB border to reuse more tiles
 * Share code for "Select: Invert grays"
+* Switch to smaller ADC/DAA binary to decimal converter
+* Numerous micro-optimizations
 * Disable -static in compilation of DTE encoder on macOS (#24)
+* Allow use of out-of-PATH copy of RGBDS
 
 0.20 (2020-01-30)
 * Add SGB-only Chroma crosstalk test
