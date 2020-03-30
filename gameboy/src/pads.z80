@@ -1,7 +1,7 @@
 ;
 ; Controller reading for Game Boy and Super Game Boy
 ;
-; Copyright 2018 Damian Yerrick
+; Copyright 2018, 2020 Damian Yerrick
 ; 
 ; This software is provided 'as-is', without any express or implied
 ; warranty.  In no event will the authors be held liable for any damages
@@ -80,14 +80,13 @@ read_pad::
   ret
 
 .onenibble:
-  ldh [rP1],a  ; switch the key matrix
-  ldh a,[rP1]  ; ignore value while waiting for the key matrix to settle
+  ldh [rP1],a     ; switch the key matrix
+  call .knownret  ; burn 10 cycles calling a known ret
+  ldh a,[rP1]     ; ignore value while waiting for the key matrix to settle
   ldh a,[rP1]
-  ldh a,[rP1]
-  ldh a,[rP1]
-  ldh a,[rP1]
-  ldh a,[rP1]  ; the actual read
+  ldh a,[rP1]     ; this read counts
   or $F0   ; A7-4 = 1; A3-0 = unpressed keys
+.knownret:
   ret
 
 autorepeat_60hz_if_sgb::
@@ -142,6 +141,20 @@ autorepeat::
 ; Super Game Boy detection ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;
+; Sets hw_capability to 1 if the player number is nonzero.
+; When the key matrix is released, SGB returns 4 - player number in
+; bits 1-0, where 3 means player 1, 2 means player 2, etc.
+; Fully reading advances to the next player.
+capa_1_if_player_2:
+  ldh a, [rP1]
+  and $03
+  xor $03
+  ret z
+  ld a, $01
+  ldh [hw_capability],a
+  ret
+
+;;
 ; Sets hw_capability to $01 if on a Super Game Boy.
 detect_sgb::
   ; Try to set the SGB to 2-player mode
@@ -149,25 +162,9 @@ detect_sgb::
   ld b, 1
   call sgb_set_bplus1_players
   call sgb_wait
-
-  ; When the key matrix is released, SGB returns player number in
-  ; bits 1-0 (active low).
-  ldh a, [rP1]
-  and $03
-  xor $03
-  jr nz, .isSGB
-
-  ; When the key matrix is asserted and released, such as when one
-  ; controller is read, SGB advances to the next controller.
+  call capa_1_if_player_2
   call read_pad
-  ldh a, [rP1]
-  and $03
-  xor $03
-  jr z, .notSGB ; a = 0
-.isSGB:
-  ld a, $01
-  ldh [hw_capability],a
-.notSGB:
+  call capa_1_if_player_2
 
   ; Now turn off 2-player mode
   ld b, 0
@@ -279,13 +276,10 @@ sgb_send::
 ;;
 ; Waits about 4 frames for Super Game Boy to have processed a command
 sgb_wait:
-  ld de, 7000
+  ld de, 65536 - (4 * 114 * 154)
 .loop:
-  nop
-  nop
-  nop
-  dec de
-  ld a, e
-  or d
+  inc e
+  jr nz, .loop
+  inc d
   jr nz, .loop
   ret
