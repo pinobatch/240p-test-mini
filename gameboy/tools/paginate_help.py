@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys, os, argparse
 from vwfbuild import rgbasm_bytearray
+from collections import Counter
 
 # Find common tools
 commontoolspath = os.path.normpath(os.path.join(
@@ -14,8 +15,6 @@ import cp144p  # registers encoding "cp144p" used by GB and GBA suites
 # must match src/undte.z80
 DTE_MIN_CODEUNIT = 128
 FIRST_PRINTABLE_CU = 24
-
-# Converting lines to documents #####################################
 
 # Encoding for RGBDS assembler ######################################
 
@@ -69,9 +68,12 @@ section "helppages",ROMX
     helptitledata = dtepages[len(allpages):]
     del dtepages[len(allpages):]
 
+    code_usage = Counter()
     for pagenum, page in enumerate(dtepages):
         lines.append("helppage_%03d:" % pagenum)
         lines.append("  db %s" % rgbasm_escape_bytes(page))
+        code_usage.update(page)  # Make histogram
+
     lines.extend('helptitle_%s: db %s,0'
                  % (doc[1], rgbasm_escape_bytes(dtetitle))
                  for doc, dtetitle in zip(docs, helptitledata))
@@ -101,7 +103,10 @@ section "helppages",ROMX
                 else:
                     stack.extend(reversed(replacements[c - DTE_MIN_CODEUNIT]))
             out = out.decode("cp144p")
-            lines.append("; $%02X: %s" % (i + DTE_MIN_CODEUNIT, repr(out)))
+            
+            lines.append("; $%02X: %s (%d)"
+                         % (i + DTE_MIN_CODEUNIT, repr(out),
+                            code_usage.get(i + DTE_MIN_CODEUNIT, 0)))
 
     lines.append("")
     return "\n".join(lines)

@@ -43,13 +43,13 @@ The Game Boy outputs
 video. The original
 Game Boy and Game Boy
 Pocket have a passive
-matrix STN LCD panel
-with four shades of gray.
+matrix STN LCD with
+four shades of gray.
 The Super Game Boy
 accessory maps these
 shades to colors.
 Game Boy Color has
-a TFT panel with 32
+a TFT LCD with 32
 levels per RGB channel.
 ----
 Press Start in any test
@@ -168,7 +168,7 @@ check gray levels.
 ←→: Change its value
 A: Start or stop the test
 ----
-The STN display in the
+The STN LCD in the
 original Game Boy and
 Game Boy Pocket has a
 slow response, which
@@ -176,7 +176,7 @@ blurs fast motion.
 Game Boy Color's
 TFT greatly improves
 response time.
-All Game Boy displays
+All Game Boy LCDs
 have an interlace-like
 effect, drawing even
 or odd lines darker
@@ -219,9 +219,9 @@ and low as blurring.
 
 == Overscan ==
 
-With this pattern you
-can discover how much
-of the picture edge your
+Use this pattern to
+check how much of
+the picture edge your
 Game Boy's lens hides.
 
 The LCD is recessed
@@ -231,8 +231,8 @@ screen's edges depending
 on the lighting angle.
 
 ↑↓←→: Choose an edge
-Hold A + ↑↓←→:
-  Move that edge
+A + ↑↓←→: Move edge
+Select: Invert grays
 ----
 Move each edge inward
 until you see the border,
@@ -396,9 +396,9 @@ This test shows a
 scrolling background.
 Use it to measure
 cadence detection in a
-deinterlacer or test
-hypotheses about
-handheld "interlacing".
+deinterlacer or row
+inversion artifacts
+in a handheld LCD.
 
 ↑↓: Change speed
 ←→: Change direction

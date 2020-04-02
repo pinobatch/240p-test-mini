@@ -44,6 +44,14 @@ Because of this "subtractive" nature, as well as the overall reduced
 contrast and other display artifacts on monochrome handhelds, many
 tests allow inverting grays with the Select Button.
 
+To keep positive and negative voltages balanced, an LCD inverts each
+pixel's phase on alternate frames.  Game Boy displays alternate this
+phase by row.  Thus slight level differences between a pixel and its
+inverted counterpart can look like interlace.
+(See "[LCD monitor technology and tests]" by W. Andrew Steer.)
+
+[LCD monitor technology and tests]: http://www.techmind.org/lcd/
+
 Though the NES version of 240p Test Suite uses about 40 KiB of ROM
 data, the [Catskull cartridge] is limited to 32 KiB.  Fortunately,
 the graphics for several tests are smaller than on a 240p platform,
