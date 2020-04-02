@@ -2,6 +2,7 @@
 import sys, os, argparse
 from vwfbuild import rgbasm_bytearray
 from collections import Counter
+from itertools import chain
 
 # Find common tools
 commontoolspath = os.path.normpath(os.path.join(
@@ -15,6 +16,36 @@ import cp144p  # registers encoding "cp144p" used by GB and GBA suites
 # must match src/undte.z80
 DTE_MIN_CODEUNIT = 128
 FIRST_PRINTABLE_CU = 24
+
+# Reencoding given a replacements table #############################
+
+# The compressed text that jroatch's encoder emits isn't optimal and
+# can be improved, even with a greedy algorithm.
+
+def dtedec(s, replacements):
+    """Decode a byteslike using a DTE table."""
+    stack = bytearray(reversed(s))
+    out = bytearray()
+    while stack:
+        c = stack.pop()
+        if c < DTE_MIN_CODEUNIT:
+            out.append(c)
+        else:
+            stack.extend(reversed(replacements[c - DTE_MIN_CODEUNIT]))
+    return bytes(out)
+
+def dtemakeenctable(replacements):
+    """Make a greedy encoding table for DTE"""
+    encs = [(dtedec(r, replacements), bytes([i + DTE_MIN_CODEUNIT]))
+            for i, r in enumerate(replacements)]
+    # try this or try encs.reverse(), whatever works better
+    encs.sort(key=lambda x: len(x[0]), reverse=True)
+    return encs
+
+def dteenc(s, enctable):
+    for needle, replacement in enctable:
+        s = s.replace(needle, replacement)
+    return s
 
 # Encoding for RGBDS assembler ######################################
 
@@ -65,6 +96,24 @@ section "helppages",ROMX
     result = dte_compress(dtepages, mincodeunit=DTE_MIN_CODEUNIT, compctrl=FIRST_PRINTABLE_CU)
     dtepages, replacements, pairfreqs = result
     newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
+
+    # 2020-04-01: I realized I could beat jroatch's encoder
+    # even with the same dictionary
+    reenctable = dtemakeenctable(replacements)
+    greedysaved = 0
+    for i, txt in enumerate(chain(allpages, helptitledata)):
+        newpage = dteenc(txt, reenctable)
+        assert dtedec(newpage, replacements) == txt
+        svd = len(dtepages[i]) - len(newpage)
+        if svd < 0:
+            print("Greedy loses %d bytes!"
+                  % (len(newpage) - len(dtepages[i])), file=stderr)
+            print(page.decode("cp144p"), file=sys.stderr)
+        else:
+            dtepages[i] = newpage
+            greedysaved += svd
+
+    # Document titles come last
     helptitledata = dtepages[len(allpages):]
     del dtepages[len(allpages):]
 
@@ -92,23 +141,18 @@ section "helppages",ROMX
 
     lines.append("; compressed help from %d bytes to %d bytes"
                  % (oldsize, newsize))
+    if greedysaved > 0:
+        lines.append("; the greedy reencoder saved %d more" % greedysaved)
+
     if verbose:
         for i, r in enumerate(replacements):
-            stack = bytearray(reversed(r))
-            out = bytearray()
-            while stack:
-                c = stack.pop()
-                if c < DTE_MIN_CODEUNIT:
-                    out.append(c)
-                else:
-                    stack.extend(reversed(replacements[c - DTE_MIN_CODEUNIT]))
-            out = out.decode("cp144p")
-            
+            out = dtedec(r, replacements).decode("cp144p")
             lines.append("; $%02X: %s (%d)"
                          % (i + DTE_MIN_CODEUNIT, repr(out),
                             code_usage.get(i + DTE_MIN_CODEUNIT, 0)))
 
     lines.append("")
+
     return "\n".join(lines)
 
 def parse_argv(argv):
