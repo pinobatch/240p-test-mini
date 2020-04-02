@@ -4,7 +4,7 @@ Long run detector for binary files
 Copyright 2018-2019 Damian Yerrick
 insert zlib license here
 """
-import string
+import string, bisect, sys
 
 def addrtosym(s, syms):
     try:
@@ -204,6 +204,7 @@ jp_in_jr_range = [
     if -126 <= target - i <= 129
 ]
 
+sortedsyms = sorted(syms.items())
 optimizable = []
 optimizable.extend(optimizable_hram_accesses)
 optimizable.extend(rstable_calls)
@@ -213,9 +214,16 @@ optimizable.extend(jr_to_ret)
 optimizable.extend(jp_forward_0)
 optimizable.extend(jp_in_jr_range)
 optimizable.sort()
+optimizable = [
+    (addr, inst,
+     sortedsyms[max(0, bisect.bisect_left(sortedsyms, (addr, "")) - 1)])
+    for addr, inst in optimizable
+]
 
 if optimizable:
     print("These instructions can be optimized:")
     print("\n".join(
-        "$%04x: %s" % row for row in optimizable
+        "$%04x (%s+%d): %s"
+        % (addr, label, addr - labeladdr, inst)
+        for (addr, inst, (labeladdr, label)) in optimizable
     ))
