@@ -47,6 +47,27 @@ def dteenc(s, enctable):
         s = s.replace(needle, replacement)
     return s
 
+def dtereenc(txt, oldenc, enctable, printoldbetter=False):
+    """Encode to DTE then keep the shorter of corresponding lines.
+
+Neither jroatch's algorithm nor my algorithm is optimal.  But if I
+compare them line by line, I can take whatever's best.
+"""
+    newenc = dteenc(txt, enctable).split(b"\n")
+    oldenc = oldenc.split(b"\n")
+    if printoldbetter: txt = txt.split(b"\n")
+    bestenc = []
+    for u, o, n in zip(txt, oldenc, newenc):
+        if len(o) < len(n):
+            if printoldbetter:
+                print(u.decode("cp144p"), file=sys.stderr)
+                print("jr-dte:", o.hex(), file=sys.stderr)
+                print("greedy:", n.hex(), file=sys.stderr)
+            bestenc.append(o)
+        else:
+            bestenc.append(n)
+    return b"\n".join(bestenc)
+
 # Encoding for RGBDS assembler ######################################
 
 def rgbasm_escape_bytes(blo):
@@ -103,16 +124,13 @@ section "helppages",ROMX
     reenctable = dtemakeenctable(replacements)
     greedysaved = 0
     for i, txt in enumerate(chain(allpages, helptitledata)):
-        newpage = dteenc(txt, reenctable)
+        newpage = dtereenc(txt, dtepages[i], reenctable,
+                           printoldbetter=inputlog or verbose)
         assert dtedec(newpage, replacements) == txt
         svd = len(dtepages[i]) - len(newpage)
-        if svd < 0:
-            print("Greedy loses %d bytes!"
-                  % (len(newpage) - len(dtepages[i])), file=stderr)
-            print(page.decode("cp144p"), file=sys.stderr)
-        elif svd > 0:
+        bytes_pl = "bytes" if abs(svd) != 1 else "byte"
+        if svd > 0:
             if inputlog:
-                bytes_pl = "bytes" if svd > 1 else "byte"
                 loglines = [
                     "For the text", "", txt.decode("cp144p"), "",
                     "jroatch dte gives", dtepages[i].hex(),

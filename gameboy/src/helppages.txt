@@ -176,10 +176,10 @@ blurs fast motion.
 Game Boy Color's
 TFT greatly improves
 response time.
-All Game Boy LCDs
-have an interlace-like
-effect, drawing even
-or odd lines darker
+All GB LCDs use row
+inversion that can look
+like interlace, drawing
+even or odd lines darker
 in alternate frames.
 ----
 STN smearing:
@@ -678,7 +678,7 @@ Chroma crosstalk
 This pattern shows
 colored stripes arranged
 to show crosstalk
-between the luma and
+between luma and
 chroma of the composite
 video output of an
 NTSC Super NES.
