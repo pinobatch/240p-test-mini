@@ -5,7 +5,7 @@ HUFFNIB_INCLUDE_TESTS = 0
 hCodeLengths = hLocals + $00
 hBitAccum    = hLocals + $0F
 
-huffnib_bytecountlo equs "(help_line_buffer + 30)"
+; huffnib_bytecountlo is top of stack
 huffnib_bytecounthi equs "(help_line_buffer + 31)"
 huffnib_symboldefs equs "(help_line_buffer)"
 
@@ -85,6 +85,19 @@ canohuff_decode_symbol:
   pop de
   ret
 
+vwfInit::
+  ld hl, vwfChrData_huf
+  ld de, vwfChrData
+  call huffnib_decode_block
+
+  ; This is not ideal (wasting 2 bits per glyph or 26 bytes) because
+  ; all upper nibbles are automatically zero, but it was quick to do.
+  ; Decoding to unpacked nibbles won't save more than maybe 10 bytes.
+  ; hl and de are already in position after the last block
+;  ld hl, vwfChrWidths_huf
+;  ld de, vwfChrWidths
+
+  ; fall through to huffnib_decode_block
 
 ; I'm estimating 22 cycles per input bit and 74 per output byte.
 ; The largest known message is 10120 bits and 1538 bytes, or
@@ -145,21 +158,25 @@ huffnib_decode_compressed_block:
   cp $0F
   jr c, .headerloop
 
+  pop de  ; Restore destination address
+
   ; Read length and negate it
   ld a, [hl+]
   cpl
   add 1
-  ld [huffnib_bytecountlo], a
+  push af  ; leave the length low byte on top of stack
   ld a, [hl+]
   cpl
   adc 0
   ld [huffnib_bytecounthi], a
 
-  pop de
   ld b, $80  ; initialize state for getbit
 
 .byteloop:
   ; 74+22n Decode two nibbles and combine them
+  ; At this point:
+  ; A = low byte of length upcounter, B = bits left in this byte,
+  ; DE = destination, HL = source
   call canohuff_decode_symbol
   swap a
   ld [de], a
@@ -171,14 +188,15 @@ huffnib_decode_compressed_block:
   inc de
 
   ; 10 go to next byte
-  ld a, [huffnib_bytecountlo]
+  pop af
   inc a
-  ld [huffnib_bytecountlo], a
+  push af
   jr nz, .byteloop
   ld a, [huffnib_bytecounthi]
   inc a
   ld [huffnib_bytecounthi], a
   jr nz, .byteloop
+  pop af
   ret
 
 ; Unused, untested non-canonical version ;;;;;;;;;;;;;;;;;;;;;;;;;;;;

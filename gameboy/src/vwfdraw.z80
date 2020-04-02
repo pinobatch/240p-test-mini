@@ -36,14 +36,15 @@ lineImgBuf:: ds lineImgBufLen * 2
 CHAR_BIT EQU 8
 LOG_GLYPH_HEIGHT EQU 3
 GLYPH_HEIGHT EQU (1 << LOG_GLYPH_HEIGHT)
-GLYPH_HEIGHT_MINUS_1 EQU 7
+GLYPH_HEIGHT_MINUS_1 EQU GLYPH_HEIGHT + (-1)
 
-NUM_GLYPHS EQU 112
+NUM_GLYPHS EQU 104
 FIRST_PRINTABLE_CU EQU $18
 
+; vwfInit is in huffnib.z80 to save 3 bytes
 section "vwfHuffUnComp", wram0, align[LOG_GLYPH_HEIGHT]
-vwfChrData: ds NUM_GLYPHS * GLYPH_HEIGHT
-vwfChrWidths: ds NUM_GLYPHS
+vwfChrData:: ds NUM_GLYPHS * GLYPH_HEIGHT
+vwfChrWidths:: ds NUM_GLYPHS
 
 ; Approximate timing for vwfPutTile:
 ;
@@ -359,13 +360,3 @@ vwfPutBufHBlank::
   dec c
   jr nz,.tileloop
   ret
-
-vwfInit::
-  ld hl, vwfChrData_huf
-  ld de, vwfChrData
-  call huffnib_decode_block
-  ; This is not ideal (wasting 2 bits per glyph) because all upper
-  ; nibbles are automatically zero, but it was quick to do.
-  ld hl, vwfChrWidths_huf
-  ld de, vwfChrWidths
-  jp huffnib_decode_block
