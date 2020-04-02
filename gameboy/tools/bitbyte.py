@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 CHAR_BIT = 8
 
 class BitByteInterleave(object):

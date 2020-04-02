@@ -66,7 +66,7 @@ def rgbasm_escape_bytes(blo):
             for r in runs]
     return ','.join(runs)
 
-def render_help(docs, verbose=False):
+def render_help(docs, verbose=False, inputlog=None):
     lines = ["""
 ; Help data generated with paginate_help.py - do not edit
 
@@ -93,7 +93,8 @@ section "helppages",ROMX
     dtepages = list(allpages)
     dtepages.extend(helptitledata)
     oldsize = sum(len(x) for x in dtepages)
-    result = dte_compress(dtepages, mincodeunit=DTE_MIN_CODEUNIT, compctrl=FIRST_PRINTABLE_CU)
+    result = dte_compress(dtepages, mincodeunit=DTE_MIN_CODEUNIT,
+                          compctrl=FIRST_PRINTABLE_CU, inputlog=inputlog)
     dtepages, replacements, pairfreqs = result
     newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
 
@@ -109,7 +110,16 @@ section "helppages",ROMX
             print("Greedy loses %d bytes!"
                   % (len(newpage) - len(dtepages[i])), file=stderr)
             print(page.decode("cp144p"), file=sys.stderr)
-        else:
+        elif svd > 0:
+            if inputlog:
+                bytes_pl = "bytes" if svd > 1 else "byte"
+                loglines = [
+                    "For the text", "", txt.decode("cp144p"), "",
+                    "jroatch dte gives", dtepages[i].hex(),
+                    "while greedy recompression saves %d %s" % (svd, bytes_pl),
+                    newpage.hex(), ""
+                ]
+                print("\n".join(loglines), file=sys.stderr)
             dtepages[i] = newpage
             greedysaved += svd
 
@@ -162,6 +172,8 @@ def parse_argv(argv):
                    help="write asm output here instead of standard output")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="write replacements")
+    p.add_argument("--dte-input-log",
+                   help="store input to jroatch's DTE here")
     return p.parse_args(argv[1:])
 
 def main(argv=None):
@@ -170,7 +182,8 @@ def main(argv=None):
     with open(args.INFILE, 'r', encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
     docs = lines_to_docs(args.INFILE, lines, maxpagelen=14)
-    help_asm = render_help(docs, verbose=args.verbose)
+    help_asm = render_help(docs, verbose=args.verbose,
+                           inputlog=args.dte_input_log)
     if args.output != '-':
         with open(args.output, "w") as outfp:
             outfp.write(help_asm)

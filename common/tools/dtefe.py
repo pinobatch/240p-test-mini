@@ -5,15 +5,16 @@ license: zlib
 """
 import sys, os, subprocess
 
-def dte_compress(lines, compctrl=32, mincodeunit=128):
+def dte_compress(lines, compctrl=32, mincodeunit=128,
+                 inputlog=None):
     """Compress a set of byte strings with DTE.
 
 lines -- a list of byte strings to compress, where no code unit
     is greater than mincodeunit
 compctrl -- if an integer, exclude control characters less than this;
     if False, exclude control characters less than '\x20';
-    otherwise, exclude only '\x00'
-from compression; if True, compress them as any other
+    otherwise, exclude only '\x00' from compression
+inputlog -- log the input data to dte process to this file
 
 """
     dte_path = os.path.join(os.path.dirname(__file__), "dte")
@@ -31,7 +32,12 @@ from compression; if True, compress them as any other
     compress_cmd_line = [
         dte_path, "-c", "-e", excluderange, "-r", digramrange
     ]
+
     inputdata = delimiter.join(lines)
+    if inputlog:
+        with open(inputlog, 'wb') as outfp:
+            outfp.write(inputdata)
+        print(" ".join(compress_cmd_line), file=sys.stderr)
     spresult = subprocess.run(
         compress_cmd_line, check=True,
         input=inputdata, stdout=subprocess.PIPE
@@ -51,7 +57,7 @@ def main(argv=None):
 
 if __name__=='__main__':
     if 'idlelib' in sys.modules:
-        main(["dtefe.py", "../README.md"])
+        main(["dtefe.py", "../../README.md"])
     else:
         main()
 
