@@ -273,10 +273,9 @@ These shouldn't happen:
 - Thin horizontal stripes
   in flicker pattern
 ----
-Handhelds' LCD driver
-circuits use a technique
-similar to interlacing
-to improve response time.
+Row inversion to balance
+charge on an LCD may
+resemble interlace.
 
 Portrait of Gus by
   darryl.revok
@@ -410,9 +409,9 @@ Tiles by Damian Yerrick
 == Grid scroll test ==
 
 A grid scrolls vertically
-or horizontally. This can
-be used to test linearity
-and how well the display
+or horizontally. Use it
+to test linearity and
+how well the display
 copes with scrolling and
 frame rate. Some scalers
 may produce a still image
@@ -445,15 +444,15 @@ is treating the signal as
 interlaced and dropping
 or weaving frames.
 A solid gray image
-probably means slow
-LCD response.
+indicates slow LCD
+response.
 
 == Backlight zone test ==
 
 This test displays a
 small moving square,
 letting you check how
-a display works with
+a display handles
 small bright areas.
 Some LED-lit LCDs dim
 dark areas to make
@@ -514,13 +513,28 @@ in one of two modes:
 hiss (32767 steps)
 or buzz (127 steps).
 
+== MDFourier ==
+
+This plays a series of
+tones to generate an
+audio signature for the
+MDFourier analysis tool.
+junkerhq.net/MDFourier
+
+Record the audio output
+using a sound card
+and compare it to
+other systems using
+the GB v1 profile.
+
+A: Play tones   B: Stop
+
 == Audio sync test ==
 
 This test flashes the
 screen for two frames
-along with a 1 kHz
-tone when the dot
-hits the floor.
+and plays a tone when
+the dot hits the floor.
 
 You can verify sync
 between audio and video
