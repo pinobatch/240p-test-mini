@@ -71,7 +71,7 @@ grayramp_chr_gbc::
   db %11111111  ; tile 5: full
   db %11111111
 
-section "sharpness_gfx0",ROM0
+section "sharpness_gfx1",ROMX
 
 sharpness_brick_tile::
   dw `11222222
@@ -111,7 +111,6 @@ global sizeof_hepsie_chr
 section "shadowsprite_gfx1",ROMX
 portrait_pal::
   incbin "obj/gb/Gus_portrait-GBC.pal"
-section "shadowsprite_gfx0",ROM0
 hepsie_palette_gbc::
   drgb $000000
   drgb $00FF00  ; skirt
