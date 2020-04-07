@@ -221,7 +221,6 @@ sgb_send::
   ; B: Number of remaining bytes in this packet
   ; C: Number of remaining packets
   ; D: Remaining bit data
-  ; E: Number of remaining bits in this byte
   ld a,$07
   and [hl]
   ret z
@@ -234,29 +233,32 @@ sgb_send::
   ldh [rP1],a
   ld a,$30
   ldh [rP1],a
-  push bc
   ld b,SIZEOF_SGB_PACKET
 .byteloop:
-  ; Read a byte from the packet
-  ld e,CHAR_BIT
-  ld a,[hl+]
+  ld a,[hl+]  ; Read a byte from the packet
+
+  ; Put bit 0 in carry and the rest (and a 1) into D.  Once this 1
+  ; is shifted out of D, D is 0 and the byte is finished.
+  ; (PB16 and IUR use the same principle for loop control.)
+  scf      ; A = hgfedcba, CF = 1
+  rra      ; A = 1hgfedcb, CF = a
   ld d,a
 .bitloop:
   ; Send a 1 as $10 then $30, or a 0 as $20 then $30.
   ; This is constant time thanks to ISSOtm, unlike SGB BIOS
   ; which takes 1 mcycle longer to send a 0 then a 1.
   ld a,$10
-  bit 0,d
-  jr nz,.bitIs1
+  jr c, .bitIs1
   add a,a ; ld a,$20
 .bitIs1:
   ldh [rP1],a
   ld a,$30
   ldh [rP1],a
 
+  ldh a, [rIE]  ; Burn 3 cycles to retain original loops's speed
+
   ; Advance D to next bit (this is like NES MMC1)
-  rr d
-  dec e
+  srl d
   jr nz,.bitloop
   dec b
   jr nz,.byteloop
@@ -268,7 +270,6 @@ sgb_send::
   ld [rP1],a
 
   call sgb_wait
-  pop bc
   dec c
   jr nz,.packetloop
   ret
