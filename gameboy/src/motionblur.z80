@@ -246,14 +246,20 @@ motionblur_handle_presses:
   .no_writeback_value:
 
 .no_cursor_control:
-  bit PADB_A,b
+  ld a, PADF_A
+  and b
   ret z
-  ldh a,[is_running]
-  and $80
-  xor $80
-  ldh [is_running],a
-  ld a,1
+
+  ; When A is pressed, set frames_left to 1 so that the animation
+  ; restarts immediately.
+  ; ld a, 1  ; frames_left is 1, but so is PADF_A
   ld [frames_left],a
+
+  ; Toggle running flag and clear its phase
+  ldh a,[is_running]
+  cpl
+  and $80
+  ldh [is_running],a
   ret
 
 make_help_vram:

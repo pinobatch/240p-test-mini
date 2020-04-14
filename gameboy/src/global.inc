@@ -131,6 +131,14 @@ dwxy: macro
 
   ENDC
 
+;;
+; Syntax: lb rp, hivalue, lovalue
+; Loads hivalue into the upper register of a pair (B, D, or H)
+; and lovalue into the lower register of the same pair (C, E, or L).
+lb: MACRO ; r, hi, lo
+  ld \1, low(\2) << 8 | low(\3)
+  endm
+
 ; Glyphs
 GL_RIGHT EQU $1C
 GL_LEFT EQU $1D

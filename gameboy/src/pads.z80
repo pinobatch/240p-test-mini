@@ -276,8 +276,11 @@ sgb_send::
 
 ;;
 ; Waits about 4 frames for Super Game Boy to have processed a command
+; 4 frames is 4*154 = 616 scanlines or 4*154*114 = 70224 M-cycles.
+; Each iteration of the inner loop takes 4 cycles.
+; Thus we wait 4*154*114/4 = 17556 iterations
 sgb_wait:
-  ld de, 65536 - (4 * 114 * 154)
+  ld de, 65536 - (114 * 154 * 4 / 4)
 .loop:
   inc e
   jr nz, .loop
