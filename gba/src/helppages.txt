@@ -44,10 +44,10 @@ has two goals:
    levels of a display.
 ----
 The Game Boy Advance
-system outputs progressive
-video with 160 lines of
-picture. Its TFT panel has 32
-levels per RGB channel and a
+system outputs 160 lines of
+progressive video.
+Its TFT LCD has 32 levels
+per RGB channel and a
 reputation for crushing black
 levels, for which its launch
 titles failed to compensate.
@@ -60,8 +60,7 @@ GameCube outputs 480i
 or 480p video.
 ----
 Press Start in any test
-pattern to show help for
-that pattern.
+to show relevant help.
 
 The test suite is also
 available for several
@@ -91,9 +90,8 @@ all directions.
 
 Use it to verify the horizontal
 to vertical size ratio setting
-of your display or scaler or
-to verify the lack of barrel
-distortion of a CRT.
+of a display or scaler or to
+measure distortion on a CRT.
 
 A: Hide or show grid
 Select: Invert grays
@@ -119,8 +117,7 @@ A: Go to fine grid
 Use this pattern to
 check color balance.
 This gray ramp should
-not have a red, green,
-or blue tint to it.
+not have a colored tint.
 
 Cheap color LCDs may
 have different gamma
@@ -130,9 +127,8 @@ curves per component.
 
 Some displays and scalers
 have problems with sudden
-changes between deep
-black and a white screen.
-Other displays may have
+changes between deep black
+and white. Others may have
 stuck or damaged pixels.
 
 ←→: Change color among
@@ -166,14 +162,15 @@ check gray levels.
 A: Start or stop the test
 ----
 Like the Game Boy Color,
-the Game Boy Advance has
-a TFT display with a decent
-response time.
+the Game Boy Advance
+has a TFT display with
+a decent response time.
 
-All Game Boy displays have
-an interlace-like effect,
-drawing even or odd lines
-darker in alternate frames.
+All GB LCDs use row
+inversion that can look
+like interlace, drawing
+even or odd lines darker
+in alternate frames.
 
 The Game Boy Player
 accessory has a "Screen
@@ -193,9 +190,9 @@ A: Toggle brick wall
 ----
 Modern TVs' "sharpness"
 control performs edge
-enhancement, which is
-designed for live action
-SDTV or VHS sources.
+enhancement, intended
+for live action SDTV or
+VHS sources.
 Most TVs have zero as
 no change and high as
 enhancement. A few have
@@ -205,22 +202,20 @@ and low as blurring.
 
 == Overscan ==
 
-With this pattern you
-can discover how much
-of the picture edge your
-GBA's lens hides.
+Use this pattern to check
+how much of the picture
+edge your GBA's lens hides.
 
-The LCD is slightly
-recessed in the chassis.
-This can block light from
-reaching the screen's
-edges depending on the
-angle of the light source.
-----
+The LCD is recessed
+in the chassis. This can
+cast shadows on the
+screen's edges depending
+on the lighting angle.
+
 ↑↓←→: Choose an edge
-Hold A + ↑↓←→:
-  Move that edge
-
+A + ↑↓←→: Move edge
+Select: Invert grays
+----
 Move each edge inward
 until you see the border,
 then go back one pixel. Or
@@ -232,8 +227,8 @@ in pixels in each direction.
 == Shadow sprite ==
 
 This test draws a shadow
-sprite on every other frame,
-flickering at 30 Hz.
+sprite on every other
+frame, flickering at 30 Hz.
 Many games use such flicker
 to show transparency.
 
@@ -241,8 +236,7 @@ Some deinterlacers display
 drop shadows correctly but
 still interpret 240p as 480i.
 The striped sprite should
-make attempted deinterlacing
-easy to spot.
+make this easy to spot.
 ----
 ↑↓←→: Move sprite
 A: Skip flicker frame
@@ -258,12 +252,13 @@ These shouldn't happen:
 - Thin horizontal stripes
   in flicker pattern
 ----
-Faint stripes may be visible
+Faint stripes may appear
 in the flicker pattern on a
-GBA because its LCD circuit
-uses a technique similar to
-interlacing to improve pixel
-response time.
+GBA because its LCD uses
+row inversion, drawing even
+and odd lines with opposite
+polarity to balance positive
+and negative charge.
 
 Portrait of Gus by
   darryl.revok
@@ -272,18 +267,16 @@ Hill zone by mikejmoffitt
 
 == Stopwatch ==
 
-This stopwatch helps you
-measure a TV's lag, detect
-dropped frames, or just
-count how long your spouse
-has been on the phone.
+This stopwatch helps
+you measure a TV's lag,
+detect dropped frames,
+time a workout, etc.
 
 A: Start or stop
-Select when stopped: Reset
-Select when running: Lap
+Select stopped: Reset
+Select running: Lap
 ↑: Change ruler at left
-   (show, hide, or show
-   during even frames)
+   (show, hide, or blink)
 ↓: Hide or show
    inactive circles
 ----
@@ -311,11 +304,11 @@ using a cable with both
 composite and S-Video out.
 ----
 Then photograph both
-screens at once. The picture
-will show the difference in
-image processing latency
-between them. Some consumer
-LCD TVs exceed five frames.
+screens at once.
+The picture will show
+the latency difference
+between them. Some LCD
+TVs exceed five frames.
 
 The ruler helps count
 scanlines of lag. Use a
@@ -338,24 +331,20 @@ Press A when the moving
 and still reticles align
 to display the offset in
 frames from the actual
-intersection and whether
-it was early or late. After
-ten non-early presses,
+intersection. After ten
+non-early presses,
 their average is shown.
 ----
 ↑↓: Choose a setting
 ←→: Change its value
 
-Settings include the
-direction of the moving
-reticle (horizontal,
-vertical, or both),
-whether to randomize
-timing of movement, and
-whether to beep when A
-is pressed or beep and
-flash when the reticles
-align.
+Settings include the direction
+of the moving reticle, whether
+to randomize timing of
+movement, and whether to
+beep when A is pressed
+or beep and flash when
+the reticles align.
 
 == Hill zone scroll test ==
 
@@ -378,9 +367,9 @@ This test shows a
 scrolling background.
 Use it to measure
 cadence detection in a
-deinterlacer or test
-hypotheses about
-handheld "interlacing".
+deinterlacer or row
+inversion artifacts
+in a handheld LCD.
 
 ↑↓: Change speed
 ←→: Change direction
@@ -391,12 +380,11 @@ Tiles by Damian Yerrick
 
 == Grid scroll test ==
 
-A grid scrolls vertically
-or horizontally. This can
-be used to test linearity
-and how well the display
-copes with scrolling and
-frame rate. Some scalers
+A grid scrolls vertically or
+horizontally. Use it to test
+linearity and how well the
+display copes with scrolling
+and frame rate. Some scalers
 may produce a still image
 at maximum speed.
 
@@ -413,8 +401,7 @@ lines, each one pixel wide.
 ↑↓←→: Move the pattern
   by one pixel
 Hold ↑↓←→: Move every frame
-A: Switch among horizontal,
-  vertical, and checkerboard
+A: Rotate stripes
 Select: Show or hide
   frame counter
 ----
@@ -423,23 +410,20 @@ should flicker. If holding
 Up makes a still image, your
 scaler is treating the signal
 as interlaced and either
-discarding every other frame
-or weaving them incorrectly.
-
-If holding Up makes a solid
-gray image, you're seeing
+dropping or weaving frames.
+A solid gray image indicates
 slow LCD response time or
 Game Boy Player filtering.
 
 == Backlight zone test ==
 
 This test displays a small
-moving square, letting you
-check how a display works
-with small bright areas.
+moving square, letting
+you check how a display
+handles small bright areas.
 Some LED-lit LCDs dim
-dark areas to make black
-areas darker, which causes
+dark areas to make blacks
+deeper, which causes
 problems with scenes such
 as starfields and credits.
 
@@ -484,11 +468,11 @@ center or hard left or right.
 The Game Boy Advance adds
 two 8-bit PCM channels.
 ----
-Most options in the menu
-use the wavetable with
-an approximate sine wave.
-It has a prominent overtone
-5 octaves up.
+Most choices use the
+wavetable with an
+approximate sine wave.
+It has a prominent
+overtone 5 octaves up.
 
 The CPU generates noise
 with a polynomial counter
@@ -503,12 +487,11 @@ Karplus/Strong algorithm.
 == Audio sync test ==
 
 This test flashes the
-whole screen for two
-frames along with a
-1 kHz test tone when
+screen for two frames
+and plays a tone when
 the dot hits the floor.
 
-You can verify the sync
+You can verify sync
 between audio and video
 with recording equipment
 or an oscilloscope.
@@ -519,9 +502,8 @@ A: Start or stop the test
 
 This test served as a
 placeholder in early versions
-of 160p Test Suite for tests
-that have not yet been ported
-to Game Boy Advance.
+of the Suite for tests not yet
+ported to Game Boy Advance.
 It's still cute.
 
 ←→: Move
@@ -561,11 +543,10 @@ NTSC-J: shades 1 and 0.5
 ----
 The PLUGE Contrast
 sub-test fills the screen
-with a pattern based on the
-SHARK (U+1F988) emoji.
-Use it with various palettes
-to check contrast and
-brightness.
+with a shark pictogram.
+Use it with various
+palettes to check
+contrast and brightness.
 
 A: Switch palette among color,
   dark, darker, light, or lighter
@@ -574,9 +555,8 @@ Select: Return to PLUGE
 == Gradient color bars ==
 
 This pattern lets you
-calibrate red, green, and
-blue colors on your TV.
-Increase the "contrast"
+calibrate colors on a TV.
+Increase the contrast
 (white level) until C and
 E in the white ramp look
 the same, then decrease
@@ -627,8 +607,7 @@ Concept by Konsolkongen
 ↑↓←→: Move the pattern
   by one pixel
 Hold ↑↓←→: Move every frame
-A: Switch among horizontal,
-  vertical, and checkerboard
+A: Rotate stripes
 Select: Show or hide
   frame counter
 

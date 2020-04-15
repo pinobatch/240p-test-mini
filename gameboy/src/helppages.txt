@@ -82,8 +82,8 @@ the Game Boy screen.
 Use it to verify the
 horizontal to vertical
 size ratio setting of
-your display or scaler
-or to measure distortion
+a display or scaler or
+to measure distortion
 on a CRT.
 
 A: Hide or show grid
@@ -632,7 +632,7 @@ Select: Go to PLUGE
 
 This pattern lets you
 calibrate colors on
-your TV. Increase the
+a TV. Increase the
 contrast until C and
 E in the white ramp
 look the same, then

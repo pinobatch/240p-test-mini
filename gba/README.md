@@ -44,6 +44,12 @@ Because of this "subtractive" nature, as well as the overall
 darkness on GBA prior to SP, many tests allow inverting grays
 with the Select Button.
 
+To keep positive and negative voltages balanced, an LCD inverts each
+pixel's phase on alternate frames.  Game Boy displays alternate this
+phase by row.  Thus slight level differences between a pixel and its
+inverted counterpart can look like interlace.
+(See "[LCD monitor technology and tests]" by W. Andrew Steer.)
+
 NES and Game Boy ports are also available.
 
 Artemio Urbina maintains the upstream suite on five platforms:
