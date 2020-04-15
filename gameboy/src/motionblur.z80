@@ -52,19 +52,19 @@ wndmap:
 MONO_MAX_GRAY = 3
 COLOR_MAX_GRAY = 31
 
-row_high_low:  ; low and high+1 values for each row, monochrome
+row_high_low:  ; low and high-low+1 values for each row, monochrome
   db 0, MONO_MAX_GRAY+1
-  db 1, 21
+  db 1, 20
   db 0, MONO_MAX_GRAY+1
-  db 1, 21
+  db 1, 20
   db 0, MONO_MAX_GRAY+1
   db 0, 2
 
-row_high_low_gbc:  ; high+1 and low values for each row, SGB/GBC
+row_high_low_gbc:  ; low and high-low+1 values for each row, SGB/GBC
   db 0, COLOR_MAX_GRAY+1
-  db 1, 21
+  db 1, 20
   db 0, COLOR_MAX_GRAY+1
-  db 1, 21
+  db 1, 20
   db 0, COLOR_MAX_GRAY+1
   db 0, 2
 
@@ -246,10 +246,10 @@ motionblur_handle_presses:
   .no_cursor_right:
   
   ; Write back only if within range
-  cp l
-  jr c,.no_writeback_value
+  sub l
   cp h
   jr nc,.no_writeback_value
+    add l
     ld [$FF00+c],a
     cp d
     call nz, motionblur_update_sgb
@@ -345,7 +345,7 @@ motionblur_calc_bgp:
 
   ; If current step (bit 0) is off, swap the two
   ldh a,[is_running]
-  rr a
+  rra
   jr c,.no_swap
     ld a,d
     ld d,e
@@ -355,7 +355,7 @@ motionblur_calc_bgp:
 
   ; If stripes are off, use the current frame shade for both rows
   ldh a,[is_stripes]
-  rr a
+  rra
   jr c,.no_destripe
     ld e,d
   .no_destripe:
@@ -372,11 +372,11 @@ motionblur_calc_bgp:
       ld c, 1
       ldh a, [hw_capability]
       rra
-      jr c, .mono_have_text_shade
+      jr c, .mono_have_text_shade   ; SGB: use 1
       dec c
       bit 1, b
-      jr nz, .mono_have_text_shade
-      ld c, 3
+      jr nz, .mono_have_text_shade  ; 2 or 3: use 0
+      ld c, 3                       ; Otherwise use 3
     .mono_have_text_shade:
     ; b=back shade, c=front shade,
     ; d=even rows shade, e=odd rows shade

@@ -295,20 +295,20 @@ allhuffdata_predecode::
   ; one for DMG and one for GBC?
   ld a, [hl+]  ; nonzero if DMG/GBC pair
   inc hl
+  ld de, 14    ; distance to next entry after DMG half of DMG/GBC pair
   or a
   jr z, .not_gbc_pair
-  ; 1: Load this if DMG or next if GBC
+
+  ; DMG/GBC pair identifier nonzero means this is a GBC pair.
+  ; Decompress this file if DMG or the next if GBC.
   ldh a, [hw_capability]  ; D7 set if GBC
   add a
-  jr c, .gbc_pair_is_gbc
-  ; DMG/GBC pair: Decode this one, skip next one
-  ld de, 14
-  jr .have_hl_de
+  jr nc, .have_hl_de  ; DMG: Decode this entry and skip the next
 .gbc_pair_is_gbc:
-  ld de, 8    ; Skip to next entry
+  ld e, 8     ; Skip to next entry
   add hl, de
 .not_gbc_pair:
-  ld de, 6
+  ld e, 6     ; Decode this entry
 .have_hl_de:
 
   ; HL: pointer to source field of this record

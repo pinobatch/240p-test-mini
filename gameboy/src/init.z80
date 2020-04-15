@@ -86,13 +86,13 @@ reset_handler::
   ld [das_keys],a
   ld [das_timer],a
 
-  jr nc, .not_gba
-    rra
-    bit 0, b
-    scf  ; Keep GBC status in carry for decision on whether to fade
-    jr z, .not_gba
-    ld a, $C0
-  .not_gba:
+  jr nc, .not_gba_check
+    rr b
+    ld a, $03  ; GBC: 0|03  GBA: 1|03
+    rra        ; GBC: 1|01  GBA: 1|81
+    rra        ; GBC: 1|80  GBA: 1|C0
+    ; and carry is still set to skip the fading
+  .not_gba_check:
   ldh [hw_capability], a
 
   ; To distinguish the SGB models from GB, the game's header must

@@ -110,9 +110,9 @@ vwfDrawLabels::
   ld a,e     ; Calculate new tile number
   add c
   ld e,a
-  jr nc,.no_tilenum_wrap
-    inc d
-  .no_tilenum_wrap:
+  adc d  ; Wrap from tile $8FF to $900, not $8FF to $800
+  sub e
+  ld d, a
   push de  ; Stack: new tilenum, string end
 
   ; Copy C tiles' worth of pixels

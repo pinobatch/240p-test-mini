@@ -183,24 +183,22 @@ vwfPuts::
   jr c,.decret
 
   ; Save position, draw glyph, load position
-  cp 32
-  jr z,.nodrawspace
   ld c,a
   push hl
   push bc
-  call vwfPutTile
+  cp 32  ; Skip drawing the space character
+  call nz, vwfPutTile
   pop bc
   pop hl
   ld a,c
-.nodrawspace:
   
   ; Add up the width of the glyph
   ld de,vwfChrWidths-FIRST_PRINTABLE_CU
   add e
   ld e,a
-  jr nc,.gwnowrap
-  inc d
-.gwnowrap:
+  adc d
+  sub e
+  ld d, a
   ld a,[de]
   add b
   ld b,a
@@ -225,13 +223,13 @@ vwfStrWidth::
   ld a,[hl+]
   sub FIRST_PRINTABLE_CU
   jr c,vwfPuts.decret
-  
+
   ld de,vwfChrWidths
   add e
   ld e,a
-  jr nc,.gwnowrap
-  inc d
-.gwnowrap:
+  adc d
+  sub e
+  ld d, a
   ld a,[de]
   add b
   ld b,a

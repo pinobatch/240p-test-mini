@@ -68,14 +68,14 @@ undte_line::
   ; and then decode the first.  The address of the second is
   ; dte_replacements + 2*(code - DTE_MIN_CODEUNIT) + 1
   sub DTE_MIN_CODEUNIT
-  ld hl,dte_replacements
-  scf
-  adc a  ; A = 2*(code - DTE_MIN_CODEUNIT) + 1
+  ld hl,dte_replacements + 1
+  add a  ; A = 2*(code - DTE_MIN_CODEUNIT)
   add l
   ld l,a
-  jr nc,.pairtable_no_wrap
-  inc h
-.pairtable_no_wrap:
+  adc h
+  sub l
+  ld h, a
+
   ; Get the second code and stack it
   ld a,[hl-]
   ld [bc],a

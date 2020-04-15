@@ -84,16 +84,12 @@ sw_sgb_rects:
   db 0, 0, 0, 0, 0, 0, 0, 0
 
 activity_stopwatch::
+  ; All variables start at $00 except show_face, which starts at $FF
   xor a
-  ldh [is_running],a
-  ldh [is_lap],a
-  ldh [is_ruler],a
-  ldh [hours],a
-  ldh [frames_bcd],a
-  ldh [minutes_bcd],a
-  ldh [seconds_bcd],a
-  dec a
-  ldh [show_face],a
+  ld hl, hours
+  ld c, show_face - hours
+  rst memset_tiny
+  ld [hl], $FF
 .restart:
   call clear_gbc_attr
 
@@ -231,7 +227,7 @@ activity_stopwatch::
   ; Up: Toggle ruler
   bit PADB_UP,b
   jr z,.not_toggle_ruler
-    ; TODO: make this go 0, 3, 1
+    ; Counts 0, 3, 1
     ldh a,[is_ruler]
     add $03
     and $03
@@ -250,40 +246,9 @@ activity_stopwatch::
     ld [show_face],a
   .not_toggle_face:
 
-  ; Increment the counter by one frame
   ldh a,[is_running]
   or a
-  jr z,.not_running
-    ldh a,[frames_bcd]
-    inc a
-    daa
-    cp $60
-    jr c,.not_wrap_frames
-      xor a
-    .not_wrap_frames:
-    ldh [frames_bcd],a
-    jr c,.not_running
-
-    ldh a,[seconds_bcd]
-    inc a
-    daa
-    cp $60
-    jr c,.not_wrap_seconds
-      xor a
-    .not_wrap_seconds:
-    ldh [seconds_bcd],a
-    jr c,.not_running
-
-    ldh a,[minutes_bcd]
-    inc a
-    daa
-    cp $60
-    jr c,.not_wrap_minutes
-      xor a
-    .not_wrap_minutes:
-    ldh [minutes_bcd],a
-    jr c,.not_running
-  .not_running:
+  call nz, sw_inc_counter
 
   ldh a,[is_lap]
   or a
@@ -301,7 +266,34 @@ activity_stopwatch::
   ld a,[show_face]  ; $00: hide; $FF: show
   or 40  ; $28: Hide face; $FF: Show
   ldh [rWY],a
-  jp .loop
+  jr .loop
+
+;;
+; Add one frame to the counter
+sw_inc_counter:
+  lb bc, frames_bcd - hours, low(frames_bcd)
+  .loop:
+    ld a, [$FF00+c]
+    inc a
+    daa
+    ld [$FF00+C], a
+    cp $60
+    ret c
+    ; If increased past 60, clear it and continue to the next digit
+    xor a
+    ld [$FF00+C], a
+    dec c
+    dec b
+    jr nz, .loop
+
+  ld a,[$FF00+C]  ; Hours wrap at 10, not 60
+  inc a
+  cp 10
+  jr c,.not_wrap_hours
+    xor a
+  .not_wrap_hours:
+  ld [$FF00+C],a
+  ret
 
 digits_label_msg:
   db  20,  0,"hr",10
@@ -313,13 +305,15 @@ digits_label_msg:
 
 sw_convert:
   ld hl,help_line_buffer
-  ld b, $80
+  ld b, $80  ; Digit tile base
   ldh a,[hours]
   call .convert_1digit
   ldh a,[minutes_bcd]
   call .convert_2digits
   ldh a,[seconds_bcd]
   call .convert_2digits
+
+  ; If odd and SGB, use the alternate digit tiles
   ldh a, [hw_capability]
   rra
   ldh a,[frames_bcd]
@@ -460,11 +454,10 @@ sw_init_oam:
   .rulerobjloop:
     inc hl  ; Skip Y
     ld a,b
-    rra
-    ld a,8
-    jr nc,.notrulerR
-      ld a,14
-    .notrulerR:
+    rra    ; CF set if odd index else clear
+    sbc a  ; $FF if odd index else 0
+    and 6  ; 6 if odd index else 0
+    add 8  ; 14 if odd index else 8
     ld [hl+],a  ; 1. X
     ld a,$BD
     ld [hl+],a  ; 2. tile
@@ -480,9 +473,8 @@ sw_draw_ruler:
   ; Is the ruler enabled?  First check the displayed frames digit
   ld a,[help_line_buffer+6]
   rra
-  rra
-  ; If C is clear, the frame is even, so use bit 0 of is_ruler.
-  ; If C is set, the frame is odd, so use bit 1 of is_ruler.
+  rra  ; C clear on even frames, set on odd ones
+  ; On even frames, use bit 0 of is_ruler; on odd frames, use bit 1
   ldh a,[is_ruler]
   jr nc,.is_even_frame
     rra
@@ -498,7 +490,7 @@ sw_draw_ruler:
     inc l
     inc l
     inc l
-    cp 160
+    cp 144+16
     jr c,.rulerloop
   .no_ruler:
 

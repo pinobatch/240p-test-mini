@@ -72,31 +72,33 @@ gray_ramp_sgb_rects:
   db 0, 9, 4, 16
 
 ;;
-; Expand A tiles from DE to HL
+; Expand A tiles from DE to HL, duplicating each 4-byte group 4 times
 ; DE must be 4 byte aligned
 load_gray_ramp_tiles:
   ld [tilesleft],a
-  ld b,4
+  lb bc, 4, 4  ; repeating each C-byte portion B times
   .rowpairloop:
-    ld c,4
+    push bc
     .byteloop:
       ld a,[de]
       inc e
       ld [hl+],a
       dec c
       jr nz,.byteloop
+    pop bc
     ld a,e
-    sub 4
+    sub c
     ld e,a
     dec b
     jr nz,.rowpairloop
 
-  ; Did it wrap to the next page?
-  add 4
+  ; Move to next 4-byte group
+  add c
   ld e,a
-  jr nc,.enotwrapped
-    inc d
-  .enotwrapped:
+  adc d
+  sub e
+  ld d, a
+
   ld a,[tilesleft]
   dec a
   jr nz,load_gray_ramp_tiles
@@ -713,7 +715,7 @@ activity_solid_screen::
     ldh [rBCPD],a
     ld a,h
     ldh [rBCPD],a
-    jr .custom_color_written
+    xor a  ; make (harmless) DMG write instead of SGB write
   .set_color_not_gbc:
   rra
   ldh a, [curpalette]
@@ -795,22 +797,22 @@ activity_solid_screen::
     add low(customred)
     ld c,a
     ld a,[$FF00+c]
+    ld e, a  ; E = last value
     bit PADB_RIGHT,b
     jr z,.not_custom_increase
-    cp 31
-    jr nc,.not_custom_increase
       inc a
-      ldh [lastlcdc], a
     .not_custom_increase:
-
     bit PADB_LEFT,b
     jr z,.not_custom_decrease
-    or a
-    jr z,.not_custom_decrease
-      ldh [lastlcdc], a
       dec a
     .not_custom_decrease:
-    ld [$FF00+c],a
+    ; if the new value is valid, write it back
+    cp 32
+    jr nc, .custom_no_change
+      ld [$FF00+c],a
+      xor e  ; set E iff changed
+      ldh [lastlcdc], a
+    .custom_no_change:
 
     call solid_update_rgb
     jr .input_done
