@@ -398,7 +398,7 @@ motionblur_calc_bgp:
 
   ; If not running, use the front shade with the maximum contrast
   ldh a,[is_running]
-  rl a
+  add a
   jr c,.is_running_gbc
   .sgb_calc:
     ld c,0

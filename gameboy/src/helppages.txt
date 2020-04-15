@@ -568,6 +568,13 @@ SMPTE color bars
 Color bars on gray
 Color bleed
 
+== SGB color tests: Menu ==
+
+PLUGE
+Color bars on gray
+Color bleed
+Chroma crosstalk
+
 == Color tests ==
 
 These patterns measure
@@ -679,13 +686,6 @@ Hold: Move every frame
 A: Rotate stripes
 Select: Show or hide
   frame counter
-
-== SGB color tests: Menu ==
-
-PLUGE
-Color bars on gray
-Color bleed
-Chroma crosstalk
 
 == Chroma crosstalk ==
 

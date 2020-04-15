@@ -42,12 +42,10 @@ activity_gbc_tests_menu::
   jr z, activity_about_gbc_tests
 
 .loop:
-  ld b, helpsect_color_tests_menu
   ldh a, [hw_capability]
-  rra
-  jr nc, .have_help_page_id
-    ld b, helpsect_sgb_color_tests_menu
-  .have_help_page_id:
+  and $01  ; A=1 for SGB or 0 for GBC
+  add helpsect_color_tests_menu  ; GBC and SGB must be consecutive
+  ld b, a
   ld a,PADF_A|PADF_B|PADF_START|PADF_DOWN|PADF_UP|PADF_LEFT|PADF_RIGHT
   call helpscreen
 
@@ -532,10 +530,10 @@ smpte_load_map::
     inc d
   .rowdata_nowrap1:
   add e
-  jr nc,.rowdata_nowrap2
-    inc d
-  .rowdata_nowrap2:
   ld e,a
+  adc d
+  sub e
+  ld d, a
 
   pop af  ; Stack: rowmap pos
   swap a
@@ -833,9 +831,9 @@ load_color_bleed::
 
   ; Load GBC attributes
   ldh a, [hw_capability]
-  rra
-  jr c, .load_sgb_attrs
-  ld a, 1
+  rlca
+  jr nc, .load_sgb_attrs
+  ; ld a, 1  ; bit 0 already set!
   ldh [rVBK],a
   xor a
   ldxy hl, 0, 2

@@ -208,20 +208,8 @@ activity_grid_scroll::
     .not_release_A:
 
     ; Change speed in range 1-4
-    ldh a,[cur_speed]
-    bit PADB_UP,b
-    jr z,.not_increase_speed
-      inc a
-      cp 5
-      jr nc,.not_writeback_speed
-    .not_increase_speed:
-    bit PADB_DOWN,b
-    jr z,.not_decrease_speed
-      dec a
-      jr z,.not_writeback_speed
-    .not_decrease_speed:
-    ldh [cur_speed],a
-    .not_writeback_speed:
+    ld c, 5
+    call process_speed_input
 
     jr .a_done
   .a_held:
@@ -331,6 +319,27 @@ init_grid_scroll_vars:
   ld [hl],a
   ret
 
+;;
+; @param B new keys
+; @param C 1 more than maximum speed
+process_speed_input:
+
+  ; Change speed in range 1-16
+  ldh a,[cur_speed]
+  bit PADB_UP,b
+  jr z,.not_increase_speed
+    inc a
+    cp c
+    ret nc
+  .not_increase_speed:
+  bit PADB_DOWN,b
+  jr z,.not_decrease_speed
+    dec a
+    ret z
+  .not_decrease_speed:
+  ldh [cur_speed],a
+  ret
+
 process_1d_input:
   ; Process input
   ldh a,[new_keys]
@@ -353,20 +362,8 @@ process_1d_input:
   .no_toggle_pause:
 
   ; Change speed in range 1-16
-  ldh a,[cur_speed]
-  bit PADB_UP,b
-  jr z,.not_increase_speed
-    inc a
-    cp 17
-    jr nc,.not_writeback_speed
-  .not_increase_speed:
-  bit PADB_DOWN,b
-  jr z,.not_decrease_speed
-    dec a
-    jr z,.not_writeback_speed
-  .not_decrease_speed:
-  ldh [cur_speed],a
-.not_writeback_speed:
+  ld c, 17
+  call process_speed_input
   ; Fall through to move_by_speed
 
 move_by_speed:
@@ -749,12 +746,14 @@ load_kiki_bg:
       inc de
       dec c
       jr nz,.wallbits_loop
+
+    ; Move to next output row
     ld a,12
     add e
-    ld e,a
-    jr nc,.no_d_wrap
-      inc d
-    .no_d_wrap:
+    ld e, a
+    adc d
+    sub e
+    ld d, a
 
     pop hl
     dec b
@@ -775,24 +774,24 @@ load_kiki_bg:
     call set_gbc_palette
 
     ; Set tiles 2-4 to use secondary palette
-	ld hl,_SCRN0
-	ld bc,$0100+low(rVBK)
-	.attrloop:
-	  ld a,[hl]
-	  sub 2
-	  cp 3  ; CF=1 if alternate palette else 0
-	  ld a,0
-	  rla   ; A=1 if alternate palette else 0
-	  ld d,a
-	  ld a,b
-	  ld [$FF00+c],a
-	  ld a,d
-	  ld [hl+],a
-	  xor a
-	  ld [$FF00+c],a
-	  ld a,h
-	  cp high(_SCRN1)
-	  jr c,.attrloop
+    ld hl,_SCRN0
+    ld bc,$0100+low(rVBK)
+    .attrloop:
+      ld a,[hl]
+      sub 2
+      cp 3  ; CF=1 if alternate palette else 0
+      ld a,0
+      rla   ; A=1 if alternate palette else 0
+      ld d,a
+      ld a,b
+      ld [$FF00+c],a
+      ld a,d
+      ld [hl+],a
+      xor a
+      ld [$FF00+c],a
+      ld a,h
+      cp high(_SCRN1)
+      jr c,.attrloop
   .not_gbc:
 
   ld a,LCDCF_ON|BG_CHR21|BG_NT0

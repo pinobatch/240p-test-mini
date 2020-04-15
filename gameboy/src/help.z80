@@ -403,7 +403,7 @@ helpscreen::
     ld d, 0
     ld hl, helpblink_chr
     add hl, de
-    ld de, $88C6
+    ld de, $88C6  ; address within head tile
     ld bc, 8
     call memcpy
   .no_blink:
@@ -438,12 +438,10 @@ help_load_bg:
   ldh [rSCY],a
 
   ; Clear VWF canvas in pattern table
-  ld e,0
   ldh a,[hw_capability]
   add a
-  jr nc,.notgbc2
-    dec e
-  .notgbc2:
+  sbc a  ; $00 for DMG (colors 0 and 1) or $FF for GBC (2 and 3)
+  ld e, a
   ld hl,CHRRAM0
   call clear_canvas
   ld hl,CHRRAM2
@@ -539,14 +537,48 @@ help_load_bg:
   ldxy hl, 1, 16, _SCRN1
   ld c,WINDOW_WIDTH
   rst memset_tiny
-  
+
+  ; Things to draw only on GB/SGB or only on GBC
   ldh a,[hw_capability]
   add a
   jr nc,.notgbcfinal
     call .load_gbc_only
     jr .donegbcfinal
   .notgbcfinal:
-    call .load_mono_only
+
+    ; Things to load only on mono system
+    ; Background map: Cut out area for left half of character
+    ; so that it can be drawn with flipped tiles
+    ldxy hl, 0, CHARACTER_Y+4
+    ld c,8
+    call .whitecol
+    ldxy hl, 1, CHARACTER_Y
+    ld c,12
+    call .solidcol
+    ldxy hl, 2, CHARACTER_Y
+    ld c,12
+    call .solidcol
+
+    ; Load static sprites
+    ld a,OAMF_XFLIP
+    ldh [Lspriterect_attr],a
+    ld hl,SOAM
+    ld bc,($86*256) + 12/2
+    ld de,(CHARACTER_Y*8+16)*256+16+8
+    call .objcol
+    ld bc,($88*256) + 12/2
+    ld de,(CHARACTER_Y*8+16)*256+8+8
+    call .objcol
+    ld bc,($96*256) + 8/2
+    ld de,(CHARACTER_Y*8+16+32)*256+0+8
+    call .objcol
+    ld a,l
+    ld [oam_used],a
+
+    ; Load palette
+    ld a,%01101100
+    call set_bgp
+    call set_obp0
   .donegbcfinal:
   call lcd_clear_oam
   call run_dma
@@ -563,40 +595,6 @@ help_load_bg:
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
   ret
-
-.load_mono_only:
-  ; Background map: Cut out area for left half of character
-  ; so that it can be drawn with flipped tiles
-  ldxy hl, 0, CHARACTER_Y+4
-  ld c,8
-  call .whitecol
-  ldxy hl, 1, CHARACTER_Y
-  ld c,12
-  call .solidcol
-  ldxy hl, 2, CHARACTER_Y
-  ld c,12
-  call .solidcol
-
-  ; Load static sprites
-  ld a,OAMF_XFLIP
-  ldh [Lspriterect_attr],a
-  ld hl,SOAM
-  ld bc,($86*256) + 12/2
-  ld de,(CHARACTER_Y*8+16)*256+16+8
-  call .objcol
-  ld bc,($88*256) + 12/2
-  ld de,(CHARACTER_Y*8+16)*256+8+8
-  call .objcol
-  ld bc,($96*256) + 8/2
-  ld de,(CHARACTER_Y*8+16+32)*256+0+8
-  call .objcol
-  ld a,l
-  ld [oam_used],a
-
-  ; Load palette
-  ld a,%01101100
-  call set_bgp
-  jp set_obp0
 
 .load_gbc_only:
   ; Fill BG attribute with back wall palette number
@@ -1064,9 +1062,11 @@ help_putlineb:
   ld c,14  ; tile count
   jp vwfPutBufHBlank
 
+;;
+; Draws a page number.  Assumes the page number is less than 20.
 help_put2dig:
   or a  ; clear halfcarry
-  daa
+  daa   ; convert $0A-$13 to $10-$19
   cp 10
   jr c,.less_than_ten
     push af
