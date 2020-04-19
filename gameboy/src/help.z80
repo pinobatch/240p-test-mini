@@ -48,15 +48,21 @@ wnd_x: ds 1
 wnd_progress: ds 1
 help_allowed_keys: ds 1
 help_cur_doc: ds 1
-help_wanted_page:: ds 1
 
-help_cur_page: ds 1
-help_bg_loaded:: ds 1
 help_show_cursor: ds 1
-help_cursor_y:: ds 1
 help_height: ds 1
-help_font_loaded: ds 1
 help_blink_timer: ds 1
+
+
+; Keep cursor_y and help_wanted_page consecutive the save/restore of
+; main, sound test, and color tests.  Keep the rest consecutive for
+; help_init.
+help_cursor_y:: ds 1
+help_wanted_page:: ds 1
+help_bg_loaded:: ds 1
+help_font_loaded: ds 1
+help_cur_page: ds 1
+
 
 section "help_map0",ROM0
 helpattrmap_gbc:
@@ -145,12 +151,13 @@ section "help",ROM0
 ; Clears several variables belonging to the help system.
 help_init::
   xor a
-  ld [help_wanted_page],a
-  ld [help_bg_loaded],a
-  ld [help_cursor_y],a
-  ld [help_font_loaded], a
+  ld hl, help_cursor_y
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
   dec a
-  ld [help_cur_page],a
+  ld [hl],a
   ret
 
 ;;
@@ -175,19 +182,18 @@ read_pad_help_check::
   ldh [rNR52],A
 
   ; Call help
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
-  call helpscreen
+  call helpscreen_abslr
   or a,$FF
   ret
 
 activity_about::
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
   ld b,helpsect_about
-  jr helpscreen
+  jr helpscreen_abslr
 
 activity_credits::
-  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
   ld b,helpsect_144p_test_suite
+helpscreen_abslr::
+  ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
   ; Fall through to helpscreen
 
 ;;
@@ -603,16 +609,16 @@ help_load_bg:
 
   ld de,_SCRN0
   ld bc,32*WALL_HEIGHT
-  ld h,1  ; back wall palette
+  ld h,a  ; back wall palette 1
   call memset
-  ld bc,32*(18 - WALL_HEIGHT)
+  ld bc,32*(32 - WALL_HEIGHT)
   ld h,2  ; floor palette
   call memset
+  ; DE = _SCRN1 by now
 
   ; Fill window attribute
-  ld de,_SCRN1
-  ld bc,32*18
-  ld h,e
+  ld b, 4
+  ld h, e  ; attribute 0
   call memset
 
   ; Draw palette and flipping for character
@@ -639,7 +645,7 @@ help_load_bg:
   ld c,8/2
   call .righthalfcol
 
-  ; TODO: Draw sprite overlay
+  ; Draw sprite overlay
   ld hl,SOAM
   
   ; Vest left half
@@ -745,12 +751,11 @@ gbc_bottom_oam_end:
 ; @param HL starting address
 clear_canvas:
   ld bc,-1024
-  xor a
   .loop:
+    xor a
     ld [hl+],a
-    xor e
+    ld a, e
     ld [hl+],a
-    xor e
     inc c
     jr nz,.loop
     inc b

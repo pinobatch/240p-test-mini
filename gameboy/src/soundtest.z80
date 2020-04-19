@@ -36,12 +36,12 @@ waveram_sin16x:
 waveram_end::
 
 init_apu::
-  ld a,$80
-  ldh [rNR52],a  ; Bring audio circuit out of reset
-  ld a,$FF
-  ldh [rNR51],a  ; Set panning
-  ld a,$77
-  ldh [rNR50],a  ; Set master volume
+  ld hl, rNR52
+  ld [hl], $80  ; Bring audio circuit out of reset
+  dec l
+  ld [hl], $FF  ; Set center pan
+  dec l
+  ld [hl], $77  ; Set master volume to maximum
   xor a
   ldh [rNR10],a  ; Disable pulse 1 sweep
   ret
@@ -65,21 +65,20 @@ activity_soundtest::
   bit PADB_START,[hl]
   jr z,.not_help
     ; Save menu selection, show help, and restore menu selection
-    ld a,[help_wanted_page]
-    ld c,a
-    ld a,[help_cursor_y]
+    ld hl, help_cursor_y
+    ld a,[hl+]
     ld b,a
+    ld c,[hl]
     push bc
 
-    ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
     ld b,helpsect_sound_test
-    call helpscreen
+    call helpscreen_abslr
 
     pop bc
-    ld a,b
-    ld [help_cursor_y],a
-    ld a,c
-    ld [help_wanted_page],a
+    ld hl, help_cursor_y
+    ld a, b
+    ld [hl+], a
+    ld [hl], c
     jr activity_soundtest
   .not_help:
 

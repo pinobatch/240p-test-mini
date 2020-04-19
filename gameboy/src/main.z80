@@ -49,9 +49,8 @@ main::
   else
     ;call activity_soundtest
     if 1
-      ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
       ld b,helpsect_to_do
-      call helpscreen
+      call helpscreen_abslr
     endc
   endc
 .loop:
@@ -67,10 +66,10 @@ main::
   .not_page_two:
 
   ; Save menu selection and get the index into the handler list
-  ld a,[help_wanted_page]
-  ld c,a
-  ld a,[help_cursor_y]
+  ld hl, help_cursor_y
+  ld a,[hl+]
   ld b,a
+  ld c,[hl]
   push bc
 
   ; Start does About instead of what is selected
@@ -84,10 +83,10 @@ main::
 
   ; Restore menu selection
   pop bc
-  ld a,b
-  ld [help_cursor_y],a
-  ld a,c
-  ld [help_wanted_page],a
+  ld hl, help_cursor_y
+  ld a, b
+  ld [hl+], a
+  ld [hl], c
   jr .loop
 
 section "main_handlers", ROM0
