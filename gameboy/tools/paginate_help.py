@@ -141,6 +141,9 @@ section "helppages",ROMX
             dtepages[i] = newpage
             greedysaved += svd
 
+    newnewsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
+    assert newnewsize == newsize - greedysaved
+
     # Document titles come last
     helptitledata = dtepages[len(allpages):]
     del dtepages[len(allpages):]
@@ -170,7 +173,8 @@ section "helppages",ROMX
     lines.append("; compressed help from %d bytes to %d bytes"
                  % (oldsize, newsize))
     if greedysaved > 0:
-        lines.append("; the greedy reencoder saved %d more" % greedysaved)
+        lines.append("; the greedy reencoder saved %d more making %d bytes"
+                     % (greedysaved, newnewsize))
 
     if verbose:
         for i, r in enumerate(replacements):
