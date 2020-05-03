@@ -22,7 +22,6 @@ include "src/hardware.inc"
 include "src/global.inc"
 
   rsset hLocals
-Lshifterid rb 1
 Lshiftermask rb 1
 Ldstoffset rb 1
 
@@ -66,28 +65,28 @@ vwfChrWidths:: ds NUM_GLYPHS
 ; skipping shifting for $00 slivers
 
 section "vwfPutTile",ROM0,align[LOG_GLYPH_HEIGHT]
-ff_shr_x:: db $FF,$7F,$3F,$1F,$0F,$07,$03,$01
+not_ff_shr_x:: db $00,$80,$C0,$E0,$F0,$F8,$FC,$FE
 
 ; The second half of the routine comes before the first half to ease alignment
 vwfPutTile_shifter:
   rept GLYPH_HEIGHT_MINUS_1
     rrca
   endr
+  ld h,a  ; H: all glyph bits, circularly rotated
 
-  ; Break it up into 2 bytes
-  ld c,a  ; C: all glyph bits
+  ; Load destination address
+  ldh a,[Ldstoffset]
+  ld l,a
+
+  ; Break up glyph bits into 2 bytes
   ldh a,[Lshiftermask]
-  and c
-  ld b,a  ; B: left half bits
-  xor c
+  and h
   ld c,a  ; C: right half bits
+  xor h   ; A: left half bits
 
   ; OR in the left byte
   ld h,high(lineImgBuf)
-  ldh a,[Ldstoffset]
-  ld l,a
-  ld a,[hl]
-  or b
+  or [hl]
   ld [hl],a
 
   ; OR in the left
@@ -104,14 +103,26 @@ vwfPutTile_shifter:
 
   ; Advance to next row
   and GLYPH_HEIGHT-1
-  jr nz, vwfPutTile_rowloop
-  ret
+  ret z
+
+  ; Shift each row
+vwfPutTile_rowloop:
+  ; Read an 8x1 sliver of the glyph into B
+  ld a,[de]
+  inc e
+  or a
+  jr z,.sliver_is_blank
+
+  ; Shift the sliver
+  ld h,high(vwfPutTile_shifter)
+  ld l, b
+  jp hl
 
   ; Special handling for blank slivers
 .sliver_is_blank:
   ldh a,[Ldstoffset]
   inc a
-  jr .have_new_dstoffset
+  jr vwfPutTile_shifter.have_new_dstoffset
 
 ;;
 ; Draws the tile for glyph A at horizontal position B
@@ -141,7 +152,7 @@ vwfPutTile::
   ; Get the mask of which bits go here and which to the next tile
   xor b
   ld e,a  ; E = horizontal offset within tile
-  ld bc,ff_shr_x
+  ld bc,not_ff_shr_x
   add c
   ld c,a  ; BC = ff_shr_x+horizontal offset
   ld a,[bc]
@@ -150,26 +161,11 @@ vwfPutTile::
   ; Calculate the address of the shift routine
   ld a,low(vwfPutTile_shifter) + CHAR_BIT - 1
   sub e
-  ldh [Lshifterid],a
+  ld b, a
 
   ld d,h
   ld e,l
-
-  ; Shift each row
-vwfPutTile_rowloop:
-  ; Read an 8x1 sliver of the glyph into B
-  ld a,[de]
-  inc e
-  or a
-  jr z,vwfPutTile_shifter.sliver_is_blank
-
-  ; Shift the sliver
-  ld b,a
-  ld h,high(vwfPutTile_shifter)
-  ldh a,[Lshifterid]
-  ld l,a
-  ld a,b
-  jp hl
+  jr vwfPutTile_rowloop
 
 ;;
 ; Write glyphs for the 8-bit-encoded characters string at (hl) to

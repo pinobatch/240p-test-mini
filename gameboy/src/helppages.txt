@@ -141,7 +141,7 @@ stuck or damaged pixels.
 ←→: Change gray level
   or color
 A on white: Hide or show
-  RGB input (GBC/SGB)
+  RGB input (SGB/GBC)
 ↑↓←→: Change RGB value
 ----
 Poor high-voltage
@@ -715,7 +715,7 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.21wip (2020-02-06)
+Ver. 0.21wip (2020-05-03)
 Convergence
 
 © 2011-2016
