@@ -144,6 +144,23 @@ section "helppages",ROMX
     newnewsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
     assert newnewsize == newsize - greedysaved
 
+    # Experiment: Put most commonly repeated lines in/after title table
+    uniquelines = Counter()
+    linecount = 0
+    for page in dtepages:
+        page = page.rstrip(b'\x00').split(b"\n")
+        uniquelines.update(x for x in page if x)
+    print("%s lines, %d unique"
+          % (sum(uniquelines.values()), len(uniquelines)), file=sys.stderr)
+    alllinesbytes = sum((len(k) + 1) * v for k, v in uniquelines.items())
+    ulinesbytes = sum((len(k) + 1) for k in uniquelines)
+    print("Removing dupe lines would cut %d bytes to %d plus some overhead"
+          % (alllinesbytes, ulinesbytes), file=sys.stderr)
+    print("Most common lines:", file=sys.stderr)
+    for k, v in uniquelines.most_common():
+        if v < 2: break
+        print(dtedec(k, replacements).decode("cp144p"), v, file=sys.stderr)
+
     # Document titles come last
     helptitledata = dtepages[len(allpages):]
     del dtepages[len(allpages):]
