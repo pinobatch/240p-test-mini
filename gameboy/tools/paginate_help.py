@@ -97,8 +97,6 @@ section "helppages",ROMX
                  for i, doc in enumerate(docs))
     lines.extend('global helpsect_%s' % (doc[1])
                  for i, doc in enumerate(docs))
-    lines.append('helptitles::')
-    lines.extend('  dw helptitle_%s' % doc[1] for doc in docs)
 
     cumul_pages = [0]
     allpages = []
@@ -150,20 +148,17 @@ section "helppages",ROMX
     for page in dtepages:
         page = page.rstrip(b'\x00').split(b"\n")
         uniquelines.update(x for x in page if x)
-    print("%s lines, %d unique"
-          % (sum(uniquelines.values()), len(uniquelines)), file=sys.stderr)
-    alllinesbytes = sum((len(k) + 1) * v for k, v in uniquelines.items())
-    ulinesbytes = sum((len(k) + 1) for k in uniquelines)
-    print("Removing dupe lines would cut %d bytes to %d plus some overhead"
-          % (alllinesbytes, ulinesbytes), file=sys.stderr)
-    print("Most common lines:", file=sys.stderr)
-    for k, v in uniquelines.most_common():
-        if v < 2: break
-        print(dtedec(k, replacements).decode("cp144p"), v, file=sys.stderr)
+    repeatedlines = {k for k, v in uniquelines.items() if v > 1}
 
     # Document titles come last
     helptitledata = dtepages[len(allpages):]
     del dtepages[len(allpages):]
+
+    # Append repeated lines that aren't titles as if they were
+    repeatedlines.difference_update(helptitledata)
+    helptitledata.extend(repeatedlines)
+    lines.append('helptitles::')
+    lines.extend('  dw helptitle_%d' % i for i in range(len(helptitledata)))
 
     # Try to match lines of text to document titles
     # (reuse of title of document id 0 is currently buggy)
@@ -190,9 +185,9 @@ section "helppages",ROMX
         lines.append("  db %s" % rgbasm_escape_bytes(page))
         code_usage.update(page)  # Make histogram
 
-    lines.extend('helptitle_%s: db %s,0'
-                 % (doc[1], rgbasm_escape_bytes(dtetitle))
-                 for doc, dtetitle in zip(docs, helptitledata))
+    lines.extend('helptitle_%d: db %s,0'
+                 % (i, rgbasm_escape_bytes(dtetitle))
+                 for i, dtetitle in enumerate(helptitledata))
 
     lines.append('help_cumul_pages::')
     lines.append(rgbasm_bytearray(cumul_pages))
@@ -218,6 +213,13 @@ section "helppages",ROMX
             lines.append("; $%02X: %s (%d)"
                          % (i + DTE_MIN_CODEUNIT, repr(out),
                             code_usage.get(i + DTE_MIN_CODEUNIT, 0)))
+        lines.append("; Repeated lines that aren't document titles")
+        print(repeatedlines, file=sys.stderr)
+        lines.extend(
+            "; %s (%d)"
+            % (dtedec(r, replacements).decode("cp144p"), uniquelines[r])
+            for r in repeatedlines
+        )
 
     lines.append("")
 

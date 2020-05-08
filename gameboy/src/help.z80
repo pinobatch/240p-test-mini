@@ -952,7 +952,7 @@ help_draw_multiline:
   ; If at a NUL terminator, stop.  At any other control
   ; character, continue to next line
   ld a,[hl+]
-  cp 0
+  or a
   jr z,.textdone
 
   ; If not below the screen, continue

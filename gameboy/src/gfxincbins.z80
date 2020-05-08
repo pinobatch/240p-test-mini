@@ -29,7 +29,7 @@ sizeof_helptiles_gbc equ 960
 global sizeof_helptiles_gbc
 helptiles_end::
 
-section "helptiles_gfx0", ROM0
+; section "helptiles_gfx0", ROMX
 helpblink_chr::
   incbin "obj/gb/helpblink.chrgb"  ; copied to VRAM $88C6
 
@@ -42,7 +42,7 @@ sgbborder::
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "convergence_gfx0",ROM0
+section "convergence_gfx1",ROMX
 convergence_chr::
   incbin "obj/gb/convergence.chrgb.pb16"
 sizeof_convergence_chr equ 80
@@ -98,16 +98,6 @@ global sizeof_megaton_tiles
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "shadowsprite_gfx0",ROM0
-shadow_reticle_chr::
-  incbin "obj/gb/shadow_reticle.chrgb.pb16"
-sizeof_shadow_reticle_chr equ 16*4*4
-global sizeof_shadow_reticle_chr
-hepsie_chr::
-  incbin "obj/gb/hepsie.chrgb.pb16"
-sizeof_hepsie_chr equ 16*3*4
-global sizeof_hepsie_chr
-
 section "shadowsprite_gfx1",ROMX
 portrait_pal::
   incbin "obj/gb/Gus_portrait-GBC.pal"
@@ -120,6 +110,16 @@ hepsie_palette_gbc::
   drgb $FF00DD  ; cape
   drgb $FFAA55
 hepsie_palette_gbc_end::
+
+; section "shadowsprite_gfx0",ROM0
+shadow_reticle_chr::
+  incbin "obj/gb/shadow_reticle.chrgb.pb16"
+sizeof_shadow_reticle_chr equ 16*4*4
+global sizeof_shadow_reticle_chr
+hepsie_chr::
+  incbin "obj/gb/hepsie.chrgb.pb16"
+sizeof_hepsie_chr equ 16*3*4
+global sizeof_hepsie_chr
 
 ; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
