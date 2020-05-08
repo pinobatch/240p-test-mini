@@ -857,6 +857,14 @@ wnd_x_sequence_last:
 
 ; Help text drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+undte_helptitle_a:
+  ld de,helptitles
+  call de_index_a
+undte_to_help_line_buffer:
+  ld de,help_line_buffer
+  jp undte_line
+
+
 ; The NES version uses a state machine that loads one line per frame.
 ; This is needed because the NES PPU has no hblank (mode 0); instead,
 ; it proceeds directly from one mode 3 to the next.  In addition, its
@@ -878,10 +886,7 @@ help_draw_wanted_page:
   ; Draw the document's title
   call vwfClearBuf
   ld a,[help_cur_doc]
-  ld de,helptitles
-  call de_index_a
-  ld de,help_line_buffer
-  call undte_line
+  call undte_helptitle_a
   ld hl,help_line_buffer
   ld b,$00  ; X position
   call vwfPuts
@@ -907,11 +912,23 @@ help_draw_multiline:
   push hl
   call vwfClearBuf  ; Clear the buffer
   pop hl
-  ld de,help_line_buffer
-  call undte_line  ; Decompress a line of text
+  ld a, [hl]
+  cp $0F
+  jr nz, .not_helptitle_line
+    ; $0F $xx: Decompress title $xx
+    inc hl
+    ld a, [hl+]
+    push hl
+    call undte_helptitle_a
+    jr .have_text_line
+  .not_helptitle_line:
+    ; Decompress a line of text that occurs once
+    call undte_to_help_line_buffer
+    push hl
+  .have_text_line:
+  ; HL still on the stack
 
   ; Draw the line of text to the buffer
-  push hl
   ld a,[help_allowed_keys]
   and PADF_DOWN
   jr z,.not_menu_indent

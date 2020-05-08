@@ -165,6 +165,25 @@ section "helppages",ROMX
     helptitledata = dtepages[len(allpages):]
     del dtepages[len(allpages):]
 
+    # Try to match lines of text to document titles
+    # (reuse of title of document id 0 is currently buggy)
+    helptitleinv = {t: idx for idx, t in enumerate(helptitledata) if idx}
+
+    # Experiment: Replace lines matching helplines with references
+    for i, page in enumerate(dtepages):
+        page = page.rstrip(b'\x00').split(b"\n")
+        newpage = bytearray()
+        for j, line in enumerate(page):
+            helptitleid = helptitleinv.get(line)
+            if helptitleid is not None:
+                newpage.extend([0x0F, helptitleid])
+            else:
+                newpage.extend(line)
+                if j != len(page) - 1:
+                    newpage.append(0x0A)
+        newpage.append(0)
+        dtepages[i] = bytes(newpage)
+
     code_usage = Counter()
     for pagenum, page in enumerate(dtepages):
         lines.append("helppage_%03d:" % pagenum)
