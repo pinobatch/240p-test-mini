@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 import sys, os, argparse
-from vwfbuild import rgbasm_bytearray
 from collections import Counter
 from itertools import chain
 
+# allow building from attic
+sys.path.append(os.path.normpath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
+from vwfbuild import rgbasm_bytearray
+
 # Find common tools
 commontoolspath = os.path.normpath(os.path.join(
-    os.path.dirname(sys.argv[0]), "..", "..", "common", "tools"
+    os.path.dirname(sys.argv[0]), "..", "..", "..", "common", "tools"
 ))
 sys.path.append(commontoolspath)
 from parsepages import lines_to_docs
