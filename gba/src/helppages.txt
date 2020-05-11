@@ -19,9 +19,9 @@ Stopwatch
 Manual lag test
 Hill zone scroll test
 Vertical scroll test
-Grid scroll
+Grid scroll test
 Full screen stripes
-Backlight zone
+Backlight zones
 Sound test
 Audio sync
 Lame boy
@@ -138,12 +138,10 @@ A on white: Hide or show
   RGB input
 ↑↓←→: Change RGB value
 ----
-Poor high-voltage
-regulation in a CRT
-causes image size to
-depend on brightness.
-This changes the
-width of the border
+Poor high-voltage regulation
+in a CRT causes image size
+to depend on brightness.
+This changes border width
 on Game Boy Player.
 
 == Motion blur ==
@@ -415,7 +413,7 @@ A solid gray image indicates
 slow LCD response time or
 Game Boy Player filtering.
 
-== Backlight zone test ==
+== Backlight zones ==
 
 This test displays a small
 moving square, letting
@@ -460,12 +458,12 @@ video are synchronized.
 A: Play a sound and
   flash the screen
 
-The Game Boy has stereo
-audio output. Each voice
+All Game Boy systems output
+stereo audio. Each voice
 (pulse 1, pulse 2, wavetable,
 and noise) can be panned
 center or hard left or right.
-The Game Boy Advance adds
+Game Boy Advance adds
 two 8-bit PCM channels.
 ----
 Most choices use the
@@ -484,7 +482,7 @@ The G chord is synthesized
 in real-time using the
 Karplus/Strong algorithm.
 
-== Audio sync test ==
+== Audio sync ==
 
 This test flashes the
 screen for two frames
@@ -554,7 +552,7 @@ Select: Return to PLUGE
 
 == Gradient color bars ==
 
-This pattern lets you
+Use this pattern to
 calibrate colors on a TV.
 Increase the contrast
 (white level) until C and
@@ -597,7 +595,7 @@ Select: Play 1 kHz tone
 
 == Color bleed ==
 
-This pattern helps
+Use this pattern to
 diagnose color bleed
 caused by incorrect
 color resampling.

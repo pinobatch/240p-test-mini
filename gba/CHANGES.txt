@@ -1,6 +1,6 @@
 0.21
 * Help: Make some descriptions more concise (with Artemio's help)
-* Compile with -fno-common for forthcoming GCC 10
+* Compile with -fno-common for GCC 10 compatibility
 
 0.20 (2020-01-30)
 * Add Convergence test

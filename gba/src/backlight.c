@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_video.h>
 #include <gba_input.h>
 
-extern const unsigned char helpsect_backlight_zone_test[];
+extern const unsigned char helpsect_backlight_zones[];
 
 void activity_backlight_zone(void) {
   unsigned int inverted = 0, hidden = 0, held_keys = 0, sz = 1;
@@ -29,7 +29,7 @@ void activity_backlight_zone(void) {
 
   load_common_obj_tiles();
   while (1) {
-    read_pad_help_check(helpsect_backlight_zone_test);
+    read_pad_help_check(helpsect_backlight_zones);
     held_keys |= new_keys;
     if (new_keys & KEY_SELECT) {
       inverted = !inverted;

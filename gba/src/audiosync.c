@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_sound.h>
 #include <gba_input.h>
 
-extern const unsigned char helpsect_audio_sync_test[];
+extern const unsigned char helpsect_audio_sync[];
 #define PFMAP 23
 
 static const BarsListEntry audiosync_rects[] = {
@@ -58,7 +58,7 @@ void activity_audio_sync() {
     if (progress < 120) {
       REG_SOUND1CNT_H = 0;  // note cut
       REG_SOUND1CNT_X = 0x8000;
-      read_pad_help_check(helpsect_audio_sync_test);
+      read_pad_help_check(helpsect_audio_sync);
     
       if (new_keys & KEY_A) {
         running = !running;
