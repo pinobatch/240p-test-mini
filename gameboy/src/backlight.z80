@@ -66,7 +66,7 @@ activity_backlight_zone::
   ldh [rLCDC],a
 
 .loop:
-  ld b,helpsect_backlight_zone_test
+  ld b,helpsect_backlight_zones
   call read_pad_help_check
   jr nz,.restart
 

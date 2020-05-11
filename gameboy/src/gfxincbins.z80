@@ -128,6 +128,7 @@ hillzone_nam::
   incbin "obj/gb/greenhillzone.nam.pb16"
 kikitiles_chr::
   incbin "obj/gb/kikitiles.chrgb"
+section "shadowsprite_gfx1",ROMX
 kikimap::
   incbin "obj/gb/kikimap.chr1.pb16"
 

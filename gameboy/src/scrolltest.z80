@@ -177,7 +177,7 @@ activity_grid_scroll::
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 .loop:
-  ld b,helpsect_grid_scroll_test
+  ld b,helpsect_grid_scroll
   call read_pad_help_check
   jr nz,.restart
 
@@ -248,7 +248,7 @@ activity_hillzone_scroll::
   ldh a,[vblank_lcdc_value]
   ldh [rLCDC],a
 .loop:
-  ld b,helpsect_hill_zone_scroll_test
+  ld b,helpsect_hill_zone_scroll
   call read_pad_help_check
   jr nz,.restart
 
@@ -280,7 +280,7 @@ activity_kiki_scroll::
   ld b, 19
   call sgb_set_palette_b
 .loop:
-  ld b,helpsect_vertical_scroll_test
+  ld b,helpsect_vertical_scroll
   call read_pad_help_check
   jr nz,.restart
 

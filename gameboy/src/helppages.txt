@@ -19,7 +19,7 @@ Hill zone scroll
 Vertical scroll
 Grid scroll
 Full screen stripes
-Backlight zone
+Backlight zones
 Sound test
 Audio sync
 Lame boy
@@ -166,7 +166,7 @@ check gray levels.
 
 ↑↓: Choose a setting
 ←→: Change its value
-A: Start or stop the test
+A: Start or stop
 ----
 The STN LCD in the
 original Game Boy and
@@ -374,7 +374,7 @@ beep when A is pressed
 or beep and flash when
 the reticles align.
 
-== Hill zone scroll test ==
+== Hill zone scroll ==
 
 This shows a scrolling
 background with several
@@ -389,7 +389,7 @@ A: Start or stop
 Hill zone by mikejmoffitt
   & Damian Yerrick
 
-== Vertical scroll test ==
+== Vertical scroll ==
 
 This test shows a
 scrolling background.
@@ -406,7 +406,7 @@ A: Start or stop
 Map by Artemio Urbina
 Tiles by Damian Yerrick
 
-== Grid scroll test ==
+== Grid scroll ==
 
 A grid scrolls vertically
 or horizontally. Use it
@@ -447,7 +447,7 @@ A solid gray image
 indicates slow LCD
 response.
 
-== Backlight zone test ==
+== Backlight zones ==
 
 This test displays a
 small moving square,
@@ -494,9 +494,9 @@ video are synchronized.
 A: Play a sound and
   flash the screen
 
-The Game Boy has stereo
-audio output. Each voice
-(pulse 1, pulse 2,
+The Game Boy outputs
+stereo audio. Each
+voice (pulse 1, pulse 2,
 wavetable, and noise)
 can be panned left,
 center, or right.
@@ -529,7 +529,7 @@ the GB v1 profile.
 
 A: Play tones   B: Stop
 
-== Audio sync test ==
+== Audio sync ==
 
 This test flashes the
 screen for two frames
@@ -630,7 +630,7 @@ Select: Go to PLUGE
 
 == Gradient color bars ==
 
-This pattern lets you
+Use this pattern to
 calibrate colors on
 a TV. Increase the
 contrast until C and
@@ -674,7 +674,7 @@ Select: Play 1 kHz tone
 
 == Color bleed ==
 
-This pattern helps
+Use this pattern to
 diagnose color bleed
 caused by incorrect
 color resampling.

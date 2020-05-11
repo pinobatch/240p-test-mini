@@ -8,6 +8,8 @@
   when on ground; involve the abdominal and back muscles
 * Help: Make some descriptions more concise (with Artemio's help)
 * Help: Move non-ASCII symbols to $18-$1F to free DTE codes
+* Help: Use two compressors, choosing the best for each line
+* Help: Coalesce repeated lines of text
 * Simplify title in SGB border to reuse more tiles
 * Share code for "Select: Invert grays"
 * Share code for scroll tests' speed control
