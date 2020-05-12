@@ -1016,12 +1016,12 @@ help_draw_status_line:
     ld a,[help_cur_page]
     sub a,d
     inc a
-    call help_put2dig
+    call help_put1dig
     ld a,"/"
     ld [hl+],a
     ld a,e
     sub d
-    call help_put2dig
+    call help_put1dig
     ld a,GL_RIGHT
     ld [hl+],a
     ld [hl],0
@@ -1085,19 +1085,8 @@ help_putlineb:
   jp vwfPutBufHBlank
 
 ;;
-; Draws a page number.  Assumes the page number is less than 20.
-help_put2dig:
-  or a  ; clear halfcarry
-  daa   ; convert $0A-$13 to $10-$19
-  cp 10
-  jr c,.less_than_ten
-    push af
-    swap a
-    and $0F
-    add "0"
-    ld [hl+],a
-    pop af
-  .less_than_ten:
+; Draws a page number.  Assumes the page number is less than 10.
+help_put1dig:
   and $0F
   add "0"
   ld [hl+],a
