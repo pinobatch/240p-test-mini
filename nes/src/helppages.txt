@@ -735,6 +735,8 @@ Record the NES's audio
 output using a sound card and
 compare it to other systems
 using the NES v7 profile.
+Only the 2A03 is tested,
+not Famicom expansion audio.
 
 A: Play tones   B: Stop
 ←→: Change video background
