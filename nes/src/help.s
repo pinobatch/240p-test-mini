@@ -588,14 +588,14 @@ vwfmap_tileloop:
 .segment "HELPDATA"
 ; Y, Start tile, Attr, X, Height
 gus_sprite_strips:
-  .byte 115,$21,$40,32, 3  ; Elbows
-  .byte 115,$21,$00,88, 3
+  .byte 115,$21,$41,32, 3  ; Elbows
+  .byte 115,$21,$01,88, 3
 
 
-  .byte  69,$11,$40,48, 2  ; Head excl. eye
-  .byte  55,$01,$40,56, 2
-  .byte  55,$01,$00,64, 2
-  .byte  69,$11,$00,72, 2
+  .byte  69,$11,$43,48, 2  ; Head excl. eye
+  .byte  55,$01,$43,56, 2
+  .byte  55,$01,$03,64, 2
+  .byte  69,$11,$03,72, 2
 
   .byte 103,$27,$41,40, 3  ; Arms and torso (upper)
   .byte 103,$17,$41,48, 3
@@ -625,7 +625,7 @@ gus_eyes2:  ; eyes shut
 
 helpscreen_palette:
   .byte     $20,$0F,$20,$0F,$0F,$20,$20
-  .byte $0F,$02,$27,$38, $0F,$18,$27,$38, $0F,$02,$27,$20
+  .byte $0F,$02,$27,$38, $0F,$18,$27,$38, $0F,$02,$27,$20, $0F,$02,$27,$12
 helpscreen_palette_size = * - helpscreen_palette
 pagenum_template:  .byte 134," 1/1 ",135,0
 updowna_msg:       .byte 132,133,"A: Select",0
