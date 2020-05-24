@@ -732,9 +732,10 @@ analysis tool available at
 junkerhq.net/MDFourier
 
 Record the NES's audio
-output using a sound card and
-compare it to other systems
-using the NES v7 profile.
+output using a sound card
+and compare it to other
+systems using the NES v7
+profile (or newer).
 Only the 2A03 is tested,
 not Famicom expansion audio.
 
@@ -794,7 +795,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.21wip (2020-02-02)
+Version 0.21 (2020-05-2x)
 MDFourier phase improvement
 
 Concept: Artemio Urbina

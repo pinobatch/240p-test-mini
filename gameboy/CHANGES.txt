@@ -1,23 +1,24 @@
-0.21
+0.21 (2020-05-2x)
 * Add Convergence pattern
 * Overscan: Change WX in hblank to hide a 1-line-tall glitch
   (reported by LIJI32)
 * Stopwatch: Make hours digit work
-* Manual lag test: Compress tilemap with PB16
+* Vertical scroll: Compress tilemap with PB16
 * Lame boy: Glove contrast; vest and sleeve trail; squash bottom
   when on ground; involve the abdominal and back muscles
 * Help: Make some descriptions more concise (with Artemio's help)
-* Help: Move non-ASCII symbols to $18-$1F to free DTE codes
-* Help: Use two compressors, choosing the best for each line
 * Help: Coalesce repeated lines of text
-* Simplify title in SGB border to reuse more tiles
+* Help: Move non-ASCII symbols to $18-$1F to free DTE codes
+* Help: Compress each line of text twice and keep the smaller
+* Help: Assume no document has more than 9 pages
+* Simplify title in SGB border to reuse more tiles and more closely
+  match the recent Genesis version
 * Share code for "Select: Invert grays"
 * Share code for scroll tests' speed control
 * SGB packet sending: Use ring counter 
 * Switch to smaller ADC/DAA binary to decimal converter
 * Numerous micro-optimizations
 * Disable -static in compilation of DTE encoder on macOS (#24)
-* DTE: Compress each line of text twice and keep the smaller
 * unused.py: Recognize more optimization opportunities
 * Allow use of out-of-PATH copy of RGBDS
 

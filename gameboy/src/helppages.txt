@@ -715,7 +715,7 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.21wip (2020-05-03)
+Ver. 0.21 (2020-05-2x)
 Convergence
 
 © 2011-2016
