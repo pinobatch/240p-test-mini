@@ -1,4 +1,4 @@
-0.21 (2020-05-2x)
+0.21 (2020-05-25)
 * Add Convergence pattern
 * Overscan: Change WX in hblank to hide a 1-line-tall glitch
   (reported by LIJI32)

@@ -715,7 +715,7 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.21 (2020-05-2x)
+Ver. 0.21 (2020-05-25)
 Convergence
 
 © 2011-2016
@@ -739,6 +739,7 @@ Special thanks:
 Thank you to my patrons:
   Johnathan Roatch
   Joe Parsell
+  Brad Smith
 ----
 You can help:
 - Run tests on authentic

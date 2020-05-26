@@ -1,9 +1,9 @@
-0.21 (2020-05-2x)
+0.21 (2020-05-25)
 * Help: Make some descriptions more concise (with Artemio's help)
 * Compile with -fno-common for GCC 10 compatibility
 
 0.20 (2020-01-30)
-* Add Convergence test
+* Add Convergence pattern
 * Vertical scroll test: Display the correct help page
 * Help: Blink Gus's eyes
 

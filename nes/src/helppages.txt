@@ -795,7 +795,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.21 (2020-05-2x)
+Version 0.21 (2020-05-25)
 MDFourier phase improvement
 
 Concept: Artemio Urbina
@@ -815,6 +815,7 @@ PARTICULAR PURPOSE.
 Thank you to my patrons:
   Johnathan Roatch
   Joe Parsell
+  Brad Smith
 
 You can help this project by
 running the test on authentic

@@ -10,13 +10,13 @@
 #
 
 # These are used in the title of the NES program and the zip file.
-title = 240pee
-version = 0.21
+title:=240pee
+version:=0.21
 
 # Space-separated list of assembly language files that make up the
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
-objlist = vwf7 zappertest overclock paldetect vwf_draw init \
+objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
   main help helppages.hlp stills linearity stopwatch backlight scrolltest \
   kiki audiosync soundtest crowd mdfourierfe mdfourier \
   overscan megaton shadowsprite \
@@ -24,13 +24,13 @@ objlist = vwf7 zappertest overclock paldetect vwf_draw init \
   pb53files rectfiles ntscPeriods
 objlistnsf := mdfouriernsf mdfourier ntscPeriods
 
-AS65 = ca65
-LD65 = ld65
-CFLAGS65 = -g
-objdir = obj/nes
-srcdir = src
-imgdir = tilesets
-cimgdir = ../common/tilesets
+AS65:=ca65
+LD65:=ld65
+CFLAGS65:=-g
+objdir:=obj/nes
+srcdir:=src
+imgdir:=tilesets
+cimgdir:=../common/tilesets
 
 # Flags for native tools written in C
 CC := gcc

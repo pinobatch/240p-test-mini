@@ -1,17 +1,17 @@
-0.21 (2020-05-2x)
+0.21 (2020-05-25)
 * Build-time option to exit to menu if included in Action 53
   multicart, either from menu or pressing Reset twice
-* Help: Add shading detail to Gus's shirt and cap
 * MDFourier: Hold Start at boot to skip to this activity
-* MDFourier: Warn for reduced precision (triangle phase differs
-  from power-up state) and add tones to indicate it for profile v7
+* MDFourier: Warn for reduced precision (triangle phase differs from
+  power-up state) and add tones to indicate it for profile v7 and v8
 * MDFourier: Fix stuck note after pressing B to stop
 * MDFourier: Caution that Famicom expansions are not tested
 * Build MDFourier by itself as an NSF
+* Help: Add shading detail to Gus's shirt and cap (GBA parity)
 * Disable -static when building DTE encoder on macOS (#24)
 
 0.20 (2020-01-30)
-* Add Convergence test
+* Add Convergence pattern
 * Add MDFourier tone generator
 
 0.19 (2019-09-12)
