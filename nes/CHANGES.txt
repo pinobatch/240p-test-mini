@@ -1,6 +1,7 @@
-0.21 (2020-05-25)
+0.21 (2020-06-01)
 * Build-time option to exit to menu if included in Action 53
   multicart, either from menu or pressing Reset twice
+* PLUGE: Draw center grays in correct colors after closing help
 * MDFourier: Hold Start at boot to skip to this activity
 * MDFourier: Warn for reduced precision (triangle phase differs from
   power-up state) and add tones to indicate it for profile v7 and v8
