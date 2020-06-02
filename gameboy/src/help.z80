@@ -955,6 +955,11 @@ help_draw_multiline:
   or a
   jr z,.textdone
 
+  ; Try again in case the last line was a helptitles line
+  ld a,[hl]
+  or a
+  jr z,.textdone
+
   ; If not below the screen, continue
   inc b
   ld a,b
