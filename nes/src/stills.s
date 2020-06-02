@@ -523,11 +523,12 @@ is_shark = test_state+2
 
 restart:
   ; Load initial palette
-  lda #$3F
-  sta PPUADDR
+  lda #$00
+  sta PPUMASK
+  ldx #$3F
+  stx PPUADDR
   ldx #$05
   stx PPUADDR
-  lda #$00
   sta PPUDATA
   lda #$10
   sta PPUDATA
@@ -538,7 +539,7 @@ restart:
   ldx #$02
   ldy #$00
   lda #10
-  jsr unpb53_file
+  jsr unpb53_file  ; shark pictogram tiles
 
   ; Draw PLUGE map on nametable 0
   lda #RF_pluge
