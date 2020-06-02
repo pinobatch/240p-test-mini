@@ -27,7 +27,7 @@ cur_lcdc rb 1
 need_sgb_update rb 1
 
 ; Game Boy Color tests menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-section "gbctestmenu", ROM0
+section "gbctestmenu_about", ROM0
 activity_about_gbc_tests:
   ld b,helpsect_color_tests
   jp helpscreen_abslr

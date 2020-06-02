@@ -34,10 +34,10 @@ lastrawlag    rb 1  ; in signed magnitude (7 set: early); overlaps framecounts
 
 num_tests     rb 1
 cursor_y      rb 1
-reticlepos    rb 1
-reticletarget rb 1
 reticledir    rb 1  ; 1: horizontal; 2: vertical; 3: both
 enableflags   rb 1
+reticlepos    rb 1
+reticletarget rb 1
 
 CROSSING_BEEP_FREQ = 2048-131
 A_PRESS_BEEP_FREQ = 2048-262
@@ -46,13 +46,14 @@ section "megaton",ROM0
 
 ; Megaton: Manual lag test
 activity_megaton::
+  ld hl, num_tests
   xor a
-  ldh [num_tests],a
-  ldh [cursor_y],a
+  ld [hl+], a  ; num_tests = 0
+  ld [hl+], a  ; cursor_y = 0
   inc a
-  ldh [reticledir],a
-  ld a,$03
-  ldh [enableflags],a
+  ld [hl+], a  ; reticledir = 1
+  ld a, 3
+  ld [hl], a   ; enableflags = 3
 
 .restart:
   call clear_gbc_attr

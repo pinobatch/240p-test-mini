@@ -1084,6 +1084,8 @@ help_putlineb:
   ld c,14  ; tile count
   jp vwfPutBufHBlank
 
+section "help_p1d", ROM0
+
 ;;
 ; Draws a page number.  Assumes the page number is less than 10.
 help_put1dig:

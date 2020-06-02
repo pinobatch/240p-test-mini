@@ -138,13 +138,14 @@ mt_belowR:
   db KT_SHADOW_U_L, KT_SHADOW_UL_L,KT_SHADOW_L,   KT_SHADOW_L
   db KT_SHADOW_UL_L,KT_SHADOW_L,   KT_SHADOW_UL_L
 
-section "gridscroll",ROM0
+section "gridscroll_tile",ROM0
 gridtile_pb16:
   db %01011111
   db %11111111
   db %10000001
   db %11111101
   db %11111111
+section "gridscroll",ROM0
 kikibgpalette_gbc:
   drgb $FFFFAA  ; 0: orange (sand)
   drgb $FFAA55

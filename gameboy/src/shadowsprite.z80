@@ -494,8 +494,7 @@ load_bg:
   ldh [rSCX], a
   ldh a,[cur_bg_style]
   ld de,shadow_sprite_bg_loaders
-  call de_index_a
-  jp hl
+  jp jumptable_de_a
 
 shadow_sprite_bg_loaders:
   dw load_gus_portrait
