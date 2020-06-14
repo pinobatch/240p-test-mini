@@ -226,7 +226,7 @@ activity_overscan::
 
   jp .loop
 
-TILE_P equ $06
+TILE_P equ $1B  ; flipped V
 TILE_X equ $07
 TILE_RARROW equ $08
 TILE_RBORDER equ $03
@@ -302,7 +302,7 @@ overscan_draw_sides:
   ld [hl+],a
   ld a,TILE_P
   ld [hl+],a
-  xor a
+  ld a, $40  ;vertical flip
   ld [hl+],a
 
   ld [hl],e

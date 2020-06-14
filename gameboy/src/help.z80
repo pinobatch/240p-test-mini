@@ -356,32 +356,30 @@ helpscreen::
   call help_move_window
 
   ; Draw sprites
-  ld a,4*CHARACTER_OBJ_COUNT
-  ld [oam_used],a
+  ld hl, oam_used
+  ld [hl], 4*CHARACTER_OBJ_COUNT
 
   ; Draw arrow if up/down navigation allowed
   ld a,[help_show_cursor]
   or a
   jr z,.nodrawarrow
-  ld a,[oam_used]
-  ld l,a
-  ld h,high(SOAM)
-  ld a,[help_cursor_y]
-  add a
-  add a
-  add a
-  add HELP_CURSOR_Y_BASE
-  ld [hl+],a
-  ld a,[wnd_x]
-  add 6+1
-  ld [hl+],a
-  ld a,ARROW_SPRITE_TILE
-  ld [hl+],a
-  xor a
-  ld [hl+],a
-  ld a,l
-  ld [oam_used],a
-.nodrawarrow:
+    ld l, [hl]  ; L = OAM pointer
+    ld a,[help_cursor_y]
+    add a
+    add a
+    add a
+    add HELP_CURSOR_Y_BASE
+    ld [hl+],a
+    ld a,[wnd_x]
+    add 6+1
+    ld [hl+],a
+    ld a,ARROW_SPRITE_TILE
+    ld [hl+],a
+    xor a
+    ld [hl+],a
+    ld a,l
+    ld [oam_used],a
+  .nodrawarrow:
   call lcd_clear_oam
 
   ; Wait for next frame
