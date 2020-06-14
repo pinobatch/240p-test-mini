@@ -1,7 +1,333 @@
-;
-; MDFourier test engine
-;
 include "src/hardware.inc"
 include "src/global.inc"
 
-section "mdfourier",ROM0
+SECTION "apubuffer", WRAM0
+
+; Null terminated (address, data) pairs
+apubuffer equs "help_line_buffer"	
+
+SECTION "mdfourier", ROM0
+
+run_mdfourier::
+  ld de, apucmd_reset_apu
+  call load_apucmd_de
+  call mdfourier_present
+  ld hl, waveram_sinx
+  call load_waveram_hl
+  call pattern_sync
+  
+  ld c, $00
+  call pattern_tone_scale_duty_c
+  ld c, $40
+  call pattern_tone_scale_duty_c
+  ld c, $80
+  call pattern_tone_scale_duty_c
+  ld c, $C0
+  call pattern_tone_scale_duty_c
+
+  ld a, [new_keys]
+  bit PADB_B, a
+  jr nz, .halt
+
+  ld c, $00
+  call pattern_noise_scale_duty_c
+  ld c, $08
+  call pattern_noise_scale_duty_c
+  call pattern_steady_noise
+
+  ld a, [new_keys]
+  bit PADB_B, a
+  jr nz, .halt
+
+  ld de, apucmd_pulse_reset_lo
+  call pattern_pulse_reset_de
+  ld de, apucmd_pulse_reset_hi
+  call pattern_pulse_reset_de
+  ld c, $00
+  call pattern_sweep_up_duty_c
+  ld c, $C0
+  call pattern_sweep_up_duty_c
+
+  call pattern_sync
+
+
+.halt:
+  xor a
+  ldh [rNR52], a
+
+  ret
+
+load_apucmd_de:
+  ld hl, apubuffer
+  jr apu_stpcpy
+
+;;
+; Copies a string consisting of alternating addresses and data,
+; terminated by a zero address.
+; @param HL destination pointer
+; @param DE source string, NUL-terminated
+; @return DE and HL both point to the trailing NUL, BC unchanged
+apu_stpcpyloop:
+  inc de
+  ld [hl+],a
+  ld a,[de]
+  inc de
+  ld [hl+],a
+apu_stpcpy::
+  ld a,[de]
+  and a
+  jr nz,apu_stpcpyloop
+  ld [hl],a
+  ret
+
+load_waveram_hl:
+  xor a
+  ldh [rNR30], a
+  lb bc, 16, _AUD3WAVERAM
+  .loop:
+    ld a, [hl+]
+    ld [$FF00+c], a
+    inc c
+    djnz .loop
+  ld a, $80
+  ldh [rNR30], a
+  ret
+
+mdfourier_present:
+  ld a, [new_keys]
+  bit PADB_B, a
+  ret nz
+
+  call read_pad
+  rst wait_vblank_irq
+  ; fall through
+mdfourier_push_apubuffer:
+  ld hl, apubuffer
+  jr .loopcontinue
+
+  ; 11 cycles per write is 7 fewer than the NES version
+  ; 1. two repeats of apubuffer address (-4)
+  ; 2. autoincrementing apubuffer (-2)
+  ; 3. one repeat of $4000 (-3)
+  ; 4. moving destination address to C (+1)
+  ; 5. terminator testing must be in A (+1)
+  .loop:
+    ld c, a
+    ld a, [hl+]
+    ld [$FF00+c], a
+  .loopcontinue:
+    ld a, [hl+]
+    or a
+    jr nz, .loop
+
+  ; Mark this bufferas pushed
+  ld [apubuffer], a
+  ret
+
+;;
+; HL = ((unsigned short *)HL)[A & 0x7F]; A = L
+hl_index_a:
+  add a, a
+  add a, l    ; A = A+L
+  ld l, a    ; L = A+L
+  adc a, h    ; A = A+L+H+carry
+  sub l       ; A = H+carry
+  ld h, a    ; H = H+carry
+  ld a, [hl+]
+  ld h, [hl]
+  ld l, a
+  ret
+
+; patterns ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+pattern_sync:
+  call silence_20_frames
+  ld b, 10
+  .loop:
+    push bc
+    ld de, apucmd_sync_tone
+    call load_apucmd_de
+    call mdfourier_present
+    ld b, 1
+    call silence_b_frames
+    pop bc
+    djnz .loop
+silence_20_frames:
+  ld b, 20
+silence_b_frames:
+  ld de, apucmd_silence
+  call load_apucmd_de
+wait_b_frames:
+  push bc
+  call mdfourier_present
+  pop bc
+  djnz wait_b_frames
+  ret
+
+;;
+; @param C $00, $40, or $80 for pulse 1, $C0 for wave
+; @return C: pointer to frequency low byte register;
+;         HL: pointer to end of APU command
+load_note_start_duty_c:
+  ld de, apucmd_sync_tone
+  ld a, c
+  cp $C0
+  jr c, .notwave1
+    ld de, apucmd_wave_tone
+  .notwave1:
+  call load_apucmd_de
+  ld a, c
+  ld [apubuffer+3], a
+  cp $C0
+  ld c, low(rNR13)
+  ret c
+  ld c, low(rNR33)
+  ret
+
+pattern_tone_scale_duty_c:
+  call load_note_start_duty_c
+  ld b, 0
+  ld d, h
+  ld e, l
+  .loop:
+    push bc
+    ld a, c
+    ld [de], a  ; address: frequency low
+    inc de
+    ld a, b
+    ld hl, pitch_table
+    call hl_index_a
+    ld [de], a  ; data: frequency low
+    inc de
+    ld a, c
+    inc a
+    ld [de], a  ; address: frequency high
+    inc de
+    ld a, h
+    ld [de], a  ; data: frequency high
+    inc de
+    xor a
+    ld [de], a
+    ld b, 10
+    call wait_b_frames
+    pop bc
+
+    ldh a, [new_keys]
+    bit PADB_B, a
+    ret nz
+
+    ld de, apubuffer
+    inc b
+    ld a, b
+    cp 73
+    jr c, .loop
+silence_10_frames:
+  ld b, 10
+  jr silence_b_frames
+
+pattern_noise_scale_duty_c:
+  ld a, $77
+  or c
+  ld c, a
+  .loop:
+    ldh a, [new_keys]
+    bit PADB_B, a
+    ret nz
+
+    ld de, apucmd_noise_tone
+    call load_apucmd_de
+    ld a, c
+    ld [apubuffer+3], a
+    
+    push bc
+    ld b, 20
+    call wait_b_frames
+    pop bc
+
+    ; Want to go 77, 76, 75, 74, 67, 66, 65, 64...
+    ; or 7F, 7E, 7D, 7C, 6F, 6E, 6D, 6C
+    dec c
+    bit 2, c
+    jr nz, .loop
+    ld a, c
+    sub $0C
+    ld c, a
+    jr nc, .loop
+  ret
+
+pattern_steady_noise:
+  call silence_20_frames
+  ld de, apucmd_noise_tone
+  call load_apucmd_de
+  ld b, 80
+  call wait_b_frames
+  ld b, 80
+  call silence_b_frames
+
+pattern_pulse_reset_de:
+  ld b, 20
+  .loop:
+    push de
+    push bc
+    call load_apucmd_de
+    call mdfourier_present
+    pop bc
+    pop de
+    djnz .loop
+  jr silence_10_frames
+
+pattern_sweep_up_duty_c:
+  call load_note_start_duty_c
+  ld b, 6
+  .loop:
+    push bc
+    ld a, c
+    ld [hl+], a
+    ld a, b
+    ld [hl+], a
+    ld [hl], 0
+    call mdfourier_present
+    pop bc
+
+    ldh a, [new_keys]
+    bit PADB_B, a
+    ret nz
+
+    ld hl, apubuffer
+    inc b
+    jr nz, .loop
+  ld b, 20
+  call wait_b_frames
+  jr silence_10_frames
+
+; data tables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+apucmd_reset_apu:
+  db low(rNR52), $00, low(rDIV), $FF, low(rNR52), $80
+  db low(rNR51), $FF, low(rNR50), $77
+apucmd_silence:
+  db low(rNR10), $00
+  db low(rNR12), $08, low(rNR22), $08, low(rNR32), $00, low(rNR42), $08
+  db low(rNR14), $87, low(rNR24), $87, low(rNR44), $87
+  db $00
+apucmd_sync_tone:
+  db low(rNR12), $F8, low(rNR11), $80, low(rNR12), $F8
+  db low(rNR13), 256-16, low(rNR14), $87
+  db $00
+apucmd_wave_tone:
+  ; on DMG, if you don't turn the DAC off and on for each note start,
+  ; the first four bytes of wave RAM may get corrupted
+  db low(rNR30), $00, low(rNR30), $80, low(rNR32), $20
+  db low(rNR33), 256-16, low(rNR34), $87
+  db $00
+apucmd_noise_tone:
+  db low(rNR42), $F8, low(rNR43), $14, low(rNR44), $80
+  db $0
+apucmd_pulse_reset_lo:
+  db low(rNR11), $00, low(rNR12), $F8
+  db low(rNR13), 256-low(336), low(rNR14), $87-high(336)
+  db $00
+apucmd_pulse_reset_hi:
+  db low(rNR11), $00, low(rNR12), $F8
+  db low(rNR13), 256-low(84), low(rNR14), $87-high(84)
+  db $00

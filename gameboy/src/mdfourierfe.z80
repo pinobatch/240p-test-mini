@@ -25,19 +25,28 @@ activity_mdfourier::
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
+  ld b, 7
+  call sgb_set_palette_b
 
 .loop:
   ld b,helpsect_mdfourier
   call read_pad_help_check
   jr nz, .restart
+  rst wait_vblank_irq
   ldh a, [new_keys]
   bit PADB_B, a
   ret nz
   bit PADB_A, a
   jr z, .loop
-  
-  call lcd_off
-  ; TODO: Start test
+
+  ; Start test.  First make the background dark on GBC
+  ; and light on DMG  
+  ld a, $FF
+  call set_bgp
+  xor a
+  ldh [rBGP], a
+
+  call run_mdfourier
   jr .restart
 
 mdfourier_title_labels:

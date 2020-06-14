@@ -11,7 +11,7 @@
 
 # Used in the title of the zipfile and .gb executable
 title:=gb240p
-version:=0.21
+version:=0.22wip
 
 # Space-separated list of asm files without .z80 extension
 # (use a backslash to continue on the next line)
@@ -21,7 +21,7 @@ objlist := header init \
   megaton stopwatch soundtest mdfourier mdfourierfe audiosync \
   sgbtests gbctests \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
-  uniur huffnib gfxincbins allhuffdata
+  uniur huffnib gfxincbins allhuffdata pitchtable
 
 huffdata := \
   obj/gb/stopwatchhand.chrgb.pb16 \
@@ -197,3 +197,7 @@ obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
 
 ../common/tools/dte$(DOTEXE): ../common/tools/dte.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+# So, pitch!
+obj/gb/pitchtable.z80: tools/pitchtable.py
+	$(PY) $< > $@

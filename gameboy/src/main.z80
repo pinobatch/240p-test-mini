@@ -46,7 +46,7 @@ main::
 
   ; Hold Start at power on to skip to MDFourier
   call read_pad
-  ld a, [cur_keys]
+  ldh a, [cur_keys]
   and PADF_START
   jr z, .boot_no_start_button
     call ensure_vwfInit
