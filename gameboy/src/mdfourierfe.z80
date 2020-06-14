@@ -1,0 +1,48 @@
+;
+; MDFourier front end
+;
+include "src/gb.inc"
+include "src/global.inc"
+
+
+section "mdfourierfe",ROM0
+
+activity_mdfourier::
+.restart:
+  call clear_gbc_attr
+  ld hl, CHRRAM2
+  ld c, 16
+  rst memset_tiny  ; clear background tile
+  cpl
+  ldh [rLYC], a  ; disable lyc irq
+  call clear_scrn0_to_0
+  ld de,CHRRAM1>>4
+  ld hl,mdfourier_title_labels
+  call vwfDrawLabels
+  ld a, %01011100
+  call set_bgp
+  
+  ld a,LCDCF_ON|BG_NT0|BG_CHR21
+  ldh [vblank_lcdc_value],a
+  ldh [rLCDC],a
+
+.loop:
+  ld b,helpsect_mdfourier
+  call read_pad_help_check
+  jr nz, .restart
+  ldh a, [new_keys]
+  bit PADB_B, a
+  ret nz
+  bit PADB_A, a
+  jr z, .loop
+  
+  call lcd_off
+  ; TODO: Start test
+  jr .restart
+
+mdfourier_title_labels:
+  db  24, 32,"MDFourier v1",10
+  db  24, 40,"tone generator",10
+  db  24, 64,"A: Start   B: Stop",10
+  db  24, 80,"Caution:",10
+  db  24, 88,"Not yet implemented!",0

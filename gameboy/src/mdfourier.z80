@@ -1,0 +1,7 @@
+;
+; MDFourier test engine
+;
+include "src/hardware.inc"
+include "src/global.inc"
+
+section "mdfourier",ROM0

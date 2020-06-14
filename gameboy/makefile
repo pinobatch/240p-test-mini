@@ -18,7 +18,8 @@ version:=0.21
 objlist := header init \
   main help helppages.hlp placeholder \
   stills shadowsprite backlight scrolltest motionblur overscan \
-  megaton stopwatch soundtest audiosync sgbtests gbctests \
+  megaton stopwatch soundtest mdfourier mdfourierfe audiosync \
+  sgbtests gbctests \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
   uniur huffnib gfxincbins allhuffdata
 

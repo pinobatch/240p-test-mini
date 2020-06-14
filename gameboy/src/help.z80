@@ -269,7 +269,7 @@ helpscreen::
   ld b,PADF_UP|PADF_DOWN
   call autorepeat
 
-  ; Handle keypresses, but ignore tuem until Huffman predecoding
+  ; Handle keypresses, but ignore thgem until Huffman predecoding
   ; finishes so that the copyright notice is displayed.
   ; 0: none loaded; 1: font loaded; 2: font and predecodes loaded
   ld a, [help_font_loaded]
@@ -871,17 +871,19 @@ undte_to_help_line_buffer:
 ; vblank is only 10 lines.  Thus the Game Boy version draws each line
 ; and uploads it over the next 14 hblanks.
 
-help_draw_wanted_page:
-  ; Ensure the font is loaded
+;;
+; Decompresses the font if not yet decompressed
+ensure_vwfInit::
   ld hl, help_font_loaded
   ld a, [hl]
   or a
-  jr nz, .vwfAlreadyInit
-    inc [hl]
-    call vwfInit
-  .vwfAlreadyInit:
+  ret nz
+  inc [hl]
+  jp vwfInit
 
+help_draw_wanted_page:
   ; Draw the document's title
+  call ensure_vwfInit
   call vwfClearBuf
   ld a,[help_cur_doc]
   call undte_helptitle_a

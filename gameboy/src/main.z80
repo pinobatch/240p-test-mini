@@ -44,6 +44,15 @@ main::
   ei
   call help_init
 
+  ; Hold Start at power on to skip to MDFourier
+  call read_pad
+  ld a, [cur_keys]
+  and PADF_START
+  jr z, .boot_no_start_button
+    call ensure_vwfInit
+    call activity_mdfourier
+  .boot_no_start_button:
+
   if 1
     call activity_credits
   else
@@ -118,4 +127,5 @@ page_two_handlers:
   dw activity_backlight_zone
   dw activity_soundtest
   dw activity_audiosync
+  dw activity_mdfourier
   dw lame_boy_demo
