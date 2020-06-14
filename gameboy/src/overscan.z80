@@ -232,9 +232,8 @@ TILE_RARROW equ $08
 TILE_RBORDER equ $03
 
 overscan_draw_sides:
-  ld h,high(SOAM)
-  ld a,[oam_used]
-  ld l,a
+  ld hl, oam_used
+  ld l, [hl]
 
   ldh a,[right_border]
   ld de,127*256+80
@@ -327,9 +326,8 @@ ctz::
   ret
 
 overscan_draw_arrow:
-  ld h,high(SOAM)
-  ld a,[oam_used]
-  ld l,a
+  ld hl, oam_used
+  ld l, [hl]
 
   ; Find which side is in use and how big the border is set
   ldh a,[cur_side]
@@ -410,9 +408,8 @@ overscan_draw_arrow:
 ; Window can't be drawn exactly one pixel from the right side on
 ; mono.  Cover up the difference with sprites.
 overscan_draw_rborder:
-  ld h,high(SOAM)
-  ld a,[oam_used]
-  ld l,a
+  ld hl, oam_used
+  ld l, [hl]
   ld a,[right_border]
   cpl
   add 169

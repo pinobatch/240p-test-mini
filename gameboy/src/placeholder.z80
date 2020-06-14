@@ -602,9 +602,8 @@ Lx_add                 rb 1
   ld a,b
   ldh [Lx_add],a
 
-  ld h,high(SOAM)
-  ld a,[oam_used]
-  ld l,a
+  ld hl, oam_used
+  ld l, [hl]
 .rowloop:
   ldh a,[Lspriterect_width]
   ld b,a  ; B: remaining width on this row in 8px units
