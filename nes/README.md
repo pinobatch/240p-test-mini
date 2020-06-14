@@ -15,6 +15,11 @@ As a secondary target, the suite aims to provide tools for
 calibrating colors, black and white levels for specific console
 outputs and setups. 
 
+MDFourier is tool to compare audio signatures and generate graphs
+that show how they differ.  A tone generator produces a signal for
+recording from the console, and the analysis program compares the
+frequencies to a reference recording and displays the results.
+
 This is free software, with full source code available under the GPL.
 
 [240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite

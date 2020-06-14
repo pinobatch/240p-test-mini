@@ -5,11 +5,18 @@ The [240p Test Suite] is a homebrew software suite for video game
 consoles developed to help in the evaluation of upscalers, upscan
 converters and line doublers.
 
+MDFourier is tool to compare audio signatures and generate graphs
+that show how they differ.  A tone generator produces a signal for
+recording from the console, and the analysis program compares the
+frequencies to a reference recording and displays the results.
+
 This program is a port of Artemio Urbina's 240p Test Suite
 to the Game Boy, as a way of learning the Game Boy CPU.
+It also contains an MDFourier tone generator.
 
 Build requirements: RGBDS, Python 3, Pillow, and GNU Make
 
+[240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
 [240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
 
 Usage
@@ -25,6 +32,9 @@ Super Game Boy that tests color balance.  Each test is controlled
 with the Control Pad and the A and Select Buttons.  To show help for
 any test, press Start or read src/helppages.txt. To leave a test,
 press the B Button.
+
+To skip straight to MDFourier tone generator, hold the Start Button
+as the console maker's logo disappears.
 
 [EverDrive-GB]: https://krikzz.com/store/home/48-everdrive-gb.html
 [Catskull cartridge]: https://catskullelectronics.com/32kcart

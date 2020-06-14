@@ -716,8 +716,8 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.21 (2020-06-01)
-Convergence
+Ver. 0.22wip (2020-06-14)
+MDFourier
 
 © 2011-2016
   Artemio Urbina

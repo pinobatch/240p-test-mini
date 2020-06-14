@@ -4,7 +4,6 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-
 section "mdfourierfe",ROM0
 
 activity_mdfourier::
@@ -52,6 +51,4 @@ activity_mdfourier::
 mdfourier_title_labels:
   db  24, 32,"MDFourier v1",10
   db  24, 40,"tone generator",10
-  db  24, 64,"A: Start   B: Stop",10
-  db  24, 80,"Caution:",10
-  db  24, 88,"Not yet implemented!",0
+  db  24, 64,"A: Start   B: Stop",0
