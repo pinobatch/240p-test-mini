@@ -29,9 +29,13 @@ the menu with the Control Pad and the A and B Buttons.  There are
 three pages of tests: one with mostly still images, one with more
 interactive tests, and a third exclusive to Game Boy Color and
 Super Game Boy that tests color balance.  Each test is controlled
-with the Control Pad and the A and Select Buttons.  To show help for
-any test, press Start or read src/helppages.txt. To leave a test,
+with the Control Pad and the A and Select Buttons.  To leave a test,
 press the B Button.
+
+To show help for any test, press Start or read `src/helppages.txt`.
+Gus, the character at left, was an esports instructor until game
+publishers cracked down on the esports academies in June 2012 and
+July 2013.  Then he became a home theater installer.
 
 To skip straight to MDFourier tone generator, hold the Start Button
 as the console maker's logo disappears.
@@ -131,7 +135,7 @@ invited to post in its [NESdev thread] or [GBDev thread].
 [GBDev thread]: http://gbdev.gg8.se/forums/viewtopic.php?id=542
 
 Copyright 2011-2018 Artemio Urbina  
-Copyright 2018-2019 Damian Yerrick
+Copyright 2018-2020 Damian Yerrick
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

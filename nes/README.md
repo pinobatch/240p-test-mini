@@ -35,8 +35,12 @@ Once the suite is running, the credits will appear.  You can navigate
 the menu with the Control Pad and the A and B Buttons.  There are
 two pages of tests, one with mostly still images and the other with
 more interactive tests.  Each test is controlled with the Control Pad
-and the A and Select Buttons.  To show help for any test, press Start
-or read `src/helppages.txt`.  To leave a test, press the B Button.
+and the A and Select Buttons.  To leave a test, press the B Button.
+
+To show help for any test, press Start or read `src/helppages.txt`.
+Gus, the character at left, was an esports instructor until game
+publishers cracked down on the esports academies in June 2012 and
+July 2013.  Then he became a home theater installer.
 
 To skip straight to MDFourier tone generator, hold the Start Button
 while turning on the power or while pressing the Reset Button.
@@ -123,7 +127,7 @@ high-quality displays and scalers.
 [development thread]: http://forums.nesdev.com/viewtopic.php?t=13394
 
 Copyright 2011-2018 Artemio Urbina  
-Copyright 2015-2018 Damian Yerrick
+Copyright 2015-2020 Damian Yerrick
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

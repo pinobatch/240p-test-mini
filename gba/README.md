@@ -21,8 +21,12 @@ Once the suite is running, the credits will appear.  You can navigate
 the menu with the Control Pad and the A and B Buttons.  There are
 two pages of tests: one with mostly still images and one with more
 interactive tests.  Each test is controlled with the Control Pad and
-the A and Select Buttons.  To show help for any test, press Start or
-read src/helppages.txt. To leave a test, press the B Button.
+the A and Select Buttons.  To leave a test, press the B Button.
+
+To show help for any test, press Start or read `src/helppages.txt`.
+Gus, the character at left, was an esports instructor until game
+publishers cracked down on the esports academies in June 2012 and
+July 2013.  Then he became a home theater installer.
 
 Because the controls match the Game Boy Color version, the L and R
 (shoulder) buttons are not used.
@@ -118,7 +122,7 @@ invited to post in its [gbadev thread].
 [gbadev thread]: http://forum.gbadev.org/viewtopic.php?t=18168
 
 Copyright 2011-2018 Artemio Urbina  
-Copyright 2018-2019 Damian Yerrick
+Copyright 2018-2020 Damian Yerrick
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
