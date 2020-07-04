@@ -397,8 +397,8 @@ smpte_helpscreen:
   .byte helpsect_smpte_color_bars, helpsect_color_bars_on_gray
 
 smpte_palettes:
-  .byte $0f,$10,$28,$2c, $0f,$14,$16,$02, $0f,$01,$20,$04, $0f,$1a,$0d,$00
-  .byte $0f,$20,$38,$2c, $0f,$14,$16,$12, $0f,$01,$20,$04, $0f,$2a,$0d,$00
+  .byte $0f,$10,$28,$2c, $0f,$14,$16,$02, $0f,$0C,$20,$03, $0f,$1a,$0d,$00
+  .byte $0f,$20,$38,$2c, $0f,$14,$16,$12, $0f,$0C,$20,$03, $0f,$2a,$0d,$00
 
 tvSystemkHz: .byte 55, 51, 55
 
