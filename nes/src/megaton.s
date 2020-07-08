@@ -103,9 +103,9 @@ restart:
   lda #MT_DIRTY_CBOXCOLOR
   sta mt_dirty
   lda nmis
-  sta CRCLO
-  eor #1
-  sta CRCHI
+  tax
+  eor #$55
+  jsr _srand
 
   lda #VBLANK_NMI
   sta lastgrade
@@ -431,7 +431,7 @@ loop:
     sta reticletarget
     bit enableflags
     bpl :+
-      jsr rand_crc
+      jsr _rand
       and #$0F
       clc
       adc #<-8

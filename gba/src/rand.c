@@ -1,6 +1,6 @@
 /*
 Pseudorandom number generator
-Copyright 2018 Damian Yerrick
+Copyright 2018, 2020 Damian Yerrick
 
 This work is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any
@@ -34,6 +34,6 @@ void lcg_srand(unsigned int in_seed) {
 }
 
 int lcg_rand(void) {
-  seed = (seed * 0x01010101) + 0x31415927;
+  seed = (seed + 0xB3) * 0x01010101;
   return (seed ^ (seed >> 16)) & 0xFFFF;
 }

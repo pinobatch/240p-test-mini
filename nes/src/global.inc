@@ -129,9 +129,8 @@ bcd_highdigits = $0000
 .global bcdConvert24, bcdWrite
 .globalzp bcdNum, bcdResult
 
-; random.s
-.globalzp CRCLO, CRCHI
-.global rand_crc, crc16_update
+; rand.s
+.global _srand, _rand
 
 ; overclock.s
 .global do_overclock

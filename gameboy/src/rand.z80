@@ -1,7 +1,7 @@
 ;
 ; Pseudorandom number generator
 ;
-; Copyright 2018 Damian Yerrick
+; Copyright 2018, 2020 Damian Yerrick
 ; 
 ; This software is provided 'as-is', without any express or implied
 ; warranty.  In no event will the authors be held liable for any damages
@@ -22,48 +22,35 @@
 section "rand_ram",WRAM0
 randstate: ds 4
 
+; The formula is
+; x[i + 1] = (x[i] + 0xB3) * 0x01010101
+; or equivalently
+; x[i + 1] = x[i] * 0x01010101 + 0xB3B3B3B3
+; Prior to cc65 commit 3994fee595 it was
+; x[i + 1] = x[i] * 0x01010101 + 0x31415927
+
 section "rand",ROM0
 
 ;;
 ; Generates a pseudorandom 16-bit integer in BC
 ; using the LCG formula from cc65 rand():
-; x[i + 1] = x[i] * 0x01010101 + 0x31415927
+; x[i + 1] = x[i] * 0x01010101 + 0xB3B3B3B3
 ; @return A=B=state bits 31-24 (which have the best entropy),
 ; C=state bits 23-16, DHL trashed
 rand::
-  ; Load bits 31-8 of the current value to BCA
-  ld hl,randstate+3
-  ld a,[hl-]
-  ld b,a
-  ld a,[hl-]
-  ld c,a
-  ld a,[hl-]  ; skip D; thanks ISSOtm for the idea
-  ; Used to load bits 7-0 to E.  Reading [HL] each time turned out
-  ; no slower and saved 1 byte.
-
-  ; Multiply by 0x01010101
-  add [hl]
-  ld d,a
-  adc c
-  ld c,a
-  adc b
-  ld b,a
-
-  ; Add 0x31415927 and write back
-  ld a,[hl]
-  add $27
-  ld [hl+],a
-  ld a,d
-  adc $59
-  ld [hl+],a
-  ld a,c
-  adc $41
-  ld [hl+],a
-  ld c,a
-  ld a,b
-  adc $31
-  ld [hl],a
-  ld b,a
+  ; Add 0xB3 then multiply by 0x01010101
+  ld hl, randstate+0
+  ld a, [hl]
+  add a, $B3
+  ld [hl+], a
+  adc a, [hl]
+  ld [hl+], a
+  adc a, [hl]
+  ld [hl+], a
+  ld c, a
+  adc a, [hl]
+  ld [hl], a
+  ld b, a
   ret
 
 ;;
@@ -83,5 +70,6 @@ srand::
 ;
 ; According to tools/rand.py, after srand(1) then ten rand() calls,
 ; first ten BC results should be
-; 3242 2805 8971 25AC F2DD
-; 0E2B BBBD 66BB A14A 2493
+; b4b4 85d1 8e08 9b0d 2d92
+; 794b 64eb 8a25 35ab 6731
+; Verify this with SHOW_RNG in placeholder.z80

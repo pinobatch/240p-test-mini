@@ -25,7 +25,7 @@ run_mdfourier::
   ld c, $C0
   call pattern_tone_scale_duty_c
 
-  ld a, [new_keys]
+  ldh a, [new_keys]
   bit PADB_B, a
   jr nz, .halt
 
@@ -35,7 +35,7 @@ run_mdfourier::
   call pattern_noise_scale_duty_c
   call pattern_steady_noise
 
-  ld a, [new_keys]
+  ldh a, [new_keys]
   bit PADB_B, a
   jr nz, .halt
 
@@ -94,7 +94,7 @@ load_waveram_hl:
   ret
 
 mdfourier_present:
-  ld a, [new_keys]
+  ldh a, [new_keys]
   bit PADB_B, a
   ret nz
 
