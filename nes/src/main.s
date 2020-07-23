@@ -195,6 +195,7 @@ routines:
   .addr do_sharpness-1
   .addr do_crosstalk-1
   .addr do_overscan-1
+  .addr do_safearea-1
   .addr do_overclock-1
 ::page2start = (* - routines)/2
   .addr do_drop_shadow_sprite-1

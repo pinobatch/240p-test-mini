@@ -14,6 +14,7 @@ IRE
 Sharpness
 Chroma crosstalk
 Overscan
+Safe areas
 CPU clock speed
 ----
 Shadow sprite
@@ -422,6 +423,18 @@ PAL NES border is always
 black. It covers 2 pixels
 of the left and right sides
 and 1 on the top.
+
+== Safe areas ==
+
+TV broadcasting standards
+define safe areas to ensure
+a TV's overscan does not
+cut off important information.
+For example, broadcasters
+try to keep text within the
+center 80% of the screen's
+width and height, called the
+title safe area.
 
 == Shadow sprite ==
 

@@ -108,7 +108,7 @@ SIZEOF_TEST_STATE = 24
 .global do_audiosync
 
 ; overscan.s
-.global do_overscan
+.global do_overscan, do_safearea
 
 ; megaton.s
 .global do_manual_lag

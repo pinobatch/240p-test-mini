@@ -304,11 +304,12 @@ bmask     = $08
   asl a
   asl a
   tax
-  lda #0
-  sta rf_curpattable
   lda rectfill_layouts+3,x
   sta rf_tilenum
   lda rectfill_layouts+2,x
+  and #$10
+  sta rf_curpattable
+  eor rectfill_layouts+2,x
   sta rf_curnametable
   lda rectfill_layouts+1,x
   ldy rectfill_layouts+0,x
@@ -330,15 +331,13 @@ bmask     = $08
     lda rf_curnametable
     ora #$03
     sta PPUADDR
-    lda #$C0
-    sta PPUADDR
-    ldx #0
+    ldx #$C0
+    stx PPUADDR
     attrcopyloop:
-      lda attrbuf,x
+      lda a:attrbuf-$C0,x
       sta PPUDATA
       inx
-      cpx #64
-      bcc attrcopyloop
+      bne attrcopyloop
   no_rects:
 
   ; Skip to labels
@@ -501,9 +500,15 @@ times85:
   asl a
   sta PPUMASK
   tax
-  tay
+have_x:
+  ldy #$00
   lda #$02
   jmp unpb53_file
+.endproc
+
+.proc rf_load_tiles_1000
+  ldx #$10
+  bne rf_load_tiles::have_x
 .endproc
 
 ;;

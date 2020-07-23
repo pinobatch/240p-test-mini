@@ -20,8 +20,8 @@
 .include "nes.inc"
 .include "global.inc"
 .include "rectfill.inc"
-.importzp helpsect_overscan
-.importzp RF_overscan
+.importzp helpsect_overscan, helpsect_safe_areas
+.importzp RF_overscan, RF_safearea_1, RF_safearea_2, RF_safearea_3
 
 .segment "RODATA"
 
@@ -451,6 +451,8 @@ base_x = $03
 
 ; Drawing the edges ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.code
+
 .proc overscan_prepare_left
   lda #$60
   sta vram_copydsthi
@@ -551,3 +553,128 @@ sideprocs:
     bpl colloop
   rts
 .endproc
+
+.proc do_safearea
+whichpage = test_state+0
+restart:
+  jsr rf_load_tiles
+  jsr rf_load_tiles_1000
+  jsr ppu_wait_vblank
+  lda #$3F
+  sta PPUADDR
+  ldy #$00
+  sty PPUADDR
+  ldx #2
+  palloop2:
+    ldy #$00
+    palloop:
+      lda gcbars_palette,y
+      sta PPUDATA
+      iny
+      cpy #16
+      bcc palloop
+      dex
+      bne palloop2
+
+  lda #RF_safearea_1
+  jsr rf_load_layout
+  lda #RF_safearea_2
+  jsr rf_load_layout
+  lda #RF_safearea_3
+  jsr rf_load_layout
+
+  ldx #0
+  jsr ppu_clear_oam
+  ldx #16
+  ; Load sprite columns at sides
+  objloadloop:
+    dex
+    txa
+    inx
+    sta OAM+0,x
+    sta OAM+4,x
+    txa
+    and #$08
+    eor #$14
+    sta OAM+1,x
+    eor #1
+    sta OAM+5,x
+    lda #2
+    sta OAM+2,x
+    sta OAM+6,x
+    lda #0
+    sta OAM+3,x
+    lda #248
+    sta OAM+7,x
+    txa
+    clc
+    adc #8
+    tax
+    cmp #232
+    bcc objloadloop
+  ; Set sprite 0
+  lda #$07
+  sta OAM+0
+  lda #$0F
+  sta OAM+1
+  lda #$20
+  sta OAM+2
+  sta OAM+3
+
+loop:
+  jsr ppu_wait_vblank
+
+  ldx #0
+  stx OAMADDR
+  lda #>OAM
+  sta OAM_DMA
+  ldy #240-8
+  lda #VBLANK_NMI|BG_0000|OBJ_0000|1
+  sec
+  jsr ppu_screen_on
+
+  lda #helpsect_safe_areas
+  jsr read_pads_helpcheck
+  bcc :+
+    jmp restart
+  :
+
+  ; Sprite 0 to switch $2000 at top of PocketNES, above
+  lda #$C0
+  s0offloop:
+    bit PPUSTATUS
+    bvs s0offloop
+  s0onloop:
+    bit PPUSTATUS
+    beq s0onloop
+  bmi s0nope
+    lda #VBLANK_NMI|BG_0000|OBJ_0000|0
+    sta PPUCTRL
+    ldx #>-3328
+    ldy #<-3328
+    jsr waitminusxy
+    lda #VBLANK_NMI|BG_1000|OBJ_0000|0
+    sta PPUCTRL
+    ldx #>-1470
+    ldy #<-1470
+    jsr waitminusxy
+    lda #VBLANK_NMI|BG_0000|OBJ_0000|1
+    sta PPUCTRL
+  s0nope:
+
+  lda new_keys+0
+  and #KEY_B
+  beq loop
+  rts
+.endproc
+
+waitminusxy:
+  iny
+  bne waitminusxy
+  inx
+  bne waitminusxy
+  rts
+
+.rodata
+gcbars_palette:
+  .byte $0F,$00,$10,$0F, $0F,$16,$26,$36, $0F,$28,$38,$30, $0F,$12,$22,$32

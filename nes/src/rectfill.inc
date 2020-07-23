@@ -18,7 +18,7 @@ RECTFILL_INC = 1
 .global rf_vwfClearPuts_cb, rf_vwfClearPuts
 
 ; other related APIs
-.global rf_load_tiles, rf_color_lineImgBuf, rf_copy8tiles
+.global rf_load_tiles, rf_load_tiles_1000, rf_color_lineImgBuf, rf_copy8tiles
 .global rf_load_yrgb_palette
 
 ; Macros for defining rects and labels

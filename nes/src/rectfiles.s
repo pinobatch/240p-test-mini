@@ -17,7 +17,8 @@
 .segment "GATEDATA"
 
 ; each record is 4 bytes, consisting of
-; address, nametable ($20 or $24), label starting tile
+; address, nametable ($20 or $24) OR pattern table ($00 or $10),
+; label starting tile
 rectfill_layouts:
   rectfile RF_ire, ire_rects, $20
   rectfile RF_smpte, smpte_rects, $20
@@ -44,6 +45,9 @@ rectfill_layouts:
   rectfile RF_crowd, crowd_labels, $20, $20
   rectfile RF_mdfourier, mdfourier_labels, $20, $20
   rectfile RF_mdfourier_15k, mdfourier_15k_rects, $2C
+  rectfile RF_safearea_1, safearea_main_rects, $20, $20
+  rectfile RF_safearea_2, safearea_extra_texts, $30, $20
+  rectfile RF_safearea_3, safearea_nt2_rects, $24
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
@@ -433,3 +437,85 @@ mdfourier_15k_rects:
   .byte $00
   .byte $00  ; no labels
 
+; Safe area consists of 3 files:
+; - the main screen (Pat $0000, NT $2000)
+; - the bottom half of the text (Pat $1000, NT $2000)
+; - above and below the PocketNES safe area (Pat $0000, NT $2400)
+safearea_main_rects:
+  rf_rect   0,  0,256,240,$1C, RF_ROWXOR|RF_COLXOR  ; background
+  rf_rect  48, 16,208,208,$00, 0  ; title safe cutout
+  rf_rect  24, 24,232,200,$00, 0
+  rf_rect  32, 40, 48, 56,$14, RF_ROWXOR|RF_COLXOR  ; danger symbol
+  rf_rect  32, 88, 48,104,$14, RF_ROWXOR|RF_COLXOR  ; action symbol
+  rf_rect  32,120, 48,136,$14, RF_ROWXOR|RF_COLXOR  ; pnes symbol
+  rf_rect  32,160, 48,176,$14, RF_ROWXOR|RF_COLXOR  ; title symbol
+  .byte 0
+  rf_attr   0,  0,256,240, 3  ; pnes safe (most of screen)
+  rf_attr  16, 16,240,208, 0  ; title safe (inner rectangle)
+  rf_attr  32, 32, 48, 64, 1  ; danger symbol
+  rf_attr  32, 80, 48,112, 2  ; action symbol
+  rf_attr  32,112, 48,144, 3  ; pnes symbol
+  .byte 0
+  rf_label  53, 24, 2, 0
+  .byte "Safe Area on 5.37 MHz",0
+  rf_label 153, 24, 2, 0
+  .byte "NTSC VDPs",0
+  rf_label  56, 40, 2, 0
+  .byte "Danger Zone",0
+  rf_label  56, 48, 2, 0
+  .byte "Top and bottom 8 lines",0
+  rf_label  56, 56, 2, 0
+  .byte "Most TVs hide all of",0
+  rf_label 146, 56, 2, 0
+  .byte "this. Keep NES",0
+  rf_label  56, 64, 2, 0
+  .byte "scroll seam artifacts here",0
+  rf_label 171, 64, 2, 0
+  .byte "if possible.",0
+  rf_label  56, 72, 2, 0
+  .byte "Later consoles don't even",0
+  rf_label 171, 72, 2, 0
+  .byte "generate this.",0
+  rf_label  56, 88, 2, 0
+  .byte "Action Safe Area",0
+  rf_label  56, 96, 2, 0
+  .byte "256x224, (0, 8)-(255, 231)",0
+  rf_label  56,104, 2, 0
+  .byte "Most TVs show some of this.",0
+  rf_label  56,120, 2, 0
+  .byte "PocketNES Safe Area",0
+  rf_label  56,128, 2, 0
+  .byte "256x212, (8, 16)-(247, 227)",0
+  rf_label  56,136, 2, 0
+  .byte "Practically all TVs show this.",0
+  rf_label 186,136, 2, 0
+  .byte "Platforms,",0
+  rf_label  56,144, 2, 0
+  .byte "pits, and indicators are fine.",0
+  .byte 0
+
+safearea_extra_texts:
+  .byte 0
+  rf_label  56,160, 2, 0
+  .byte "Title Safe Area",0
+  rf_label  56,168, 2, 0
+  .byte "224x192, (16, 24)-(239, 215)",0
+  rf_label  56,176, 2, 0
+  .byte "Marked on Nint",0
+  rf_label 120,176, 2, 0
+  .byte "endo background planning",0
+  rf_label  56,184, 2, 0
+  .byte "sheet. Keep menus, score,",0
+  rf_label 169,184, 2, 0
+  .byte "dialogue, and",0
+  rf_label  56,192, 2, 0
+  .byte "legal notices here.",0
+  .byte 0
+
+safearea_nt2_rects:
+  rf_rect   0,  0,256,240,$1C, RF_ROWXOR|RF_COLXOR  ; background
+  .byte 0
+  rf_attr   0,  0,256,240, 2  ; action safe (most of screen)
+  rf_attr   0,224,256,240, 1  ; danger zone
+  .byte 0
+  .byte 0
