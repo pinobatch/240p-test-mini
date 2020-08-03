@@ -1,11 +1,12 @@
 144p Test Suite
 ===============
 
-The [240p Test Suite] is a homebrew software suite for video game
-consoles developed to help in the evaluation of upscalers, upscan
-converters and line doublers.
+The [240p Test Suite] is a homebrew application for video game
+consoles that helps evaluate compatibility of upscalers and other
+video processors, either stand-alone or built into a TV, with retro
+consoles' video.
 
-MDFourier is tool to compare audio signatures and generate graphs
+MDFourier is a tool to compare audio signatures and generate graphs
 that show how they differ.  A tone generator produces a signal for
 recording from the console, and the analysis program compares the
 frequencies to a reference recording and displays the results.
@@ -24,13 +25,21 @@ Usage
 To run this on a Game Boy, load the ROM onto your [EverDrive-GB]
 or [Catskull cartridge].
 
-Once the suite is running, the credits will appear.  You can navigate
-the menu with the Control Pad and the A and B Buttons.  There are
-three pages of tests: one with mostly still images, one with more
-interactive tests, and a third exclusive to Game Boy Color and
-Super Game Boy that tests color balance.  Each test is controlled
-with the Control Pad and the A and Select Buttons.  To leave a test,
-press the B Button.
+In menus and help:
+
+* Control Pad ⬅➡: Turn page
+* Control Pad ⬆⬇: Move cursor
+* A Button: Choose option
+* B Button: Go to previous menu
+* Start Button: Show help for menu
+
+In an activity:
+
+* Control Pad, A, Select: Control activity
+* Start Button: Show help for activity
+* B Button: Close activity
+
+Some tests are exclusive to Game Boy Color and Super Game Boy.
 
 To show help for any test, press Start or read `src/helppages.txt`.
 Gus, the character at left, was an esports instructor until game

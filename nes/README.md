@@ -1,21 +1,21 @@
 240p Test Suite
 ===============
 
-The [240p Test Suite] is a homebrew software suite for video game
-consoles developed to help in the evaluation of upscalers, upscan
-converters and line doublers.
+Most video game consoles prior to 1999 output a 240-line progressive
+(240p) video signal.  Though it has nonstandard timing compared to
+broadcast TV, most TVs from the 1980s can display it.  However, many
+flat-panel TVs from 2007 and later have trouble with 240p video.
 
-It has tests designed with the processing of 240p signals in mind,
-although when possible it includes other video modes and specific
-tests for them.  These have been tested with video processors on
-real hardware and a variety of displays, including CRTs and Arcade
+The [240p Test Suite] is a homebrew application for video game
+consoles that helps evaluate compatibility of upscalers and other
+video processors, either stand-alone or built into a TV, with retro
+consoles' video.  It also provides tools for calibrating black and
+white levels, colors, and picture size for accurate reproduction
+across displays.  These have been tested with video processors on
+real hardware and a variety of displays, including CRTs and arcade
 monitors via RGB.
 
-As a secondary target, the suite aims to provide tools for
-calibrating colors, black and white levels for specific console
-outputs and setups. 
-
-MDFourier is tool to compare audio signatures and generate graphs
+MDFourier is a tool to compare audio signatures and generate graphs
 that show how they differ.  A tone generator produces a signal for
 recording from the console, and the analysis program compares the
 frequencies to a reference recording and displays the results.
@@ -31,11 +31,19 @@ Load 240pee.nes onto a [PowerPak] or [EverDrive-N8] and run it.
 You can also burn it to an NES cartridge with an UNROM board.
 Full instructions are in `making-carts.md`.
 
-Once the suite is running, the credits will appear.  You can navigate
-the menu with the Control Pad and the A and B Buttons.  There are
-two pages of tests, one with mostly still images and the other with
-more interactive tests.  Each test is controlled with the Control Pad
-and the A and Select Buttons.  To leave a test, press the B Button.
+In menus and help:
+
+* Control Pad ⬅➡: Turn page
+* Control Pad ⬆⬇: Move cursor
+* A Button: Choose option
+* B Button: Go to previous menu
+* Start Button: Show help for menu
+
+In an activity:
+
+* Control Pad, A, Select: Control activity
+* Start Button: Show help for activity
+* B Button: Close activity
 
 To show help for any test, press Start or read `src/helppages.txt`.
 Gus, the character at left, was an esports instructor until game
@@ -47,23 +55,22 @@ while turning on the power or while pressing the Reset Button.
 
 Versions
 --------
-The Nintendo Entertainment System (NES) can output 240 picture
-lines in a progressive "double struck" mode.  It does not support
-interlaced video, and its 52-color palette is closer to HSV than RGB.
-The three main regional variants (NTSC NES/Famicom, PAL NES, and PAL
-famiclones) have different CPU speeds and frame rates.
+The Nintendo Entertainment System outputs 240 picture lines in a
+progressive "double struck" mode.  It does not support interlaced
+video, and its 52-color palette is closer to HSV than RGB.
 
-The 240p test suite for Nintendo Entertainment System was developed
-in 6502 assembly language using [ca65], with image conversion tools
-written in Python 3 and [Pillow] (Python Imaging Library).  It
-compensates for regional speed differences and has been tested on
-authentic NTSC and PAL NES consoles and on a Dendy (PAL famiclone).
+The 240p Test Suite for NES was developed in 6502 assembly language
+using [ca65], with image conversion tools written in Python 3 and
+[Pillow] (Python Imaging Library).  It compensates for the different
+CPU speeds and frame rates among the console's regional variants
+and has been tested on authentic NTSC and PAL NES consoles and on a
+Dendy (PAL famiclone).
 
 Artemio Urbina maintains the upstream suite on five platforms:
 
 * It was first developed in C for the Sega Genesis using the SGDK,
-  using 320x224p resolution.  It comes as a cartridge image or as
-  a disc image for Sega CD.  Version 1.16 adds support for 256x224p.
+  using 320x224p or 256x224p resolution.  It comes as a cartridge
+  image or as a disc image for Sega CD.
 * The TurboGrafx-16 version was made with HuC.  It supports widths
   256, 320, and 512, and heights 224 and 239.  It comes as a HuCard
   image for Turbo EverDrive, a disc image for CD-ROM2 (TurboGrafx-CD
@@ -80,8 +87,10 @@ Artemio Urbina maintains the upstream suite on five platforms:
   resolutions as the Dreamcast version.  It comes as a disc image for
   a modded GameCube, a DOL file for SD Media Launcher on GameCube,
   and a DOL file for Homebrew Channel on Wii.
-* The author of the NES port also maintains a port to Game Boy and
-  Game Boy Color and a port to Game Boy Advance.
+
+The author of the NES port also maintains a port to Game Boy,
+which is enhanced for Super Game Boy and Game Boy Color,
+and a port to Game Boy Advance.
 
 [ca65]: https://cc65.github.io/cc65/
 [Pillow]: https://pillow.readthedocs.org/

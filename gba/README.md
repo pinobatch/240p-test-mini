@@ -1,9 +1,10 @@
 160p Test Suite
 ===============
 
-The [240p Test Suite] is a homebrew software suite for video game
-consoles developed to help in the evaluation of upscalers, upscan
-converters and line doublers.
+The [240p Test Suite] is a homebrew application for video game
+consoles that helps evaluate compatibility of upscalers and other
+video processors, either stand-alone or built into a TV, with retro
+consoles' video.
 
 This program is a port of Artemio Urbina's 240p Test Suite
 to the Game Boy Advance.
@@ -17,11 +18,19 @@ be loaded onto a GBA through a flash card, a GBA Movie Player, a PC
 with an MBV2 or Xboo multiboot cable, or the homebrew Game Boy
 Interface software for GameCube.
 
-Once the suite is running, the credits will appear.  You can navigate
-the menu with the Control Pad and the A and B Buttons.  There are
-two pages of tests: one with mostly still images and one with more
-interactive tests.  Each test is controlled with the Control Pad and
-the A and Select Buttons.  To leave a test, press the B Button.
+In menus and help:
+
+* Control Pad ⬅➡: Turn page
+* Control Pad ⬆⬇: Move cursor
+* A Button: Choose option
+* B Button: Go to previous menu
+* Start Button: Show help for menu
+
+In an activity:
+
+* Control Pad, A, Select: Control activity
+* Start Button: Show help for activity
+* B Button: Close activity
 
 To show help for any test, press Start or read `src/helppages.txt`.
 Gus, the character at left, was an esports instructor until game
