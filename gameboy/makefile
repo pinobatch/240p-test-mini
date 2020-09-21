@@ -112,14 +112,17 @@ $(title).gb: $(objlisto)
 	$(RGBLINK) -w -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
 	$(RGBFIX) -p0 -v $@
 
-obj/gb/%.o: obj/gb/%-dedent.z80 src/gb.inc src/hardware.inc src/global.inc
+#obj/gb/%.o: obj/gb/%-dedent.z80 src/gb.inc src/hardware.inc src/global.inc
+#	$(RGBASM) -o $@ $<
+#
+#obj/gb/%-dedent.z80: src/%.z80
+#	$(PY) tools/bgrdedent.py -o $@ $<
+
+obj/gb/%.o: src/%.z80 src/gb.inc src/hardware.inc src/global.inc
 	$(RGBASM) -o $@ $<
 
 obj/gb/%.o: obj/gb/%.z80
 	$(RGBASM) -o $@ $<
-
-obj/gb/%-dedent.z80: src/%.z80
-	$(PY) tools/bgrdedent.py -o $@ $<
 
 # Files that will be included with incbin
 
