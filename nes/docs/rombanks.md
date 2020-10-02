@@ -12,9 +12,9 @@ segments are in bank 0:
 * `BANK00` and `BANK01` (BNROM: 0; UNROM: 0 and 1)  
   Compressed CHR and map data
 * `GATEDATA` (BNROM: 0; UNROM: 1)  
-  Files that are decompressed not to VRAM but to main memory, such as
-  the tilemap in the *Kiki Kaikai*-inspired vertical scroll test and
-  the sprite in the shadow sprite test
+  Files decompressed not to VRAM but to main memory for a second pass
+  of decompression, such as the tilemap in the vertical scroll test
+  and the sprite in the shadow sprite test
 * `STUB0` (BNROM: 0; UNROM: does not exist)  
   If the NES powers on in this bank, immediately switch to bank 1
 
@@ -23,5 +23,5 @@ in the same bank as the test screen's code, calls need to go through
 `unpb53_gate` to switch banks.  So the test program switches to bank
 1 and calls the gate.  In BNROM, switching to bank 1 is a no-op, and
 the gate switches to bank 0 to perform the decompression.  In UNROM,
-switching to bank 1 actually brings the relevant data into view, but
+switching to bank 1 brings `GATEDATA` contents into view, and
 the gate is a no-op because decompression is in the fixed bank.
