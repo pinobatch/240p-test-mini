@@ -93,6 +93,18 @@ static const unsigned short smptePalette100[] = {
   RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 1, 1, 1),
   RGB5( 3, 3, 3)
 };
+static const unsigned short smptePalette75J[] = {
+  RGB5( 0, 0, 0),RGB5( 0, 0,23),RGB5(23, 0, 0),RGB5(23, 0,23),
+  RGB5( 0,23, 0),RGB5( 0,23,23),RGB5(23,23, 0),RGB5(23,23,23),
+  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 0, 0, 0),
+  RGB5( 1, 1, 1)
+};
+static const unsigned short smptePalette100J[] = {
+  RGB5( 0, 0, 0),RGB5( 0, 0,31),RGB5(31, 0, 0),RGB5(31, 0,31),
+  RGB5( 0,31, 0),RGB5( 0,31,31),RGB5(31,31, 0),RGB5(31,31,31),
+  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 0, 0, 0),
+  RGB5( 1, 1, 1)
+};
 static const unsigned short plugePaletteNTSC[] = {
   RGB5( 2, 2, 2),RGB5( 3, 3, 3),RGB5( 0, 0, 0),RGB5( 0, 0, 0),
   RGB5(13,13,13),RGB5(19,19,19),RGB5(25,25,25),RGB5(31,31,31)
@@ -265,7 +277,7 @@ static void do_bars(const BarsListEntry *rects, const unsigned char *helpsect) {
   REG_SOUND3CNT_X = (2048 - 131) + 0x8000;  // full volume
   while (1) {
     read_pad_help_check(helpsect);
-    if (new_keys & KEY_A) {
+    if (new_keys & KEY_UP) {
       bright = !bright;
     }
     if (new_keys & KEY_SELECT) {

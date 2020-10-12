@@ -252,7 +252,7 @@ activity_pluge:
   rra
   jr nc, .no_sgb_update
     ldh a, [curpalette]
-    add 28
+    add $1E
     ld b, a
     ld c, a
     ld d, a
@@ -263,9 +263,10 @@ activity_pluge:
     ldh a, [curvolume]
     or a
     jr nz,.sgb_not_shark_palette
-      dec b
-      dec b
-      ld de, $1819
+      ld a, b
+      add $28-$1C
+      ld b, a
+      ld de, $2627
     .sgb_not_shark_palette:
     call sgb_set_palettes_bcde
   .no_sgb_update:
@@ -580,8 +581,8 @@ smpte_load_map::
 HALF_KHZ equ 2048-131
 
 section "smptebars", ROM0
-; These parts of the SMPTE test palette are not also included
-; in the SGB master palette
+; The SMPTE bars test shares cbog_palette_* with the Color bars on
+; gray palette, which is in the SGB master palette.
 smpte_palette_dark:
   drgb $101010  ; Green to blue (nonblue replaced with black)
   drgb $C010C0
@@ -591,6 +592,36 @@ smpte_palette_dark:
   drgb $10C0C0
   drgb $101010
   drgb $C0C0C0
+
+smpte_palette_darkj:
+  drgb $101010  ; Green to blue (nonblue replaced with black)
+  drgb $C010C0
+  drgb $101010
+  drgb $1010C0
+  drgb $101010  ; Green to white (nonblue replaced with black)
+  drgb $10C0C0
+  drgb $101010
+  drgb $C0C0C0
+
+smpte_palette_light:
+  drgb $101010  ; Green to blue (nonblue replaced with black)
+  drgb $FF10FF
+  drgb $101010
+  drgb $1010FF
+  drgb $101010  ; Green to white (nonblue replaced with black)
+  drgb $10FFFF
+  drgb $101010
+  drgb $FFFFFF
+
+smpte_palette_lightj:
+  drgb $101010  ; Green to blue (nonblue replaced with black)
+  drgb $FF10FF
+  drgb $101010
+  drgb $1010FF
+  drgb $101010  ; Green to white (nonblue replaced with black)
+  drgb $10FFFF
+  drgb $101010
+  drgb $FFFFFF
 
 smpte_palette_both:
   drgb $101010
@@ -602,15 +633,15 @@ smpte_palette_both:
   drgb $181818  ; shade3
   drgb $FF00FF
 
-smpte_palette_light:
-  drgb $101010  ; Green to blue (nonblue replaced with black)
-  drgb $FF10FF
+smpte_palette_bothj:
   drgb $101010
-  drgb $1010FF
-  drgb $101010  ; Green to white (nonblue replaced with black)
-  drgb $10FFFF
-  drgb $101010
-  drgb $FFFFFF
+  drgb $300068  ; purple (Q)
+  drgb $FFFFFF  ; bright white
+  drgb $002050  ; blue (I)
+  drgb $101010  ; shade2 (black)
+  drgb $080808  ; shade1
+  drgb $181818  ; shade3
+  drgb $FF00FF
 
 cbog_sgb_rects:
   db $04*8+1  ; 1 packet holds up to 2 rectangles
@@ -713,7 +744,7 @@ smpte_bars_engine:
     ldh [rNR52],a  ; stop audio circuit
     ret
   .no_quit:
-  bit PADB_A,b
+  bit PADB_UP,b
   jr z,.notogglepalette
     ldh a,[curpalette]
     cpl

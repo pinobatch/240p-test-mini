@@ -132,27 +132,27 @@ cbog_palette_light::
   drgb $FF1010
   drgb $1010FF
 
-  ; 24-27: PLUGE test
-pluge_palette_common::
-  drgb $686868
-  drgb $989898
-  drgb $c8c8c8
-  drgb $f8f8f8
-  drgb $686868
-  drgb $686868
-  drgb $c8c8c8
-  drgb $f8f8f8
+  ; 24-25: Color bars on gray dark without setup
+cbog_palette_darkj::
+  drgb $00B800  ; Green to white
+  drgb $00B8B8
+  drgb $B8B800
+  drgb $B8B8B8
+  drgb $00B800  ; Green to blue
+  drgb $B800B8
+  drgb $B80000
+  drgb $0000B8
 
-pluge_palette_ntsc::
-  drgb $101010  ; NTSC version
-  drgb $181818
-  drgb $080808
-  drgb $080808
-
-  drgb $000000  ; NTSC-J version
-  drgb $080808
-  drgb $080008
-  drgb $000800
+  ; 26-27: Color bars on gray light without setup
+cbog_palette_lightj::
+  drgb $B8FFB8  ; Green to white
+  drgb $B8FFFF
+  drgb $FFFFB8
+  drgb $FFFFFF
+  drgb $B8FFB8  ; Green to blue
+  drgb $FFB8FF
+  drgb $FFB8B8
+  drgb $B8B8FF
 
   ; 28-32: PLUGE Contrast test
 pluge_shark_palette::
@@ -208,6 +208,29 @@ pluge_shark_palette::
   drgb $A8A8E0
   drgb $FF0000
   drgb $0000C8
+
+  ; 38-39: PLUGE surround
+pluge_palette_common::
+  drgb $686868
+  drgb $989898
+  drgb $c8c8c8
+  drgb $f8f8f8
+  drgb $686868
+  drgb $686868
+  drgb $c8c8c8
+  drgb $f8f8f8
+
+  ; 38-39: PLUGE with and without setup
+pluge_palette_ntsc::
+  drgb $101010  ; NTSC version
+  drgb $181818
+  drgb $080808
+  drgb $080808
+
+  drgb $000000  ; NTSC-J version
+  drgb $080808
+  drgb $080008
+  drgb $000800
 
 sgb_master_palette_end:
 

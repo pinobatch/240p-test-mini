@@ -648,15 +648,15 @@ Use this pattern to
 calibrate for NTSC
 levels regarding
 contrast, brightness,
-and colors. With some
-displays, you can use
-blue-only mode to
-confirm color balance.
+and colors. Use some
+displays' blue-only mode
+to confirm color balance.
 Based on SMPTE
 EG 1-1990
 
-A: Toggle brightness
+↑: Toggle brightness
   (75% or 100%)
+A: Coming soon
 Select: Play 1 kHz tone
 
 == Color bars on gray ==
@@ -669,7 +669,7 @@ color balance.
 Based on Digital Video
 Essentials: HD Basics
 
-A: Toggle brightness
+↑: Toggle brightness
   (75% or 100%)
 Select: Play 1 kHz tone
 
