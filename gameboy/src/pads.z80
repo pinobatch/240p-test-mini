@@ -162,6 +162,7 @@ detect_sgb::
   ld b, 1
   call sgb_set_bplus1_players
   call sgb_wait
+  call read_pad
   call capa_1_if_player_2
   call read_pad
   call capa_1_if_player_2
@@ -276,11 +277,14 @@ sgb_send::
 
 ;;
 ; Waits about 4 frames for Super Game Boy to have processed a command
-; 4 frames is 4*154 = 616 scanlines or 4*154*114 = 70224 M-cycles.
-; Each iteration of the inner loop takes 4 cycles.
-; Thus we wait 4*154*114/4 = 17556 iterations
+; Ideally, 4 frames is 4*154 = 616 scanlines or 4*154*114 = 70224
+; M-cycles.  But in fact, the guideline might be referring to
+; NTSC Super NES frames, which are 262 scanlines of 68.2 M-cycles
+; each.  Thus we can try waiting 4*262*68.2 = 71473.6 cycles.
+; Each iteration of the inner loop takes 4+3/256 cycles.
+; Thus we wait 71473 / 4 = 17868 iterations.
 sgb_wait:
-  ld de, 65536 - (114 * 154 * 4 / 4)
+  ld de, 65536 - 17868
 .loop:
   inc e
   jr nz, .loop
