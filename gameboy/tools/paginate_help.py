@@ -95,7 +95,7 @@ section "helppages",ROMX
 """]
     lines.extend('helpsect_%s equ %d' % (doc[1], i)
                  for i, doc in enumerate(docs))
-    lines.extend('global helpsect_%s' % (doc[1])
+    lines.extend('export helpsect_%s' % (doc[1])
                  for i, doc in enumerate(docs))
 
     cumul_pages = [0]

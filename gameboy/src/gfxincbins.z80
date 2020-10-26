@@ -23,10 +23,10 @@ include "src/gb.inc"
 section "helptiles_gfx1",ROMX
 helptiles:: incbin "obj/gb/helptiles.chrgb16.pb16"
 sizeof_helptiles equ 672
-global sizeof_helptiles
+export sizeof_helptiles
 helptiles_gbc:: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
 sizeof_helptiles_gbc equ 960
-global sizeof_helptiles_gbc
+export sizeof_helptiles_gbc
 helptiles_end::
 
 ; section "helptiles_gfx0", ROMX
@@ -46,7 +46,7 @@ section "convergence_gfx1",ROMX
 convergence_chr::
   incbin "obj/gb/convergence.chrgb.pb16"
 sizeof_convergence_chr equ 80
-global sizeof_convergence_chr
+export sizeof_convergence_chr
 
 section "grayramp_gfx1",ROMX, align[2]
 grayramp_sgb_chr::
@@ -87,14 +87,14 @@ section "cpsgrid_gfx1",ROMX
 cps_grid_chr::
   incbin "obj/gb/cps_grid.chrgb.pb16"
 sizeof_cps_grid_chr equ 128
-global sizeof_cps_grid_chr
+export sizeof_cps_grid_chr
 
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "megaton_gfx0",ROM0
 megatontiles_chr:: incbin "obj/gb/megatontiles.chrgb16.pb16"
 sizeof_megaton_tiles equ 320
-global sizeof_megaton_tiles
+export sizeof_megaton_tiles
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -115,11 +115,11 @@ hepsie_palette_gbc_end::
 shadow_reticle_chr::
   incbin "obj/gb/shadow_reticle.chrgb.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4
-global sizeof_shadow_reticle_chr
+export sizeof_shadow_reticle_chr
 hepsie_chr::
   incbin "obj/gb/hepsie.chrgb.pb16"
 sizeof_hepsie_chr equ 16*3*4
-global sizeof_hepsie_chr
+export sizeof_hepsie_chr
 
 ; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
