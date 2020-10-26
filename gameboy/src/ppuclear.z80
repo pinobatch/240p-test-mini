@@ -47,7 +47,8 @@ SECTION "stat_handler", ROM0[$0048]
   pop af
   reti
 
-SECTION "vblank_tail", ROM0[$0051]
+; Tails for RST and interrupt handlers followthe last
+; _used_ interrupt handler.
 vblank_tail:
   ldh a,[nmis]
   inc a
@@ -55,7 +56,6 @@ vblank_tail:
   pop af
   reti
 
-SECTION "wait_vblank_irq_tail", ROM0[$0059]
 wait_vblank_irq_tail:
   halt
   cp [hl]
@@ -89,12 +89,12 @@ lcd_off::
   res 7, [hl]
   ret
 
-SECTION "wait_vblank_irq", ROM0[wait_vblank_irq]
+SECTION "wait_vblank_irq", ROM0[$10]
 ;;
 ; Waits for the vblank ISR to increment the count of vertical blanks.
 ; Will lock up if DI, vblank IRQ off, or LCD off.
 ; Clobbers A, HL
-wait_vblank_irq_impl::
+wait_vblank_irq::
   ld hl,nmis
   ld a,[hl]
   jr wait_vblank_irq_tail

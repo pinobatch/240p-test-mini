@@ -223,10 +223,10 @@ run_dma_end:
 ; figure out which to make into RSTs.
 
 
-section "memset_tiny",ROM0[memset_tiny]
+section "memset_tiny",ROM0[$08]
 ;;
 ; Writes C bytes of value A starting at HL.
-memset_tiny_impl::
+memset_tiny::
   ld [hl+],a
   dec c
   jr nz,memset_tiny

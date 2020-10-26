@@ -68,14 +68,16 @@ GLOBAL_INC SET 1
 ;
 ; Follow this thread:
 ; http://gbdev.gg8.se/forums/viewtopic.php?pid=3176#p3176
+;
+; This should be revisited after the introduction of SECTION UNION
+; in RGBDS 0.4.0.
 hLocals EQU $FF80
 locals_size EQU 16
 hTestState EQU $FF90
 test_state_size EQU 16
 
-; RGBASM requires that RST arguments be constexpr, not imported
-memset_tiny     EQU $0008
-wait_vblank_irq EQU $0010
+; RGBASM once required that RST arguments be constexpr,
+; not imported. Fixed in 0.4.0
 
 ; 384-byte temporary buffer in VRAM used for tilemap decompression
 ; while LCD is off.  An entire screen's worth of tilemap data
@@ -129,8 +131,6 @@ dwxy: macro
   endc
   endm
 
-  ENDC
-
 ;;
 ; Syntax: lb rp, hivalue, lovalue
 ; Loads hivalue into the upper register of a pair (B, D, or H)
@@ -144,3 +144,5 @@ GL_RIGHT EQU $1C
 GL_LEFT EQU $1D
 GL_UP EQU $1E
 GL_DOWN EQU $1F
+
+  ENDC
