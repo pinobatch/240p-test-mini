@@ -841,8 +841,11 @@ bleedtile_top:    .byte $00, $55, $55
 bleedtile_bottom: .byte $FF, $55, $AA
 
 bleed_palette:
-  .byte $0F,$0F,$0F,$20, $0F,$0F,$0F,$16, $0F,$0F,$0F,$1A, $0F,$0F,$0F,$12
-  .byte $0F,$0F,$0F,$20
+  .byte $0F,$16,$12,$04  ; red and blue
+  .byte $0F,$2A,$2C,$04  ; green and cyan
+  .byte $0F,$28,$24,$04  ; yellow and magenta
+  .byte $0F,$00,$20,$04  ; gray and white
+  .byte $0F,$0F,$0F,$20  ; "frame" notice
 frame_label:
   .byte "Frame",0
 
@@ -869,48 +872,58 @@ tvSystemFPS:  .byte 60, 50, 50
   tya
   jsr bcd8bit
   ora #'0'
-  ldx #56
+  ldx #60
   jsr vwfPutTile
   lda bcd_highdigits
   ora #'0'
-  ldx #51
+  ldx #55
   jsr vwfPutTile
   lda #>frame_label
   ldy #<frame_label
-  ldx #20
+  ldx #24
   jsr vwfPuts
+  lda #%00000110  ; Colors 2 and 3
+  jsr rf_color_lineImgBuf
 
   pla
   tax
   pla
   sta $00
 
-  ; Draw the tile in question into x=8-15
-  ldy #8
+  ; Draw the tile in question into
+  ; x=0-7 (tile 1 plane 0)
+  ; x=4-0
+  ldy #0
   l2:
+    lda #0
+    sta lineImgBuf+16,y
+    sta lineImgBuf+17,y
+
     lda bleedtile_top,x
     eor $00
-    sta lineImgBuf,y
+    sta lineImgBuf+0,y   ; Tile 1 plane 0
+    sta lineImgBuf+24,y  ; Tile 2 plane 1
+    sta lineImgBuf+32,y  ; Tile 3 plane 0
+    eor #$FF
+    sta lineImgBuf+40,y  ; Tile 3 plane 1
     iny
+
     lda bleedtile_bottom,x
     eor $00
-    sta lineImgBuf,y
-    iny
-    cpy #16
-    bcc l2
-  lda #%00000110
-  jsr rf_color_lineImgBuf
+    sta lineImgBuf+0,y   ; Tile 1 plane 0
+    sta lineImgBuf+24,y  ; Tile 2 plane 1
+    sta lineImgBuf+32,y  ; Tile 3 plane 0
+    eor #$FF
+    sta lineImgBuf+40,y  ; Tile 3 plane 1
 
-  ; Finally, blank the first tile to color 0
-  lda #$00
+    iny
+    cpy #8
+    bcc l2
+
+  lda #$10
   sta vram_copydstlo
+  lda #$00
   sta vram_copydsthi
-  ldy #15
-  l3:
-    sta lineImgBuf,y
-    dey
-    bpl l3
-  
   rts 
 .endproc
 
@@ -953,6 +966,15 @@ restart:
     cpy #20
     bcc palloop
 
+  lda #0
+  sta PPUADDR
+  sta PPUADDR
+  ldx #16
+  blackloop:
+    sta PPUDATA
+    dex
+    bne blackloop
+
   lda bg_type
   and #$7F
   tax
@@ -961,7 +983,7 @@ restart:
   
   ; Set up the frame counter sprites
   ldx #0
-  ldy #2
+  ldy #3
   objloop:
     lda #207
     sta OAM+0,x
@@ -977,9 +999,13 @@ restart:
     adc #4
     tax
     iny
-    cpy #8
+    cpy #10
     bcc objloop
-  jsr ppu_clear_oam 
+  lda #3
+  sta OAM+$19
+  jsr ppu_clear_oam
+  
+  ; Set up the 
 
 loop:
   ldx tile_shape
