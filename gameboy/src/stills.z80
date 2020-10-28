@@ -1132,9 +1132,6 @@ full_stripes_common::
   ; A is still 0
   call memset_inc
 
-  ld a,$FF
-  ldh [rLYC],a  ; disable lyc irq
-
   ; Position the window
   ld a,167-48
   ldh [rWX],a
@@ -1158,9 +1155,15 @@ full_stripes_common::
   .specific_loading_done:
 
   ; Turn on LCD
+  ld a, STATF_LYC
+  ldh [rSTAT], a
+  ld a, IEF_LCDC|IEF_VBLANK
+  ldh [rIE], a
   ldh a,[curlcdc]
   ldh [vblank_lcdc_value],a
-  ldh [rLCDC],a
+  ldh [stat_lcdc_value],a
+  ldh [rLYC], a
+  ldh [rLCDC],a  ; disable lyc irq
 
 .loop:
   ldh a,[bleed_help_page]
@@ -1204,6 +1207,10 @@ full_stripes_common::
   .not_select:
 
   rst wait_vblank_irq
+  ld a, 4
+  ldh [rSCY], a
+  ld a, 28
+  ldh [rLYC], a
   ldh a,[curpalette]
   ld b,a
   ld a,[curtileid]
@@ -1241,12 +1248,27 @@ update_bcd_frame_counter:
 
   ; And draw it
   call vwfClearBuf
+
   ld hl,help_line_buffer
   ld b,4  ; X position
   call vwfPuts
+  call bleed_stripwait
   pop hl
   ld c,6
-  jp vwfPutBufHBlank
+  call vwfPutBufHBlank
+  call bleed_stripwait
+  call bleed_stripwait
+
+bleed_stripwait:
+  ldh a, [rSCY]
+  add 4
+  halt
+  ldh [rSCY], a
+  ldh a, [rLYC]
+  add 28
+  ldh [rLYC], a
+  ret
+
 
 ;;
 ; Copies a nul-terminated string.

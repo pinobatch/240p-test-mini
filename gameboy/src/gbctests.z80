@@ -816,17 +816,17 @@ sgb_bleed_rects:
   db %00010000  ; inside and border to palette 0, outside to palette 1
   db 0, 0, 19, 3  ; l, t, r, b, inclusive
 
-  ; Rows 8-11: palette 2
+  ; Rows 7-10: palette 2
   db %00000001
   db %00000010
-  db 0, 8, 19, 11
+  db 0, 7, 19, 10
 
-  ; Rows 12-15: palette 3
+  ; Rows 11-13: palette 3
   db %00000001
   db %00000011
-  db 0, 12, 19, 15
+  db 0, 11, 19, 13
 
-  ; Rectangles 4 and 5 unused
+  ; Rectangles 4 and 5 will be used once all 4 are in play
   db 0, 0, 0, 0, 0, 0
   db 0, 0, 0, 0, 0, 0
 
