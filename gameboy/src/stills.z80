@@ -1080,8 +1080,9 @@ word_frame:
 ;;
 ; @param A index into bleed_types
 ; @param B starting XOR value (alternates $00 and $FF)
-; @param DE destination tile address
+; Tile $10: colors 0 and 1
 load_bleed_frame_a:
+  ld de,CHRRAM0+16*$10
   ld hl,bleed_types
   add a,a
   add a,l
@@ -1100,6 +1101,30 @@ load_bleed_frame_a:
     xor c
     dec b
     jr nz,.loop
+
+  ; Construct color 2 tile
+  ld [hl], d
+  inc l
+  ld d, h
+  ld e, l
+  ld l, 0  ; seek to start of tile
+  ld bc, 15
+  call memcpy
+  
+  ; Construct colors 1 and 2 tile
+  ld b, 8
+  ld l, 0
+  .color12loop:
+    ld a, [hl+]
+    inc l
+    ld [de], a
+    inc e
+    cpl
+    ld [de], a
+    inc e
+    dec b
+    jr nz, .color12loop
+
   ret
 
 activity_full_stripes::
@@ -1124,13 +1149,15 @@ full_stripes_common::
 
   ; Make VWF window for frame number at (0, 0) on window
   ld hl,CHRRAM0
-  ld c,112  ; 6 tiles window, 1 tile blank (for color bleed)
+  ld c,112  ; 1 tile blank, 6 tiles window
   ; A is still 0
   rst memset_tiny
   ld hl,_SCRN1
   ld c,6
   ; A is still 0
   call memset_inc
+  xor a
+  ld [hl+], a
 
   ; Position the window
   ld a,167-48
@@ -1204,6 +1231,7 @@ full_stripes_common::
     xor LCDCF_WINON
     ldh [curlcdc],a
     ldh [vblank_lcdc_value],a
+    ldh [stat_lcdc_value],a
   .not_select:
 
   rst wait_vblank_irq
@@ -1214,7 +1242,6 @@ full_stripes_common::
   ldh a,[curpalette]
   ld b,a
   ld a,[curtileid]
-  ld de,CHRRAM0+256
   call load_bleed_frame_a
   call update_bcd_frame_counter
   jr .loop
@@ -1223,7 +1250,7 @@ full_stripes_common::
 ; Update the frame counter
 ; @param HL destination address of frame counter tiles
 update_bcd_frame_counter:
-  ld hl,CHRRAM0+$000
+  ld hl,CHRRAM0+$011
   push hl
 
   ; Write "Frame "
@@ -1250,11 +1277,11 @@ update_bcd_frame_counter:
   call vwfClearBuf
 
   ld hl,help_line_buffer
-  ld b,4  ; X position
+  ld b,0  ; X position
   call vwfPuts
   call bleed_stripwait
   pop hl
-  ld c,6
+  ld c,5
   call vwfPutBufHBlank
   call bleed_stripwait
   call bleed_stripwait
@@ -1353,7 +1380,9 @@ activity_convergence::
   ldh a, [curlcdc]
   and LCDCF_BG9C00
   jr z, .sgb_palette_is_gray
-    call sgb_set_palette_bleed
+    ld bc, $2A2B
+    ld de, $2C2D
+    call sgb_set_palettes_bcde
     jr .sgb_palette_loaded
   .sgb_palette_is_gray:
     call sgb_set_palette_gray
@@ -1421,6 +1450,7 @@ activity_convergence::
   and LCDCF_BG9C00
   jr z, .set_grid_palette
     ldh a, [curscry]
+    ld b, b
     ldh [rBGP], a  ; Show/hide lines on Super Game Boy
     and $10
     ld a, $80

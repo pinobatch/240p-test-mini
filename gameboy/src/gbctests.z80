@@ -252,7 +252,7 @@ activity_pluge:
   rra
   jr nc, .no_sgb_update
     ldh a, [curpalette]
-    add $1E
+    add $1C
     ld b, a
     ld c, a
     ld d, a
@@ -808,60 +808,90 @@ smpte_bars_engine:
 section "colorbleed", ROM0
 sgb_bleed_rects:
   db $04*8+2  ; 3 packets hold up to 5 rectangles
-  db 3        ; number of rectangles
+  db 4        ; number of rectangles
 
-  ; Rows 0-3: palette 0
-  ; Rows 4-7: palette 1
+  ; Rows 0-10: palette 0 | 2
   db %00000111  ; bit 0: inside, 1: border, 2: outside
-  db %00010000  ; inside and border to palette 0, outside to palette 1
-  db 0, 0, 19, 3  ; l, t, r, b, inclusive
+  db %00001010  ; inside and border to palette 2, outside to palette 0
+  db 10, 0, 19, 10  ; l, t, r, b, inclusive
 
-  ; Rows 7-10: palette 2
+  ; Rows 4-6: palette 2
   db %00000001
-  db %00000010
-  db 0, 7, 19, 10
+  db %00000001
+  db 0, 4, 19, 6
 
   ; Rows 11-13: palette 3
   db %00000001
   db %00000011
   db 0, 11, 19, 13
 
-  ; Rectangles 4 and 5 will be used once all 4 are in play
-  db 0, 0, 0, 0, 0, 0
-  db 0, 0, 0, 0, 0, 0
+  ; Rows 14-17: palette 3 | 0
+  db %00000001
+  db %00000011
+  db 0, 14, 9, 17
+  db 0, 0, 0, 0, 0, 0  ; Rect 5: Unused
+
+bleed_tile_ids:
+  db $10, $10
+  db $10, $11
+  db $11, $11
+  db $11, $11
+  db $10, $12
+  db $FF
+
+gbc_bleed_attrs:
+  db $00, $02
+  db $01, $01
+  db $00, $02
+  db $03, $03
+  db $03, $00
+  db $FF
 
 activity_color_bleed::
   ld a,helpsect_color_bleed
   jp full_stripes_common
 
-load_color_bleed::
+;;
+; @param DE pointer to 10-entry map
+draw_bleed_rects:
   ; Load plane 0
   ld hl,_SCRN0
-  ld a,$06  ; blank tile
-  ld c,32*1+1
+  xor a  ; blank tile
+  ld c,32+1
   rst memset_tiny
-  ld b,5
   .p0rowgrploop:
-    ld d,3
+    ld b, 3
     .p0rowloop:
-      ld a,$10  ; pattern tile
+      ld a, [de]
+      inc de
       ld c,8
       rst memset_tiny
-      ld a, $06  ; blank tile
+      xor a   ; Blank tile
       ld [hl+], a
       ld [hl+], a
-      ld a,$10  ; pattern tile
+      ld a, [de]  ; Right half pattern
+      dec de
       ld c,8
       rst memset_tiny
-      ld a,$06  ; blank tile
+      xor a  ; blank tile
       ld c,14
       rst memset_tiny
-      dec d
+      dec b
       jr nz,.p0rowloop
     ld c,32  ; blank row
     rst memset_tiny
-    dec b
-    jr nz,.p0rowgrploop
+
+    ; Advance to next group of rows
+    inc de
+    inc de
+    ld a, [de]
+    add a
+    jr nc,.p0rowgrploop
+  ret
+
+load_color_bleed::
+  ld de, bleed_tile_ids
+  call draw_bleed_rects
 
   ; Load GBC attributes
   ldh a, [hw_capability]
@@ -869,19 +899,16 @@ load_color_bleed::
   jr nc, .load_sgb_attrs
   ; ld a, 1  ; bit 0 already set!
   ldh [rVBK],a
-  xor a
-  ldxy hl, 0, 1
-  .gbcattrloop:
-    ld c,4*32
-    rst memset_tiny
-    inc a
-    cp 5
-    jr nz, .gbcattrloop
-  xor a
-  ldh [rVBK],a
-  
+  ld de, gbc_bleed_attrs
+  call draw_bleed_rects
+  ld hl,_SCRN1
+  ld c,7
+  ld a,3
+  rst memset_tiny
+
   ; Load palette
   ld a,$80
+  ldh [rVBK],a
   ld bc,(color_bleed_palette_end-color_bleed_palette)*256+low(rBCPS)
   ld hl,color_bleed_palette
   jp set_gbc_palette
@@ -891,8 +918,6 @@ load_color_bleed::
   ldh [rBGP], a
   ld hl, sgb_bleed_rects
   call sgb_send
-  ; fall through
-sgb_set_palette_bleed::
   ld bc, $0405
   ld de, $0607
   jp sgb_set_palettes_bcde

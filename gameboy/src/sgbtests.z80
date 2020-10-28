@@ -33,20 +33,20 @@ sharpness_bricks_gbc_palette::
 color_bleed_palette::
   drgb $000000
   drgb $FF0000
-  drgb $000000
-  drgb $FF0000
+  drgb $0000FF
+  drgb $FF80FF
   drgb $000000
   drgb $00FF00
+  drgb $00FFFF
+  drgb $FF80FF
   drgb $000000
-  drgb $00FF00
+  drgb $FFFF00
+  drgb $FF00FF
+  drgb $FF80FF
   drgb $000000
-  drgb $0000FF
-  drgb $000000
-  drgb $0000FF
-  drgb $000000
+  drgb $808080
   drgb $FFFFFF
-  drgb $000000
-  drgb $FFFFFF
+  drgb $FF80FF
 color_bleed_palette_end::
 
   ; 8-11: 12-step gray ramp
@@ -220,7 +220,7 @@ pluge_palette_common::
   drgb $c8c8c8
   drgb $f8f8f8
 
-  ; 38-39: PLUGE with and without setup
+  ; 40-41: PLUGE with and without setup
 pluge_palette_ntsc::
   drgb $101010  ; NTSC version
   drgb $181818
@@ -231,6 +231,25 @@ pluge_palette_ntsc::
   drgb $080808
   drgb $080008
   drgb $000800
+
+  ; 42-45: Convergence (no longer shared with color bleed
+  ; since #26)
+  drgb $000000
+  drgb $FF0000
+  drgb $000000
+  drgb $FF0000
+  drgb $000000
+  drgb $00FF00
+  drgb $000000
+  drgb $00FF00
+  drgb $000000
+  drgb $0000FF
+  drgb $000000
+  drgb $0000FF
+  drgb $000000
+  drgb $FFFFFF
+  drgb $000000
+  drgb $FFFFFF
 
 sgb_master_palette_end:
 
