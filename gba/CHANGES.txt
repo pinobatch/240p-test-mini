@@ -1,3 +1,6 @@
+0.22
+* Color bleed: Rearrange to 10 rectangles
+
 0.21 (2020-06-01)
 * Help: Make some descriptions more concise (with Artemio's help)
 * Compile with -fno-common for GCC 10 compatibility

@@ -1,3 +1,11 @@
+0.22
+* Add Safe areas pattern
+* Color bleed: Rearrange to 10 rectangles
+* Add a back story for Gus
+* Begin printable manual
+* SMPTE bars: Move I and Q to correct hues ($0C and $03)
+* Change random formula to reflect new cc65
+
 0.21 (2020-06-01)
 * Build-time option to exit to menu if included in Action 53
   multicart, either from menu or pressing Reset twice

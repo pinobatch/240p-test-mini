@@ -808,8 +808,9 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.22a53 (2020-09-13)
-Corrected SMPTE I/Q phase
+Version 0.22wiup (2020-10-28)
+Safe areas; more color bleed;
+correct SMPTE I/Q phase
 
 Concept: Artemio Urbina
   🐦 @Artemio

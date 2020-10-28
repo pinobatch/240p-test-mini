@@ -1,3 +1,14 @@
+0.22
+* Add MDFourier audio test
+* Color bleed: Rearrange to 10 rectangles
+* Add a back story for Gus
+* Document deliberately replaced assets
+* Change random formula to reflect new cc65
+* More micro-optimizations
+* Free space occupied by RSTs and interrupts that won't be used
+* Migrate to RGBDS 0.4.0 (no dedent, no duplicate section names,
+  rename GLOBAL to EXPORT)
+
 0.21 (2020-06-01)
 * Add Convergence pattern
 * Overscan: Change WX in hblank to hide a 1-line-tall glitch

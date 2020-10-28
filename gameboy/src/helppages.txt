@@ -716,8 +716,8 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.22wip (2020-06-14)
-MDFourier
+Ver. 0.22wip (2020-10-28)
+MDFourier; more bleed
 
 © 2011-2016
   Artemio Urbina
