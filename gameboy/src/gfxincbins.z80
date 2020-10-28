@@ -98,9 +98,7 @@ export sizeof_megaton_tiles
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "shadowsprite_gfx1",ROMX
-portrait_pal::
-  incbin "obj/gb/Gus_portrait-GBC.pal"
+section "shadowsprite_gfx0",ROM0
 hepsie_palette_gbc::
   drgb $000000
   drgb $00FF00  ; skirt
@@ -111,7 +109,9 @@ hepsie_palette_gbc::
   drgb $FFAA55
 hepsie_palette_gbc_end::
 
-; section "shadowsprite_gfx0",ROM0
+section "shadowsprite_gfx1",ROMX
+portrait_pal::
+  incbin "obj/gb/Gus_portrait-GBC.pal"
 shadow_reticle_chr::
   incbin "obj/gb/shadow_reticle.chrgb.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4
