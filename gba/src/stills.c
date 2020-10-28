@@ -549,10 +549,24 @@ void activity_cps_grid(void) {
 }
 
 static const uint32_t full_stripes_patterns[3][2] = {
-  {0x00000000,0x11111111},
-  {0x01010101,0x01010101},
-  {0x01010101,0x10101010}
+  {0x11111111,0x22222222},
+  {0x12121212,0x12121212},
+  {0x12121212,0x21212121}
 };
+
+static const unsigned short full_stripes_colors[10][2] = {
+  { RGB5(31, 0, 0), 0 },
+  { RGB5(31,31, 0), 0 },
+  { RGB5( 0,31, 0), 0 },
+  { RGB5( 0,31,31), 0 },
+  { RGB5( 0, 0,31), 0 },
+  { RGB5(31, 0,31), 0 },
+  { RGB5(31,31,31), 0 },
+  { RGB5(31,31,31), 0 },
+  { RGB5(16,16,16), 0 },
+  { RGB5(31, 0, 0), RGB5( 0, 0,31) }
+};
+
 
 static void do_full_stripes(const unsigned char *helpsect) {
   unsigned int pattern = 0, inverted = 0, frame = 0;
@@ -563,7 +577,7 @@ static void do_full_stripes(const unsigned char *helpsect) {
 
   // row 19: frame counter
   dma_memset16(MAP[PFOVERLAY], 0x0000, 32*20*2);
-  loadMapRowMajor(&(MAP[PFOVERLAY][19][24]), 0x0002, 6, 1);
+  loadMapRowMajor(&(MAP[PFOVERLAY][19][24]), 0x6002, 6, 1);
 
   while (1) {
     read_pad_help_check(helpsect);
@@ -576,7 +590,7 @@ static void do_full_stripes(const unsigned char *helpsect) {
       lcdcvalue ^= BG0_ON;
     }
     if (new_keys & (KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT)) {
-      inverted ^= 0x11111111;
+      inverted ^= 0x33333333;
     }
     if (new_keys & KEY_B) {
       return;
@@ -591,11 +605,10 @@ static void do_full_stripes(const unsigned char *helpsect) {
     BG_OFFSET[0].x = BG_OFFSET[0].y = BG_OFFSET[1].x = 0;
     BG_OFFSET[1].y = 4;
     BG_COLORS[0] = RGB5(0, 0, 0);
-    BG_COLORS[1] = RGB5(31, 31, 31);
-    BG_COLORS[2] = RGB5(0, 0, 0);
-    BG_COLORS[17] = RGB5(31, 0, 0);
-    BG_COLORS[33] = RGB5(0, 31, 0);
-    BG_COLORS[49] = RGB5(0, 0, 31);
+    for (int c = 0; c < 10; ++c) {
+      BG_COLORS[c * 16 + 1] = full_stripes_colors[c][0];
+      BG_COLORS[c * 16 + 2] = full_stripes_colors[c][1];
+    }
     REG_DISPCNT = lcdcvalue;
 
     // Draw the pattern
@@ -613,7 +626,7 @@ static void do_full_stripes(const unsigned char *helpsect) {
 
 void activity_full_stripes(void) {
   // Clear the screen
-  dma_memset16(MAP[PFMAP], 0x0001, 32*21*2);
+  dma_memset16(MAP[PFMAP], 0x6001, 32*21*2);
   do_full_stripes(helpsect_full_screen_stripes);
 }
 
@@ -625,7 +638,7 @@ void activity_color_bleed(void) {
   for (unsigned int sy = 0; sy < 5; ++sy) {
     for (unsigned int sx = 0; sx < 2; ++sx) {
       unsigned short *src = &(MAP[PFMAP][sy * 4 + 1][sx * 15 + 1]);
-      unsigned int tilenum = (((sy + 1) & 0x03) << 12) + 1;
+      unsigned int tilenum = ((sy * 2 + sx) << 12) + 1;
       for (unsigned int j = 0; j < 96; j += 32) {
         dma_memset16(src + j, tilenum, 13*2);
       }
