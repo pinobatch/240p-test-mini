@@ -582,11 +582,14 @@ static void do_full_stripes(const unsigned char *helpsect) {
       return;
     }
 
+    if (++frame >= 60) frame = 0;
+    posprintf(help_line_buffer, "Frame %02d", frame);
+
     VBlankIntrWait();
     BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFOVERLAY);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_OFFSET[1].x = BG_OFFSET[1].y = 0;
+    BG_OFFSET[0].x = BG_OFFSET[0].y = BG_OFFSET[1].x = 0;
+    BG_OFFSET[1].y = 4;
     BG_COLORS[0] = RGB5(0, 0, 0);
     BG_COLORS[1] = RGB5(31, 31, 31);
     BG_COLORS[2] = RGB5(0, 0, 0);
@@ -603,29 +606,29 @@ static void do_full_stripes(const unsigned char *helpsect) {
     }
 
     // Draw the frame counter
-    if (++frame >= 60) frame = 0;
     dma_memset16(PATRAM4(0, 2), 0x2222, 32*6);
-    posprintf(help_line_buffer, "Frame %02d", frame);
     vwf8Puts(PATRAM4(0, 2), help_line_buffer, 4, 1);
   }
 }
 
 void activity_full_stripes(void) {
   // Clear the screen
-  dma_memset16(MAP[PFMAP], 0x0001, 32*20*2);
+  dma_memset16(MAP[PFMAP], 0x0001, 32*21*2);
   do_full_stripes(helpsect_full_screen_stripes);
 }
 
 void activity_color_bleed(void) {
   // Clear the screen
-  dma_memset16(MAP[PFMAP], 0x0000, 32*20*2);
+  dma_memset16(MAP[PFMAP], 0x0000, 32*21*2);
   
   // Draw stripe regions
-  for (unsigned int i = 0; i < 4; ++i) {
-    unsigned short *src = &(MAP[PFMAP][i * 5 + 1][2]);
-    for (unsigned int j = 0; j < 96; j += 32) {
-      unsigned int tilenum = (((i + 1) & 0x03) << 12) + 1;
-      dma_memset16(src + j, tilenum, 26*2);
+  for (unsigned int sy = 0; sy < 5; ++sy) {
+    for (unsigned int sx = 0; sx < 2; ++sx) {
+      unsigned short *src = &(MAP[PFMAP][sy * 4 + 1][sx * 15 + 1]);
+      unsigned int tilenum = (((sy + 1) & 0x03) << 12) + 1;
+      for (unsigned int j = 0; j < 96; j += 32) {
+        dma_memset16(src + j, tilenum, 13*2);
+      }
     }
   }
   do_full_stripes(helpsect_color_bleed);
