@@ -2,7 +2,7 @@ include "src/gb.inc"
 include "src/global.inc"
 
 section "sgbcolors", ROM0, ALIGN[3]
-sgb_master_palette:
+sgb_master_palette::
 gbmonopalette::
   ; 0: Grays
   drgb $F8F8F8
@@ -121,18 +121,7 @@ cbog_palette_dark::
   drgb $C01010
   drgb $1010C0
 
-  ; 22-23: Color bars on gray light
-cbog_palette_light::
-  drgb $10FF10  ; Green to white
-  drgb $10FFFF
-  drgb $FFFF10
-  drgb $FFFFFF
-  drgb $10FF10  ; Green to blue
-  drgb $FF10FF
-  drgb $FF1010
-  drgb $1010FF
-
-  ; 24-25: Color bars on gray dark without setup
+  ; 22-23: Color bars on gray dark without setup
 cbog_palette_darkj::
   drgb $00B800  ; Green to white
   drgb $00B8B8
@@ -143,16 +132,27 @@ cbog_palette_darkj::
   drgb $B80000
   drgb $0000B8
 
+  ; 24-25: Color bars on gray light
+cbog_palette_light::
+  drgb $10FF10  ; Green to white
+  drgb $10FFFF
+  drgb $FFFF10
+  drgb $FFFFFF
+  drgb $10FF10  ; Green to blue
+  drgb $FF10FF
+  drgb $FF1010
+  drgb $1010FF
+
   ; 26-27: Color bars on gray light without setup
 cbog_palette_lightj::
-  drgb $B8FFB8  ; Green to white
-  drgb $B8FFFF
-  drgb $FFFFB8
+  drgb $00FF00  ; Green to white
+  drgb $00FFFF
+  drgb $FFFF00
   drgb $FFFFFF
-  drgb $B8FFB8  ; Green to blue
-  drgb $FFB8FF
-  drgb $FFB8B8
-  drgb $B8B8FF
+  drgb $00FF00  ; Green to blue
+  drgb $FF00FF
+  drgb $FF0000
+  drgb $0000FF
 
   ; 28-32: PLUGE Contrast test
 pluge_shark_palette::

@@ -744,14 +744,26 @@ smpte_bars_engine:
     ldh [rNR52],a  ; stop audio circuit
     ret
   .no_quit:
+
+  ; 0: NTSC setup, 75%
+  ; 1: no setup, 75%
+  ; 2: NTSC setup, 100%
+  ; 3: no setup, 100%
+  ldh a,[curpalette]
   bit PADB_UP,b
-  jr z,.notogglepalette
-    ldh a,[curpalette]
-    cpl
+  jr z,.notoggle75100
+    xor $02
+    jr .have_new_curpalette
+  .notoggle75100:
+  bit PADB_A,b
+  jr z,.notogglesetup
+    xor $01
+  .have_new_curpalette:
     ldh [curpalette],a
     ldh a, [hw_capability]
     ldh [need_sgb_update], a
-  .notogglepalette:
+  .notogglesetup:
+
   bit PADB_SELECT,b
   jr z,.notogglevol
     ldh a,[curvolume]
@@ -786,16 +798,13 @@ smpte_bars_engine:
   ldh a, [need_sgb_update]
   rra
   jr nc, .not_send_sgb
-    xor a
-    ldh [need_sgb_update], a
-    ld d, a
-    ld e, a
-    ld bc,$1415
     ld a, [curpalette]
-    or a
-    jr z,.sgb_is_dark
-      ld bc,$1617
-    .sgb_is_dark:
+    add a
+    add (cbog_palette_dark-sgb_master_palette)/8
+    ld b, a
+    ld c, a
+    inc c
+    ld de, $0000
     call sgb_set_palettes_bcde
   .not_send_sgb:
 
