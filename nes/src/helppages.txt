@@ -98,12 +98,11 @@ taken from a Vs. System or
 PlayChoice 10 arcade board.
 ----
 The PLUGE Contrast
-sub-test fills the screen
-with a pattern based on the
-SHARK (U+1F988) emoji.
-Use it with various palettes
-to check contrast and
-brightness.
+pattern fills the screen
+with a shark pictogram.
+Use it with various
+palettes to check
+contrast and brightness.
 
 A: Switch palette among
   normal, dark, or light colors

@@ -81,29 +81,36 @@ const unsigned short gray4pal[4] = {
 const unsigned short invgray4pal[4] = {
   RGB5(31,31,31),RGB5(23,23,23),RGB5(15,15,15),RGB5( 0, 0, 0)
 };
-static const unsigned short smptePalette75[] = {
-  RGB5( 2, 2, 2),RGB5( 2, 2,24),RGB5(24, 2, 2),RGB5(24, 2,24),
-  RGB5( 2,24, 2),RGB5( 2,24,24),RGB5(24,24, 2),RGB5(24,24,24),
-  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 1, 1, 1),
-  RGB5( 3, 3, 3)
-};
-static const unsigned short smptePalette100[] = {
-  RGB5( 2, 2, 2),RGB5( 2, 2,31),RGB5(31, 2, 2),RGB5(31, 2,31),
-  RGB5( 2,31, 2),RGB5( 2,31,31),RGB5(31,31, 2),RGB5(31,31,31),
-  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 1, 1, 1),
-  RGB5( 3, 3, 3)
-};
-static const unsigned short smptePalette75J[] = {
-  RGB5( 0, 0, 0),RGB5( 0, 0,23),RGB5(23, 0, 0),RGB5(23, 0,23),
-  RGB5( 0,23, 0),RGB5( 0,23,23),RGB5(23,23, 0),RGB5(23,23,23),
-  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 0, 0, 0),
-  RGB5( 1, 1, 1)
-};
-static const unsigned short smptePalette100J[] = {
-  RGB5( 0, 0, 0),RGB5( 0, 0,31),RGB5(31, 0, 0),RGB5(31, 0,31),
-  RGB5( 0,31, 0),RGB5( 0,31,31),RGB5(31,31, 0),RGB5(31,31,31),
-  RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 0, 0, 0),
-  RGB5( 1, 1, 1)
+static const unsigned short smptePalettes[][13] = {
+  {
+    // 75% with setup
+    RGB5( 2, 2, 2),RGB5( 2, 2,24),RGB5(24, 2, 2),RGB5(24, 2,24),
+    RGB5( 2,24, 2),RGB5( 2,24,24),RGB5(24,24, 2),RGB5(24,24,24),
+    RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 1, 1, 1),
+    RGB5( 3, 3, 3)
+  },
+  {
+    // 75% without setup
+    RGB5( 0, 0, 0),RGB5( 0, 0,23),RGB5(23, 0, 0),RGB5(23, 0,23),
+    RGB5( 0,23, 0),RGB5( 0,23,23),RGB5(23,23, 0),RGB5(23,23,23),
+    RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 0, 0, 0),
+    RGB5( 1, 1, 1)
+
+  },
+  {
+    // 100% with setup
+    RGB5( 2, 2, 2),RGB5( 2, 2,31),RGB5(31, 2, 2),RGB5(31, 2,31),
+    RGB5( 2,31, 2),RGB5( 2,31,31),RGB5(31,31, 2),RGB5(31,31,31),
+    RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 1, 1, 1),
+    RGB5( 3, 3, 3)
+  },
+  {
+    // 100% without setup
+    RGB5( 0, 0, 0),RGB5( 0, 0,31),RGB5(31, 0, 0),RGB5(31, 0,31),
+    RGB5( 0,31, 0),RGB5( 0,31,31),RGB5(31,31, 0),RGB5(31,31,31),
+    RGB5( 6, 0,13),RGB5(31,31,31),RGB5( 0, 4, 6),RGB5( 0, 0, 0),
+    RGB5( 1, 1, 1)
+  },
 };
 static const unsigned short plugePaletteNTSC[] = {
   RGB5( 2, 2, 2),RGB5( 3, 3, 3),RGB5( 0, 0, 0),RGB5( 0, 0, 0),
@@ -278,7 +285,10 @@ static void do_bars(const BarsListEntry *rects, const unsigned char *helpsect) {
   while (1) {
     read_pad_help_check(helpsect);
     if (new_keys & KEY_UP) {
-      bright = !bright;
+      bright ^= 2;
+    }
+    if (new_keys & KEY_A) {
+      bright ^= 1;
     }
     if (new_keys & KEY_SELECT) {
       beep = beep ^ 0x2000;
@@ -291,7 +301,7 @@ static void do_bars(const BarsListEntry *rects, const unsigned char *helpsect) {
     VBlankIntrWait();
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
     BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    dmaCopy(bright ? smptePalette100 : smptePalette75, BG_COLORS+0x00, sizeof(smptePalette100));
+    dmaCopy(smptePalettes[bright], BG_COLORS+0x00, sizeof(smptePalettes[0]));
     REG_DISPCNT = MODE_0 | BG0_ON;
     REG_SOUND3CNT_H = beep;
   }
