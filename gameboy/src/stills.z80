@@ -1318,10 +1318,9 @@ activity_convergence::
   call clear_gbc_attr
 
   ; Load tiles
-  ld hl,CHRRAM0
   ld de,convergence_chr
   ld b,sizeof_convergence_chr/16
-  call pb16_unpack_block
+  call pb16_unpack_to_CHRRAM0
 
   ; Load grid background
   ld h, $04

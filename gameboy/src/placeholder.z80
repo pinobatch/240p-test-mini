@@ -131,17 +131,6 @@ putnibble_raw:
 
 ; Background drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-load_common_obj_tiles::
-  ld hl,CHRRAM0
-  jr load_common_tiles_hl
-
-load_common_bg_tiles::
-  ld hl,CHRRAM2
-load_common_tiles_hl:
-  ld de,bggfx_chr
-  ld b,32
-  jp pb16_unpack_block
-
 draw_bg:
   call lcd_off
   call load_common_bg_tiles

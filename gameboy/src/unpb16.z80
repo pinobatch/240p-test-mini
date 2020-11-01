@@ -19,6 +19,9 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
 include "src/global.inc"
+CHRRAM0 equ $8000
+CHRRAM2 equ $9000
+
 
   rsset hLocals
 pb16_byte0 rb 1
@@ -67,6 +70,50 @@ pb16_unpack_packet:
   sla b
   jr nz,.byteloop
   ret
+
+; Tile loaders used in multiple places, to optimize JP to JR
+
+
+load_common_obj_tiles::
+  ld hl,CHRRAM0
+  jr load_common_tiles_hl
+
+load_common_bg_tiles::
+  ld hl,CHRRAM2
+load_common_tiles_hl:
+  ld de,bggfx_chr
+  ld b,32
+  jr pb16_unpack_block
+
+;;
+; Loads the following tiles into CHR RAM
+; 00: c0
+; 01: c1
+; 02: c2
+; 03: c3
+; 04: 7 c3, 1 c2
+; 05: 6 c2, 2 c1
+; 06: 5 c1, 3 c0
+; 07: 4 c0, 4 c1
+; 08: 4 c2, 4 c3
+; 09: 06 flipped
+; 0A: 05 flipped
+; 0B: 04 flipped
+; 0C: Grid square
+load_smpte_tiles::
+  ld hl,CHRRAM0
+  ld de,smptetiles_chr
+  ld b,13
+  jr pb16_unpack_to_CHRRAM0
+
+load_backlight_chr::
+  ld de,backlight_chr
+  ld b,5
+  ; fall through
+
+pb16_unpack_to_CHRRAM0::
+  ld hl, CHRRAM0
+  ; fall through
 
 ;;
 ; Unpacks 2*B packets from DE to HL (opposite direction vs. memcpy),

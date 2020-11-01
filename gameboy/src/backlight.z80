@@ -28,12 +28,6 @@ is_hidden rb 1
 cursize rb 1
 
 section "backlight",ROM0
-load_backlight_chr::
-  ld hl,CHRRAM0
-  ld de,backlight_chr
-  ld b,5
-  jp pb16_unpack_block
-
 activity_backlight_zone::
   ld a,88
   ldh [xpos],a

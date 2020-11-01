@@ -59,9 +59,8 @@ activity_shadow_sprite::
 
   call load_frame_type_names
   ld de,hepsie_chr
-  ld hl,CHRRAM0
   ld b,sizeof_hepsie_chr/16
-  call pb16_unpack_block
+  call pb16_unpack_to_CHRRAM0
   ld de,shadow_reticle_chr
   ld hl,CHRRAM0+24*16
   ld b,sizeof_shadow_reticle_chr/16

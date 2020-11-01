@@ -403,8 +403,7 @@ sgb_load_border::
   ld a, [de]
   inc de
   ld b, a
-  ld hl, CHRRAM0
-  call pb16_unpack_block
+  call pb16_unpack_to_CHRRAM0
   ; ld b, 0  ; guaranteed by pb16_unpack_block
   push de
   ld a, $13<<3|1

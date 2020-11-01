@@ -76,9 +76,8 @@ activity_megaton::
 
   ; Load background tiles
   ld de,megatontiles_chr
-  ld hl,CHRRAM0
   ld b,sizeof_megaton_tiles/16
-  call pb16_unpack_block
+  call pb16_unpack_to_CHRRAM0
   ld de,CHRRAM1>>4
   ld hl,megaton_labels
   call vwfDrawLabels
