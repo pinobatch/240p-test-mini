@@ -48,7 +48,7 @@ two goals:
    levels of a display.
 
 The Nintendo Entertainment
-System (NES) can output 240
+System (NES) outputs 240
 picture lines in a progressive
 "double struck" mode. It does
 not support interlaced video,
@@ -56,8 +56,7 @@ and its 52-color palette is
 closer to HSV than RGB.
 ----
 Press Start in any test
-pattern to show help for
-that pattern.
+to show relevant help.
 
 The test suite is also
 available for several other
@@ -79,21 +78,20 @@ lose sync. The outer bars
 are the darkest mix of
 colors the NES can show.
 
-You should adjust brightness
-until the outer bars are
-clearly visible and inner
-bars are not.
+Adjust brightness until
+the outer bars are clearly
+visible and inner bars are not.
 ----
 ↓: Darken the entire screen
   by 25% with emphasis filter
 A: Switch outer bars
   between gray and color
-Select: Open PLUGE Contrast
+Select: Go to PLUGE Contrast
 
-The emphasis filter and gray
-outer bars may misbehave on
-NES consoles modded with
-a 2C03 or 2C05 RGB PPU
+Emphasis and gray outer bars
+may misbehave on Famicom
+Titler or on consoles modded
+with a 2C03 or 2C05 RGB PPU
 taken from a Vs. System or
 PlayChoice 10 arcade board.
 ----
@@ -106,15 +104,15 @@ contrast and brightness.
 
 A: Switch palette among
   normal, dark, or light colors
-Select: Return to PLUGE
+Select: Go to PLUGE
 
 == Gradient color bars ==
 
-This pattern allows you to
-calibrate the red, green, and
-blue colors on your TV.
+Use this pattern to
+calibrate red, green, and
+blue colors on a TV.
 
-Use the TV's "contrast"
+Use the TV's contrast
 control to adjust the white
 level such that four levels
 each of red, green, and blue
@@ -123,25 +121,24 @@ are visible, and the lightest
 level of each color is
 distinct from white.
 
-A: Hide or show 16px grid
+A: Hide or show grid
 
 == SMPTE color bars ==
 
-This approximation of SMPTE
-EG 1-1990 can be used to
-calibrate for approximate
-color levels.
+This approximation of
+SMPTE EG 1-1990 can
+be used to calibrate for
+rough color levels.
 
 A: Toggle bars' brightness
 Select: Play 1 kHz tone
 
-With some TVs, you can turn
-on blue-only mode to confirm
-color balance. But because
-the NES's composite encoder
-does not attempt to produce
-accurate RGB hues, these
-colors will not be pure.
+Use some TVs' blue-only
+mode to confirm color balance.
+because the NES's composite
+encoder does not attempt to
+produce accurate RGB hues,
+these colors will not be pure.
 
 The mini-PLUGE at bottom
 right causes some TVs
@@ -166,7 +163,7 @@ Essentials: HD Basics
 
 == Color bleed ==
 
-This pattern helps diagnose
+Use this pattern to diagnose
 color bleed caused by
 incorrect color resampling.
 
@@ -174,8 +171,7 @@ incorrect color resampling.
   pattern by one pixel
 Hold ↑↓←→: Move the
   pattern every frame
-A: Switch among horizontal,
-  vertical, and checkerboard
+A: Rotate stripes
 Select: Show or hide
   frame counter
 
@@ -192,13 +188,13 @@ with no distortion.
 
 A: Change between 256x224
    and 256x240 pixel grids
-Select: Change between
-   black and gray background
+Select: Toggle gray
+   background
 
-Many games designed for
-NTSC display may show
-artifacts outside the
-256x224 pixel area.
+Many games made for NTSC
+systems show artifacts
+outside the 256x224
+pixel area.
 
 == Linearity ==
 
@@ -208,14 +204,13 @@ ratio of the NES PPU. NTSC
 is 8:7; PAL is close to 11:8.
 
 Use it to verify the
-horizontal to vertical
-size ratio setting of your
-display or scaler or to
-verify the lack of barrel
-distortion of a CRT.
+horizontal to vertical size
+ratio setting of your display
+or scaler or to measure
+barrel distortion on a CRT.
 
-The diameter of each circle
-should be the same in all
+Each circle should have
+the same diameter in all
 directions, and the diameter
 of all four small circles
 should be the same.
@@ -225,8 +220,8 @@ A: Hide or show a
 
 == Convergence ==
 
-Use these patterns to adjust
-a CRT's color convergence.
+Use these to adjust a
+CRT's color convergence.
 
 Fine grid
 ↑↓: Change grid pattern
@@ -241,13 +236,14 @@ A: Go to fine grid
 
 == Gray ramp ==
 
-This gray ramp should not
-have a red, green, or blue
-tint to it.
+Use this pattern to
+check color balance.
+This gray ramp should
+not have a colored tint.
 
-Some cheaper LCDs can have
-different gamma curves for
-the different components.
+Cheap color LCDs may
+have different gamma
+curves per component.
 
 == Solid color screen ==
 
@@ -291,17 +287,17 @@ by lidnariq of NESdev BBS
 
 == Sharpness ==
 
-Set the sharpness of your
-TV to a value that shows
-clean black and gray
-transitions without white
-ghost lines on the side.
+Set the sharpness of
+your TV to a value that
+shows clean black and
+gray transitions without
+white lines on the side.
 
 Modern TVs' "sharpness"
 control performs edge
-enhancement, which is
-designed for live action
-SDTV or VHS sources.
+enhancement, intended
+for live action SDTV or
+VHS sources.
 Most TVs have zero as
 no change and high as
 enhancement. A few have
@@ -314,8 +310,8 @@ A: Toggle brick wall
 == Chroma crosstalk ==
 
 This pattern shows colored
-stripes arranged to exploit
-crosstalk between the luma
+stripes arranged to show
+crosstalk between luma
 and chroma of the composite
 video output.
 
@@ -328,20 +324,19 @@ checkerboard patterns often
 produce crosstalk artifacts.
 
 On an NTSC NES, the word
-"Pass" appears with flicker.
-On an NES modified to output
-RGB, the stripes won't spell
-anything.
+"Pass" fades in and out.
+Through S-Video or RGB,
+the stripes are indistinct.
 
 == CPU clock speed ==
 
 Kevin Horton's Hi-Def NES
-mod includes a feature to
-overclock the NES CPU to
-reduce slowdown in games.
-This test measures the CPU's
-clock rate using the length
-of a scanline as a time base.
+mod lets ths user overclock
+the CPU to reduce slowdown
+in games. This test measures
+the CPU's clock rate using
+the length of a scanline as
+a time base.
 
 Though the NES has no
 real-time clock, a program
@@ -366,16 +361,16 @@ is making 262 or 312 lines:
 From this, it calculates
 CPU clock speed.
 It repeats this calculation
-every few frames, so if you
-change the CPU's speed
+every few frames, so if
+the CPU's speed changes
 while the test runs, the
 displayed value will update.
 
 == Overscan ==
 
-With this pattern you can
-discover how much of the
-picture edge your TV hides.
+Use this pattern to check
+how much of the picture
+edge your TV hides.
 
 Historically, CRT TVs
 have been calibrated to
@@ -390,8 +385,7 @@ have unwanted information
 near the edge.
 
 ↑↓←→: Choose an edge
-Hold A + ↑↓←→:
-  Move that edge
+A + ↑↓←→: Move edge
 Select: Invert grays
 ----
 Move each edge inward until
@@ -404,11 +398,10 @@ in pixels in each direction.
 
 Poor high-voltage regulation
 in a CRT causes image size
-to depend on brightness.
-This changes the width of
-the border. To test this,
-press Select and repeat the
-above steps.
+to depend on brightness,
+changing the border's width.
+To test this, press Select
+and repeat the above steps.
 ----
 The NES picture is 256x240
 pixels. The nominal 4:3 frame
@@ -449,8 +442,7 @@ Some deinterlacers display
 drop shadows correctly but
 still interpret 240p as 480i.
 The striped sprite should
-make attempted deinterlacing
-easy to spot.
+make this easy to spot.
 ----
 ↑↓←→: Move sprite
 A: Skip flicker frame
@@ -475,9 +467,10 @@ Hill zone by mikejmoffitt
 
 This stopwatch helps you
 measure a TV's lag, detect
-dropped frames, or just
-count how long your spouse
-has been on the phone.
+dropped frames, time a
+workout, or just count how
+long your spouse has been
+on the phone.
 
 A: Start or stop
 Select when stopped: Reset
@@ -497,21 +490,20 @@ Lag measurement
 
 To measure lag, get a
 camera and connect two
-displays at once. One is
+displays to one NES. One is
 being tested, and the other
 (the reference) should be a
 CRT SDTV or a display with
 known lag. For example,
 connect a CRT to the RF out
-of a front-loading NES and
-your scaler to the AV out.
+and your scaler to AV out.
 
 Then photograph both
 screens at once. The picture
 will show the difference in
 image processing latency
-between them. Some consumer
-LCD TVs exceed five frames.
+between them. Some LCD TVs
+exceed five frames.
 ----
 Lag measurement
 
@@ -585,9 +577,9 @@ reticles align.
 
 This shows a scrolling
 background with several
-parallax strips. It can be
-used to notice any drops
-in frame rate.
+parallax strips. Use it
+to notice any drops in
+frame rate.
 
 ↑↓: Change speed
 ←→: Change direction
@@ -599,9 +591,9 @@ Hill zone by mikejmoffitt
 == Vertical scroll test ==
 
 This shows a scrolling
-background. It can be
-used to measure cadence
-detection in a deinterlacer.
+background. Use it to
+measure cadence detection
+in a deinterlacer.
 
 ↑↓: Change speed
 ←→: Change direction
@@ -612,11 +604,11 @@ Tiles by Damian Yerrick
 
 == Grid scroll test ==
 
-A grid is scrolled vertically
-or horizontally. This can be
-used to test linearity and
-how well the display copes
-with scrolling and frame rate.
+A grid scrolls vertically
+or horizontally. Use it
+to test linearity and how
+well the display copes with
+scrolling and frame rate.
 Some scalers may produce a
 still image at maximum speed.
 
@@ -633,8 +625,7 @@ lines, each one pixel wide.
   pattern by one pixel
 Hold ↑↓←→: Move the
   pattern every frame
-A: Switch among horizontal,
-  vertical, and checkerboard
+A: Rotate stripes
 Select: Show or hide
   frame counter
 
@@ -642,9 +633,8 @@ While you hold Up, the lines
 should flicker. If holding
 Up makes a still image, your
 scaler is treating the signal
-as interlaced and either
-discarding every other frame
-or weaving them incorrectly.
+as interlaced and dropping
+or weaving frames.
 
 == Backlight zone test ==
 
@@ -653,8 +643,8 @@ moving square, letting you
 check how a display works
 with small bright areas.
 Some LED-lit LCDs dim
-dark areas to make black
-areas darker, which causes
+dark areas to make blacks
+deeper, which causes
 problems with scenes such
 as starfields and credits.
 
@@ -682,9 +672,9 @@ Crowd (PCM)
 == Sound test ==
 
 Use this test to ensure
-that the audio output works
-and that audio and video are
-synchronized.
+that the audio output
+works and that audio and
+video are synchronized.
 
 A: Play a sound and
   flash the screen
@@ -756,6 +746,18 @@ A: Play tones   B: Stop
   to test A/V crosstalk
   (menu, below black, black,
   white, 15k, or 8k)
+----
+Other tests that use the
+triangle channel can leave
+it in an unpredictable state.
+This causes noise and DPCM
+volume to vary between runs.
+Only a power cycle or Reset
+Button press fully resets it.
+
+Start+Reset: Skip to
+  MDFourier menu
+A+Start+Reset: Start test
 
 == Audio sync test ==
 
@@ -807,7 +809,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.22wiup (2020-10-28)
+Version 0.22wip (2020-10-28)
 Safe areas; more color bleed;
 correct SMPTE I/Q phase
 

@@ -37,6 +37,21 @@ test_finished:
     bit cur_keys
     bvs another_run_wait_b
 
+  ; If Start+A is held, start test immediately
+  lda mdfourier_good_phase
+  beq not_startplusa
+  lda cur_keys
+  and #KEY_START|KEY_A
+  cmp #KEY_START|KEY_A
+  bne not_startplusa
+    lda #1
+    sta skip_ppu
+    jsr run_ppu_loader
+    jsr mdfourier_run
+    dec skip_ppu
+    jmp after_run
+  not_startplusa:
+
   wait_for_start:
     lda #helpsect_mdfourier
     jsr read_pads_helpcheck
@@ -72,6 +87,8 @@ test_finished:
     bpl wait_for_start
 
   jsr mdfourier_run
+
+after_run:
 
   ; If B was pressed to interrupt, transition from "OK" to based
   ; on the phase. Otherwise, transition from "OK" to "Complete".
