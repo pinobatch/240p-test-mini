@@ -583,6 +583,9 @@ HALF_KHZ equ 2048-131
 section "smptebars", ROM0
 ; The SMPTE bars test shares cbog_palette_* with the Color bars on
 ; gray palette, which is in the SGB master palette.
+; Color bars on gray uses cbog as palettes 0 and 1
+; SMPTE bars uses cbog as palettes 0 and 1, smpte as 2 and 3
+; for the castellations, and both for the bottom row as 4 and 5
 smpte_palette_dark:
   drgb $101010  ; Green to blue (nonblue replaced with black)
   drgb $C010C0
@@ -629,18 +632,18 @@ smpte_palette_both:
   drgb $FFFFFF  ; bright white
   drgb $002050  ; blue (I)
   drgb $101010  ; shade2 (black)
-  drgb $080808  ; shade1
+  drgb $080808  ; shade1 (just below black)
   drgb $181818  ; shade3
   drgb $FF00FF
 
 smpte_palette_bothj:
-  drgb $101010
+  drgb $000000
   drgb $300068  ; purple (Q)
   drgb $FFFFFF  ; bright white
   drgb $002050  ; blue (I)
-  drgb $101010  ; shade2 (black)
-  drgb $080808  ; shade1
-  drgb $181818  ; shade3
+  drgb $000000  ; shade2 (black)
+  drgb $000000  ; shade1 (also black)
+  drgb $080808  ; shade3
   drgb $FF00FF
 
 cbog_sgb_rects:
@@ -779,21 +782,23 @@ smpte_bars_engine:
 
   ; Load palette and tiles
   ld hl,cbog_palette_dark
-  ld de,smpte_palette_dark
-  ldh a,[curpalette]
-  or a
-  jr z,.notloadlight
-    ld hl,cbog_palette_light
-    ld de,smpte_palette_light
-  .notloadlight:
+  ldh a, [curpalette]  ; 75% setup, 75% no setup, 100% setup, 100% no setup
+  ld e, a
   ld a,$80
-  ld bc,(2*8)*256+low(rBCPS)
-  call set_gbc_palette
-  ld h, d
-  ld l, e
+  call .send_e
+  ld bc, smpte_palette_light - (cbog_palette_light + 2*8)
+  add hl, bc
   ld a,$90
   ld bc,(2*8)*256+low(rBCPS)
   call set_gbc_palette
+  ld hl, smpte_palette_both
+  ldh a, [curpalette]
+  and $01
+  ld e, a
+  ld a,$A0
+  call .send_e
+
+  ld hl, smpte_palette_both
 
   ldh a, [need_sgb_update]
   rra
@@ -809,6 +814,16 @@ smpte_bars_engine:
   .not_send_sgb:
 
   jr .loop
+
+  ; Sends 8 colors at HL+E*16 to the background palette at
+  ; index A ($80-$BF)
+.send_e:
+  ld d, 0
+  swap e
+  add hl, de
+  ld bc,(2*8)*256+low(rBCPS)
+  jp set_gbc_palette
+
 
 ; Color bleed test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
