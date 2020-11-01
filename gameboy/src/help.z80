@@ -342,6 +342,7 @@ helpscreen::
     or a
     jr nz, .not_slid_completely_off
       call help_draw_wanted_page
+      rst wait_vblank_irq
       jr .not_exit
     .not_slid_completely_off:
     cp 128

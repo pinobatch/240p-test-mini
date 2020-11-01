@@ -474,7 +474,6 @@ sgb_ntsc_test::
   call sgb_send
   ld a, %11100100
   ldh [rBGP], a
-  ldh [rLYC], a  ; disable lyc irq
   ld a, 4
   ldh [hIncTime], a
   ldh [rSCX], a

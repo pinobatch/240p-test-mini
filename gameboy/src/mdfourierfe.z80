@@ -12,8 +12,6 @@ activity_mdfourier::
   ld hl, CHRRAM2
   ld c, 16
   rst memset_tiny  ; clear background tile
-  cpl
-  ldh [rLYC], a  ; disable lyc irq
   call clear_scrn0_to_0
   ld de,CHRRAM1>>4
   ld hl,mdfourier_title_labels

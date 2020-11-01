@@ -294,14 +294,12 @@ load_gray_ramp_gbc:
 activity_gray_ramp::
 .restart:
   call clear_gbc_attr
-  ld [oam_used],a
   call lcd_clear_oam
   xor a
   ld hl,CHRRAM0
   ld c,16
   rst memset_tiny
-  dec a
-  ldh [rLYC],a  ; disable lyc irq
+  ; The loaders expect hl = CHRRAM0+16
 
   ldh a, [hw_capability]
   add a
@@ -350,8 +348,6 @@ activity_linearity::
 
 .restart:
   call clear_gbc_attr
-  cpl
-  ld [rLYC], a  ; activity does not use STAT LYC IRQ
 
   ld l,5
   ld bc,CHRRAM2
@@ -546,8 +542,6 @@ activity_sharpness::
 
 .restart:
   call clear_gbc_attr
-  cpl
-  ldh [rLYC], a  ; disable lyc irq
 
   ; Load primary picture
   ld bc, CHRRAM2
@@ -675,7 +669,6 @@ activity_solid_screen::
   rst memset_tiny
   dec a
   ldh [lastlcdc], a  ; lastlcdc: true if color changed
-  ldh [rLYC],a  ; disable lyc irq
   ld c,9*16
   rst memset_tiny
 
@@ -970,8 +963,6 @@ activity_cps_grid::
 
 .restart:
   call clear_gbc_attr
-  cpl
-  ldh [rLYC], a  ; disable lyc irq
 
   ld hl,CHRRAM2
   ld de,cps_grid_chr
@@ -1189,8 +1180,7 @@ full_stripes_common::
   ldh a,[curlcdc]
   ldh [vblank_lcdc_value],a
   ldh [stat_lcdc_value],a
-  ldh [rLYC], a
-  ldh [rLCDC],a  ; disable lyc irq
+  ldh [rLCDC],a
 
 .loop:
   ldh a,[bleed_help_page]
@@ -1326,9 +1316,6 @@ activity_convergence::
 
 .restart:
   call clear_gbc_attr
-  cpl
-  ldh [rLYC], a  ; activity does not use STAT LYC IRQ or window
-  ldh [rWX], a
 
   ; Load tiles
   ld hl,CHRRAM0
@@ -1450,7 +1437,6 @@ activity_convergence::
   and LCDCF_BG9C00
   jr z, .set_grid_palette
     ldh a, [curscry]
-    ld b, b
     ldh [rBGP], a  ; Show/hide lines on Super Game Boy
     and $10
     ld a, $80

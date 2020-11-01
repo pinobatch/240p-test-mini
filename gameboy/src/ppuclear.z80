@@ -251,6 +251,8 @@ set_gbc_mono_palette::
 ;;
 ; Turns off rendering, marks help page as needing to be reloaded,
 ; and clears the attribute plane of the GBC tilemaps.
+; Also disables sets window and LYC to offscreen, resets the VRAM
+; bank to 0, and clears scrolling and sprites.
 ; @return A=0
 clear_gbc_attr::
   call lcd_off
@@ -263,9 +265,16 @@ clear_gbc_attr::
     ld b, 4
     call memset  ; clear the second one
   .return_0:
+
+  ld a, $FF
+  ldh [rLYC], a  ; Disable LYC IRQ and window
+  ldh [rWY], a
   xor a
-  ld [help_bg_loaded],a
-  ldh [rVBK],a
+  ld [help_bg_loaded],a  ; Mark help as unloaded
+  ldh [rVBK], a          ; Reset VRAM bank, scrolling, and sprites
+  ldh [rSCX], a
+  ldh [rSCY], a
+  ld [oam_used], a
   ret
 
 load_full_nam::

@@ -126,8 +126,7 @@ activity_megaton::
   call srand
 
   ; Turn on rendering
-  ld a,255
-  ldh [rLYC],a  ; disable lyc irq
+  ld a,$FF
   call set_obp0  ; set sprite palette to all black
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_8X16
   ldh [vblank_lcdc_value],a

@@ -38,8 +38,6 @@ activity_audiosync::
 .restart:
   call clear_gbc_attr
   ldh [unpaused],a
-  ldh [rSCX],a
-  ldh [rSCY],a
   ldh [progress],a
 
   ; Load tiles
@@ -59,8 +57,6 @@ activity_audiosync::
   call sgb_set_palette_gray
 
   ; Turn on rendering
-  ld a,$FF
-  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_ON
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a

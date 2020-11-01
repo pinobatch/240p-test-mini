@@ -163,8 +163,6 @@ activity_grid_scroll::
   ldh [curpalette],a
 .restart:
   call clear_gbc_attr
-  cpl
-  ldh [rLYC],a  ; disable lyc irq
   call sgb_set_palette_gray
   call clear_scrn0_to_0
 
@@ -760,11 +758,9 @@ load_kiki_bg:
     dec b
     jp nz,.bitunpack_rowloop
 
-  ; Disable raster interrupt and set palette
+  ; Set palette
   ld a,%11100100
   ldh [rBGP],a
-  ldh [rLYC],a  ; disable lyc irq
-
   ldh a, [hw_capability]
   add a
   jr nc,.not_gbc

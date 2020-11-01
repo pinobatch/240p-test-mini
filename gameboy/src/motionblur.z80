@@ -132,7 +132,6 @@ activity_motion_blur::
 
   ; Turn on rendering (no sprites)
   ld a,%10101010
-  ldh [rLYC],a  ; disable lyc irq
   call set_bgp  ; Palette all gray until calculated
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ldh [vblank_lcdc_value],a

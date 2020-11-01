@@ -70,8 +70,7 @@ activity_shadow_sprite::
   call make_shadow_chr
   call load_bg
 
-  dec a
-  ldh [rLYC],a  ; disable lyc irq until something needs it
+  ld a, $FF
   call set_obp0
   call set_obp1
   ldh a, [vblank_lcdc_value]
@@ -582,7 +581,7 @@ load_hillzone_bg_with_lcdc:
 
 load_horizontal_stripes:
   call clear_gbc_attr
-  ld a,$FF
+  dec a  ; ld a,$FF
   jr load_shadow_sprite_bg_stripes
 
 load_diagonal_stripes:

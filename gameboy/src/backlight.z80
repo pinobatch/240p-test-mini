@@ -47,20 +47,13 @@ activity_backlight_zone::
 
 .restart:
   call clear_gbc_attr
+  ldh [held_keys],a
   call sgb_set_palette_gray
   call load_backlight_chr
   call clear_scrn0_to_0
-
-  ; Clear unused sprites
-  ld a,4
-  ld [oam_used],a
   call lcd_clear_oam
 
   ; Blank screen
-  xor a
-  ldh [held_keys],a
-  dec a
-  ldh [rLYC],a  ; disable lyc irq
   ld a,LCDCF_ON|BG_NT0|BG_CHR21|OBJ_ON
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
