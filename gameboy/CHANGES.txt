@@ -1,10 +1,11 @@
-0.22
+0.22 (2020-11-04)
 * Add MDFourier audio test
+* Color bars: A to toggle NTSC 7.5% setup
 * Color bleed: Rearrange to 10 rectangles
 * Add a back story for Gus
 * Document deliberately replaced assets
 * Change random formula to reflect new cc65
-* More micro-optimizations
+* Continuing micro-optimizations
 * Free space occupied by RSTs and interrupts that won't be used
 * Migrate to RGBDS 0.4.0 (no dedent, no duplicate section names,
   rename GLOBAL to EXPORT)

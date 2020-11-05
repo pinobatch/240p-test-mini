@@ -718,7 +718,7 @@ crosstalk artifacts.
 
 == 144p Test Suite ==
 
-Ver. 0.22wip (2020-10-28)
+Ver. 0.22 (2020-11-04)
 MDFourier; more bleed
 
 © 2011-2016
@@ -740,7 +740,8 @@ Special thanks:
   GBDev Forum & Discord
   Antonio Vivace
 Thank you to my patrons:
-  Johnathan Roatch
+  Rin Marina
+  Artemio Urbina
   Joe Parsell
   Brad Smith
 ----

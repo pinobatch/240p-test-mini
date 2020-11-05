@@ -1,5 +1,8 @@
-0.22
+0.22 (2020-11-04)
+* Color bars: A to toggle NTSC 7.5% setup
 * Color bleed: Rearrange to 10 rectangles
+* Add a back story for Gus
+* Document deliberately replaced assets
 
 0.21 (2020-06-01)
 * Help: Make some descriptions more concise (with Artemio's help)

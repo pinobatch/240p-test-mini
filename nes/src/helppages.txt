@@ -809,7 +809,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.22wip (2020-10-28)
+Version 0.22 (2020-11-04)
 Safe areas; more color bleed;
 correct SMPTE I/Q phase
 
@@ -828,9 +828,8 @@ or FITNESS FOR A
 PARTICULAR PURPOSE.
 ----
 Thank you to my patrons:
-  Johnathan Roatch
-  Joe Parsell
-  Brad Smith
+Rin Marina, Artemio Urbina,
+Joe Parsell, and Brad Smith
 
 You can help this project by
 running the test on authentic

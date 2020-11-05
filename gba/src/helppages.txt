@@ -615,7 +615,7 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.22wip (2020-10-28)
+Version 0.22 (2020-11-04)
 If it bleeds, it leads.
 
 © 2011-2016 Artemio Urbina
@@ -636,9 +636,8 @@ Special thanks:
   gbadev.org
 
 Thank you to my patrons:
-  Johnathan Roatch
-  Joe Parsell
-  Brad Smith
+Rin Marina, Artemio Urbina,
+Joe Parsell, and Brad Smith
 ----
 You can help:
 - Run tests on authentic

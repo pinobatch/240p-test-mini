@@ -1,10 +1,13 @@
-0.22
+0.22 (2020-11-04)
 * Add Safe areas pattern
-* Color bleed: Rearrange to 10 rectangles
-* Add a back story for Gus
-* Begin printable manual
 * SMPTE bars: Move I and Q to correct hues ($0C and $03)
+* Color bleed: Rearrange to 10 rectangles
+* MDFourier: Run automatically if Start+A held during Reset
+* Help: Improve antialiasing of Gus's outline
 * Change random formula to reflect new cc65
+* Add a back story for Gus
+* Document deliberately replaced assets
+* Begin work on printable manual
 
 0.21 (2020-06-01)
 * Build-time option to exit to menu if included in Action 53
