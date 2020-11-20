@@ -737,8 +737,7 @@ Program: Damian Yerrick
   🐦 @PinoBatch
 Special thanks:
   Shmups Forum
-  GBDev Forum & Discord
-  Antonio Vivace
+  gbdev contributors
 Thank you to my patrons:
   Rin Marina
   Artemio Urbina
