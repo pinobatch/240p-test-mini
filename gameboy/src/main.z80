@@ -38,7 +38,7 @@ main::
   ldh a, [hw_capability]
   rra
   jr nc, .skip_sgb_loading
-    call sgb_load_master_palette
+    call sgb_load_all_palettes
     call sgb_load_border
   .skip_sgb_loading:
   ei

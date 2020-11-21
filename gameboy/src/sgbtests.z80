@@ -2,7 +2,7 @@ include "src/gb.inc"
 include "src/global.inc"
 
 section "sgbcolors", ROM0, ALIGN[3]
-sgb_master_palette::
+sgb_all_palettes::
 gbmonopalette::
   ; 0: Grays
   drgb $F8F8F8
@@ -251,7 +251,7 @@ pluge_palette_ntsc::
   drgb $000000
   drgb $FFFFFF
 
-sgb_master_palette_end:
+sgb_all_palettes_end:
 
 section "sgbcode", ROM0
 ; An activity that uses PAL01 instead of PAL_SET may need to
@@ -293,14 +293,14 @@ sgb_freeze:
   ld b, $01  ; Freeze current screen
   jp sgb_send_ab
 
-sgb_load_master_palette::
+sgb_load_all_palettes::
   call sgb_freeze
 
-  ; Load master palette into CHRRAM0
+  ; Load data for all palettes into CHRRAM0
   call sgb_load_trn_tilemap
-  ld hl, sgb_master_palette
+  ld hl, sgb_all_palettes
   ld de, CHRRAM0
-  ld bc, sgb_master_palette_end - sgb_master_palette
+  ld bc, sgb_all_palettes_end - sgb_all_palettes
   call memcpy
 
   ; Do the transfer

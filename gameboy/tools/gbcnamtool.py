@@ -45,12 +45,12 @@ def colorround(im, palettes, tilesize, subpalsize):
         im = im.convert('RGB')
 
     trials = []
-    master_palette = []
+    all_colors = []
     onetile = Image.new('P', tilesize)
     for p in palettes:
         p = list(p[:subpalsize])
         p.extend([p[0]] * (subpalsize - len(p)))
-        master_palette.extend(p)
+        all_colors.extend(p)
 
         # New images default to the full grayscale palette. Unless
         # all 256 colors are overwritten, quantizetopalette() will
@@ -92,7 +92,7 @@ def colorround(im, palettes, tilesize, subpalsize):
 
     # Calculate the resulting image
     imfinal = Image.new('P', im.size)
-    seq = [component for color in master_palette for component in color]
+    seq = [component for color in all_colors for component in color]
     imfinal.putpalette(seq)
     tilerects = zip(
         ((l, t, l + blockw, t + blockh)

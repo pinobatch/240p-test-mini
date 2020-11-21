@@ -580,7 +580,7 @@ HALF_KHZ equ 2048-131
 
 section "smptebars", ROM0
 ; The SMPTE bars test shares cbog_palette_* with the Color bars on
-; gray palette, which is in the SGB master palette.
+; gray palette from the Super Game Boy palette set.
 ; Color bars on gray uses cbog as palettes 0 and 1
 ; SMPTE bars uses cbog as palettes 0 and 1, smpte as 2 and 3
 ; for the castellations, and both for the bottom row as 4 and 5
@@ -781,7 +781,7 @@ smpte_bars_engine:
   jr nc, .not_send_sgb
     ld a, [curpalette]
     add a
-    add (cbog_palette_dark-sgb_master_palette)/8
+    add (cbog_palette_dark-sgb_all_palettes)/8
     ld b, a
     ld c, a
     inc c

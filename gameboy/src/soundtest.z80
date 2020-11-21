@@ -41,7 +41,7 @@ init_apu::
   dec l
   ld [hl], $FF  ; Set center pan
   dec l
-  ld [hl], $77  ; Set master volume to maximum
+  ld [hl], $77  ; Set channel volumes to maximum
   xor a
   ldh [rNR10],a  ; Disable pulse 1 sweep
   ret
