@@ -42,7 +42,7 @@ sgbborder::
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "convergence_gfx1",ROMX
+section "convergence_gfx0",ROM0
 convergence_chr::
   incbin "obj/gb/convergence.chrgb.pb16"
 sizeof_convergence_chr equ 80
@@ -71,7 +71,7 @@ grayramp_chr_gbc::
   db %11111111  ; tile 5: full
   db %11111111
 
-section "sharpness_gfx1",ROMX
+section "sharpness_gfx0",ROM0
 
 sharpness_brick_tile::
   dw `11222222
@@ -134,7 +134,7 @@ kikimap::
 
 ; Backlight zone ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "backlight_gfx1",ROMX
+section "backlight_gfx0",ROM0
 backlight_chr::
   incbin "obj/gb/backlightzone.chrgb.pb16"
 

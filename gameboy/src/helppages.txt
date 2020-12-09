@@ -153,6 +153,15 @@ This changes border
 width on Super Game Boy
 or Game Boy Player.
 
+== HEALTH WARNING ==
+
+This pattern flashes.
+Do not use it if you
+have a seizure disorder.
+
+A: Motion blur
+B: Cancel
+
 == Motion blur ==
 
 This tests how quickly

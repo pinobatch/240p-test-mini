@@ -54,13 +54,16 @@ help_height: ds 1
 help_blink_timer: ds 1
 
 
-; Keep cursor_y and help_wanted_page consecutive the save/restore of
+; Keep cursor_y and help_wanted_page consecutive for save/restore of
 ; main, sound test, and color tests.  Keep the rest consecutive for
 ; help_init.
+help_init_zerofill_start:
+help_flashing_accepted:: ds 1
 help_cursor_y:: ds 1
 help_wanted_page:: ds 1
 help_bg_loaded:: ds 1
 help_font_loaded: ds 1
+help_init_zerofill_end:
 help_cur_page: ds 1
 
 
@@ -151,11 +154,9 @@ section "help",ROM0
 ; Clears several variables belonging to the help system.
 help_init::
   xor a
-  ld hl, help_cursor_y
-  ld [hl+], a
-  ld [hl+], a
-  ld [hl+], a
-  ld [hl+], a
+  ld hl, help_init_zerofill_start
+  ld c, help_init_zerofill_end-help_init_zerofill_start
+  rst memset_tiny
   dec a
   ld [hl],a
   ret

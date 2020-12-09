@@ -21,6 +21,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_video.h>
 #include <gba_input.h>
 
+extern const unsigned char helpsect_health_warning[];
+#define DOC_HEALTH_WARNING ((unsigned int)helpsect_health_warning)
+
 extern const unsigned char helpsect_motion_blur[];
 #define PFMAP 23
 #define NUM_PARAMS 6
@@ -45,10 +48,19 @@ static const char motion_blur_labels[] =
   "\x6a""\x80""time\n"
   "\x6a""\x88""shade\n"
   "\x58""\x90""Stripes";
+
+// Health and safety
+static unsigned char flashing_accepted = 0;
   
 void activity_motion_blur() {
   unsigned char params[NUM_PARAMS] = {15, 1, 31, 1, 0, 0};
   unsigned int phase = 0, timeleft = 0, running = 0;
+
+  if (!flashing_accepted) {
+    helpscreen(DOC_ABOUT, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+    if (!(new_keys & (KEY_A | KEY_START))) return;
+    flashing_accepted = 1;
+  }
 
   load_common_bg_tiles();
   dma_memset16(MAP[PFMAP], BLANK_TILE, 32*20*2);
