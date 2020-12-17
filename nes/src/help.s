@@ -21,6 +21,7 @@
 .include "global.inc"
 .import helptitles_hi, helptitles_lo
 .import helppages_hi, helppages_lo, help_cumul_pages
+.importzp helpsect_240p_test_suite, helpsect_about, helpsect_health_warning
 .importzp HELP_NUM_PAGES, HELP_NUM_SECTS
 
 .assert .bank(helppages_lo) = .bank(helpscreen_cb), error, "HELPDATA and CODE02 banks differ"
@@ -37,6 +38,7 @@ help_cursor_y:  .res 1
 cursor_dirty:   .res 1
 vram_copydstlo: .res 1
 vram_copydsthi: .res 1
+flashing_ok:    .res 1
 .bss
 help_line_buffer:.res HELP_LINE_LEN
 
@@ -57,14 +59,41 @@ help_line_buffer:.res HELP_LINE_LEN
   lda new_keys+0
   and #KEY_START
   beq not_help
-    lda #KEY_B|KEY_A|KEY_START|KEY_LEFT|KEY_RIGHT
-    jsr helpscreen
+    jsr helpscreen_abslr
     sec
     rts
   not_help:
 
   clc
+return:
   rts
+.endproc
+
+.proc flashing_consent
+  lda flashing_ok
+  bne already_accepted 
+    ldx #helpsect_health_warning
+    jsr helpscreen_abslr
+    lda new_keys
+    and #KEY_A|KEY_START
+    sta flashing_ok
+  already_accepted:
+  rts
+.endproc
+
+.proc do_credits
+  ldx #helpsect_240p_test_suite
+  bne helpscreen_abslr
+.endproc
+
+.proc do_about
+  ldx #helpsect_about
+  ; fall through
+.endproc
+
+.proc helpscreen_abslr
+  lda #KEY_B|KEY_A|KEY_START|KEY_LEFT|KEY_RIGHT
+  ; fall through
 .endproc
 
 ;;

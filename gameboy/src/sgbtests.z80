@@ -468,6 +468,9 @@ hIncTime    rb 1
 hCurPalette rb 1
 
 sgb_ntsc_test::
+  call flashing_consent
+  ret z
+
   call clear_gbc_attr
   ld hl, sgb_cmd_clear_attrs
   call sgb_send

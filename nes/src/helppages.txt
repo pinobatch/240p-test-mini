@@ -307,6 +307,15 @@ and low as blurring.
 
 A: Toggle brick wall
 
+== HEALTH WARNING ==
+
+This pattern flashes.
+Do not use it if you
+have a seizure disorder.
+
+A: View pattern
+B: Cancel
+
 == Chroma crosstalk ==
 
 This pattern shows colored

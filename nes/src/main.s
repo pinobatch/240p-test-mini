@@ -19,8 +19,7 @@
 
 .include "nes.inc"
 .include "global.inc"
-.importzp helpsect_240p_test_suite, helpsect_240p_test_suite_menu
-.importzp helpsect_about
+.importzp helpsect_240p_test_suite_menu
 
 OAM = $0200
 
@@ -216,18 +215,6 @@ routines:
   .addr do_credits-1
   .addr do_a53_exit-1
 .popseg
-.endproc
-
-.proc do_credits
-  ldx #helpsect_240p_test_suite
-  lda #KEY_LEFT|KEY_RIGHT|KEY_B|KEY_A|KEY_START
-  jmp helpscreen
-.endproc
-
-.proc do_about
-  ldx #helpsect_about
-  lda #KEY_LEFT|KEY_RIGHT|KEY_B|KEY_A|KEY_START
-  jmp helpscreen
 .endproc
 
 ;;

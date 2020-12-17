@@ -187,6 +187,20 @@ read_pad_help_check::
   or a,$FF
   ret
 
+;;
+; Displays a health warning about flashing lights.
+; @return A=0, ZF true if no consent; A!=0, ZF false if consent
+flashing_consent::
+  ld a, [help_flashing_accepted]
+  or a
+  ret nz
+  ld b,helpsect_health_warning
+  call helpscreen_abslr
+  ld a, [cur_keys]
+  and PADF_A|PADF_START
+  ld [help_flashing_accepted], a
+  ret
+
 activity_about::
   ld b,helpsect_about
   jr helpscreen_abslr
@@ -821,10 +835,11 @@ help_move_window:
   inc [hl]
 
   ; Look up wnd_x_sequence[a]
-  ld e,a
-  ld d,0
-  ld hl,wnd_x_sequence
-  add hl,de
+  add low(wnd_x_sequence)
+  ld l, a
+  adc high(wnd_x_sequence)
+  sub l
+  ld h, a
   ld a,[hl]
 .have_wnd_x:
   ld [wnd_x],a

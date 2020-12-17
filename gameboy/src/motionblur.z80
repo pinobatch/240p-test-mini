@@ -69,17 +69,10 @@ row_high_low_gbc:  ; low and high-low+1 values for each row, SGB/GBC
   db 0, 2
 
 section "motionblur",ROM0
+
 activity_motion_blur::
-  ld a, [help_flashing_accepted]
-  or a
-  jr nz, .seen_health_warning
-    ld b,helpsect_health_warning
-    call helpscreen_abslr
-    ld a, [cur_keys]
-    and PADF_A|PADF_START
-    ret z
-    ld [help_flashing_accepted], a
-  .seen_health_warning:
+  call flashing_consent
+  ret z
 
   xor a
   ldh [frames_left],a  ; = 0

@@ -193,7 +193,7 @@ section "helppages",ROMX
     lines.append(rgbasm_bytearray(cumul_pages))
     lines.append('HELP_NUM_PAGES equ %d' % cumul_pages[-1])
     lines.append('HELP_NUM_SECTS equ %d' % len(docs))
-    lines.append('global HELP_NUM_PAGES, HELP_NUM_SECTS')
+    lines.append('export HELP_NUM_PAGES, HELP_NUM_SECTS')
     
     lines.append('helppages::')
     lines.extend('  dw helppage_%03d' % i for i in range(cumul_pages[-1]))

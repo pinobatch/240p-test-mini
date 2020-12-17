@@ -119,6 +119,9 @@ loop:
 .endproc
 
 .proc do_crosstalk
+  jsr flashing_consent
+  beq no_flashing_please
+
 palette_base = test_state + 0
   lda #VBLANK_NMI
   sta help_reload
@@ -179,6 +182,7 @@ loop:
   lda new_keys
   and #KEY_B
   beq loop
+no_flashing_please:
   rts
 .endproc
 

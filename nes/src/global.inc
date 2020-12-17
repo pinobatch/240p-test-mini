@@ -38,9 +38,10 @@ IS_MULTICART = 0
 .global ppu_clear_nt, ppu_clear_oam, ppu_wait_vblank
 .global ppu_screen_on, ppu_oam_dma_screen_on_xy0, ppu_screen_on_xy0
 
-; helpscreen.s
+; help.s
 HELP_LINE_LEN = 40
-.global helpscreen, helpcheck, read_pads_helpcheck
+.global helpscreen, helpscreen_abslr, do_credits, do_about
+.global helpcheck, read_pads_helpcheck, flashing_consent
 .globalzp help_reload
 .globalzp vram_copydstlo, vram_copydsthi
 .global help_line_buffer
