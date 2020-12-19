@@ -125,14 +125,13 @@ pb16_unpack_block::
   ; Prefill with zeroes
   xor a
   ldh [pb16_byte0],a
-  ld c,a
 .packetloop:
+  ld c,a
   push bc
   call pb16_unpack_packet
   call pb16_unpack_packet
   ld a,c
   pop bc
-  ld c,a
   dec b
   jr nz,.packetloop
   ret

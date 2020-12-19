@@ -196,7 +196,7 @@ flashing_consent::
   ret nz
   ld b,helpsect_health_warning
   call helpscreen_abslr
-  ld a, [cur_keys]
+  ldh a, [cur_keys]
   and PADF_A|PADF_START
   ld [help_flashing_accepted], a
   ret

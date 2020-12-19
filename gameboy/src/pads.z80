@@ -22,8 +22,8 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-DAS_DELAY = 15
-DAS_SPEED = 3
+DAS_DELAY equ 15
+DAS_SPEED equ 3
 
 SECTION "hram_pads", HRAM
 cur_keys:: ds 1
