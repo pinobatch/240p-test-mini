@@ -27,6 +27,8 @@
 /gba/zip.in
 /nes/*.n??.deb
 /nes/*.dbg
+/nes/*.cdl
+/nes/*.nes.ram.nl
 /nes/*map.txt
 /nes/new-linearity/map.txt
 /gameboy/gb240p.gb
