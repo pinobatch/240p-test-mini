@@ -7,7 +7,7 @@ game _Fire Shark_ as a repeating pattern.  When I discovered that
 we probably don't have the rights to this icon, I drew my own
 replacement based on the pose used by emoji fonts' renderings
 of the character 🦈 [SHARK (U+1F988)][2], added in Unicode 11.
-I made a bit more cartoonish, including a large eye like those
+I made it a bit more cartoonish, including a large eye like those
 of the icon, and colored it based on the closest color in the
 [Bisqwit palette on wiki.nesdev.com][3] to each color in the icon.
 
@@ -21,7 +21,7 @@ of the icon, and colored it based on the closest color in the
 
 Though I give NES equivalents for all seven colors, I ended up not
 drawing a visible tongue.  And on 2bpp platforms (NES and GB), the
-background mark and space will have to share colors with the shark.
+background mark and space have to share colors with the shark.
 
 Copyright 2018 Damian Yerrick
 This shark icon and its description are licensed under
