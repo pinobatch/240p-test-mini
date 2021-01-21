@@ -1,0 +1,49 @@
+Page 5
+
+Available tests
+
+[PLUGE] [PLUGE Contrast] [IRE]
+PLUGE (picture line-up generation equipment) and IRE
+Adjust brightness or black level
+
+[Gradient bars] [SMPTE bars] [Bars on gray]
+Color bars
+Adjust contrast, saturation, and tint
+
+[Gray ramp] [Color bleed] [Solid color]
+Gray ramp: Adjust color temperature and gamma
+Color bleed: Diagnose color resampling problems
+Solid color: Diagnose 60 Hz audio buzz and signal loss from
+black screen transition
+
+Page 6
+
+More tests
+
+[Grid] [Overscan] [Linearity]
+Grid and Overscan: Measure how much of each side a TV cuts off
+Linearity: Measure consistency of shapes across the screen
+
+[Convergence crosses] [Convergence large areas] [Sharpness A]
+Convergence: Align red, green, and blue components
+Sharpness: Adjust edge enhancement
+
+Chroma crosstalk: Show an artifact of NTSC NES composite out
+CPU clock speed: Adjust an overclock modification
+Stopwatch: Measure lag difference between TVs, detect
+dropped frames, or time a workout
+
+Page 7
+
+Shadow sprite: Test flicker and stripe transparency that may
+confuse scalers
+Full screen stripes: Measure consistent pixel width in a scaler
+Manual lag test: Line up reticles to get a feel for a scaler's delay
+
+Scroll test: Measure dropped frames, cadence detection,
+motion interpolation, and shape consistency
+Backlight zones: Find dimming zones in an LED-lit LCD
+
+Sound test: Play frequencies through each APU output pin
+Audio sync: Animation to measure delay between audio and video
+Zapper test: Measure whether the light gun sees the TV

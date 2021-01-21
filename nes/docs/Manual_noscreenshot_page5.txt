@@ -1,0 +1,25 @@
+This was all on page 5 before I decided to add screenshots to the manual.
+
+Available tests
+
+PLUGE (picture line-up generation equipment): Adjust the TV's "brightness" or black level
+Color bars: Adjust contrast and tint
+Color bleed: Diagnose incorrect color resampling
+Grid, Overscan, and Safe areas: show how much of the sides of the picture a TV cuts off
+Linearity: Measure whether shapes are consistent across the screen
+Convergence: Align red, green, and blue
+Gray ramp: Adjust color temperature and gamma
+Solid color screen: Diagnose 60 Hz audio buzz and signal loss from black screens
+IRE: Show a rectangle with 0% to 100% gray
+Sharpness: Show possibly unwanted edge enhancement
+Chroma crosstalk: Show a quirk of how the NTSC NES generates color
+CPU clock speed: Measure overclock modifications
+Shadow sprite: Show pseudo-transparency methods that trip up some upscalers, such as 30 Hz flicker and stripes
+Stopwatch: Measure lag difference between TVs, detect dropped frames, or time a workout
+Manual lag test: Line up reticles to get a feel for how much a scaler is delaying video and audio
+Scroll tests: Measure dropped frames, cadence detection, motion interpolation, and shape consistency
+Full screen stripes: Measure unwanted deinterlacing and consistent pixel width in a scaler
+Backlight zone test: Find dimming zones in an LED-lit LCD
+Sound test: Play several frequencies through each APU output pin
+Audio sync test: Play a simple animation to measure delay between audio and video
+Zapper test: Show whether the light gun is seeing the TV
