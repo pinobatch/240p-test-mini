@@ -284,22 +284,23 @@ helpscreen::
   ld b,PADF_UP|PADF_DOWN
   call autorepeat
 
-  ; Handle keypresses, but ignore thgem until Huffman predecoding
+  ; Read keys pressed this frame into B.  Ignore keys not enabled in
+  ; help_allowed_keys, and ignore all keys until Huffman predecoding
   ; finishes so that the copyright notice is displayed.
   ; 0: none loaded; 1: font loaded; 2: font and predecodes loaded
   ld a, [help_font_loaded]
-  srl a
+  and $FE
   jr z, .no_keys
     ldh a,[new_keys]
-    ld b,a
-    ld a,[help_allowed_keys]
-    and b
+    ld hl, help_allowed_keys
+    and [hl]
   .no_keys:
   ld b,a
 
   ; Page to page navigation
   call help_get_doc_bounds
-  ld a,[help_wanted_page]
+  ld hl, help_wanted_page
+  ld a, [hl]
   bit PADB_LEFT,b
   jr z,.not_left
     dec a
@@ -312,12 +313,10 @@ helpscreen::
   jr c,.new_page_out_of_range
   cp e
   jr nc,.new_page_out_of_range
-    ld [help_wanted_page],a
+    ld [hl],a
   .new_page_out_of_range:
 
   ; Up and down navigation based on page's line count
-  ld a,[help_height]
-  ld c,a
   ld a,[help_cursor_y]
   bit PADB_UP,b
   jr z,.not_up
@@ -328,7 +327,8 @@ helpscreen::
   bit PADB_DOWN,b
   jr z,.not_down
     inc a
-    cp c
+    ld hl, help_height
+    cp [hl]
     jr nc,.new_y_out_of_range
   .not_down:
   ld [help_cursor_y],a
@@ -336,10 +336,9 @@ helpscreen::
 
   ; If an exit key is pressed while the showing page is the
   ; wanted page, stop
-  ld a,[help_wanted_page]
-  ld c,a
+  ld hl, help_wanted_page
   ld a,[help_cur_page]
-  xor c
+  xor [hl]
   jr nz,.not_on_wanted_page
     ld a,PADF_B|PADF_A|PADF_START
     and b
@@ -462,9 +461,9 @@ help_load_bg:
   add a
   sbc a  ; $00 for DMG (colors 0 and 1) or $FF for GBC (2 and 3)
   ld e, a
-  ld hl,CHRRAM0
+  ld h, high(CHRRAM0)
   call clear_canvas
-  ld hl,CHRRAM2
+  ld h, high(CHRRAM2)
   call clear_canvas
 
   ; Background map: Draw back wall
@@ -762,9 +761,10 @@ gbc_bottom_oam_end:
 
 ;;
 ; Clear 2048 bytes of VWF canvas to plane1 = 0, plane1 = E
-; @param HL starting address
+; @param H starting address high bits
 clear_canvas:
   ld bc,-1024
+  ld l, c
   .loop:
     xor a
     ld [hl+],a
@@ -1153,3 +1153,45 @@ de_index_a::
   ld l,a
   ret
 
+; This is experimental untested code to be used for saving space
+; later on when I need to read down, up, left, and right actions
+; from a lookup table.
+  if 0
+section "help_table_lead0",ROM0
+
+;;
+; Jumps to an entry in the following table indexed by
+; the number of leading zeroes in A.
+;   call table_lead0_pc
+;   dw routine_80orhigher
+;   dw routine_40orhigher
+;   dw routine_20orhigher
+; N.B.: Though it's a call, it acts like a jp in that the
+; execution does not resume after the end of the table
+table_lead0_pc:
+  pop hl
+  ; fall through to table_lead0_hl
+
+;;
+; Jumps to an entry in the following table indexed by
+; the number of leading zeroes in A.
+;   ld hl, tablestart
+;   jp table_lead0_hl
+; tablestart:
+;   dw routine_80orhigher
+;   dw routine_40orhigher
+;   dw routine_20orhigher
+table_lead0_hl:
+  scf  ; call the ninth routine if A was 0
+  .loop:
+    adc a
+    jr c, .found
+    inc hl
+    inc hl
+    jr z, .loop
+  ld a, [hl+]
+  ld h, [hl]
+  ld l, a
+  jp hl
+
+  endc
