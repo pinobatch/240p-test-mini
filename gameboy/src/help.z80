@@ -484,13 +484,10 @@ help_load_bg:
 
   ; Background map: Draw right half of character
   ldxy hl, 3, CHARACTER_Y
-  ld a,$86
-  ld c,12/2
-  call .righthalfcol
+  call .righthalfcol8612
   ldxy hl, 4, CHARACTER_Y
   ld a,$88
-  ld c,12/2
-  call .righthalfcol
+  call .righthalfcol12
   ldxy hl, 5, CHARACTER_Y + 4
   ld a,$96
   ld c,8/2
@@ -646,13 +643,10 @@ help_load_bg:
 
   ; Background map: Draw left half of character
   ldxy hl, 2, CHARACTER_Y
-  ld a,$86
-  ld c,12/2
-  call .righthalfcol
+  call .righthalfcol8612
   ldxy hl, 1, CHARACTER_Y
   ld a,$88
-  ld c,12/2
-  call .righthalfcol
+  call .righthalfcol12
   ldxy hl, 0, CHARACTER_Y+4
   ld a,$96
   ld c,8/2
@@ -710,6 +704,10 @@ help_load_bg:
     jr nz,.objcutoutcol_loop
   ret
 
+.righthalfcol8612:
+  ld a, $86
+.righthalfcol12:
+  ld c, 12/2
 .righthalfcol:
   ld de,32
   .righthalfcol_loop:
