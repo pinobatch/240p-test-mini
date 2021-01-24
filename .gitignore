@@ -9,9 +9,10 @@
 *.pb53
 *.sb53
 *.iu53
-/nes/obj/nes/*.s
-/nes/obj/nes/*.sav
-/nes/new-linearity/obj/nes/*.sav
+*.pyc
+zip.in
+__pycache__/
+/240p-test-mini-*.zip
 /gameboy/obj/gb/*.z80
 /gameboy/obj/gb/*.nam
 /gameboy/obj/gb/*.iu
@@ -19,33 +20,27 @@
 /gameboy/obj/gb/*.pal
 /gameboy/obj/gb/*.huf
 /gameboy/obj/gb/*.border
+/gameboy/gb240p.gb
+/gameboy/gb240p.map
+/gameboy/gb240p.sym
+# mgba-qt makes .sav files even for games with no battery
+# these are unrelated to NES savtool's image format
+/gameboy/gb240p.sav
 /gba/build
-/240p-test-mini-*.zip
-/zip.in
-/nes/zip.in
-/gameboy/zip.in
-/gba/zip.in
+/gba/240pee_mb.elf
+/gba/240pee_mb.gba
+/gba/240pee_mb.sav
+/gba/.map
+/nes/obj/nes/*.s
+/nes/obj/nes/*.sav
 /nes/*.n??.deb
 /nes/*.dbg
 /nes/*.cdl
 /nes/*.nes.ram.nl
 /nes/*map.txt
-/nes/new-linearity/map.txt
-/gameboy/gb240p.gb
-/gameboy/gb240p.map
-/gameboy/gb240p.sym
-# mgba-qt makes .sav files even for games with no battery
-/gameboy/gb240p.sav
 /nes/240pee-bnrom.nes
 /nes/240pee.nes
 /nes/mdfourier.nsf
-/nes/new-linearity/new-linearity.nes
-/gba/240pee_mb.elf
-/gba/240pee_mb.gba
-/gba/240pee_mb.sav
-/gba/.map
-__pycache__/
-*.pyc
 /common/tools/dte
 /common/tools/dte.exe
 
