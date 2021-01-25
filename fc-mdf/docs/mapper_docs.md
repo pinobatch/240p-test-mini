@@ -67,10 +67,10 @@ instruments of _Space Manbow_.
 - $9000: Select 8K PRG bank at $C000
 - $9010: Audio address (wait 6 cycles afterward)
 - $9030: Audio data (wait 42 cycles afterward)
-- $A000, $A010: Select 1K PRG bank at $0000, $0400
-- $B000, $B010: Select 1K PRG bank at $0800, $0C00
-- $C000, $C010: Select 1K PRG bank at $1000, $1400
-- $D000, $D010: Select 1K PRG bank at $1800, $1C00
+- $A000, $A010: Select 1K CHR bank at $0000, $0400
+- $B000, $B010: Select 1K CHR bank at $0800, $0C00
+- $C000, $C010: Select 1K CHR bank at $1000, $1400
+- $D000, $D010: Select 1K CHR bank at $1800, $1C00
 - $E000: WRAM enable (bit 7), reset OPLL (bit 6), mirroring (bits 1-0)
 - $E010: IRQ latch (like VRC6)
 - $F000: IRQ control (like VRC6)
@@ -95,8 +95,7 @@ Famicom Disk System
 -------------------
 Disk image format: .fds; NSF bitmask: $04
 
-Single-channel wavetable chip roughly equivalent to Konami SCC.
-To be described.
+Single-channel 2-operator FM wavetable hybrid. To be described.
 
 MMC5
 ----
