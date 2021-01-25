@@ -4,8 +4,6 @@ Concise mapper docs
 For writing MDFourier code on a laptop away from the Internet, such
 as in the grocery store parking lot.
 
-Detection procedure to be added.
-
 VRC6
 ----
 iNES mapper: 24; NSF bitmask: $01
@@ -122,7 +120,7 @@ interface based on what most licensed games use.
 - $5100: Bank mode (3: 8Kx4; only _Castlevania III_ differs)
 - $5101: CHR mode (3: 1Kx8; only _Metal Slader Glory_ differs)
 - $5104: ExRAM mapping (2: Use as work RAM, not ExGrafix)
-- $5105: Mirroring ($00: A; 44: vertical; $50: horizontal; $FF: B)
+- $5105: Mirroring ($00: A; $44: vertical; $50: horizontal; $55: B)
 - $5114: Select 8K PRG bank at  ($80-$FF: ROM)
 - $5115: Select 8K PRG bank at $A000 ($80-$FF: ROM)
 - $5116: Select 8K PRG bank at $C000 ($80-$FF: ROM)
@@ -307,3 +305,21 @@ and/or noise is enabled on a channel, and the corresponding square or
 noise generator is outputting 0, the DAC outputs 0 instead of the
 literal or envelope value.
 
+Detection procedure
+-------------------
+As with [Holy Mapperel], I'll distinguish the mappers through their
+nametable mirroring behavior.  The following is preliminary:
+
+1. Probe CIRAM after $5105=$01
+   If L-shaped then **MMC5**
+2. Set $8000=$0C.
+   Probe CIRAM after $A000=$00-$03.
+   If V, H, A, B then **FME-7** and possibly a YM2149
+3. Probe CIRAM after $E000=$00-$03.
+   If V, H, A, B then **VRC7**
+3. Probe CIRAM after $B003=$00, $04, $08, $0C.
+   If V, H, A, B then **VRC6**, after which distinguish AD from ED2.
+4. Probe CIRAM with $C000=$FE, $C800=$D000=$D800=$FF.
+   If L-shaped then **N163**
+
+[Holy Mapperel]: https://github.com/pinobatch/holy-mapperel
