@@ -769,22 +769,20 @@ activity_solid_screen::
     ld b,a
     ldh a,[curscry]
 
-    ; At this point: A is which row is selected, and B
+    ; At this point: A is which row is selected, and B is buttons.
+    ; Handle up and down presses
     bit PADB_DOWN,b
     jr z,.not_custom_next_row
       inc a
-      cp 3
-      jr c,.not_custom_next_row
-      dec a
     .not_custom_next_row:
-
     bit PADB_UP,b
     jr z,.not_custom_prev_row
       dec a
-      cp 3
-      jr c,.not_custom_prev_row
-      inc a
     .not_custom_prev_row:
+    cp 3
+    jr c,.custom_y_in_bounds
+      ldh a,[curscry]
+    .custom_y_in_bounds:
     ldh [curscry],a
 
     add low(customred)

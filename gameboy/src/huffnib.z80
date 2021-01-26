@@ -25,8 +25,8 @@ getbit: macro
   endm
 
 ;;
-; Incomplete, untested decoder for a canonical Huffman code
-; code_lengths must be in HRAM
+; Decoder for a canonical Huffman code
+; code_lengths are in HRAM
 ; assume 23 mcycles per input bit plus 30 per symbol.
 canohuff_decode_symbol:
   ; Regmap:

@@ -357,8 +357,8 @@ overscan_draw_arrow:
   ld e,a
   ld [hl+],a
   
-  ; Calculate Y coordinate of first sprite.  Top and bottom sides
-  ; have constant Y
+  ; Calculate X coordinate of first sprite.  Top and bottom sides
+  ; have constant X
   ld a,84
   bit 1,b
   jr nz,.have_x_coord
