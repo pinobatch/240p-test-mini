@@ -4,7 +4,7 @@ title := mdfourier
 version := wip
 defaultmapper := mmc5
 allmappers := mmc5 vrc6 vrc6ed2 vrc7 fme7 n163
-objlist := init main
+objlist := init main bg
 
 objdir := obj/nes
 srcdir := src

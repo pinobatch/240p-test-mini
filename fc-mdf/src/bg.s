@@ -1,9 +1,13 @@
 .include "nes.inc"
 .include "global.inc"
 
+OAM = $0200
+
 .bss
 ; Bit 7-1 of each entry gives what character to write
 ppu_linebuf: .res 28
+
+.zeropage
 ppu_cursor_x: .res 1
 ppu_cursor_y: .res 1
 ppu_yscroll: .res 1
@@ -15,7 +19,9 @@ ppu_row_to_push: .res 1
   jsr ppu_clear_linebuf
   lda #240-24  ; top of screen
   sta ppu_yscroll
+  sta ppu_row_to_push
   ldy #0
+  sty ppu_cursor_y
   sty PPUMASK
   ldx #$20
   lda #$40
@@ -135,7 +141,8 @@ loop:
     sta ppu_linebuf,x
     inx
     stx ppu_cursor_x
-    lda ppu_row
+    lda ppu_cursor_y
+    sta ppu_row_to_push
     rts
   is_control_character:
 
@@ -207,7 +214,9 @@ loop:
 ; this should be rolled into the NMI handler
 .proc ppu_push
   lda ppu_row_to_push
-  bmi push_nothing
+  bpl :+
+    rts
+  :
   lsr a
   ror a
   tax
@@ -231,7 +240,9 @@ loop:
     bit PPUDATA
     inx
     cpx #2
-    bcc loop
+    bcs :+
+      jmp loop
+    :
 
   ; TODO: If pushed row is in the overscan, scroll until it isn't
   lda ppu_row_to_push
@@ -240,7 +251,7 @@ loop:
   asl a
   asl a
   tax  ; X = Y coordinate of top of pushed orow
-  sbc ppu_scroll_y
+  sbc ppu_yscroll
   bcs :+
     adc #240
   :
@@ -253,7 +264,7 @@ loop:
     bcs :+
       adc #240
     :
-    sta ppu_scroll_y
+    sta ppu_yscroll
   not_offscreen:
 
   sec
