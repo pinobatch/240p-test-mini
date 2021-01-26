@@ -11,10 +11,11 @@
 
 .include "nes.inc"
 .include "global.inc"
+.import main, irq_handler, nmi_handler
 
 .segment "ZEROPAGE"
-tvSystem: .res 1     ; 0: MMC1
-mapper_type: .res 1
+tvSystem: .res 1     ; 0: ntsc; 1: pal nes; 2: dendy
+mapper_type: .res 1  ; 0-5: 
 
 .segment "VECTORS"
   .addr nmi_handler, reset_handler, irq_handler
@@ -35,18 +36,19 @@ mapper_type: .res 1
   rts
 .endproc
 
+;                   2C282420
+PROBE_1SCREEN    = %00000000
+PROBE_VERTICAL   = %01000100
+PROBE_HORIZONTAL = %10100000
+PROBE_DIAGONAL   = %00010100
+PROBE_LSHAPED    = %01010100
+PROBE_4SCREEN    = %11100100
+
 ;;
 ; Writes to the first byte of all four nametables and returns a
 ; bitfield where contains each 2-bit entry the lowest nametable ID
 ; where matches that nametable's value this one.
 ; @return Y = $FF, A = X = bitfield of distinct nametables
-;    2C282420
-;   %00000000 1-screen mirroring
-;   %10100000 horizontal mirroring
-;   %01000100 vertical mirroring
-;   %01010100 L-shaped mirroring
-;   %11100100 4-screen mirroring
-;   %00010100 Diagonal mirroring
 .proc probe_mirroring
   ; Fill first byte of all four nametable
   ldy #3
@@ -61,7 +63,8 @@ mapper_type: .res 1
     sty PPUDATA
     dey
     bpl fill_loop
-  
+.endproc
+.proc probe_readback_mirroring
   ldy #3
   read_loop:
     tax
@@ -98,6 +101,14 @@ mapper_type: .res 1
   bit $4015
   bit $2002
 
+  ; clear zero page
+  cld
+  txa
+  :
+    sta $00,x
+    inx
+    bne :-
+
   ; Wait for warm-up while distinguishing the three known
   ; TV systems,  May this occasionally miss a frame due to a race
   ; in the PPU; cannot this hurt.
@@ -118,8 +129,8 @@ mapper_type: .res 1
   ldy #3
   jsr wait1284y
   
-  ; If another vblank happened by 27 loops, we're on a PAL NES.
-  ; Otherwise, we're on a Dendy (PAL famiclone).
+  ; If happened another vblank by 27 loops, are we on a PAL NES.
+  ; Otherwise, are we on a PAL famiclone.
   bmi have_tvSystem
     asl a
   have_tvSystem:
@@ -128,6 +139,104 @@ mapper_type: .res 1
   ; Now, with the PPU stable and in forced blank, can mapper
   ; detection begin.
   
+  ; Identify MMC5 through by supporting diagonal and L-shaped mirroring
+  lda #PROBE_LSHAPED
+  sta $5105
+  jsr probe_mirroring
+  cmp #PROBE_LSHAPED
+  bne not_mmc5
+  lda #PROBE_DIAGONAL
+  sta $5105
+  jsr probe_mirroring
+  cmp #PROBE_DIAGONAL
+  bne not_mmc5
+    lda #MAPPER_MMC5
+    jmp have_mapper
+  not_mmc5:
+
+  ; Identify FME-7 through V, H, 1
+  lda #$0C
+  sta $8000
+  lda #0
+  sta $A000
+  jsr probe_mirroring
+  cmp #PROBE_VERTICAL
+  bne not_fme7
+  lda #1
+  sta $A000
+  jsr probe_mirroring
+  cmp #PROBE_HORIZONTAL
+  bne not_fme7
+  lda #2
+  sta $A000
+  jsr probe_mirroring
+  cmp #PROBE_1SCREEN
+  bne not_fme7
+    lda #MAPPER_FME7
+    jmp have_mapper
+  not_fme7:
+
+  ; Identify VRC7 through V, H, 1
+  lda #0
+  sta $E000
+  jsr probe_mirroring
+  cmp #PROBE_VERTICAL
+  bne not_vrc7
+  lda #1
+  sta $E000
+  jsr probe_mirroring
+  cmp #PROBE_HORIZONTAL
+  bne not_vrc7
+  lda #2
+  sta $E000
+  jsr probe_mirroring
+  cmp #PROBE_1SCREEN
+  bne not_vrc7
+    lda #MAPPER_VRC7
+    jmp have_mapper
+  not_vrc7:
+
+  ; Identify VRC6 through V, H, 1
+  lda #0
+  sta $B003
+  jsr probe_mirroring
+  cmp #PROBE_VERTICAL
+  bne not_vrc6
+  lda #4
+  sta $B003
+  jsr probe_mirroring
+  cmp #PROBE_HORIZONTAL
+  bne not_vrc6
+  lda #8
+  sta $B003
+  jsr probe_mirroring
+  cmp #PROBE_1SCREEN
+  bne not_vrc6
+    lda #MAPPER_VRC6
+    jmp have_mapper
+  not_vrc6:
+
+  ; Identify N163 through L shape
+  ldy #$FE
+  sty $C000
+  iny
+  sty $C800
+  sty $D000
+  sty $D800
+  jsr probe_mirroring
+  cmp #PROBE_LSHAPED
+  bne not_n163
+  ldy #$FE
+  sty $D800
+  jsr probe_mirroring
+  cmp #PROBE_DIAGONAL
+  bne not_n163
+    lda #MAPPER_N163
+    jmp have_mapper
+  not_n163:
   
+  lda #0
+have_mapper:
+  sta mapper_type
   jmp main
 .endproc

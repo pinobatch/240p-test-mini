@@ -10,9 +10,9 @@
 MEMORY {
   ZP:       start = $10, size = $f0, type = rw;
   # use first $10 zeropage locations as locals
-  HEADER:   start = 0, size = $0010, type = ro, file = %O, fill=yes, fillval=$00;
   RAM:      start = $0300, size = $0500, type = rw;
 
+  # Skipping the header because it varies
   ROM80:    start = $8000, size = $2000, type = ro, file = %O, fill=yes, fillval=$FF;
   ROMA0:    start = $A000, size = $2000, type = ro, file = %O, fill=yes, fillval=$FF;
   ROMC0:    start = $C000, size = $2000, type = ro, file = %O, fill=yes, fillval=$FF;
@@ -20,7 +20,6 @@ MEMORY {
 }
 
 SEGMENTS {
-  INESHDR:    load = HEADER, type = ro, align = $10;
   ZEROPAGE:   load = ZP, type = zp;
   BSS:        load = RAM, type = bss, define = yes, align = $100;
   # To support both CHR ROM and CHR RAM boards, the test contains

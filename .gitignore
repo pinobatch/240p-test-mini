@@ -13,6 +13,14 @@
 zip.in
 __pycache__/
 /240p-test-mini-*.zip
+/fc-mdf/obj/fc-mdf/*.s
+/fc-mdf/*.n??.deb
+/fc-mdf/*.dbg
+/fc-mdf/*.cdl
+/fc-mdf/*.nes.ram.nl
+/fc-mdf/*map.txt
+/fc-mdf/mdfourier-*.nes
+/fc-mdf/mdfourier.prg
 /gameboy/obj/gb/*.z80
 /gameboy/obj/gb/*.nam
 /gameboy/obj/gb/*.iu
