@@ -24,12 +24,12 @@ the sense of addresses ending in 1 or 2.
 - $B000: Saw volume (0-42: normal; 43-63: double peak)
 - $B001: Saw period low
 - $B002: Saw enable and period high
-- $B003: WRAM enable (bit 7) and nametable mirroring mode (bits 3-2)
+- $B003: Mirroring control [Bitfield]
 - $C000: Select 8K PRG bank at $C000
 - $D000-$D003: Select 1K CHR bank at $0000, $0400, $0800, $0C00
 - $E000-$E003: Select 1K CHR bank at $1000, $1400, $1800, $1C00
 - $F000: IRQ latch reload value (up counter)
-- $F001: IRQ control (bitfield; see below)
+- $F001: IRQ control [Bitfield]
 - $F002: Acknowledge IRQ
 
 VRC6 bitfields:
@@ -37,6 +37,12 @@ VRC6 bitfields:
     7654 3210  $9000, $A000: Pulse duty and volume
     |||| ++++- Volume
     ++++------ Pulse width (0-7: 1/16 to 8/16; 8-F: 100%)
+    
+    7654 3210  $B003: Mirroring control
+    | |+-||++- Must be 0
+    | |  ++--- Nametable mirroring mode
+    | +------- Must be 1
+    +--------- WRAM enable
     
     7654 3210  $F001: IRQ control
           ||+- 1: Keep IRQ enabled after write to acknowledge
@@ -62,9 +68,7 @@ version of the Yamaha YM2413 OPLL with no rhythm section (thus
 6 channels) and preset patches replaced with ports of the
 instruments of _Space Manbow_.
 
-- $8000: Select 8K PRG bank at $8000
-- $8010: Select 8K PRG bank at $A000
-- $9000: Select 8K PRG bank at $C000
+- $8000, $8010, $9000: Select 8K PRG bank at $8000, $A000, $C000
 - $9010: Audio address (wait 6 cycles afterward)
 - $9030: Audio data (wait 42 cycles afterward)
 - $A000, $A010: Select 1K CHR bank at $0000, $0400
@@ -316,7 +320,7 @@ nametable mirroring behavior.  The following is preliminary:
    If V, H, A, B then **FME-7** and possibly a YM2149
 3. Probe CIRAM after $E000=$00-$03.
    If V, H, A, B then **VRC7**
-3. Probe CIRAM after $B003=$00, $04, $08, $0C.
+3. Probe CIRAM after $B003=$20, $24, $28, $2C.
    If V, H, A, B then **VRC6**, after which distinguish AD from ED2.
 4. Probe CIRAM with $C000=$FE, $C800=$D000=$D800=$FF.
    If L-shaped then **N163**

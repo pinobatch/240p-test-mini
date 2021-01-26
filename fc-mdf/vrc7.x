@@ -25,10 +25,11 @@ SEGMENTS {
   # To support both CHR ROM and CHR RAM boards, the test contains
   # the exact same data in both PRG ROM and CHR ROM.  On CHR RAM
   # boards, init code copies the first 8K of PRG ROM to CHR RAM.
-  CHR:        load = ROMA0, type = ro, align = $10;
+  CHR:        load = ROM80, type = ro, align = $10;
   RODATA:     load = ROMA0, type = ro, align = $10;
   CODE:       load = ROMC0, type = ro, align = $10;
-  LOWCODE:    load = ROME0, type = ro, align = $10, optional=yes;
+  INITDATA:   load = ROME0, type = ro, align = $100, optional=yes;
+  LOWCODE:    load = ROME0, type = ro, align = $10;
   VECTORS:    load = ROME0, type = ro, start = $FFFA;
 }
 

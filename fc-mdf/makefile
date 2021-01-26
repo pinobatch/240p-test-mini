@@ -39,11 +39,16 @@ debug: $(title)-$(defaultmapper).nes
 all: $(foreach o,$(allmappers),$(title)-$(o).nes)
 
 clean:
-	-rm $(objdir)/*.o $(objdir)/*.chr
+	-rm $(objdir)/*.o $(objdir)/*.chr $(title).prg
 
 dist: \
   $(foreach o,$(allmappers),$(title)-$(o).nes) $(objdir)/index.txt \
   README.md
+
+# Pictures
+
+$(objdir)/%16.chr: $(imgdir)/%.png
+	$(PY) ../common/tools/pilbmp2nes.py $< --planes "0;1" -H16 -o $@
 
 # Assembly
 
@@ -52,6 +57,10 @@ $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 
 $(objdir)/%.o: $(objdir)/%.s
 	ca65 -o $@ $<
+
+# Includes
+
+$(objdir)/init.o: $(objdir)/fizztersmboldmono16.chr
 
 # Linking
 

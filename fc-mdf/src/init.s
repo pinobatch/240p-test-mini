@@ -85,6 +85,25 @@ PROBE_4SCREEN    = %11100100
   rts
 .endproc
 
+;;
+; Lies a space glyph at $0400-$041F in the font.  If are any of
+; those bytes nonzero, is at least that bank correct.
+; @return C 0 for OK, 1 for wrong
+.proc probe_for_space
+  lda #$04
+  sta PPUADDR
+  lda #$00
+  sta PPUADDR
+  bit PPUDATA
+  ldy #31
+  loop:
+    ora PPUDATA
+    dey
+    bpl loop
+  cmp #1
+  rts
+.endproc
+
 .proc reset_handler
   sei
   ldx #$FF
@@ -197,23 +216,44 @@ PROBE_4SCREEN    = %11100100
   not_vrc7:
 
   ; Identify VRC6 through V, H, 1
-  lda #0
+  lda #$20
   sta $B003
   jsr probe_mirroring
   cmp #PROBE_VERTICAL
   bne not_vrc6
-  lda #4
+  lda #$24
   sta $B003
   jsr probe_mirroring
   cmp #PROBE_HORIZONTAL
   bne not_vrc6
-  lda #8
+  lda #$28
   sta $B003
   jsr probe_mirroring
   cmp #PROBE_1SCREEN
   bne not_vrc6
-    lda #MAPPER_VRC6
-    jmp have_mapper
+    ; Discern Akumajou Densetsu variant from Esper Dream 2 variant.
+    ; Lies a space at $0400-$041F in the font.  If are any of those
+    ; bytes nonzero, know we the variant.
+    lda #1
+    sta $D001
+    asl a
+    sta $D000
+    sta $D002
+    sta $D003
+    jsr probe_for_space
+    bcs not_vrc6ad
+      lda #MAPPER_VRC6
+      jmp have_mapper
+    not_vrc6ad:
+    lda #1
+    sta $D002
+    asl a
+    sta $D001
+    jsr probe_for_space
+    bcs not_vrc6ed2
+      lda #MAPPER_VRC6ED2
+      jmp have_mapper
+    not_vrc6ed2:
   not_vrc6:
 
   ; Identify N163 through L shape
@@ -238,5 +278,176 @@ PROBE_4SCREEN    = %11100100
   lda #0
 have_mapper:
   sta mapper_type
+
+initsrc = $00
+initdst = $02
+
+  asl a
+  tay
+  lda mapper_init_sequences,y
+  sta initsrc+0
+  lda mapper_init_sequences+1,y
+  sta initsrc+1
+  ldx #0
+  ldy #0
+  initloop:
+    lda (initsrc),y
+    iny
+    sta initdst+0
+    lda (initsrc),y
+    beq initdone
+    iny
+    sta initdst+1
+    lda (initsrc),y
+    iny
+    sta (initdst,x)
+    jmp initloop
+  initdone:
+
+  ; Among the cart games we test, is CHR RAM in only Lagrange Point.
+  lda mapper_type
+  cmp #MAPPER_VRC7
+  bne skip_chr_ram
+    lda #$80
+    ldy #0
+    ldx #16
+    sta initsrc+1
+    sty initsrc+0
+    sty PPUCTRL
+    sty PPUADDR
+    sty PPUADDR
+    loop:
+      lda (initsrc),y
+      sta PPUDATA
+      iny
+      bne loop
+      inc initsrc+1
+      dex
+      bne loop
+  skip_chr_ram:
+
   jmp main
 .endproc
+
+.segment "INITDATA"
+mapper_init_sequences:
+  .addr mapper_init_none
+  .addr mapper_init_mmc5
+  .addr mapper_init_fme7
+  .addr mapper_init_vrc7
+  .addr mapper_init_vrc6
+  .addr mapper_init_vrc6ed2
+  .addr mapper_init_n163
+
+mapper_init_none:
+  .addr $0000
+
+mapper_init_mmc5:
+  .addr $0000
+
+mapper_init_fme7:
+  .addr $8000  ; Identity mapping for PPU $0000-$0FFF
+  .byte $00
+  .addr $A000
+  .byte $00
+  .addr $8000
+  .byte $01
+  .addr $A000
+  .byte $01
+  .addr $8000
+  .byte $02
+  .addr $A000
+  .byte $02
+  .addr $8000
+  .byte $03
+  .addr $A000
+  .byte $03
+  .addr $8000  ; Identity mapping for CPU $8000-$DFFF
+  .byte $09
+  .addr $A000
+  .byte $00
+  .addr $8000
+  .byte $0A
+  .addr $A000
+  .byte $01
+  .addr $8000
+  .byte $0B
+  .addr $A000
+  .byte $02
+  .addr $8000  ; disable IRQ
+  .byte $0D
+  .addr $A000
+  .byte $00
+  .addr $0000
+
+mapper_init_vrc7:
+  .addr $8000  ; Identity mapping for CPU $8000-$DFFF
+  .byte $00
+  .addr $8010
+  .byte $01
+  .addr $9000
+  .byte $02
+  .addr $A000  ; Identity mapping for PPU $0000-$0FFF
+  .byte $00
+  .addr $A010
+  .byte $01
+  .addr $B000  ; Identity mapping for PPU $0000-$0FFF
+  .byte $02
+  .addr $B010
+  .byte $03
+  .addr $F001  ; disable IRQ
+  .byte $00
+  .addr $0000
+
+mapper_init_vrc6:
+  .addr $8000  ; CPU $8000-$BFFF = PRG banks 0 and 1
+  .byte $00
+  .addr $9002  ; Silence all channels
+  .byte $00
+  .addr $A002
+  .byte $00
+  .addr $B002
+  .byte $00
+  .addr $C000  ; CPU $C000-$DFFF = PRG bank 2
+  .byte $02
+  .addr $D000  ; CHR $0000-$0FFF = identity
+  .byte $00
+  .addr $D001
+  .byte $01
+  .addr $D002
+  .byte $02
+  .addr $D003
+  .byte $03
+  .addr $F001  ; disable IRQ
+  .byte $00
+  .addr $0000
+
+mapper_init_vrc6ed2:
+  .addr $8000  ; CPU $8000-$BFFF to PRG banks 0 and 1
+  .byte $00
+  .addr $C000  ; CPU $C000-$DFFF to PRG bank 2
+  .byte $02
+  .addr $9001  ; Silence all channels
+  .byte $00
+  .addr $A001
+  .byte $00
+  .addr $B001
+  .byte $00
+  .addr $D000  ; CHR $0000-$0FFF to identity
+  .byte $00
+  .addr $D002
+  .byte $01
+  .addr $D001
+  .byte $02
+  .addr $D003
+  .byte $03
+  .addr $F002  ; disable IRQ
+  .byte $00
+  .addr $0000
+
+mapper_init_n163:
+  .addr $0000
+
+.segment "CHR"
+  .res $0400
+  .incbin "obj/nes/fizztersmboldmono16.chr"
