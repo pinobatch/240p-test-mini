@@ -4,6 +4,7 @@
 
 OAM = $0200
 SIZEOF_LINEBUF = 28
+MDFBUF_MAX = 64
 
 .bss
 ; Bit 7-1 of each entry gives what character to write
@@ -15,6 +16,7 @@ ppu_cursor_y: .res 1
 ppu_yscroll: .res 1
 ppu_row_to_push: .res 1
 nmis: .res 1
+mdfourier_addrdata: .res 3*MDFBUF_MAX+2
 
 .segment "LOWCODE"
 
@@ -25,6 +27,7 @@ nmis: .res 1
   sta ppu_row_to_push
   ldy #0
   sty ppu_cursor_y
+  sty mdfourier_addrdata+1
   sty PPUMASK
   ldx #$20
   lda #$40
@@ -153,7 +156,6 @@ loop:
 
 .proc ppu_newline
   lda ppu_row_to_push
-  sta $4444
   bmi :+
     jsr ppu_wait_vblank
   :
@@ -190,11 +192,27 @@ loop:
 .proc ppu_wait_vblank
   tya
   pha
+
+  ldx #0
   lda nmis
   :
     cmp nmis
     beq :-
-;  jsr mdfourier_push
+
+  ; Flush audio writes
+  bne first
+  stillgoing:
+    lda mdfourier_addrdata+2,x
+    sta (mdfourier_addrdata,x)
+    inx
+    inx
+    inx
+  first:
+    lda mdfourier_addrdata+1,x
+    bne stillgoing
+  sta mdfourier_addrdata+1
+
+  ; Do vblank things
   jsr ppu_push
   ldx #0
   ldy ppu_yscroll
@@ -279,6 +297,7 @@ loop:
   cmp #240-32
   bcc not_offscreen
   is_offscreen:
+    txa
     sbc #240-32
     bcs :+
       adc #240

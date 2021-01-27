@@ -32,16 +32,30 @@
   lda #>hello_str
   ldy #<hello_str
   jsr ppu_puts_ay
+  jsr print_mapper_name
+  jsr ppu_newline
+
+.if 0
+  lda #>hello_str
+  ldy #<hello_str
+  jsr ppu_puts_ay
+  lda #>someone_testing_str
+  ldy #<someone_testing_str
+  jsr ppu_puts_ay
+.endif
+
+forever:
+  jsr ppu_wait_vblank
+  jmp forever
+.endproc
+
+.proc print_mapper_name
   lda mapper_type
   asl a
   tax
   ldy mapper_names+0,x
   lda mapper_names+1,x
-  jsr ppu_puts_ay
-
-forever:
-  jsr ppu_wait_vblank
-  jmp forever
+  jmp ppu_puts_ay
 .endproc
 
 .rodata
@@ -52,8 +66,16 @@ hello_str:
   .byte COPR," 2021 Damian Yerrick",LF,LF
   .byte "Expansion audio test coming",LF
   .byte "soon.",LF
-  .byte "Detected ",$00
-
+  .byte "Detected ",0
+.if 0
+someone_testing_str:
+  .byte "someone testing",LF
+  .byte "this terminal's scrolling",LF
+  .byte "by adding a bunch of",LF
+  .byte "unimaginative text to a",LF
+  .byte "string and watching it run",LF
+  .byte "frame by frame", 0
+.endif
 mapper_names:
   .addr unknown_mapper_name, mmc5_name, fme7_name, vrc7_name
   .addr vrc6_name, vrc6ed2_name, n163_name
