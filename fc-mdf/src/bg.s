@@ -3,10 +3,11 @@
 .export nmi_handler
 
 OAM = $0200
+SIZEOF_LINEBUF = 28
 
 .bss
 ; Bit 7-1 of each entry gives what character to write
-ppu_linebuf: .res 28
+ppu_linebuf: .res SIZEOF_LINEBUF
 
 .zeropage
 ppu_cursor_x: .res 1
@@ -122,7 +123,7 @@ loop:
     pha
     ; Printable character.  If this line is full, make a new line
     ldx ppu_cursor_x
-    cpx #28
+    cpx #SIZEOF_LINEBUF
     bcc not_overflow
       jsr ppu_newline
     not_overflow:
@@ -130,11 +131,10 @@ loop:
     ; If there's a row to push that's not this one, push it first
     lda ppu_row_to_push
     bmi push_ok
-    cmp ppu_cursor_x
+    cmp ppu_cursor_y
     beq push_ok
       jsr ppu_wait_vblank
     push_ok:
-
     pla
 
     ; Finally ready to write the character
@@ -153,30 +153,30 @@ loop:
 
 .proc ppu_newline
   lda ppu_row_to_push
+  sta $4444
   bmi :+
     jsr ppu_wait_vblank
   :
-  lda ppu_cursor_y
-  sta ppu_row_to_push
   inc ppu_cursor_y
   lda ppu_cursor_y
   cmp #15
-  lda #0
   bcc :+
+    lda #0
     sta ppu_cursor_y
   :
+  sta ppu_row_to_push
   ; fall through to ppu_clear_linebuf
 .endproc
 
 .proc ppu_clear_linebuf
-  ldy #31
+  ldx #SIZEOF_LINEBUF - 1
   lda #$40
   :
     sta ppu_linebuf,x
-    dey
+    dex
     bpl :-
-  iny
-  sty ppu_cursor_x
+  inx
+  stx ppu_cursor_x
   rts
 .endproc
 
@@ -188,6 +188,8 @@ loop:
 .endproc
 
 .proc ppu_wait_vblank
+  tya
+  pha
   lda nmis
   :
     cmp nmis
@@ -196,6 +198,12 @@ loop:
   jsr ppu_push
   ldx #0
   ldy ppu_yscroll
+  lda #VBLANK_NMI
+  clc  ; sprites not yet used
+  jsr ppu_screen_on
+  pla
+  tay
+  rts
 .endproc
 
 ;;
@@ -217,7 +225,7 @@ loop:
   rts
 .endproc
 
-; this should be rolled into the NMI handler
+; this should eventually be rolled into the NMI handler
 .proc ppu_push
   lda ppu_row_to_push
   bpl :+
@@ -237,11 +245,16 @@ loop:
   loop:
     bit PPUDATA
     bit PPUDATA
-    .repeat 28, I
-      txa
-      ora ppu_linebuf+I
-      sta PPUDATA
-    .endrepeat
+    ldy #0
+    yloop:
+      .repeat 4
+        txa
+        ora ppu_linebuf,y
+        iny
+        sta PPUDATA
+      .endrepeat
+      cpy #SIZEOF_LINEBUF
+      bcc yloop
     bit PPUDATA
     bit PPUDATA
     inx

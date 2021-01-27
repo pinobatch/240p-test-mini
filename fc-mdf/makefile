@@ -65,7 +65,7 @@ $(objdir)/init.o: $(objdir)/fizztersmboldmono16.chr
 # Linking
 
 $(title).prg: vrc7.x $(foreach o,$(objlist),$(objdir)/$(o).o)
-	ld65 -o $@ -C $^
+	ld65 -m map.txt -o $@ -C $^
 
 $(title)-%.nes: tools/mkines.py $(title).prg
 	$(PY) $^ $* $@
