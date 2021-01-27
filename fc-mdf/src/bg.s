@@ -1,5 +1,6 @@
 .include "nes.inc"
 .include "global.inc"
+.export nmi_handler
 
 OAM = $0200
 
@@ -12,8 +13,9 @@ ppu_cursor_x: .res 1
 ppu_cursor_y: .res 1
 ppu_yscroll: .res 1
 ppu_row_to_push: .res 1
+nmis: .res 1
 
-.code
+.segment "LOWCODE"
 
 .proc ppu_cls
   jsr ppu_clear_linebuf
@@ -180,6 +182,10 @@ loop:
 
 ; Vblank handler (eventually) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.proc nmi_handler
+  inc nmis
+  rti
+.endproc
 
 .proc ppu_wait_vblank
   lda nmis

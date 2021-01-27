@@ -343,6 +343,44 @@ mapper_init_none:
   .addr $0000
 
 mapper_init_mmc5:
+  .addr $5000  ; silence the pulses
+  .byte $30
+  .addr $5004
+  .byte $30
+  .addr $5015
+  .byte $00
+  .addr $5100  ; PRG bank mode: 8Kx4
+  .byte $03
+  .addr $5101  ; CHR bank mode: 8Kx8
+  .byte $03
+  .addr $5105  ; mirroring: vertical
+  .byte $44
+  .addr $5114  ; CPU 8000-DFFF: identity
+  .byte $80
+  .addr $5115
+  .byte $81
+  .addr $5116
+  .byte $82
+  .addr $5120  ; PPU 0000-0FFF: identity
+  .byte $80
+  .addr $5121
+  .byte $01
+  .addr $5122
+  .byte $02
+  .addr $5123
+  .byte $03
+  .addr $5128  ; PPU 0000-0FFF (background during 8x16 sprites): identity
+  .byte $00
+  .addr $5129
+  .byte $01
+  .addr $512A
+  .byte $02
+  .addr $512B
+  .byte $03
+  .addr $5200  ; disable ExRAM nametable as window
+  .byte $00
+  .addr $5204  ; disable scanline IRQ
+  .byte $00
   .addr $0000
 
 mapper_init_fme7:
@@ -374,6 +412,10 @@ mapper_init_fme7:
   .byte $0B
   .addr $A000
   .byte $02
+  .addr $8000  ; Mirroring: vertical
+  .byte $0C
+  .addr $A000
+  .byte $00
   .addr $8000  ; disable IRQ
   .byte $0D
   .addr $A000
@@ -381,6 +423,8 @@ mapper_init_fme7:
   .addr $0000
 
 mapper_init_vrc7:
+  .addr $E000  ; reset OPL
+  .byte $40
   .addr $8000  ; Identity mapping for CPU $8000-$DFFF
   .byte $00
   .addr $8010
@@ -391,11 +435,13 @@ mapper_init_vrc7:
   .byte $00
   .addr $A010
   .byte $01
-  .addr $B000  ; Identity mapping for PPU $0000-$0FFF
+  .addr $B000
   .byte $02
   .addr $B010
   .byte $03
   .addr $F001  ; disable IRQ
+  .byte $00
+  .addr $E000  ; mirroring: vertical
   .byte $00
   .addr $0000
 
@@ -408,6 +454,8 @@ mapper_init_vrc6:
   .byte $00
   .addr $B002
   .byte $00
+  .addr $B003  ; Mirroring: Vertical
+  .byte $20
   .addr $C000  ; CPU $C000-$DFFF = PRG bank 2
   .byte $02
   .addr $D000  ; CHR $0000-$0FFF = identity
@@ -433,6 +481,8 @@ mapper_init_vrc6ed2:
   .byte $00
   .addr $B001
   .byte $00
+  .addr $B003  ; Mirroring: Vertical
+  .byte $20
   .addr $D000  ; CHR $0000-$0FFF to identity
   .byte $00
   .addr $D002
@@ -446,6 +496,30 @@ mapper_init_vrc6ed2:
   .addr $0000
 
 mapper_init_n163:
+  .addr $5800  ; disable IRQ
+  .byte $00
+  .addr $8000  ; PPU 0000-0FFF: identity
+  .byte $00
+  .addr $8800
+  .byte $01
+  .addr $9000
+  .byte $02
+  .addr $9800
+  .byte $03
+  .addr $C000  ; Mirroring: Vertical
+  .byte $FE
+  .addr $C800
+  .byte $FF
+  .addr $D000
+  .byte $FE
+  .addr $D800
+  .byte $FF
+  .addr $E000  ; CPU 8000-DFFF: identity
+  .byte $00
+  .addr $E800
+  .byte $01
+  .addr $F000
+  .byte $02
   .addr $0000
 
 .segment "CHR"

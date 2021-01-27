@@ -124,7 +124,7 @@ interface based on what most licensed games use.
 - $5101: CHR mode (3: 1Kx8; only _Metal Slader Glory_ differs)
 - $5104: ExRAM mapping (2: Use as work RAM, not ExGrafix)
 - $5105: Mirroring ($00: A; $44: vertical; $50: horizontal; $55: B)
-- $5114: Select 8K PRG bank at  ($80-$FF: ROM)
+- $5114: Select 8K PRG bank at $8000 ($80-$FF: ROM)
 - $5115: Select 8K PRG bank at $A000 ($80-$FF: ROM)
 - $5116: Select 8K PRG bank at $C000 ($80-$FF: ROM)
 - $5117: Select 8K PRG bank at $E000
@@ -163,20 +163,14 @@ Multi-channel wavetable chip roughly equivalent to Konami SCC.
 - $4800: ARAM data
 - $5000: IRQ counter low
 - $5800: IRQ enable (bit 7); IRQ counter high (bits 6-0)
-- $8000: Select 1K CHR bank at $0000
-- $8800: Select 1K CHR bank at $0400
-- $9000: Select 1K CHR bank at $0800
-- $9800: Select 1K CHR bank at $0C00
-- $A000: Select 1K CHR bank at $1000
-- $A800: Select 1K CHR bank at $1400
-- $B000: Select 1K CHR bank at $1800
-- $B800: Select 1K CHR bank at $1C00
-- $C000: Select 1K CHR bank at $2000 (>=$E0: CIRAM)
-- $C800: Select 1K CHR bank at $2400 (>=$E0: CIRAM)
-- $D000: Select 1K CHR bank at $2800 (>=$E0: CIRAM)
-- $D800: Select 1K CHR bank at $2C00 (>=$E0: CIRAM)
+- $8000, $8800: Select 1K CHR bank at $0000, $0400
+- $9000, $9800: Select 1K CHR bank at $0800, $0C00
+- $A000, $A800: Select 1K CHR bank at $1000, $1400
+- $B000, $B800: Select 1K CHR bank at $1800, $1C00
+- $C000, $C800: Select 1K CHR bank at $2000, $2400 (>=$E0: CIRAM)
+- $D000, $D800: Select 1K CHR bank at $2800, $2C00 (>=$E0: CIRAM)
 - $E000: Mute sound (bit 6); select 8K PRG ROM at $8000 (bits 5-0)
-- $E800: PRG select $A000 [Bitfield]
+- $E800: PRG select $A000 and CHR in CIRAM [Bitfield]
 - $F000: Select 8K PRG ROM at $C000
 - $F800: ARAM address and WRAM enable
 
@@ -210,7 +204,7 @@ Each channel has an 8-byte control block
 
 Bitfields:
 
-    7654 3210  N163 $E800: PRG select $A000
+    7654 3210  N163 $E800: PRG select $A000 and CHR in CIRAM
     ||++-++++- Select 8K PRG ROM at $A000
     |+-------- CHR banks >=$E0 at $0000-$0FFF are 0: CIRAM; 1: ROM
     +--------- CHR banks >=$E0 at $1000-$1FFF are 0: CIRAM; 1: ROM
