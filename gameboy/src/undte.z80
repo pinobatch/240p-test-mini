@@ -30,6 +30,18 @@ dtestack: ds DTE_STACK_SIZE
 section "undte",ROM0
 
 ;;
+; Decompresses the title of help page A to the line buffer.
+undte_helptitle_a::
+  ld de,helptitles
+  call de_index_a
+  ; fall through
+
+;; Decompresses DTE text at HL to the line buffer.
+undte_to_help_line_buffer::
+  ld de,help_line_buffer
+  ; fall through
+
+;;
 ; Decompresses digram tree encoded (DTE) text from HL to DE.
 ; Stops at the first code unit less than FIRST_PRINTABLE_CU.
 ; @param HL source address

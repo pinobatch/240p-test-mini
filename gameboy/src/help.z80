@@ -262,9 +262,8 @@ helpscreen::
     ; If BG CHR and map are loaded, and not changing pages,
     ; don't change the transition.
     ld a,[help_cur_page]
-    ld b,a
-    ld a,[help_wanted_page]
-    xor b
+    ld hl, help_wanted_page
+    xor [hl]
     jr z,.same_doc
 
     ; If changing pages while BG CHR and map are loaded,
@@ -460,7 +459,6 @@ help_load_bg:
   ldh a,[hw_capability]
   add a
   sbc a  ; $00 for DMG (colors 0 and 1) or $FF for GBC (2 and 3)
-  ld e, a
   ld h, high(CHRRAM0)
   call clear_canvas
   ld h, high(CHRRAM2)
@@ -758,15 +756,14 @@ gbc_bottom_oam:
 gbc_bottom_oam_end:
 
 ;;
-; Clear 2048 bytes of VWF canvas to plane1 = 0, plane1 = E
+; Clear 2048 bytes of VWF canvas to plane1 = 0, plane1 = A
 ; @param H starting address high bits
 clear_canvas:
   ld bc,-1024
   ld l, c
   .loop:
-    xor a
-    ld [hl+],a
-    ld a, e
+    ld [hl],0
+    inc hl
     ld [hl+],a
     inc c
     jr nz,.loop
@@ -869,14 +866,6 @@ wnd_x_sequence_last:
   db WXBASE+0
 
 ; Help text drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-undte_helptitle_a:
-  ld de,helptitles
-  call de_index_a
-undte_to_help_line_buffer:
-  ld de,help_line_buffer
-  jp undte_line
-
 
 ; The NES version uses a state machine that loads one line per frame.
 ; This is needed because the NES PPU has no hblank (mode 0); instead,
