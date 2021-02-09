@@ -142,7 +142,7 @@ section "helppages",ROMX
     newnewsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
     assert newnewsize == newsize - greedysaved
 
-    # Experiment: Put most commonly repeated lines in/after title table
+    # Put most commonly repeated lines in/after title table
     uniquelines = Counter()
     linecount = 0
     for page in dtepages:
@@ -160,11 +160,24 @@ section "helppages",ROMX
     lines.append('helptitles::')
     lines.extend('  dw helptitle_%d' % i for i in range(len(helptitledata)))
 
+    # Failed experiment to see if I could optimize suffixes
+    # Didn't save much
+    endswithtest = [
+        (i, j) for i in helptitledata for j in helptitledata
+        if i.endswith(j) and i != j
+    ]
+    if False:
+        for i, j in endswithtest:
+            print("%s ends with %s"
+                  % (dtedec(i, replacements).decode("cp144p"),
+                     dtedec(j, replacements).decode("cp144p")),
+                  file=sys.stderr)
+
     # Try to match lines of text to document titles
     # (reuse of title of document id 0 is currently buggy)
     helptitleinv = {t: idx for idx, t in enumerate(helptitledata) if idx}
 
-    # Experiment: Replace lines matching helplines with references
+    # Replace lines matching helplines with references
     for i, page in enumerate(dtepages):
         page = page.rstrip(b'\x00').split(b"\n")
         newpage = bytearray()

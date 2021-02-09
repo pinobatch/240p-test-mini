@@ -75,11 +75,10 @@ Select: Invert grays
 
 == Linearity ==
 
-This pattern shows five
-circles at the square
-pixel aspect ratio of
-the Game Boy screen.
-
+This pattern shows
+five circles at the
+square pixel aspect ratio
+of the Game Boy screen.
 Use it to verify the
 horizontal to vertical
 size ratio setting of
@@ -255,12 +254,12 @@ each direction.
 
 == Shadow sprite ==
 
-This test draws a shadow
-sprite on every other
-frame, flickering at
-30 Hz. Many games use
-such flicker to show
-transparency.
+This test draws a
+shadow sprite on every
+other frame, flickering
+at 30 Hz.  Many games
+use such flicker to
+show transparency.
 
 Some deinterlacers show
 drop shadows OK but
@@ -401,7 +400,7 @@ Hill zone by mikejmoffitt
 
 == Vertical scroll ==
 
-This test shows a
+This test draws a
 scrolling background.
 Use it to measure
 cadence detection in a
@@ -424,8 +423,8 @@ to test linearity and
 how well the display
 copes with scrolling and
 frame rate. Some scalers
-may produce a still image
-at maximum speed.
+produce a still image at
+maximum speed.
 
 ↑↓: Change speed
 A: Start or stop
@@ -459,7 +458,7 @@ response.
 
 == Backlight zones ==
 
-This test displays a
+This test draws a
 small moving square,
 letting you check how
 a display handles
