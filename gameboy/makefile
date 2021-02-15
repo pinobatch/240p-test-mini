@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 #
 # Makefile for 144p Test Suite for Game Boy
-# Copyright 2014-2020 Damian Yerrick
+# Copyright 2014-2021 Damian Yerrick
 #
 # Copying and distribution of this file, with or without
 # modification, are permitted in any medium without royalty
@@ -15,13 +15,15 @@ version:=0.22
 
 # Space-separated list of asm files without .z80 extension
 # (use a backslash to continue on the next line)
-objlist := header init \
+objlist := linkthisfirst \
+  header init \
   main help helppages.hlp placeholder \
   stills shadowsprite backlight scrolltest motionblur overscan \
   megaton stopwatch soundtest mdfourier mdfourierfe audiosync \
   sgbtests gbctests \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
-  uniur huffnib gfxincbins allhuffdata pitchtable
+  uniur huffnib gfxincbins allhuffdata pitchtable \
+  linkthislast
 
 huffdata := \
   obj/gb/stopwatchhand.chrgb.pb16 \

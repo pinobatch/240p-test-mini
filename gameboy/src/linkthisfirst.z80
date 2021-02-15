@@ -1,0 +1,46 @@
+;
+; Variable clearing for 144p Test Suite
+;
+; Copyright 2021 Damian Yerrick
+; 
+; This software is provided 'as-is', without any express or implied
+; warranty.  In no event will the authors be held liable for any damages
+; arising from the use of this software.
+; 
+; Permission is granted to anyone to use this software for any purpose,
+; including commercial applications, and to alter it and redistribute it
+; freely, subject to the following restrictions:
+; 
+; 1. The origin of this software must not be misrepresented; you must not
+;    claim that you wrote the original software. If you use this software
+;    in a product, an acknowledgment in the product documentation would be
+;    appreciated but is not required.
+; 2. Altered source versions must be plainly marked as such, and must not be
+;    misrepresented as being the original software.
+; 3. This notice may not be removed or altered from any source distribution.
+;
+
+; cc65 uses "segments" where code and data placed in segments of the
+; same name get placed adjacently into the file.  A linker script can
+; use "define = yes" to define three additional symbols for a segment
+; https://cc65.github.io/doc/ld65.html#ss5.2
+;
+; __NAME_LOAD__
+;    Address where the segment is loaded, usually ROM
+; __NAME_RUN__
+;    RAM address to which the segment should copied at runtime
+; __NAME_SIZE__
+;    Count of bytes in the segment
+;
+; The corresponding RGBDS construction, SECTION FRAGMENT, offers no
+; way to query the start and size of a section across all its
+; fragments.  For a BSS (zero fill) section, this makes it difficult
+; to determine exactly how much to clear.  In the gbdev Discord
+; server, ISSOtm suggested measuring BSS size by defining labels
+; in certain translation units linked first or last.
+
+SECTION FRAGMENT "BSS", WRAM0
+__BSS_LOAD__::
+
+SECTION FRAGMENT "HBSS", HRAM
+__HBSS_LOAD__::
