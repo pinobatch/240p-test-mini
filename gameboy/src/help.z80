@@ -1023,14 +1023,15 @@ help_draw_status_line:
     ld a,GL_LEFT
     ld [hl+],a
     ld a,[help_cur_page]
-    sub a,d
-    inc a
-    call help_put1dig
+    sub d
+    add "1"
+    ld [hl+],a
     ld a,"/"
     ld [hl+],a
     ld a,e
     sub d
-    call help_put1dig
+    add "0"
+    ld [hl+],a
     ld a,GL_RIGHT
     ld [hl+],a
     ld [hl],0
@@ -1093,16 +1094,6 @@ help_putlineb:
   ld c,14  ; tile count
   jp vwfPutBufHBlank
 
-section "help_p1d", ROM0
-
-;;
-; Draws a page number.  Assumes the page number is less than 10.
-help_put1dig:
-  and $0F
-  add "0"
-  ld [hl+],a
-  ret
-
 ; Navigation of page ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "help_get_doc_bounds",ROM0
@@ -1113,8 +1104,9 @@ section "help_get_doc_bounds",ROM0
 ; @return D: first page of this document;
 ;   E: first page after those of this document
 help_get_doc_bounds:
-  ld hl,help_cumul_pages
   ld a,[help_cur_doc]
+help_doc_a_bounds:
+  ld hl,help_cumul_pages
   ld e,a
   ld d,0
   add hl,de

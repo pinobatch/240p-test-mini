@@ -32,9 +32,7 @@ customred   rb 1
 customgreen rb 1
 customblue  rb 1
 bleed_help_page rb 1
-
-section "stillswram", WRAM0
-curframe_bcd:: ds 1
+curframe_bcd rb 1
 
 ; Gray ramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1124,7 +1122,7 @@ full_stripes_common::
   ldh [curtileid],a
   ldh [curscry],a
   ldh [curpalette],a
-  ld [curframe_bcd],a
+  ldh [curframe_bcd],a
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|LCDCF_WIN9C00
   ldh [curlcdc],a
 .restart:
@@ -1247,14 +1245,14 @@ update_bcd_frame_counter:
   call stpcpy
 
   ; Increment and write the frame count
-  ld a,[curframe_bcd]
+  ldh a,[curframe_bcd]
   inc a
   daa
   cp $60
   jr c,.nowrap60
     xor a
   .nowrap60:
-  ld [curframe_bcd],a
+  ldh [curframe_bcd],a
   call puthex
 
   ; Terminate the string
@@ -1283,7 +1281,6 @@ bleed_stripwait:
   add 28
   ldh [rLYC], a
   ret
-
 
 ;;
 ; Copies a nul-terminated string.

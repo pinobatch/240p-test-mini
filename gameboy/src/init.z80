@@ -83,8 +83,9 @@ reset_handler::
   ldh [rP1],a
   ld a, 0  ; preserve carry
   ldh [cur_keys],a
-  ld [das_keys],a
-  ld [das_timer],a
+  ld hl, das_keys
+  ld [hl+], a  ; clear das_keys
+  ld [hl+], a  ; clear das_timer
 
   jr nc, .not_gba_check
     rr b
