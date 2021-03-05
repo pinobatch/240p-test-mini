@@ -158,7 +158,7 @@ help_init::
   ld c, help_init_zerofill_end-help_init_zerofill_start
   rst memset_tiny
   dec a
-  ld [hl],a
+  ld [hl],a  ; help_cur_page
   ret
 
 ;;

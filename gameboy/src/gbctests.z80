@@ -689,7 +689,7 @@ smpte_bars_engine:
 
   call init_apu
   ld hl,waveram_sin2x
-  call load_waveram
+  call load_waveram_hl
   ldh a,[curvolume]
   ldh [rNR32],a
   ld a,low(HALF_KHZ)
