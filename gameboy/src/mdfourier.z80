@@ -10,8 +10,7 @@ SECTION "mdfourier", ROM0
 
 run_mdfourier::
   ld de, apucmd_reset_apu
-  call load_apucmd_de
-  call mdfourier_present
+  call load_de_and_present
   ld hl, waveram_sinx
   call load_waveram_hl
   call pattern_sync
@@ -29,9 +28,9 @@ run_mdfourier::
   bit PADB_B, a
   jr nz, .halt
 
-  ld c, $00
+  ld c, $77
   call pattern_noise_scale_duty_c
-  ld c, $08
+  ld c, $7F
   call pattern_noise_scale_duty_c
   call pattern_steady_noise
 
@@ -93,6 +92,8 @@ load_waveram_hl::
   ldh [rNR30], a
   ret
 
+load_de_and_present:
+  call load_apucmd_de
 mdfourier_present:
   ldh a, [new_keys]
   bit PADB_B, a
@@ -120,7 +121,7 @@ mdfourier_push_apubuffer:
     or a
     jr nz, .loop
 
-  ; Mark this bufferas pushed
+  ; Mark this buffer as pushed
   ld [apubuffer], a
   ret
 
@@ -146,8 +147,7 @@ pattern_sync:
   .loop:
     push bc
     ld de, apucmd_sync_tone
-    call load_apucmd_de
-    call mdfourier_present
+    call load_de_and_present
     ld b, 1
     call silence_b_frames
     pop bc
@@ -156,6 +156,7 @@ silence_20_frames:
   ld b, 20
 silence_b_frames:
   ld de, apucmd_silence
+load_de_wait_b:
   call load_apucmd_de
 wait_b_frames:
   push bc
@@ -225,10 +226,22 @@ silence_10_frames:
   ld b, 10
   jr silence_b_frames
 
+pattern_steady_noise:
+  call silence_20_frames
+  ld de, apucmd_noise_tone
+  ld b, 80
+  call load_de_wait_b
+  ld b, 110
+  jr silence_b_frames
+  ; 110 because it formerly accidentally fell through to
+  ; pattern_pulse_reset_de with DE pointed at a $00 byte (a NUL
+  ; terminator).  This produced 20 frames of no-op and 20 frames
+  ; of silence.  It saved 1 byte not to fall through, and it
+  ; allowed fallthrough to shift to pattern_sweep_up_duty_c.
+
+;;
+; @param C $77 for hiss or $7F for buzz
 pattern_noise_scale_duty_c:
-  ld a, $77
-  or c
-  ld c, a
   .loop:
     ldh a, [new_keys]
     bit PADB_B, a
@@ -238,7 +251,6 @@ pattern_noise_scale_duty_c:
     call load_apucmd_de
     ld a, c
     ld [apubuffer+3], a
-    
     push bc
     ld b, 20
     call wait_b_frames
@@ -254,27 +266,6 @@ pattern_noise_scale_duty_c:
     ld c, a
     jr nc, .loop
   ret
-
-pattern_steady_noise:
-  call silence_20_frames
-  ld de, apucmd_noise_tone
-  call load_apucmd_de
-  ld b, 80
-  call wait_b_frames
-  ld b, 80
-  call silence_b_frames
-
-pattern_pulse_reset_de:
-  ld b, 20
-  .loop:
-    push de
-    push bc
-    call load_apucmd_de
-    call mdfourier_present
-    pop bc
-    pop de
-    djnz .loop
-  jr silence_10_frames
 
 pattern_sweep_up_duty_c:
   call load_note_start_duty_c
@@ -296,8 +287,20 @@ pattern_sweep_up_duty_c:
     ld hl, apubuffer
     inc b
     jr nz, .loop
+wait_20_silence_10:
+  ld de, apucmd_nul
+
+;;
+; Runs APU command DE 20 frames in a row then silence for 10
+pattern_pulse_reset_de:
   ld b, 20
-  call wait_b_frames
+  .loop:
+    push de
+    push bc
+    call load_de_and_present
+    pop bc
+    pop de
+    djnz .loop
   jr silence_10_frames
 
 ; data tables ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -320,9 +323,6 @@ apucmd_wave_tone:
   db low(rNR30), $00, low(rNR30), $80, low(rNR32), $20
   db low(rNR33), 256-16, low(rNR34), $87
   db $00
-apucmd_noise_tone:
-  db low(rNR42), $F8, low(rNR43), $14, low(rNR44), $80
-  db $0
 apucmd_pulse_reset_lo:
   db low(rNR11), $00, low(rNR12), $F8
   db low(rNR13), 256-low(336), low(rNR14), $87-high(336)
@@ -330,4 +330,9 @@ apucmd_pulse_reset_lo:
 apucmd_pulse_reset_hi:
   db low(rNR11), $00, low(rNR12), $F8
   db low(rNR13), 256-low(84), low(rNR14), $87-high(84)
+  db $00
+SECTION "mdfourier_small1", ROM0
+apucmd_noise_tone:
+  db low(rNR42), $F8, low(rNR43), $14, low(rNR44), $80
+apucmd_nul:
   db $00
