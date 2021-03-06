@@ -676,9 +676,8 @@ help_load_bg:
   ; Bottom
   ld d, h
   ld e, l
-  ld bc, gbc_bottom_oam_end-gbc_bottom_oam
   ld hl, gbc_bottom_oam
-  call memcpy
+  call memcpy_pascal16
   ld a,e
   ld [oam_used],a
 
@@ -737,6 +736,7 @@ help_load_bg:
   ret
 
 gbc_bottom_oam:
+  dw gbc_bottom_oam_end-gbc_bottom_oam-2
   db CHARACTER_Y*8+90
   db 8+8
   db $AE

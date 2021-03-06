@@ -552,8 +552,7 @@ activity_sharpness::
   ; Load secondary picture
   ld hl,sharpness_brick_tile
   ld de,CHRRAM2+$7F0
-  ld bc,16
-  call memcpy
+  call memcpy_pascal16
   ld h,$7F
   ld de,_SCRN1
   ld bc,32*18
@@ -1502,9 +1501,9 @@ convergenceB_draw_onerow:
 ; The data starts at lineImgBuf+6
 convergence_load_sgb_attr:
   ld de, lineImgBuf
+  push de
   ld hl, convergence_sgb_attrs
-  ld bc, 11
-  call memcpy
+  call memcpy_pascal16
   ld hl, lineImgBuf+6
   ld c, 2*5
   call memcpy
@@ -1525,10 +1524,11 @@ convergence_load_sgb_attr:
   ld c, 12*5
   call memcpy
 
-  ld hl, lineImgBuf
+  pop hl
   jp sgb_send
 
 convergence_sgb_attrs:
+  dw 11  ; length
   db $07*8+6  ; ATTR_CHR
   db 0  ; starting x
   db 0  ; starting y

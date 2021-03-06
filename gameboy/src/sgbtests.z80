@@ -452,7 +452,7 @@ sgb_load_border::
     jr nz, .rowloop
 
   ; And last: the palette
-  ld bc, 32
+  ld c, 32
   ld de, CHRRAM1
   call memcpy
   ; ld b, 0  ; guaranteed by memcpy

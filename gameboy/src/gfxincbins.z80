@@ -74,6 +74,7 @@ grayramp_chr_gbc::
 section "sharpness_gfx0",ROM0
 
 sharpness_brick_tile::
+  dw 16  ; length
   dw `11222222
   dw `22112222
   dw `22221122
@@ -127,7 +128,9 @@ section "scrolltest_gfx0",ROM0
 hillzone_nam::
   incbin "obj/gb/greenhillzone.nam.pb16"
 kikitiles_chr::
+  dw kikitiles_chr_end-kikitiles_chr-2
   incbin "obj/gb/kikitiles.chrgb"
+kikitiles_chr_end:
 section "scrolltest_gfx1",ROMX
 kikimap::
   incbin "obj/gb/kikimap.chr1.pb16"

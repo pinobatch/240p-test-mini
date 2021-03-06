@@ -594,10 +594,9 @@ load_kiki_bg:
   ; Load tiles
   ld hl,kikitiles_chr
   ld de,CHRRAM2
-  ld bc,12*16
-  call memcpy
+  call memcpy_pascal16
 
-  ; Copy packed map into an aligned buffer; possibly decompress later
+  ; Decompress packed map into an aligned buffer
   ld de,kikimap
   ld hl,lineImgBuf
   ld b,128/16
