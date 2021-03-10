@@ -20,34 +20,6 @@
 ;
 section "bcd",ROM0
 
-if 0
-bcd8bit_iter: macro
-  cp \1
-  jr c,.nope\@
-  sub \1
-.nope\@:
-  rl b
-  endm
-
-;;
-; Converts an 8-bit value to decimal.
-; @param A the value
-; @return A: hundreds and tens digits; C: ones digit;
-; DEHL: unchanged; Z set if number is less than 10
-bcd8bit::
-  bcd8bit_iter 200
-  bcd8bit_iter 100
-  bcd8bit_iter 80
-  bcd8bit_iter 40
-  bcd8bit_iter 20
-  bcd8bit_iter 10
-  ld c,a
-  ld a,b
-  cpl  ; correct for 8080 use of borrow flag instead of carry
-  and $3F
-  ret
-endc
-
 ;;
 ; Converts an 8-bit value to 3 binary-coded decimal digits.
 ; @param A the value
