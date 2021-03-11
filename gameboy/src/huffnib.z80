@@ -87,6 +87,36 @@ canohuff_decode_symbol:
   ret
 
 ;;
+; Fills hCodeLengths and symboldefs with compressed data header
+canohuff_read_lengths:
+
+  ; So we have 3 to 16 distinct codes, with up to 13 of any given
+  ; length, and the longest length shorter than the total number of
+  ; codes.  Thus we can use code length $F as a terminator.
+  ; Read (codes of this length, symbol) pairs until the terminator.
+  push de  ; Save destination address
+  ld bc, $8000 | low(hCodeLengths)  ; initialize state for getbit
+  ld de, huffnib_symboldefs
+.headerloop:
+  ; Write symbols in order to huffnib_symboldefs
+  ld a, [hl]
+  and $0F
+  ld [de], a
+  inc de
+
+  ; Write number of codes of each length
+  ld a, [hl+]
+  swap a
+  and $0F
+  ld [$FF00 + c], a
+  inc c
+  cp $0F
+  jr c, .headerloop
+
+  pop de  ; Restore destination address
+  ret
+
+;;
 ; Decompresses the font if not yet decompressed
 ensure_vwfInit::
   ld hl, help_font_loaded
@@ -98,32 +128,34 @@ ensure_vwfInit::
   ld de, vwfChrData
   call huffnib_decode_compressed_block
   if WIDTHS_4BIT
-    ; Unpack nibbles.  This can be done better
-    call huffnib_decode_compressed_block
-    ld b, NUM_GLYPHS/2
-    ld hl, vwfChrWidths+NUM_GLYPHS-1
+
+    ; This is not ideal either, as the code to decode 1 symbol per
+    ; byte is about as big as the code to unpack nibbles of
+    ; uncompressed data.  If we need 1 symbol per nibble or plain
+    ; nibble unpacking, look here for optimizatoin.
+    call canohuff_read_lengths
+    ld a, [hl+]  ; should equal NUM_GLYPHS/2
+    add a
+    inc hl  ; skip lengths high
     .loop:
-      dec de
-      ld a, [de]
-      and $0F
-      ld [hl-], a
-      ld a, [de]
-      swap a
-      and $0F
-      ld [hl-], a
-      dec b
+      push af
+      call canohuff_decode_symbol
+      ld [de], a
+      inc de
+      pop af
+      dec a
       jr nz, .loop
     ret
   else
 
-  ; This is not ideal (wasting 2 bits per glyph or 26 bytes) because
-  ; all upper nibbles are automatically zero, but it was quick to do.
+    ; This is not ideal (wasting 2 bits per glyph or 26 bytes) because
+    ; all upper nibbles are automatically zero, but it was quick to do.
   
-  ; hl and de are already in position after the last block
-;  ld hl, vwfChrWidths_huf
-;  ld de, vwfChrWidths
+    ; hl and de are already in position after the last block
+;    ld hl, vwfChrWidths_huf
+;    ld de, vwfChrWidths
 
-  ; fall through to huffnib_decode_block
+    ; fall through to huffnib_decode_block
   endc
 
 ;;
@@ -149,32 +181,7 @@ huffnib_decode_block::
   dec hl
 
 huffnib_decode_compressed_block::
-
-  ; So we have 3 to 16 distinct codes, with up to 13 of any given
-  ; length, and the longest length shorter than the total number of
-  ; codes.  Thus we can use code length $F as a terminator.
-  ; Read (codes of this length, symbol) pairs until the terminator.
-  push de  ; Save destination address
-  ld c, low(hCodeLengths)
-  ld de, huffnib_symboldefs
-.headerloop:
-  ; Write symbols in order to huffnib_symboldefs
-  ld a, [hl]
-  and $0F
-  ld [de], a
-  inc de
-
-  ; Write number of codes of each length
-  ld a, [hl+]
-  swap a
-  and $0F
-  ld [$FF00 + c], a
-  inc c
-  cp $0F
-  jr c, .headerloop
-
-  pop de  ; Restore destination address
-
+  call canohuff_read_lengths
   ; Read length and negate it
   ld a, [hl+]
   cpl
@@ -184,9 +191,6 @@ huffnib_decode_compressed_block::
   cpl
   adc 0
   ld [huffnib_bytecounthi], a
-
-  ld b, $80  ; initialize state for getbit
-
 .byteloop:
   ; 74+22n Decode two nibbles and combine them
   ; At this point:
