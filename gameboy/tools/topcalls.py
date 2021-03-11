@@ -13,7 +13,7 @@ an unconditional jp, jr, or ret) as the subroutine's caller.
 ignore condition (z, nz, c, nc); rewrite from awk to Python because
 I found adding these new features in Python quicker than learning awk
 """
-import os, sys, re, argparse
+import sys, re, argparse
 from collections import defaultdict
 
 re_debugging = False
@@ -72,9 +72,16 @@ def main(argv=None):
     ))
 
 if __name__=='__main__':
-    if 'idlelib' in sys.modules:
-        import glob
-        main(list(sys.argv) + list(glob.glob("../src/*.z80")))
+##    is_IDLE = 'idlelib' in sys.modules
+    want_default_file_set = len(sys.argv) < 2
+    if want_default_file_set:
+        import os
+        from os.path import dirname, normpath, join as joinpath
+        srcdir = normpath(joinpath(dirname(sys.argv[0]), "..", "src"))
+        argv = [sys.argv[0]]
+        argv.extend(joinpath(srcdir, f) for f in os.listdir(srcdir)
+                    if f.endswith(".z80"))
+        main(argv)
     else:
         main()
 
