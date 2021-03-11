@@ -159,14 +159,11 @@ activity_megaton::
     ldh [rNR52],a
     ret  
   .not_exit:
-  call handle_cursor_move
+  call megaton_move_cursor
   ldh a,[new_keys]
-  bit PADB_A,a
-  jr z,.not_A_press
+  rra
+  jr nc,.not_A_press
     call grade_press
-    ldh a,[num_tests]
-    cp MAX_TESTS
-    jp nc,activity_megaton_complete
     ldh a,[enableflags]
     bit 1,a
     ld a,$F0
@@ -180,20 +177,16 @@ activity_megaton::
 
   ; Draw moving sprites
   call move_reticle
+
   xor a
   ld [oam_used],a
-
   ldh a,[reticledir]
-  bit 0,a
-  jr z,.nohreticle
-    call draw_h_reticle
-  .nohreticle:
-
-  ldh a,[reticledir]
-  bit 1,a
-  jr z,.novreticle
-    call draw_v_reticle
-  .novreticle:
+  rra
+  push af
+  call c, draw_h_reticle
+  pop af
+  rra
+  call c, draw_v_reticle
   call lcd_clear_oam
 
   rst wait_vblank_irq
@@ -265,7 +258,11 @@ activity_megaton::
   ldh [rNR12],a
   ld a,$80|HIGH(CROSSING_BEEP_FREQ)
   ldh [rNR14],a
-  jp .loop
+
+  ; If not done, fall through to activity_megaton_complete
+  ldh a,[num_tests]
+  cp MAX_TESTS
+  jp c,.loop
 
 activity_megaton_complete:
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
@@ -343,7 +340,19 @@ activity_megaton_complete:
   jr z,.loop
   ret
 
-handle_cursor_move:
+megaton_move_cursor:
+  ; Converting a subroutine called in only one place to a macro
+  ; saves space, provided it has few or no RETs other than at
+  ; the subroutine's end.  Its size changes as follows:
+  ;
+  ;   -3 bytes for the CALL
+  ;   -1 byte for the final RET
+  ;   +1 for each early RET changed to a JR
+  ;   +1 for each JR past it changed to a JP for exceeding 127 bytes
+  ;
+  ; This subroutine's 3 early RETs make it a less than ideal
+  ; candidate for inlining.
+
   ldh a,[new_keys]
   ld b,a
 
@@ -358,25 +367,29 @@ handle_cursor_move:
     inc a
   .not_down:
   cp 3
-  jr nc,.not_writeback_cursor_y
-    ldh [cursor_y],a
-  .not_writeback_cursor_y:
+  ret nc
+  ldh [cursor_y],a
 
   ; Left/right: Change setting
-  ld a,[cursor_y]
+  ; Cursor Y already in C
+  ld c,2
   bit PADB_LEFT,b
   jr z,.not_decrease_setting
     or a
-    jr nz,.xor_setting_a
-    ld c,2
-    jr .add_c_to_direction
+    jr z,.add_c_to_direction
+  .xor_setting_a:
+    ld c,a
+    ldh a,[enableflags]
+    xor c
+    ldh [enableflags],a
+    ret
   .not_decrease_setting:
   
   bit PADB_RIGHT,b
   ret z
     or a
     jr nz,.xor_setting_a
-    ld c,1
+    dec c
   .add_c_to_direction:
     ldh a,[reticledir]
     add c
@@ -386,12 +399,6 @@ handle_cursor_move:
     .not_dir_wrap:
     ldh [reticledir],a
     ret
-  .xor_setting_a:
-    ld c,a
-    ldh a,[enableflags]
-    xor c
-    ldh [enableflags],a
-  ret
 
 grade_press:
   ; Calculate absolute value of distance
@@ -414,34 +421,78 @@ grade_press:
     and $80
     or d
   .not_early_or_late:
-  ld d,a
 
-  ldh a,[num_tests]
-  ld b,a
-  add low(framecounts)
-  ld c,a
-  ; Regmap:
-  ; B: number of tests already accepted; C: HRAM pointer to where
-  ; frame count will be written; D: absolute distance
-  ld a,d
-  ldh [lastrawlag],a
-  ld [$FF00+c],a
-  call draw_result_b
-
-  ; Reject this result if it was early or way late (>25 frames).
+  ; Accept the result unless it was early or way late (>25 frames).
   ; Early is negative ($80-$FF); both early and way late appear
   ; as an unsigned value greater than 25.
-  ldh a,[lastrawlag]
   cp 26
-  ret nc
 
-  ; Otherwise accept it
+  ; Save and draw the result
+  ld d, a  ; D = last test result
   ld hl, num_tests
-  inc [hl]
-  ret
+  ld a, [hl]
+  jr nc, .test_was_rejected
+    inc [hl]
+  .test_was_rejected:
+  ld b, a  ; A = B = number of tests already accepted
+  add low(framecounts)
+  ld c, a  ; C = where to write result
+  ld a, d
+  ld [$FF00+c],a
+  ; fall through to draw_result_b
+
+draw_result_b:
+  push bc
+  call vwfClearBuf
+  pop bc
+  push bc
+
+  ; Retrieve the value
+  ld a,low(framecounts)
+  add b
+  ld c,a
+  ld a,[$FF00+C]
+
+  ; Bit 7: Early
+  push af  ; Stack: raw value, which result
+  rla
+  jr nc,.not_early
+    ld a,"E"
+    ld b,0
+    call vwfPutTile
+  .not_early:
+  pop af
+  and $7F
+
+  ; Convert to decimal
+  call bcd8bit_ac
+  jr z,.no_tens
+    push bc  ; Stack: ones, index of result
+    ld b,6
+    or "0"
+    call vwfPutTile
+    pop bc
+  .no_tens:
+  ld a,c
+  or "0"
+  ld b,11
+  call vwfPutTile
+
+  ; Blit this tile to VRAM
+  pop bc
+  ld a,b
+  add a
+  add DIGITSPACE_TILE
+  ld l,a
+  ld h,high(CHRRAM0)>>4
+  add hl,hl
+  add hl,hl
+  add hl,hl
+  add hl,hl
+  ld c,2
+  jp vwfPutBufHBlank
 
 move_reticle:
-
   ldh a,[reticlepos]
   ld b,a
   ldh a,[reticletarget]
@@ -451,21 +502,23 @@ move_reticle:
   add a  ; A: $FE if pos>target or $00 if pos<target
   inc a  ; A: $FF if pos>target or $01 if pos<target
   add b
+  ldh [reticlepos],a
   ld b,a
 
   ; If reached goal, turn around
   cp c
-  jr nz,.writeback
+  ret nz
 
-    ; Choose a new position to seek
-    ld c,RIGHTWALL
-    bit 7,b
-    jr z,.already_on_right_side
-      ld c,LEFTWALL
-    .already_on_right_side:
-    ldh a,[enableflags]
-    rra  ; C=1 if randomize or 0 if not
-    jr nc,.writeback
+  ; Choose a new position to seek
+  ld c,RIGHTWALL
+  bit 7,b
+  jr z,.already_on_right_side
+    ld c,LEFTWALL
+  .already_on_right_side:
+  ldh a,[enableflags]
+  rra  ; C=1 if randomize or 0 if not
+  ld a, c
+  jr nc,.writeback_target
 
     push bc
     call rand
@@ -476,12 +529,7 @@ move_reticle:
     and $0F
     sub 8
     add c
-    ld c,a
-
-.writeback:
-  ld a,b
-  ldh [reticlepos],a
-  ld a,c
+  .writeback_target:
   ldh [reticletarget],a
   ret
 
@@ -525,64 +573,12 @@ draw_v_reticle:
   ldh [Lspriterect_x],a
   jr draw_sprite_reticle
 
-draw_result_b:
-  push bc
-  call vwfClearBuf
-  pop bc
-  push bc
-
-  ; Retrieve the value
-  ld a,low(framecounts)
-  add b
-  ld c,a
-  ld a,[$FF00+C]
-
-  ; Bit 7: Early  
-  push af  ; Stack: raw value, which result
-  rla
-  jr nc,.not_early
-    ld a,"E"
-    ld b,0
-    call vwfPutTile
-  .not_early:
-  pop af
-  and $7F
-
-  ; Convert to decimal
-  call bcd8bit_ac
-  jr z,.no_tens
-    push bc  ; Stack: ones, index of result
-    ld b,6
-    or "0"
-    call vwfPutTile
-    pop bc
-  .no_tens:
-  ld a,c
-  or "0"
-  ld b,11
-  call vwfPutTile
-
-  ; Blit this tile to VRAM
-  pop bc
-  ld a,b
-  add a
-  add DIGITSPACE_TILE
-  ld l,a
-  ld h,high(CHRRAM0)>>4
-  add hl,hl
-  add hl,hl
-  add hl,hl
-  add hl,hl
-  ld c,2
-  jp vwfPutBufHBlank
-
 write_carry_boolean:
   ld a,CHECKBOXTILE>>1
   rla
   ld [hl+],a
-  and $01
+  xor (OFFONTILE>>1) ^ CHECKBOXTILE
   rla
-  or OFFONTILE
   ld [hl+],a
   inc a
   ld [hl],a
