@@ -1,9 +1,10 @@
 include "src/global.inc"
 
-HUFFNIB_INCLUDE_TESTS = 0
+HUFFNIB_INCLUDE_TESTS equ 0
+WIDTHS_4BIT equ 1
 
-hCodeLengths = hLocals + $00
-hBitAccum    = hLocals + $0F
+hCodeLengths equ hLocals + $00
+hBitAccum    equ hLocals + $0F
 
 ; huffnib_bytecountlo is top of stack
 huffnib_bytecounthi equs "(help_line_buffer + 31)"
@@ -85,25 +86,50 @@ canohuff_decode_symbol:
   pop de
   ret
 
-vwfInit::
+;;
+; Decompresses the font if not yet decompressed
+ensure_vwfInit::
+  ld hl, help_font_loaded
+  ld a, [hl]
+  or a
+  ret nz
+  inc [hl]
   ld hl, vwfChrData_huf
   ld de, vwfChrData
-  call huffnib_decode_block
+  call huffnib_decode_compressed_block
+  if WIDTHS_4BIT
+    ; Unpack nibbles.  This can be done better
+    call huffnib_decode_compressed_block
+    ld b, NUM_GLYPHS/2
+    ld hl, vwfChrWidths+NUM_GLYPHS-1
+    .loop:
+      dec de
+      ld a, [de]
+      and $0F
+      ld [hl-], a
+      ld a, [de]
+      swap a
+      and $0F
+      ld [hl-], a
+      dec b
+      jr nz, .loop
+    ret
+  else
 
   ; This is not ideal (wasting 2 bits per glyph or 26 bytes) because
   ; all upper nibbles are automatically zero, but it was quick to do.
-  ; Decoding to unpacked nibbles won't save more than maybe 10 bytes.
+  
   ; hl and de are already in position after the last block
 ;  ld hl, vwfChrWidths_huf
 ;  ld de, vwfChrWidths
 
   ; fall through to huffnib_decode_block
+  endc
 
+;;
 ; I'm estimating 22 cycles per input bit and 74 per output byte.
 ; The largest known message is 10120 bits and 1538 bytes, or
 ; 337K cycles.
-
-;;
 ; @param HL start of interleaved code length counts and symbols,
 ; followed by length in bytes, followed by codes
 ; @param DE destination address
@@ -117,23 +143,12 @@ huffnib_decode_block::
   ; 2: Only 2 symbols exist
   ; 3+: Not possible. The encoder writes $FF for all symbols being
   ; 4-bit and nearly equiprobable, so just use memcpy.
-  ld a, [hl]
+  ld a, [hl+]
   cp $30
-  jr c, huffnib_decode_compressed_block
-  inc hl
+  jp nc, memcpy_pascal16
+  dec hl
 
-;;
-; Copy a string preceded by a 2-byte length from HL to DE.
-; @param HL source address
-; @param DE destination address
-memcpy_pascal16::
-  ld a, [hl+]
-  ld c, a
-  ld a, [hl+]
-  ld b, a
-  jp memcpy
-
-huffnib_decode_compressed_block:
+huffnib_decode_compressed_block::
 
   ; So we have 3 to 16 distinct codes, with up to 13 of any given
   ; length, and the longest length shorter than the total number of

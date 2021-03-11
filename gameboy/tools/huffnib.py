@@ -311,7 +311,8 @@ a single byte with value $FF (or any byte at least $30).
 
 In either case, the decoding table is followed by a 2-byte
 little-endian length of the decompressed data in bytes, then the
-compressed or uncompressed data.
+compressed or uncompressed data.  In compressed data, the code
+for the high nibble comes before the code for the low nibble.
 """
     freqs = Counter(b & 0x0F for b in data)
     freqs.update(b >> 4 for b in data)

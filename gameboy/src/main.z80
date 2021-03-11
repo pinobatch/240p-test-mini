@@ -100,8 +100,7 @@ main::
 
 section "main_handlers", ROM0
 page_one_handlers:
-  ; PLUGE, Color bars, and Color bleed aren't relevant without SGB or
-  ; GBC, and there isn't near enough room to support SGB.
+  ; PLUGE, Color bars, and Color bleed aren't relevant on DMG/MGB
   dw activity_gbc_tests_menu
   
   dw activity_cps_grid

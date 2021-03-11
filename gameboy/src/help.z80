@@ -62,7 +62,7 @@ help_flashing_accepted:: ds 1
 help_cursor_y:: ds 1
 help_wanted_page:: ds 1
 help_bg_loaded:: ds 1
-help_font_loaded: ds 1
+help_font_loaded:: ds 1
 help_init_zerofill_end:
 help_cur_page: ds 1
 
@@ -874,16 +874,6 @@ wnd_x_sequence_last:
 ; (128 bytes at roughly 9 cycles per byte), unlike the Game Boy whose
 ; vblank is only 10 lines.  Thus the Game Boy version draws each line
 ; and uploads it over the next 14 hblanks.
-
-;;
-; Decompresses the font if not yet decompressed
-ensure_vwfInit::
-  ld hl, help_font_loaded
-  ld a, [hl]
-  or a
-  ret nz
-  inc [hl]
-  jp vwfInit
 
 help_draw_wanted_page:
   ; Draw the document's title
