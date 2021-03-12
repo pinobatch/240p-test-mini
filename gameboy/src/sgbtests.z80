@@ -663,7 +663,28 @@ pass_pattern:
 
 ; SGB sound test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  rsset hTestState
+hEffectA rb 1
+hPitchA  rb 1
+hVolumeA rb 1
+hEffectB rb 1
+hPitchB  rb 1
+hVolumeB rb 1
+
 activity_sgb_sound::
+  ld a, 1
+  ld hl, hEffectA
+  ld [hl+], a
+  dec a
+  ld [hl+], a
+  ld [hl+], a
+  inc a
+  ld [hl+], a
+  dec a
+  ld [hl+], a
+  ld [hl+], a
+  ld [help_cursor_y], a
+
 .restart:
   call clear_gbc_attr
   call clear_scrn0_to_0
@@ -673,13 +694,37 @@ activity_sgb_sound::
   ld hl,sgb_sound_test_msgs
   call vwfDrawLabels
 
-  ld a,LCDCF_ON|BG_NT0|BG_CHR01
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_ON
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
 .loop:
   ld b,helpsect_sgb_sound
   call read_pad_help_check
   jr nz,.restart
+  
+  call sgb_sound_handle_dpad
+
+  ; Draw cursor
+  ld hl, SOAM
+  ld a, [help_cursor_y]
+  add a
+  add a
+  add a
+  add 40
+  ld [hl+], a
+  ld a, 16  ; x position
+  ld [hl+], a
+  ld a,$05  ; arrow tile
+  ld [hl+], a
+  xor a
+  ld [hl+], a
+  ld a, l
+  ld [oam_used], a
+
+  call lcd_clear_oam
+  rst wait_vblank_run_dma
+
+  ; TODO: Draw states of controls
 
   ldh a,[new_keys]
   bit PADB_B,a
@@ -688,6 +733,7 @@ activity_sgb_sound::
 
 sgb_stop_sound:
   ld bc, 0
+  ld d, b
 sgb_send_fxb_bgfxc_paramd:
   ld hl, help_line_buffer
   push hl
@@ -705,12 +751,32 @@ sgb_send_fxb_bgfxc_paramd:
   pop hl
   jp sgb_send
 
+sgb_sound_handle_dpad:
+  ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
+  call autorepeat
+  ld de, sgb_sound_line_limits
+  call motionblur_handle_dpad
+  cp d
+  ret z
+  ld d, a
+  ld a, [help_cursor_y]
+  ret
+
+
+sgb_sound_line_limits:  ; Low and count (high-low+1)
+  db 1, 48
+  db 0, 4
+  db 0, 3
+  db 1, 25
+  db 0, 4
+  db 0, 3
+
 sgb_sound_test_msgs:
   db 8, 8, "SGB Sound Test", $0A
-  db 8, 24, "Effect", $0A
-  db 16, 32, "Pitch", $0A
-  db 16, 40, "Volume", $0A
-  db 8, 48, "BG noise", $0A
-  db 16, 56, "Pitch", $0A
-  db 16, 64, "Volume", $0A
-  db 16, 80, "Coming soon!", $00
+  db 16, 24, "Effect", $0A
+  db 24, 32, "Pitch", $0A
+  db 24, 40, "Volume", $0A
+  db 16, 48, "BG noise", $0A
+  db 24, 56, "Pitch", $0A
+  db 24, 64, "Volume", $0A
+  db 8, 80, "Coming soon!", $00

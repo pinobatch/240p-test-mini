@@ -193,16 +193,13 @@ activity_motion_blur::
 
   jr .loop
 
-motionblur_handle_presses:
-  ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
-  call autorepeat_60hz_if_sgb
+;;
+; Updates help_cursor_y and the variable pointed to.
+; @param DE pointer to a list of (lowest, range size)
+; @return A=current value, D=previous value, B=pressed keys
+motionblur_handle_dpad::
   ldh a,[new_keys]
   ld b,a
-
-  ; Ignore the Control Pad while flicker is running
-  ldh a,[is_running]
-  rla
-  jr c,.no_cursor_control
 
   ; Up/Down: Choose a row
   ld a,[help_cursor_y]
@@ -227,12 +224,6 @@ motionblur_handle_presses:
   ld c,a  ; C points to HRAM for row B
 
   ; Ranges differ between mono and GBC
-  ld de,row_high_low
-  ldh a, [hw_capability]
-  or a
-  jr z,.not_gbc_ranges
-    ld de,row_high_low_gbc
-  .not_gbc_ranges:
   ld a,[help_cursor_y]
   call de_index_a  ; Valid values are L <= x < H
   ld a,[$FF00+c]
@@ -251,14 +242,33 @@ motionblur_handle_presses:
   ; Write back only if within range
   sub l
   cp h
-  jr nc,.no_writeback_value
-    add l
-    ld [$FF00+c],a
+  ret nc
+  add l
+  ld [$FF00+c],a
+  ret
+
+
+motionblur_handle_presses:
+  ld b,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
+  call autorepeat_60hz_if_sgb
+
+  ; Load the set of high and low water marks for DMG vs. others
+  ld de,row_high_low
+  ldh a, [hw_capability]
+  or a
+  jr z,.not_gbc_ranges
+    ld de,row_high_low_gbc
+  .not_gbc_ranges:
+
+  ; If flicker not running, update graphics
+  ldh a,[is_running]
+  rla
+  jr c, .skip_dpad
+    call motionblur_handle_dpad
     cp d
     call nz, motionblur_update_sgb
-  .no_writeback_value:
+  .skip_dpad:
 
-.no_cursor_control:
   ld a, PADF_A
   and b
   ret z
