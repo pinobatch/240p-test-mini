@@ -56,12 +56,6 @@ vblank_tail:
   pop af
   reti
 
-wait_vblank_irq_tail:
-  halt
-  cp [hl]
-  jr z, wait_vblank_irq_tail
-  ret
-
 ; A lot of this file is broken into little tiny sections, one for
 ; each routine, so that the linker can squeeze them into tiny holes
 ; between aligned or fixed-address sections
@@ -103,6 +97,12 @@ section "wait_vblank_run_dma", ROM0[$18]
 wait_vblank_run_dma::
   rst wait_vblank_irq
   jr run_dma
+wait_vblank_irq_tail:
+  halt
+  cp [hl]
+  jr z, wait_vblank_irq_tail
+  ret
+
 
 SECTION "busy_wait_vblank", ROM0
 

@@ -215,10 +215,11 @@ activity_stopwatch::
     jr nz,.have_lap
 
     ; Select while not in lap and not running: Clear to 0
-    ld [frames_bcd],a
-    ld [seconds_bcd],a
-    ld [minutes_bcd],a
-    ld [hours],a
+    ld hl, frames_bcd
+    ld [hl-], a
+    ld [hl-], a
+    ld [hl-], a
+    ld [hl-], a
 
   .have_lap:
   ldh [is_lap],a
@@ -229,21 +230,18 @@ activity_stopwatch::
   jr z,.not_toggle_ruler
     ; Counts 0, 3, 1
     ldh a,[is_ruler]
-    add $03
-    and $03
-    cp 2
-    jr nz,.ruler_skip_2
-      dec a
-    .ruler_skip_2:
+    cp 2  ; 0, 1: carry; 3: no carry
+    adc -2  ; 0, 1: subtract 2 add 1; 3: subtract 2
+    and $03  ; $FF to $03
     ldh [is_ruler],a
   .not_toggle_ruler:
 
   ; Down: Toggle visibility of BG below rLYC
   bit PADB_DOWN,b
   jr z,.not_toggle_face
-    ld a,[show_face]
+    ldh a, [show_face]
     cpl
-    ld [show_face],a
+    ldh [show_face], a
   .not_toggle_face:
 
   ldh a,[is_running]

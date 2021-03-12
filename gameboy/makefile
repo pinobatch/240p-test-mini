@@ -121,10 +121,10 @@ $(title).gb: $(objlisto)
 #	$(PY) tools/bgrdedent.py -o $@ $<
 
 obj/gb/%.o: src/%.z80 src/gb.inc src/hardware.inc src/global.inc
-	$(RGBASM) -o $@ $<
+	$(RGBASM) -h -o $@ $<
 
 obj/gb/%.o: obj/gb/%.z80
-	$(RGBASM) -o $@ $<
+	$(RGBASM) -h -o $@ $<
 
 # Files that will be included with incbin
 

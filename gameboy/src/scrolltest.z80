@@ -456,8 +456,10 @@ set_hillzone_scroll_pos_de:
   inc de
   ld a, [de]
   ld c, a
-.wwloop:
+  xor a
+  ldh [rIF], a
   halt
+.wwloop:
   ldh a,[rLY]
   cp b
   jr nz,.wwloop
