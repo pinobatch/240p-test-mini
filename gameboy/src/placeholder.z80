@@ -33,11 +33,34 @@ SHOW_RNG equ 0
 player_xsub      rb 1
 player_x         rb 1
 player_dxsub     rb 1
+player_facing    rb 1
 player_frame_sub rb 1
 player_frame     rb 1
-player_facing    rb 1
 
 section "lameboy", ROM0
+
+PLAYER_Y = 128
+PLAYER_INITIAL_X = 40
+PLAYER_TILE_BASE = $50
+
+;;
+; Initializes the player character's position and copies its tiles
+; into CHR RAM bank 0 starting at PLAYER_TILE_BASE.
+load_player_cels: macro
+  xor a
+  ld hl, player_xsub
+  ld [hl+], a  ; player_xsub
+  ld [hl], PLAYER_INITIAL_X  ; player_x
+  inc l
+  ld [hl+], a  ; player_dxsub
+  ld [hl+], a  ; player_facing
+
+  ld l, 2
+  call allhuffdata_fetch_file_l
+  ld hl,CHRRAM0+PLAYER_TILE_BASE*16
+  call pb16_unpack_block
+  endm
+
 
 sgb_lame_boy_rects:
   db $04*8+1  ; 3 packets hold up to 2 rectangles
@@ -64,7 +87,7 @@ lame_boy_demo::
   ld a,IEF_VBLANK
   ldh [rIE],a  ; enable vblank, disable stat
   call draw_bg
-  call load_player_cels
+  load_player_cels
 
   ld a,LCDCF_ON|OBJ_ON|BG_NT0|BG_CHR21
   ldh [rLCDC],a
@@ -131,24 +154,22 @@ putnibble_raw:
 ; Background drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 draw_bg:
-  call lcd_off
-  call load_common_bg_tiles
+  ; Not macrofied because of 1 early return and 1 tail call
 
-  ; Clear nametable excl. floor
-  ; Use tile $04 (lighter gray) on DMG or tile 0 (white) on SGB/GBC
-  ld h,$04
-  ld de,_SCRN0
-  ld bc,32*16
+  ld hl,CHRRAM2
+  call load_common_tiles_hl
+
+  ; Clear nametable
+  ld hl, _SCRN0
+  ld c, l  ; count = 0 meaning 256
   ldh a, [hw_capability]
-  or a
-  jr z,.not_color_sky
-    ld h,e
-  .not_color_sky:
-  call memset
+  cp 1   ; CF=1 on DMG or 0 on SGB, GBC, GBA
+  sbc a  ; A=$FF on DMG
+  and $04  ; A = $04 (lighter gray) on DMG or $00 (white/sky blue) on color
+  rst memset_tiny  ; clear top 8 rows
+  rst memset_tiny  ; clear next 8 rows
 
   ; Draw top of floor
-  ld h,d  ; switch from ldir to fast calling convention
-  ld l,e
   ld a,$0B
   ld c,32
   rst memset_tiny
@@ -496,25 +517,6 @@ move_player::
   ret
 
 ; Sprite drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-PLAYER_Y = 128
-PLAYER_TILE_BASE = $50
-
-;;
-; Initializes the player character's position and copies its tiles
-; into CHR RAM bank 0 starting at PLAYER_TILE_BASE.
-load_player_cels::
-  ld a,40
-  ld [player_x],a
-  xor a
-  ld [player_xsub],a
-  ld [player_dxsub],a
-  ld [player_facing],a
-
-  ld l, 2
-  call allhuffdata_fetch_file_l
-  ld hl,CHRRAM0+PLAYER_TILE_BASE*16
-  jp pb16_unpack_block
 
 
 ;;

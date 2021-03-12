@@ -67,11 +67,15 @@ activity_shadow_sprite::
   call pb16_unpack_block
   ; Make shadow sprites
   call make_shadow_chr
-  call load_bg
 
-  ld a, $FF
-  call set_obp0
-  call set_obp1
+  ; Set scroll registers in case a BG loader changes them
+  xor a
+  ldh [rSCY], a
+  ldh [rSCX], a
+  ldh a,[cur_bg_style]
+  ld de,shadow_sprite_bg_loaders
+  call jumptable_de_a
+
   ldh a, [vblank_lcdc_value]
   ldh [stat_lcdc_value],a
   ldh [rLCDC],a
@@ -100,8 +104,8 @@ activity_shadow_sprite::
 
   ldh a,[cur_keys]
   ld b,a
-  bit PADB_A,a
-  jr nz,.a_held
+  rra  ; set CF if A button held
+  jr c,.a_held
   
     ; B: held keys
     ldh a,[xpos]
@@ -232,20 +236,16 @@ activity_shadow_sprite::
     ldh a,[shadow_is_striped]
     add a
     ld b,a
-    ld a,[cur_frame]
+    ldh a,[cur_frame]
     add b
     ; Convert to a tile number
     add a
     add a
     add a
     add $D8
-    ld b,8
+    ld c,8
     ld hl,_SCRN1
-    .wtileloop:
-      ld [hl+],a
-      inc a
-      dec b
-      jr nz,.wtileloop
+    call memset_inc
   .no_wy:
 
   ; If GHZ, set scroll
@@ -483,14 +483,6 @@ get_shadow_frame_number:
 
 
 ; Background loaders ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-load_bg:
-  xor a
-  ldh [rSCY], a
-  ldh [rSCX], a
-  ldh a,[cur_bg_style]
-  ld de,shadow_sprite_bg_loaders
-  jp jumptable_de_a
 
 shadow_sprite_bg_loaders:
   dw load_gus_portrait

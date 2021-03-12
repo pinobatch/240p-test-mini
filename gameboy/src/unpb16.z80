@@ -73,14 +73,9 @@ pb16_unpack_packet:
 
 ; Tile loaders used in multiple places, to optimize JP to JR
 
-
 load_common_obj_tiles::
   ld hl,CHRRAM0
-  jr load_common_tiles_hl
-
-load_common_bg_tiles::
-  ld hl,CHRRAM2
-load_common_tiles_hl:
+load_common_tiles_hl::
   ld de,bggfx_chr
   ld b,32
   jr pb16_unpack_block
