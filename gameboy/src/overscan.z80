@@ -78,7 +78,6 @@ activity_overscan::
   xor a
   call set_bgp
   call set_obp0
-  call set_obp1
   dec a
   ldh [rLYC],a  ; disable LYC IRQ until ready
   call sgb_set_palette_gray

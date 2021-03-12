@@ -174,6 +174,7 @@ lcd_clear_oam::
   jr nz, .rowloop
   ret
 
+  if 0
 ;;
 ; Emulates mono palette feature on Game Boy Color.
 ; Call this only during blanking.
@@ -181,6 +182,8 @@ set_obp1::
   ldh [rOBP1],a
   ld bc,$8800 + low(rOCPS)
   jr set_gbc_mono_palette
+
+  endc
 
 ;;
 ; Emulates mono palette feature on Game Boy Color.

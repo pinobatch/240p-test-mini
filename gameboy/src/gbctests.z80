@@ -848,10 +848,6 @@ gbc_bleed_attrs:
   db $03, $00
   db $FF
 
-activity_color_bleed::
-  ld a,helpsect_color_bleed
-  jp full_stripes_common
-
 ;;
 ; @param DE pointer to 10-entry map
 draw_bleed_rects:

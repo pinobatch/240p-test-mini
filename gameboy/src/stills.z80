@@ -133,8 +133,17 @@ load_gray_ramp_sgb:
   ld a,%11100100
   ldh [rBGP], a
   ld hl, gray_ramp_sgb_rects
-  jp sgb_send
+  call sgb_send
+  ld bc, $0809
+  ld de, $0A0B
+  jp sgb_set_palettes_bcde
 
+load_gray_ramp:
+  ldh a, [hw_capability]
+  add a
+  jr c, load_gray_ramp_gbc
+  jr nz, load_gray_ramp_sgb
+  ; fall through
 load_gray_ramp_mono:
 
   ; Tiles 1-24 are compressed: 2 rows (4 bytes) are written 4 times
@@ -298,22 +307,7 @@ activity_gray_ramp::
   ld c,16
   rst memset_tiny
   ; The loaders expect hl = CHRRAM0+16
-
-  ldh a, [hw_capability]
-  add a
-  jr c, .load_gbc
-  jr z, .load_mono
-    call load_gray_ramp_sgb
-    ld bc, $0809
-    ld de, $0A0B
-    call sgb_set_palettes_bcde
-    jr .load_done
-  .load_mono:
-    call load_gray_ramp_mono
-    jr .load_done
-  .load_gbc:
-    call load_gray_ramp_gbc
-  .load_done:
+  call load_gray_ramp
 
   ; Turn on rendering
   call run_dma
@@ -1016,11 +1010,11 @@ activity_cps_grid::
 ;;
 ; Draws one row of the CPS-2 grid.
 cps_grid_two_rows:
-  call cps_grid_one_row
+  call .one_row
   ; Move to bottom half
   inc b
   inc b
-cps_grid_one_row:
+.one_row:
   ; Left column
   ld a,b
   and $02
@@ -1110,9 +1104,11 @@ load_bleed_frame_a:
     inc e
     dec b
     jr nz, .color12loop
-
   ret
 
+activity_color_bleed::
+  ld a,helpsect_color_bleed
+  db $01  ; ld bc, next_opcode
 activity_full_stripes::
   ld a,helpsect_full_screen_stripes
 full_stripes_common::
