@@ -664,5 +664,53 @@ pass_pattern:
 ; SGB sound test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 activity_sgb_sound::
+.restart:
+  call clear_gbc_attr
+  call clear_scrn0_to_0
+  call load_common_obj_tiles
+
+  ld de,$0820
+  ld hl,sgb_sound_test_msgs
+  call vwfDrawLabels
+
+  ld a,LCDCF_ON|BG_NT0|BG_CHR01
+  ldh [vblank_lcdc_value],a
+  ldh [rLCDC],a
+.loop:
   ld b,helpsect_sgb_sound
-  jp helpscreen_abslr
+  call read_pad_help_check
+  jr nz,.restart
+
+  ldh a,[new_keys]
+  bit PADB_B,a
+  jr z, .loop
+  ; Fall through to sgb_stop_sound
+
+sgb_stop_sound:
+  ld bc, 0
+sgb_send_fxb_bgfxc_paramd:
+  ld hl, help_line_buffer
+  push hl
+  ld a, $08*8+1
+  ld [hl+], a
+  ld a, b
+  ld [hl+], a
+  ld a, c
+  ld [hl+], a
+  ld a, d
+  ld [hl+], a
+  xor a
+  ld c, 12
+  rst memset_tiny
+  pop hl
+  jp sgb_send
+
+sgb_sound_test_msgs:
+  db 8, 8, "SGB Sound Test", $0A
+  db 8, 24, "Effect", $0A
+  db 16, 32, "Pitch", $0A
+  db 16, 40, "Volume", $0A
+  db 8, 48, "BG noise", $0A
+  db 16, 56, "Pitch", $0A
+  db 16, 64, "Volume", $0A
+  db 16, 80, "Coming soon!", $00
