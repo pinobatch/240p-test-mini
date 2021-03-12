@@ -23,6 +23,12 @@ include "src/global.inc"
 progress rb 1
 unpaused rb 1
 
+  rsset hLocals
+dtr_t0 rb 1
+dtr_t1 rb 1
+dtr_t2 rb 1
+dtr_t3 rb 1
+
 section "audiosync",ROM0
 
 CEILING_Y = 32
@@ -33,6 +39,94 @@ BEEP_FRAMES = 2
 FLOOR_TILE = $03
 DOT_TILE = $01
 PULSE_1K = 2048-131
+
+; Inline functions called once
+
+audiosync_draw_sprite: macro
+  ld hl,SOAM
+  ldh a,[progress]
+  cp RISEFALL_FRAMES / 2
+  jr nc,.is_descending
+    cpl
+    add RISEFALL_FRAMES + 1
+  .is_descending:
+  add 16 + FLOOR_Y - RISEFALL_FRAMES
+  ld [hl+],a
+  ld a,79+8
+  ld [hl+],a
+  ld a,DOT_TILE
+  ld [hl+],a
+  xor a
+  ld [hl+],a
+
+  ld a,l
+  ld [oam_used],a
+  call lcd_clear_oam
+  endm
+
+audiosync_draw_row: macro
+  ldh a,[progress]
+  ld b,a
+  cp 40
+  sbc a
+  cpl
+  add 4
+  ldh [dtr_t0],a
+  ld a,b
+  cp 60
+  sbc a
+  cpl
+  add 4
+  ldh [dtr_t1],a
+  ld a,b
+  cp 80
+  sbc a
+  cpl
+  add 4
+  ldh [dtr_t2],a
+  ld a,b
+  cp 100
+  sbc a
+  cpl
+  add 4
+  ldh [dtr_t3],a
+
+  ld b,CEILING_HT / 8
+  ldxy hl, 0, CEILING_Y / 8
+  ld de,12
+.rowloop:
+  ldh a,[dtr_t0]
+  ld [hl+],a
+  ld [hl+],a
+  ldh a,[dtr_t1]
+  ld [hl+],a
+  ld [hl+],a
+  ldh a,[dtr_t2]
+  ld [hl+],a
+  ld [hl+],a
+  ldh a,[dtr_t3]
+  ld [hl+],a
+  ld [hl+],a
+  inc l
+  inc l
+  inc l
+  inc l
+;  ldh a,[dtr_t3]
+  ld [hl+],a
+  ld [hl+],a
+  ldh a,[dtr_t2]
+  ld [hl+],a
+  ld [hl+],a
+  ldh a,[dtr_t1]
+  ld [hl+],a
+  ld [hl+],a
+  ldh a,[dtr_t0]
+  ld [hl+],a
+  ld [hl+],a
+  add hl,de
+  dec b
+  jr nz,.rowloop
+  endm
 
 activity_audiosync::
 .restart:
@@ -118,10 +212,9 @@ activity_audiosync::
     ld [progress],a
   .skip_clocking:
   
-  call audiosync_draw_sprite
-  rst wait_vblank_irq
-  call run_dma
-  call audiosync_draw_row
+  audiosync_draw_sprite
+  rst wait_vblank_run_dma
+  audiosync_draw_row
 
   ldh a,[progress]
   cp RISEFALL_FRAMES
@@ -130,98 +223,7 @@ activity_audiosync::
   call set_bgp
   call set_obp0
 
-  jr .loop
+  jp .loop
 
 
-  rsset hLocals
-dtr_t0 rb 1
-dtr_t1 rb 1
-dtr_t2 rb 1
-dtr_t3 rb 1
 
-;;
-; Draws tiles closing in as progress increases to 40, 60, 80, or 100
-audiosync_draw_row:
-  ldh a,[progress]
-  ld b,a
-  cp 40
-  sbc a
-  cpl
-  add 4
-  ldh [dtr_t0],a
-  ld a,b
-  cp 60
-  sbc a
-  cpl
-  add 4
-  ldh [dtr_t1],a
-  ld a,b
-  cp 80
-  sbc a
-  cpl
-  add 4
-  ldh [dtr_t2],a
-  ld a,b
-  cp 100
-  sbc a
-  cpl
-  add 4
-  ldh [dtr_t3],a
-
-  ld b,CEILING_HT / 8
-  ldxy hl, 0, CEILING_Y / 8
-  ld de,12
-.rowloop:
-  ldh a,[dtr_t0]
-  ld [hl+],a
-  ld [hl+],a
-  ldh a,[dtr_t1]
-  ld [hl+],a
-  ld [hl+],a
-  ldh a,[dtr_t2]
-  ld [hl+],a
-  ld [hl+],a
-  ldh a,[dtr_t3]
-  ld [hl+],a
-  ld [hl+],a
-  inc l
-  inc l
-  inc l
-  inc l
-;  ldh a,[dtr_t3]
-  ld [hl+],a
-  ld [hl+],a
-  ldh a,[dtr_t2]
-  ld [hl+],a
-  ld [hl+],a
-  ldh a,[dtr_t1]
-  ld [hl+],a
-  ld [hl+],a
-  ldh a,[dtr_t0]
-  ld [hl+],a
-  ld [hl+],a
-  add hl,de
-  dec b
-  jr nz,.rowloop
-  ret
-
-audiosync_draw_sprite:
-  ld hl,SOAM
-  ldh a,[progress]
-  cp RISEFALL_FRAMES / 2
-  jr nc,.is_descending
-    cpl
-    add RISEFALL_FRAMES + 1
-  .is_descending:
-  add 16 + FLOOR_Y - RISEFALL_FRAMES
-  ld [hl+],a
-  ld a,79+8
-  ld [hl+],a
-  ld a,DOT_TILE
-  ld [hl+],a
-  xor a
-  ld [hl+],a
-
-  ld a,l
-  ld [oam_used],a
-  jp lcd_clear_oam

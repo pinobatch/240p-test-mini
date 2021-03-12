@@ -175,7 +175,7 @@ jp_to_ret = [
 jr_to_ret = [
     (i, disassemble_inst(data[i], target, syms))
     for i, target in jr_instructions
-    if target in syms and data[target] == 0xC9
+    if target in syms and target < 0x8000 and data[target] == 0xC9
 ]
 
 # JR over a 1-byte instruction is $18 $01.  It can often be replaced

@@ -188,9 +188,7 @@ activity_megaton::
   rra
   call c, draw_v_reticle
   call lcd_clear_oam
-
-  rst wait_vblank_irq
-  call run_dma
+  rst wait_vblank_run_dma
 
   ; Draw checkbox for direction: horizontal
   ldh a,[reticledir]
@@ -347,8 +345,10 @@ megaton_move_cursor:
   ;
   ;   -3 bytes for the CALL
   ;   -1 byte for the final RET
+  ;   +2 for a conditional CALL changed to a JR
   ;   +1 for each early RET changed to a JR
   ;   +1 for each JR past it changed to a JP for exceeding 127 bytes
+  ;   +3 for a fallthrough changed to a JP
   ;
   ; This subroutine's 3 early RETs make it a less than ideal
   ; candidate for inlining.

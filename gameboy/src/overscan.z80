@@ -72,9 +72,7 @@ activity_overscan::
     add hl,de
     dec b
     jr nz,.initrowloop
-
   call lcd_clear_oam
-  call run_dma
 
   ; Hide BG and OBJ until ready
   xor a
@@ -157,12 +155,7 @@ activity_overscan::
     ld [$FF00+c],a
   .a_done:
   
-  xor a
-  ld [oam_used],a
-  call overscan_draw_arrow
-  call overscan_draw_sides
-  call overscan_draw_rborder
-  call lcd_clear_oam
+  call overscan_draw_sprites
   
   ; Wait for the line above the overscan top and set window to
   ; the far left
@@ -184,8 +177,7 @@ activity_overscan::
   ldh [rWX],a
   .lycdone:
 
-  rst wait_vblank_irq
-  call run_dma
+  rst wait_vblank_run_dma
 
   ; Set the borders using scrolling, window, and rLYC IRQ.
   ldh a,[left_border]
@@ -231,88 +223,6 @@ TILE_X equ $07
 TILE_RARROW equ $08
 TILE_RBORDER equ $03
 
-overscan_draw_sides:
-  ld hl, oam_used
-  ld l, [hl]
-
-  ldh a,[right_border]
-  ld de,127*256+80
-  call .one_side
-  ldh a,[left_border]
-  ld de,47*256+80
-  call .one_side
-  ldh a,[top_border]
-  ld de,87*256+48
-  call .one_side
-  ldh a,[bottom_border]
-  ld de,87*256+112
-  call .one_side
-  ld a,l
-  ld [oam_used],a
-  ret
-.one_side:
-  ; Convert to 2 digits
-  ld c,0
-  .tenloop:
-  cp 10
-  jr c,.lessthanten
-    sub 10
-    inc c
-    jr .tenloop
-  .lessthanten:
-
-  ; Draw ones digit in A
-  ; D=x coord of 2nd tile, E=y coord
-  ld [hl],e
-  inc l
-  ld [hl],d
-  inc l
-  or $10
-  ld [hl+],a
-  xor a
-  ld [hl+],a
-
-  ; Draw tens digit in C
-  ld a,c
-  or a
-  jr z,.no_tens
-    or $10
-    ld c,a
-
-    ld [hl],e
-    inc l
-    ld a,d
-    sub 8
-    ld [hl+],a
-    ld [hl],c
-    inc l
-    ld c,a  ; C = x coord of 1st tile
-    xor a
-    ld [hl+],a
-  .no_tens:
-
-  ; Draw "p"
-  ld a,e  ; Advance E to 2nd row
-  add 10
-  ld [hl+],a
-  ld e,a
-  ld a,d
-  sub 8
-  ld [hl+],a
-  ld a,TILE_P
-  ld [hl+],a
-  ld a, $40  ;vertical flip
-  ld [hl+],a
-
-  ld [hl],e
-  inc l
-  ld [hl],d
-  inc l
-  ld a,TILE_X
-  ld [hl+],a
-  xor a
-  ld [hl+],a
-  ret
 
 ;;
 ; Sets B to the number of trailing zero bits in A, trashing A.
@@ -325,10 +235,10 @@ ctz::
   jr nz,.sidepick
   ret
 
-overscan_draw_arrow:
-  ld hl, oam_used
-  ld l, [hl]
+overscan_draw_sprites:
+  ld hl, SOAM  ; start at beginning of sprite list
 
+  ; 1. ARROW
   ; Find which side is in use and how big the border is set
   ldh a,[cur_side]
   call ctz  ; B = 0 for right, 1 for left, 2 for top, 3 for bottom
@@ -401,15 +311,23 @@ overscan_draw_arrow:
   xor a
   ld [hl+],a
 
-  ld a,l
-  ld [oam_used],a
-  ret
+  ; 2. SIDES
+  ldh a,[right_border]
+  ld de,127*256+80
+  call .one_side
+  ldh a,[left_border]
+  ld de,47*256+80
+  call .one_side
+  ldh a,[top_border]
+  ld de,87*256+48
+  call .one_side
+  ldh a,[bottom_border]
+  ld de,87*256+112
+  call .one_side
 
-; Window can't be drawn exactly one pixel from the right side on
-; mono.  Cover up the difference with sprites.
-overscan_draw_rborder:
-  ld hl, oam_used
-  ld l, [hl]
+  ; 3. RIGHT BORDER
+  ; Window can't be drawn exactly one pixel from the right side on
+  ; mono.  Cover up the difference with sprites.
   ld a,[right_border]
   cpl
   add 169
@@ -417,18 +335,83 @@ overscan_draw_rborder:
 
   ld a,16
   ld de,TILE_RBORDER * $100 + $00  ; Tile and attribute
-.loop:
-  ld [hl+],a
-  ld [hl],c
-  inc l
-  ld [hl],d
-  inc l
-  ld [hl],e
-  inc l
-  add 8
-  cp 160
-  jr c,.loop
+  .rborderloop:
+    ld [hl+],a
+    ld [hl],c
+    inc l
+    ld [hl],d
+    inc l
+    ld [hl],e
+    inc l
+    add 8
+    cp 160
+    jr c,.rborderloop
 
   ld a,l
   ld [oam_used],a
+  jp lcd_clear_oam
+
+.one_side:
+  ; Draw each of the four side values
+  ; Convert to 2 digits
+  ld c,0
+  .tenloop:
+  cp 10
+  jr c,.lessthanten
+    sub 10
+    inc c
+    jr .tenloop
+  .lessthanten:
+
+  ; Draw ones digit in A
+  ; D=x coord of 2nd tile, E=y coord
+  ld [hl],e
+  inc l
+  ld [hl],d
+  inc l
+  or $10
+  ld [hl+],a
+  xor a
+  ld [hl+],a
+
+  ; Draw tens digit in C
+  ld a,c
+  or a
+  jr z,.no_tens
+    or $10
+    ld c,a
+
+    ld [hl],e
+    inc l
+    ld a,d
+    sub 8
+    ld [hl+],a
+    ld [hl],c
+    inc l
+    ld c,a  ; C = x coord of 1st tile
+    xor a
+    ld [hl+],a
+  .no_tens:
+
+  ; Draw "p"
+  ld a,e  ; Advance E to 2nd row
+  add 10
+  ld [hl+],a
+  ld e,a
+  ld a,d
+  sub 8
+  ld [hl+],a
+  ld a,TILE_P
+  ld [hl+],a
+  ld a, $40  ;vertical flip
+  ld [hl+],a
+
+  ld [hl],e
+  inc l
+  ld [hl],d
+  inc l
+  ld a,TILE_X
+  ld [hl+],a
+  xor a
+  ld [hl+],a
   ret

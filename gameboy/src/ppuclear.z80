@@ -99,6 +99,11 @@ wait_vblank_irq::
   ld a,[hl]
   jr wait_vblank_irq_tail
 
+section "wait_vblank_run_dma", ROM0[$18]
+wait_vblank_run_dma::
+  rst wait_vblank_irq
+  jr run_dma
+
 SECTION "busy_wait_vblank", ROM0
 
 ;;
@@ -120,26 +125,6 @@ busy_wait_vblank::
   cp 144
   jr c, .wait
   ret
-
-SECTION "wait_not_vblank", ROM0
-
-;;
-; Busy-wait for being out of vblank.  Use this for game loop timing
-; if interrupts aren't in use yet.
-wait_not_vblank::
-  ldh a, [rLY]
-  cp 144
-  jr nc, wait_not_vblank
-  ret
-
-SECTION "cls", ROM0
-
-clear_scrn0_to_0::
-  ld h, 0
-clear_scrn0_to_h::
-  ld de,_SCRN0
-  ld bc,32*32
-  jp memset
 
 SECTION "load_gbc_palette", ROM0
 

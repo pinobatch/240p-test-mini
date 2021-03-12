@@ -200,9 +200,7 @@ activity_shadow_sprite::
   ld [oam_used],a
   call draw_shadow_sprite
   call lcd_clear_oam
-
-  rst wait_vblank_irq
-  call run_dma
+  rst wait_vblank_run_dma
 
   ld a,%00101100  ; palette for bottom half of Hepsie
   ldh [rOBP0],a

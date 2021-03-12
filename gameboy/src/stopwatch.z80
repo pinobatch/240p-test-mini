@@ -258,8 +258,7 @@ activity_stopwatch::
   .skipping_convert_for_lap:
   call sw_draw_ruler
 
-  rst wait_vblank_irq
-  call run_dma
+  rst wait_vblank_run_dma
   call sw_blit
 
   ; Show or hide the face

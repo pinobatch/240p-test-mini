@@ -84,8 +84,7 @@ lame_boy_demo::
   call lcd_clear_oam
 
   ; And present everything
-  rst wait_vblank_irq
-  call run_dma
+  rst wait_vblank_run_dma
 
   ld hl,lameboybgpalette_gbc
   ld bc,(lameboyobjpalette_gbc-lameboybgpalette_gbc) * 256 + low(rBCPS)
