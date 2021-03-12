@@ -56,11 +56,7 @@ activity_soundtest::
   ; Look for control keys
   ld hl,new_keys
   bit PADB_B,[hl]
-  jr z,.not_exit
-    xor a
-    ldh [rNR52],a
-    ret
-  .not_exit:
+  ret nz
 
   bit PADB_START,[hl]
   jr z,.not_help

@@ -228,15 +228,13 @@ load_gray_ramp_gbc:
 
     ; calculate $401*a
     ld e,a
-    ld l,a
     add a
     add a
     ld d,a
+    ld l,a
 
     ; add $20*b
     ld h,0
-    add hl,hl
-    add hl,hl
     add hl,hl
     add hl,hl
     add hl,hl
@@ -250,9 +248,8 @@ load_gray_ramp_gbc:
     ldh [rBCPD],a
     ldh [rOCPD],a
     inc b
-    ld a,b
-    cp 32
-    jr nz,.palloop
+    bit 5, b
+    jr z,.palloop
 
   ld de,gray_ramp_rowmap
   call smpte_load_map_SCRN0
@@ -659,7 +656,7 @@ activity_solid_screen::
   xor a
   rst memset_tiny
   dec a
-  ldh [lastlcdc], a  ; lastlcdc: true if color changed
+  ldh [lastlcdc], a  ; lastlcdc: nonzero if color changed
   ld c,9*16
   rst memset_tiny
 
@@ -709,9 +706,28 @@ activity_solid_screen::
     or a
     jr z, .custom_color_written
     call calc_custom_color
-    call sgb_send_solid_color
+
+    ; Send this solid color to the SGB
+    ld a, $00*8+1
+    ld [help_line_buffer+0], a
+    ld a, l
+    ld [help_line_buffer+1], a
+    ld a, h
+    ld hl,help_line_buffer+2
+    ld [hl+], a
+    ; Add white and black for the box at top right
+    ld a, $FF
+    ld [hl+], a
+    ld [hl+], a
+    ld [hl+], a
+    ld [hl+], a
     xor a
     ldh [lastlcdc], a
+    ld c, 9
+    rst memset_tiny
+    ld hl, help_line_buffer
+    call sgb_send
+
     ld a, %11100100
   .set_color_dmg:
   ldh [rBGP], a
@@ -850,25 +866,6 @@ calc_custom_color:
   add hl,de
   ret
 
-sgb_send_solid_color:
-  ld a, $00*8+1
-  ld [help_line_buffer+0], a
-  ld a, l
-  ld [help_line_buffer+1], a
-  ld a, h
-  ld hl,help_line_buffer+2
-  ld [hl+], a
-  ld a, $FF
-  ld [hl+], a
-  ld [hl+], a
-  ld [hl+], a
-  ld [hl+], a
-  xor a
-  ld c, 9
-  rst memset_tiny
-  ld hl, help_line_buffer
-  jp sgb_send
-
 solid_update_rgb:
   ; Draw labels for Red, Green, and Blue
   call vwfClearBuf
@@ -935,14 +932,9 @@ solid_update_rgb:
 ; CPS style grid ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "cpsgrid",ROM0
-cps_grid_gbc_palette0:
-  drgb $FFFFFF
-  drgb $FF00FF
-  drgb $FF0000
-  drgb $000000
 cps_grid_gbc_palette1:
   drgb $000000
-  drgb $FF00FF
+  drgb $FF0000
   drgb $FF0000
   drgb $FFFFFF
 
@@ -989,11 +981,11 @@ activity_cps_grid::
   ldh [rBGP],a
 
   ; Set GBC palette
+  ld hl, cps_grid_gbc_palette0
   and %00001000
-  ld e,a
-  ld d,0
-  ld hl,cps_grid_gbc_palette0
-  add hl,de
+  jr z, .ispal0
+    ld hl, cps_grid_gbc_palette1
+  .ispal0:
   ld bc,8*256+low(rBCPS)
   ld a,$80
   call set_gbc_palette
@@ -1227,9 +1219,7 @@ full_stripes_common::
   call update_bcd_frame_counter
   jr .loop
 
-;;
 ; Update the frame counter
-; @param HL destination address of frame counter tiles
 update_bcd_frame_counter:
   ld hl,CHRRAM0+$011
   push hl

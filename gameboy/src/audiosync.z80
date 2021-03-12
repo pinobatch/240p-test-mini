@@ -163,11 +163,7 @@ activity_audiosync::
   ldh a,[new_keys]
   ld b,a
   bit PADB_B,b
-  jr z,.not_quit
-    xor a
-    ldh [rNR52],a  ; Disable audio chip
-    ret
-  .not_quit:
+  ret nz
 
   ; A: Toggle pause, and start over if paused
   bit PADB_A,b

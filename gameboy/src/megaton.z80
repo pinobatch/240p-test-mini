@@ -153,12 +153,7 @@ activity_megaton::
   ; Input handling
   ldh a,[new_keys]
   bit PADB_B,a
-  jr z,.not_exit
-    ; Turn off audio and end test
-    xor a
-    ldh [rNR52],a
-    ret  
-  .not_exit:
+  ret nz
   call megaton_move_cursor
   ldh a,[new_keys]
   rra
@@ -265,16 +260,16 @@ activity_megaton::
 activity_megaton_complete:
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
   ldh [vblank_lcdc_value],a
-  
-  call vwfClearBuf
-  
+
   ; Replace "Press A when reticles align"
+  call vwfClearBuf
   ld hl,help_line_buffer
   ld de,avglag_prolog
   call stpcpy
 
   ; Count the total frames
   xor a
+  ldh [rNR52],a  ; turn off audio
   ld bc,MAX_TESTS*$100+low(framecounts)
   .sumloop:
     ld d,a
@@ -324,9 +319,6 @@ activity_megaton_complete:
   ld hl,CHRRAM0+$80*16
   ld c,16
   call vwfPutBufHBlank
-
-  xor a
-  ldh [rNR52],a  ; turn off audio
 
 .loop:
   call read_pad

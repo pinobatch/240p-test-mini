@@ -90,6 +90,10 @@ main::
   .not_start:
   call jumptable_de_a
 
+  ; Turn off sound
+  xor a
+  ldh [rNR52],a
+
   ; Restore menu selection
   pop bc
   ld hl, help_cursor_y

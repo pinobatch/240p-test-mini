@@ -719,11 +719,7 @@ smpte_bars_engine:
   ldh a,[new_keys]
   ld b,a
   bit PADB_B,b
-  jr z,.no_quit
-    xor a
-    ldh [rNR52],a  ; stop audio circuit
-    ret
-  .no_quit:
+  ret nz
 
   ; 0: NTSC setup, 75%
   ; 1: no setup, 75%

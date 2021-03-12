@@ -17,6 +17,7 @@ gbmonopalette::
   drgb $001050
 
   ; 2: Grid
+cps_grid_gbc_palette0::
   drgb $F8F8F8
   drgb $FF0000
   drgb $FF0000
