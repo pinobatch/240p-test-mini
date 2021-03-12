@@ -467,7 +467,7 @@ sgb_load_border::
 hIncTime    rb 1
 hCurPalette rb 1
 
-sgb_ntsc_test::
+activity_sgb_ntsc::
   call flashing_consent
   ret z
 
@@ -548,7 +548,7 @@ sgb_ntsc_test::
 .loop:
   ld b, helpsect_chroma_crosstalk
   call read_pad_help_check
-  jr nz, sgb_ntsc_test
+  jr nz, activity_sgb_ntsc
   rst wait_vblank_irq
 
   ld a, [hIncTime]
@@ -660,3 +660,9 @@ pass_pattern:
   db %01000001
   db %01000001
   db %00100010
+
+; SGB sound test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+activity_sgb_sound::
+  ld b,helpsect_sgb_sound
+  jp helpscreen_abslr

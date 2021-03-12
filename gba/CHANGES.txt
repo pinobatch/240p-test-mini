@@ -1,3 +1,6 @@
+0.23 (future)
+* Motion blur: add health warning
+
 0.22 (2020-11-04)
 * Color bars: A to toggle NTSC 7.5% setup
 * Color bleed: Rearrange to 10 rectangles

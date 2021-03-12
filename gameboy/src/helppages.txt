@@ -583,6 +583,7 @@ PLUGE
 Color bars on gray
 Color bleed
 Chroma crosstalk
+SGB sound
 
 == Color tests ==
 
@@ -723,6 +724,17 @@ adding it to luma, diagonal
 lines and checkerboard
 patterns often produce
 crosstalk artifacts.
+
+== SGB sound ==
+
+Super Game Boy can play
+48 sound effects and
+25 background noises.
+
+↑↓: Choose a setting
+←→: Change its value
+A: Play sound
+Select: Stop BG noise
 
 == 144p Test Suite ==
 

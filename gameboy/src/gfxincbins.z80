@@ -84,7 +84,7 @@ sharpness_brick_tile::
   dw `22221131
   dw `22222211
 
-section "cpsgrid_gfx1",ROMX
+section "cpsgrid_gfx0",ROM0
 cps_grid_chr::
   incbin "obj/gb/cps_grid.chrgb.pb16"
 sizeof_cps_grid_chr equ 128
@@ -99,17 +99,6 @@ export sizeof_megaton_tiles
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "shadowsprite_gfx0",ROM0
-hepsie_palette_gbc::
-  drgb $000000
-  drgb $00FF00  ; skirt
-  drgb $FFFF00
-  drgb $FFFFFF
-  drgb $000000
-  drgb $FF00DD  ; cape
-  drgb $FFAA55
-hepsie_palette_gbc_end::
-
 section "shadowsprite_gfx1",ROMX
 portrait_pal::
   incbin "obj/gb/Gus_portrait-GBC.pal"
@@ -121,6 +110,17 @@ hepsie_chr::
   incbin "obj/gb/hepsie.chrgb.pb16"
 sizeof_hepsie_chr equ 16*3*4
 export sizeof_hepsie_chr
+
+;section "shadowsprite_gfx0",ROM0
+hepsie_palette_gbc::
+  drgb $000000
+  drgb $00FF00  ; skirt
+  drgb $FFFF00
+  drgb $FFFFFF
+  drgb $000000
+  drgb $FF00DD  ; cape
+  drgb $FFAA55
+hepsie_palette_gbc_end::
 
 ; Scroll test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -150,7 +150,7 @@ bggfx_chr::
 
 ; GBC exclusive tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "smptebars_gfx1",ROMX
+section "smptebars_gfx0",ROM0
 smptetiles_chr::
   incbin "obj/gb/smptetiles.chrgb.pb16"
 

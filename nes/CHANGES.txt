@@ -1,3 +1,6 @@
+0.23 (future)
+* Chroma crosstalk: add health warning
+
 0.22 (2020-11-04)
 * Add Safe areas pattern
 * SMPTE bars: Move I and Q to correct hues ($0C and $03)

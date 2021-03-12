@@ -1,3 +1,9 @@
+0.23 (future)
+* Add health warning to Motion blur and Chroma crosstalk
+* Reduce use of "master" per Inclusive Naming Initiative
+* topcalls.py: Port from awk to Python; list not only top calls but
+  also routines called once for more size optimization opportunities
+
 0.22 (2020-11-04)
 * Add MDFourier audio test
 * Color bars: A to toggle NTSC 7.5% setup
