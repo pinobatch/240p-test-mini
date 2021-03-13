@@ -670,24 +670,23 @@ activity_sgb_sound::
   ld hl, hEffectA
   ld [hl+], a
   dec a
-  ld [hl+], a
-  ld [hl+], a
-  inc a
-  ld [hl+], a
-  dec a
-  ld [hl+], a
-  ld [hl+], a
+  ld c, 5
+  rst memset_tiny
   ld [help_cursor_y], a
 
 .restart:
   call clear_gbc_attr
   call clear_scrn0_to_0
   call load_common_obj_tiles
+  call sgb_set_palette_gray
 
   ld de,$0820
   ld hl,sgb_sound_test_msgs
   call vwfDrawLabels
 
+  ld a, %11111100
+  call set_bgp
+  call set_obp0
   ld a,LCDCF_ON|BG_NT0|BG_CHR01|OBJ_ON
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
@@ -725,8 +724,8 @@ activity_sgb_sound::
   ; Fall through to sgb_stop_sound
 
 sgb_stop_sound:
-  ld bc, 0
-  ld d, b
+  ld bc, $8080
+  ld d, $00
 sgb_send_fxb_bgfxc_paramd:
   ld hl, help_line_buffer
   push hl

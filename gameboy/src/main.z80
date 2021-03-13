@@ -56,11 +56,10 @@ main::
   if 1
     call activity_credits
   else
-    ;call activity_soundtest
-    if 1
-      ld b,helpsect_to_do
-      call helpscreen_abslr
-    endc
+    call ensure_vwfInit
+    call lcd_off
+    call run_dma
+    call activity_sgb_sound
   endc
 .loop:
   ld a,PADF_A|PADF_START|PADF_DOWN|PADF_UP|PADF_LEFT|PADF_RIGHT

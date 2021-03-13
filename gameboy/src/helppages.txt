@@ -738,12 +738,12 @@ Select: Stop sound
 
 == 144p Test Suite ==
 
-Ver. 0.22 (2020-11-04)
-MDFourier; more bleed
+Ver. 0.23wip (2021-03-13)
+SGB audio
 
 © 2011-2016
   Artemio Urbina
-© 2015-2020
+© 2015-2021
   Damian Yerrick
 This is free software; see
 the source for copying
@@ -772,8 +772,8 @@ You can help:
   Super Game Boy or
   Game Boy Player, both
   straight to the TV
-  and with high-quality
-  external scalers
+  and with external
+  scalers
 - Spread the word about
   the project
 - Support us:

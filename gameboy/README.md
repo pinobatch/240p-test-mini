@@ -6,7 +6,7 @@ consoles that helps evaluate compatibility of upscalers and other
 video processors, either stand-alone or built into a TV, with retro
 consoles' video.
 
-MDFourier is a tool to compare audio signatures and generate graphs
+[MDFourier] is a tool to compare audio signatures and generate graphs
 that show how they differ.  A tone generator produces a signal for
 recording from the console, and the analysis program compares the
 frequencies to a reference recording and displays the results.
@@ -18,7 +18,7 @@ It also contains an MDFourier tone generator.
 Build requirements: RGBDS, Python 3, Pillow, and GNU Make
 
 [240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
-[240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
+[MDFourier]: http://junkerhq.net/MDFourier/
 
 Usage
 -----
@@ -119,7 +119,8 @@ Limits
 * Linearity: No support for non-square NTSC or PAL pixel aspect
   ratios when used through Super Game Boy.
 * Gradient and SMPTE color bars are not available on SGB.
-* Sound Test: No "Crowd" because GB PCM is limited to 4 bits.
+* Sound Test: No "Crowd" because GB PCM is limited to 4 bits and
+  very fiddly to get right without buzzing artifacts.
 * Alternate 240p/480i: SGB and GB Player offer no control over
   the host systems' interlace modes except through SGB JUMP.
 * The IRE levels of the Super NES and Nintendo GameCube video output
@@ -135,16 +136,18 @@ Contributors
 * Extra patterns and collaboration: Konsolkongen & [shmups] regulars
 
 If you're interested in contributing to the Game Boy port, you're
-invited to post in its [NESdev thread] or [GBDev thread].
+invited to post in its [NESdev thread] or [GBDev thread] or join
+the [gbdev chat server] on Discord or Matrix.
 
 [@Artemio]: https://twitter.com/Artemio
 [@PinoBatch]: https://twitter.com/PinoBatch
 [shmups]: http://shmups.system11.org/
 [NESdev thread]: https://forums.nesdev.com/viewtopic.php?f=20&t=17221
 [GBDev thread]: http://gbdev.gg8.se/forums/viewtopic.php?id=542
+[gbdev chat server]: https://gbdev.io/chat.html
 
 Copyright 2011-2018 Artemio Urbina  
-Copyright 2018-2020 Damian Yerrick
+Copyright 2018-2021 Damian Yerrick
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
