@@ -724,8 +724,7 @@ activity_sgb_sound::
 
   call lcd_clear_oam
   rst wait_vblank_run_dma
-
-  ; TODO: Draw states of controls
+  call sgb_sound_draw_values
 
   ldh a,[new_keys]
   bit PADB_B,a
@@ -757,12 +756,73 @@ sgb_sound_handle_dpad:
   call autorepeat
   ld de, sgb_sound_line_limits
   call motionblur_handle_dpad
-  cp d
+
+  ; Select: Stop
+  bit PADB_SELECT, b
+  jr nz, sgb_stop_sound
+
+  ; A: Play
+  bit PADB_A, b
   ret z
-  ld d, a
-  ld a, [help_cursor_y]
   ret
 
+  if 0
+  ; why isn't Mesen-S detecting SGB?
+
+  ld a, [help_cursor_y]
+  cp 3
+  jr c, .play_only_effect_b
+  ldh a, [hEffectA]
+  jr .play_effect_a
+.play_only_effect_b:
+  ld a, $80
+.play_effect_a:
+  ld b, a
+  ldh a, [hEffectB]
+  ; convert $00 to $80
+  add a
+  cp 1  ; CF true iff was zero
+  rra
+  ld c, a
+
+  ; bit pack the 4 args
+  ld hl, hVolumeB
+  ld a, [hl-]
+  add a
+  add a
+  or [hl]
+  dec hl
+  dec hl
+  add a
+  add a
+  or [hl]
+  dec hl
+  add a
+  add a
+  or [hl]
+  ld d, a
+  jr sgb_send_fxb_bgfxc_paramd
+
+  endc
+
+sgb_sound_draw_values:
+  ldxy hl, 10, 3
+  ld c, low(hEffectA)
+  ld de, 31
+  call .do3rows
+  dec hl
+.do3rows:
+  ld a, [$FF00+c]
+  inc c
+  call puthex_raw
+  add hl, de
+  call .do1row
+.do1row:
+  ld a, [$FF00+c]
+  inc c
+  call putnibble_raw
+  add hl, de
+  ret
 
 sgb_sound_line_limits:  ; Low and count (high-low+1)
   db 1, 48
@@ -774,10 +834,10 @@ sgb_sound_line_limits:  ; Low and count (high-low+1)
 
 sgb_sound_test_msgs:
   db 8, 8, "SGB Sound Test", $0A
-  db 16, 24, "Effect", $0A
-  db 24, 32, "Pitch", $0A
-  db 24, 40, "Volume", $0A
-  db 16, 48, "BG noise", $0A
-  db 24, 56, "Pitch", $0A
-  db 24, 64, "Volume", $0A
+  db 24, 24, "Effect", $0A
+  db 32, 32, "Pitch", $0A
+  db 32, 40, "Volume", $0A
+  db 24, 48, "BG noise", $0A
+  db 32, 56, "Pitch", $0A
+  db 32, 64, "Volume", $0A
   db 8, 80, "Coming soon!", $00

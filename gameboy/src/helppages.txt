@@ -734,7 +734,7 @@ Super Game Boy can play
 ↑↓: Choose a setting
 ←→: Change its value
 A: Play sound
-Select: Stop BG noise
+Select: Stop sound
 
 == 144p Test Suite ==
 

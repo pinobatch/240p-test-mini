@@ -137,7 +137,7 @@ lame_boy_demo::
 
 ;;
 ; Writes a byte as two values in $10-$1F to HL, high nibble first
-puthex_raw:
+puthex_raw::
   push af
   swap a
   call putnibble_raw
@@ -145,7 +145,7 @@ puthex_raw:
 
 ;;
 ; Writes bits 3-0 of A OR $10 to HL
-putnibble_raw:
+putnibble_raw::
   and $0F
   or $10
   ld [hl+],a
