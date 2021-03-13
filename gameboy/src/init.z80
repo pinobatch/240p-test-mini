@@ -114,8 +114,14 @@ reset_handler::
 
   ld a,%00001000  ; bits 3-2: dark gray
   ldh [rBGP],a
-  call detect_sgb
+  ; Super Game Boy appears not to listen for packets for the
+  ; first few frames after starting the Game Boy.  So do the
+  ; detection on the light gray frame of the fadeoutinstead.
+  call sgb_wait
+  call sgb_wait
+
   ld a,%00000100  ; bits 3-2: light gray
+  call detect_sgb
   ldh [rBGP],a
   ld b,10
 .fadelogo:

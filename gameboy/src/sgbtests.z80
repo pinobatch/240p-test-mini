@@ -764,18 +764,12 @@ sgb_sound_handle_dpad:
   ; A: Play
   bit PADB_A, b
   ret z
-  ret
-
-  if 0
-  ; why isn't Mesen-S detecting SGB?
 
   ld a, [help_cursor_y]
   cp 3
-  jr c, .play_only_effect_b
-  ldh a, [hEffectA]
-  jr .play_effect_a
-.play_only_effect_b:
   ld a, $80
+  jr nc, .play_effect_a
+  ldh a, [hEffectA]
 .play_effect_a:
   ld b, a
   ldh a, [hEffectB]
@@ -791,19 +785,17 @@ sgb_sound_handle_dpad:
   add a
   add a
   or [hl]
-  dec hl
-  dec hl
+  dec l
+  dec l
   add a
   add a
   or [hl]
-  dec hl
+  dec l
   add a
   add a
   or [hl]
   ld d, a
   jr sgb_send_fxb_bgfxc_paramd
-
-  endc
 
 sgb_sound_draw_values:
   ldxy hl, 10, 3
@@ -828,7 +820,7 @@ sgb_sound_line_limits:  ; Low and count (high-low+1)
   db 1, 48
   db 0, 4
   db 0, 3
-  db 1, 25
+  db 0, 26
   db 0, 4
   db 0, 3
 

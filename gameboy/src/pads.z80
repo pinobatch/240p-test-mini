@@ -147,6 +147,7 @@ autorepeat::
 ; bits 1-0, where 3 means player 1, 2 means player 2, etc.
 ; Fully reading advances to the next player.
 capa_1_if_player_2:
+  call read_pad
   ldh a, [rP1]
   rra  ; players 1 or 3: carry set; players 2 or 4: carry clear
   ret c
@@ -161,10 +162,7 @@ detect_sgb::
   di
   ld b, 1
   call sgb_set_bplus1_players
-  call sgb_wait
-  call read_pad
   call capa_1_if_player_2
-  call read_pad
   call capa_1_if_player_2
 
   ; Now turn off 2-player mode
@@ -283,7 +281,7 @@ sgb_send::
 ; each.  Thus we can try waiting 4*262*68.2 = 71473.6 cycles.
 ; Each iteration of the inner loop takes 4+3/256 cycles.
 ; Thus we wait 71473 / 4 = 17868 iterations.
-sgb_wait:
+sgb_wait::
   ld de, 65536 - 17868
 .loop:
   inc e
