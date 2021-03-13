@@ -156,6 +156,14 @@ capa_1_if_player_2:
   ret
 
 ;;
+; Freezes the display, such as while doing transfers.
+sgb_freeze::
+  call busy_wait_vblank
+  ld a, $17*8+1
+  ld b, $01  ; Freeze current screen
+  jr sgb_send_ab
+
+;;
 ; Sets hw_capability to $01 if on a Super Game Boy.
 detect_sgb::
   ; Try to set the SGB to 2-player mode

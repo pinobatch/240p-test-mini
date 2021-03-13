@@ -116,33 +116,25 @@ reset_handler::
   ldh [rBGP],a
   ; Super Game Boy appears not to listen for packets for the
   ; first few frames after starting the Game Boy.  So do the
-  ; detection on the light gray frame of the fadeoutinstead.
+  ; detection on the light gray frame of the fadeout instead.
   call sgb_wait
   call sgb_wait
 
   ld a,%00000100  ; bits 3-2: light gray
-  call detect_sgb
   ldh [rBGP],a
-  ld b,10
-.fadelogo:
+  call detect_sgb
 
-  ; Busy-wait for not vblank because interrupts aren't set up yet
-  ldh a, [rLY]
-  or a
-  jr nz, .fadelogo
-.no_fade:
-  call busy_wait_vblank  ; Spin because interrupts are not yet set up
-  dec b
-  jr nz,.fadelogo
+  xor a
+  ldh [rBGP],a    ; white palette
+  ldh [rSCY], a   ; clear scroll
+  ldh [rSCX], a   ; clear scroll
+  ldh [rNR52], a  ; disable (and reset) audio
 
   ; Rendering can be turned off only during blanking.  Fortunately
   ; the fadeout loop left us in vblank.  So set up the video
   ; hardware.
-  xor a
-  ldh [rLCDC], a  ; turn off rendering
-  ldh [rSCY], a   ; clear scroll
-  ldh [rSCX], a   ; clear scroll
-  ldh [rNR52], a  ; disable (and reset) audio
+.no_fade:
+  call lcd_off
 
   if bgbcompat
     ; BGB triggers spurious "reading uninitialized WRAM" exceptions

@@ -287,13 +287,6 @@ sgb_load_trn_tilemap:
   ld de, _SCRN0
   jp load_full_nam
 
-sgb_freeze:
-  ; Freeze display while doing transfers
-  call busy_wait_vblank
-  ld a, $17*8+1
-  ld b, $01  ; Freeze current screen
-  jp sgb_send_ab
-
 sgb_load_all_palettes::
   call sgb_freeze
 
@@ -831,5 +824,4 @@ sgb_sound_test_msgs:
   db 32, 40, "Volume", $0A
   db 24, 48, "BG noise", $0A
   db 32, 56, "Pitch", $0A
-  db 32, 64, "Volume", $0A
-  db 8, 80, "Coming soon!", $00
+  db 32, 64, "Volume", $00

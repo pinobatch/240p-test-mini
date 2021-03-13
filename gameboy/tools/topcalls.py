@@ -30,7 +30,8 @@ callRE = re.compile(r"""
 
 def parse_argv(argv):
     p = argparse.ArgumentParser()
-    p.add_argument("filenames", metavar="filename", nargs="*")
+    p.add_argument("filenames", metavar="filename", nargs="*",
+                   description="names of RGBASM source files")
     return p.parse_args(argv[1:])
 
 def main(argv=None):
@@ -79,7 +80,7 @@ if __name__=='__main__':
         from os.path import dirname, normpath, join as joinpath
         srcdir = normpath(joinpath(dirname(sys.argv[0]), "..", "src"))
         argv = [sys.argv[0]]
-        argv.extend(joinpath(srcdir, f) for f in os.listdir(srcdir)
+        argv.extend(joinpath(srcdir, f) for f in sorted(os.listdir(srcdir))
                     if f.endswith(".z80"))
         main(argv)
     else:
