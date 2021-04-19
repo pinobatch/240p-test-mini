@@ -163,9 +163,7 @@ reset_handler::
   ; Copy the sprite DMA routine to HRAM
   ld hl,hramcode_start
   ld de,run_dma
-  ; B = 0 per fadelogo loop
-  ld c,hramcode_end-hramcode_start
-  call memcpy
+  call memcpy_pascal16
   jp main
 
 section "memcpy", ROM0
@@ -231,6 +229,7 @@ memcpy::
 ; code from HRAM until this finishes.  Thus to present a display
 ; list, the program will call run_dma, not hramcode_start.
 hramcode_start:
+  dw hramcode_end-hramcode_start-2
   ld a,SOAM >> 8
   ldh [rDMA],a
   ld a,40
