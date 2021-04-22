@@ -216,9 +216,8 @@ A: Toggle brick wall
 ----
 Modern TVs' "sharpness"
 control performs edge
-enhancement, intended
-for live action SDTV or
-VHS sources.
+enhancement intended
+for live action sources.
 Most TVs have zero as
 no change and high as
 enhancement. A few have
@@ -537,6 +536,9 @@ other systems using
 the GB v1 profile.
 
 A: Play tones   B: Stop
+----
+To skip to MDFourier,
+hold Start at startup.
 
 == Audio sync ==
 
@@ -739,7 +741,7 @@ Select: Stop sound
 == 144p Test Suite ==
 
 Ver. 0.23wip (2021-03-13)
-SGB audio
+SGB sound
 
 © 2011-2016
   Artemio Urbina

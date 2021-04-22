@@ -4,7 +4,7 @@ First open relevant files and forums:
 
     mousepad nes/CHANGES.txt gameboy/CHANGES.txt gba/CHANGES.txt \
         makefile nes/makefile gameboy/makefile nes/src/helppages.txt \
-        gameboy/src/helppages.txt gba/src/helppages.txt &
+        gameboy/src/helppages.txt gba/src/helppages.txt private/* &
     firefox 'https://github.com/pinobatch/240p-test-mini/releases' \
         'https://forums.nesdev.com/viewtopic.php?f=22&t=13394' \
         'https://gbdev.gg8.se/forums/viewtopic.php?id=542' \
