@@ -258,6 +258,7 @@ fullstripes_rects:
 
 solid_color_rects:
   rf_rect   0,  0,256,240,$00, 0
+  rf_rect  48, 48,208,192,$04, 0
   rf_rect 160, 32,224, 40,$20, RF_INCR
   .byte $00
   rf_attr   0,  0,256,240, 0

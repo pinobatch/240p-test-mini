@@ -249,13 +249,12 @@ curves per component.
 
 Some displays and scalers
 have problems with sudden
-changes between solid black
-and solid white or bright
-colors.  Other displays may
-have stuck or damaged pixels.
+changes between deep black
+and white or bright colors.
+Other displays may have
+stuck or damaged pixels.
 Some cables produce audio
-buzzing while a white
-screen is displayed.
+buzzing on a white screen.
 
 ←→: Change color among
    white, black, red,
@@ -265,8 +264,9 @@ A on black screen: Switch
    black (some TVs lose sync)
 A on white screen:
    Hide or show custom color
-↑↓: Change custom brightness
-←→: Change custom hue
+↑↓←→: Change custom color
+Select: Toggle windowbox to
+   test brightness limiter
 
 == IRE ==
 

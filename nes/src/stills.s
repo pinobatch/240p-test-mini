@@ -1108,6 +1108,7 @@ cur_color = test_state+0
 color_box_open = test_state+1
 white_color = test_state+2
 black_color = test_state+3
+is_windowed = test_state+4
 cur_bg_color = lineImgBuf+128
 text_dark_color = lineImgBuf+129
 text_light_color = lineImgBuf+130
@@ -1116,6 +1117,7 @@ text_light_color = lineImgBuf+130
   sta cur_color
   lda #0
   sta color_box_open
+  sta is_windowed
   lda #$20
   sta white_color
   lda #$0F
@@ -1173,8 +1175,12 @@ load_palette_white:
 load_palette_black:
   lda black_color
 have_bg_color_no_text:
-  sta text_dark_color
-  sta text_light_color
+  ldx is_windowed
+  bne :+
+    tax
+  :
+  stx text_dark_color
+  stx text_light_color
 have_bg_color:
   sta cur_bg_color
 
@@ -1183,8 +1189,12 @@ have_bg_color:
   sta PPUADDR
   lda #$00
   sta PPUADDR
+  lda is_windowed
+  bne :+
+    lda cur_bg_color
+  :
+  sta PPUDATA
   lda cur_bg_color
-  sta PPUDATA 
   sta PPUDATA
   lda text_dark_color
   sta PPUDATA
@@ -1200,6 +1210,7 @@ have_bg_color:
   bcc not_help
     jmp restart
   not_help:
+
   lda new_keys+0
   and #KEY_RIGHT
   beq not_right
@@ -1281,8 +1292,15 @@ have_bg_color:
   not_down:
 
   lda new_keys+0
-  and #KEY_A
-  beq notA
+  and #KEY_SELECT
+  beq not_select
+    lda #$0F
+    eor is_windowed
+    sta is_windowed
+  not_select:
+
+  lda new_keys+0
+  bpl notA
   lda cur_color
   cmp #3
   bcc notA
