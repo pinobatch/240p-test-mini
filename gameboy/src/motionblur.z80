@@ -269,8 +269,8 @@ motionblur_handle_presses:
     call nz, motionblur_update_sgb
   .skip_dpad:
 
-  ld a, PADF_A
-  and b
+  ldh a, [new_keys]
+  and PADF_A
   ret z
 
   ; When A is pressed, set frames_left to 1 so that the animation
