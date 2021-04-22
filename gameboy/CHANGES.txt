@@ -1,10 +1,10 @@
 0.23 (future)
-* Add SGB audio test
+* Add SGB sound test
 * Add health warning to Motion blur and Chroma crosstalk
 * Delay SGB detection by 8 frames for increased compatibility
 * topcalls.py: Port from awk to Python; list not only top calls but
   also routines called once for more size optimization opportunities
-* Micro-optimizations all over based on topcalls.py results
+* Massive micro-optimizations based on topcalls.py results
 * Reduce use of "master" per Inclusive Naming Initiative
 
 0.22 (2020-11-04)
