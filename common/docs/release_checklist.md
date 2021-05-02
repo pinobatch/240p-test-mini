@@ -4,7 +4,8 @@ First open relevant files and forums:
 
     mousepad nes/CHANGES.txt gameboy/CHANGES.txt gba/CHANGES.txt \
         makefile nes/makefile gameboy/makefile nes/src/helppages.txt \
-        gameboy/src/helppages.txt gba/src/helppages.txt private/* &
+        gameboy/src/helppages.txt gba/src/helppages.txt private/* \
+        common/docs/ &
     firefox 'https://github.com/pinobatch/240p-test-mini/releases' \
         'https://forums.nesdev.com/viewtopic.php?f=22&t=13394' \
         'https://gbdev.gg8.se/forums/viewtopic.php?id=542' \
@@ -36,9 +37,10 @@ First open relevant files and forums:
 11. On GitHub, draft a new release titled
     "240p Test Suite (NES, GB, and GBA) v0.xx`
     and attach two .nes files, one .nsf, one .gb, one .gba
-12. Post highlights and link to GitHub release page to NESdev topic,
+12. Upload to junkerhq per private steps
+13. Post highlights and link to GitHub release page to NESdev topic,
     attaching ROM and source zipfile
-13. Post platform-relevant highlights, link to GitHub release, and
+14. Post platform-relevant highlights, link to GitHub release, and
     link to NESdev attachment on gbdev.gg8.se and forum.gbadev.org
-14. Mail highlights and link to GitHub release page to the
+15. Mail highlights and link to GitHub release page to the
     address shown at <https://pdroms.de/submit-news>
