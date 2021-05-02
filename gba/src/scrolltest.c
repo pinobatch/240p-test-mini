@@ -231,27 +231,31 @@ void hill_zone_load_bg(void) {
 }
 
 // Parallax scrolling for hill zone
-void hill_zone_set_scroll(unsigned int x) {
+void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
   BGCTRL[1] = BG_16_COLOR|BG_WID_64|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
   dmaCopy(greenhillzone_chrPal, BG_COLORS+0, sizeof(greenhillzone_chrPal));
-  irqEnable(IRQ_VCOUNT);
-  BG_OFFSET[1].x = x >> 3;
 
-  // Wait for y=24 and change the scroll
-  REG_DISPSTAT = (REG_DISPSTAT & 0xFF) | (24 << 8);
-  Halt();
-  BG_OFFSET[1].x = x >> 2;
-
-  // TODO: Wait for y=128
-  REG_DISPSTAT = (REG_DISPSTAT & 0xFF) | (128 << 8);
-  Halt();
-  BG_OFFSET[1].x = x;
-
-  BG_OFFSET[1].y = 0;
-  irqDisable(IRQ_VCOUNT);
+  // Because libgba's ISR takes so long, we're already out of hblank
+  // before Halt() returns.
+  for (int i = 0; i < 24; ++i) {
+    hdmaTable[i] = x >> 3;
+  }
+  for (int i = 24; i < 128; ++i) {
+    hdmaTable[i] = x >> 2;
+  }
+  for (int i = 128; i < 160; ++i) {
+    hdmaTable[i] = x;
+  }
+  
+  REG_DMA0CNT = 0;
+  REG_DMA0SAD = (intptr_t)&(hdmaTable[1]);
+  REG_DMA0DAD = (intptr_t)&(BG_OFFSET[1].x);
+  REG_DMA0CNT = 1|DMA_DST_RELOAD|DMA_SRC_INC|DMA_REPEAT|DMA16|DMA_HBLANK|DMA_ENABLE;
 }
 
 void activity_hill_zone_scroll(void) {
+  uint16_t hdmaTable[160];
+
   scrolltest_y = scrolltest_dir = scrolltest_pause = 0;
   scrolltest_dy = 1;
   hill_zone_load_bg();
@@ -261,7 +265,8 @@ void activity_hill_zone_scroll(void) {
 
     VBlankIntrWait();
     REG_DISPCNT = MODE_0 | BG1_ON;
-    hill_zone_set_scroll(scrolltest_y);
+    hill_zone_set_scroll(hdmaTable, scrolltest_y);
   } while (!(new_keys & KEY_B));
+  REG_DMA0CNT = 0;
 }
 

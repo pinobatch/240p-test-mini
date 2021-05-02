@@ -62,7 +62,7 @@ void activity_convergence(void);
 // scrolltest.c
 void activity_grid_scroll(void);
 void hill_zone_load_bg(void);
-void hill_zone_set_scroll(unsigned int x);
+void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x);
 void activity_hill_zone_scroll(void);
 void activity_kiki_scroll(void);
 

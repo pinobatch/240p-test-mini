@@ -38,7 +38,8 @@ static void gus_bg_setup(void) {
   load_flat_map(&(MAP[PFSCROLLTEST][0][8]), Gus_portrait_chrMap[0], 14, 20);
 }
 
-static void gus_bg_set_scroll(unsigned int unused) {
+static void gus_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
+  (void)hdmaTable;
   (void)unused;
   BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
   BG_OFFSET[1].x = 0;
@@ -59,7 +60,8 @@ static void bg_3_setup() {
   striped_bg_setup(0x0000);
 }
 
-static void striped_bg_set_scroll(unsigned int unused) {
+static void striped_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
+  (void)hdmaTable;
   (void)unused;
   BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
   BG_OFFSET[1].x = 0;
@@ -70,7 +72,7 @@ static void striped_bg_set_scroll(unsigned int unused) {
 
 typedef struct ShadowSpriteBG {
   void (*setup)(void);
-  void (*set_scroll)(unsigned int x);
+  void (*set_scroll)(uint16_t *hdmaTable, unsigned int x);
 } ShadowSpriteBG;
 
 const ShadowSpriteBG bgtypes[4] = {
@@ -111,6 +113,7 @@ void activity_shadow_sprite() {
   unsigned int held_keys = 0, x = 112, y = 64, facing = 0;
   unsigned int cur_bg = 0, changetimeout = 0;
   unsigned int cur_shape = 0, shadow_type = 0, frame = 0;
+  uint16_t hdmaTable[160];
   
   dma_memset16(MAP[PFOVERLAY], 0xF000, 32*21*2);
   loadMapRowMajor(&(MAP[PFOVERLAY][20][22]), 0xF001, 8, 1);
@@ -216,6 +219,7 @@ void activity_shadow_sprite() {
     ppu_clear_oam(i);
 
     VBlankIntrWait();
+    REG_DMA0CNT = 0;
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(2)|SCREEN_BASE(PFOVERLAY);
     BG_OFFSET[0].x = 0;
     BG_OFFSET[0].y = (changetimeout > 8) ? 8 : changetimeout;
@@ -228,6 +232,9 @@ void activity_shadow_sprite() {
     }
     REG_DISPCNT = MODE_0 | BG0_ON | BG1_ON | OBJ_1D_MAP | OBJ_ON;
     ppu_copy_oam();
-    bgtypes[cur_bg].set_scroll(x * 4);
+    bgtypes[cur_bg].set_scroll(hdmaTable, x * 4);
   } while (!(new_keys & KEY_B));
+
+  // clean up after hill zone
+  REG_DMA0CNT = 0;
 }
