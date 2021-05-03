@@ -498,7 +498,7 @@ safearea_main_rects:
   rf_label  56,120, 2, 0
   .byte "PocketNES Safe Area",0
   rf_label  56,128, 2, 0
-  .byte "256x212, (8, 16)-(247, 227)",0
+  .byte "240x212, (8, 16)-(247, 227)",0
   rf_label  56,136, 2, 0
   .byte "Practically all TVs show this.",0
   rf_label 186,136, 2, 0
