@@ -31,48 +31,31 @@ SECTION "rst00", ROM0[$0000]
   ret
 ; $08, $10 used for RSTs
 
-  if 0
-SECTION "rst18", ROM0[$0018]
-  ret
-SECTION "rst20", ROM0[$0020]
-  ret
-SECTION "rst28", ROM0[$0028]
-  ret
-SECTION "rst30", ROM0[$0030]
-  ret
-SECTION "rst38", ROM0[$0038]
-  ret
-SECTION "rst50", ROM0[$0050]
-  reti  ; jp timer_handler
-SECTION "rst58", ROM0[$0058]
-  reti  ; jp serial_handler
-SECTION "rst60", ROM0[$0060]
-  reti  ; jp joypad_handler
-  endc
+; $18-$38 and $50-$60 not used and omitted to save space
+; Caution: If you set a bit in IE, you MUST have a handler for that
+; interrupt.  VisualBoyAdvance is known to call interrupt handlers
+; on DI HALT.
 
 SECTION "header", ROM0[$0100]
+  ; All licensed games begin with NOP JP.  It may have had to do with
+  ; the debugger used in the era.
   nop
   jp reset_handler
 
-  ; IPL uses this header to ensure D7-D0, A5-A0, and /RD are
+  ; IPL uses this header to ensure D7-D0, A15, A5-A0, and /RD are
   ; connected before calling something in the game that might
-  ; corrupt battery-backed save RAM.
-  ; TODO: Figure out how much of this RGBFIX can fill in for me
+  ; corrupt battery-backed save RAM.  The data inserted by RGBFIX
+  ; spells "Nintendo" when deinterleaved to tiles.
+  ds 48,$00
 
-  ; magiccookiedata: spells "Nintendo" when deinterleaved to tiles
-  ; Top 4 scanlines
-  db $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83  ; Nint
-  db $00,$0C,$00,$0D,$00,$08,$11,$1F,$88,$89,$00,$0E  ; endo
-  ; Bottom 4 scanlines
-  db $DC,$CC,$6E,$E6,$DD,$DD,$D9,$99,$BB,$BB,$67,$63  ; Nint
-  db $6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E  ; endo
+  ; TODO: Figure out how much of this RGBFIX can fill in for me
 
   ; 11-character title
   DB "144P TEST"
-  DS 2
+  DS 2,$00
 
   ; Serial code (is ADME Doom or Animal Crossing?)
-  DS 4
+  DS 4,$00
 
   ; Execution mode (GBC runs in GBC mode if bit 7 is true)
   DB CART_COMPATIBLE_DMG_GBC
@@ -96,6 +79,7 @@ SECTION "header", ROM0[$0100]
   DB REGION_UE
 
   ; Old hex developer ID: $33 means "see $0144"
+  ; Must be $33 for SGB support
   DB $33
   
   ; ROM version number

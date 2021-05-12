@@ -10,14 +10,15 @@
 *.sb53
 *.iu53
 *.pyc
+*.cdl
+*.nes.ram.nl
+*.n??.deb
 zip.in
 __pycache__/
 /240p-test-mini-*.zip
 /fc-mdf/obj/fc-mdf/*.s
 /fc-mdf/*.n??.deb
 /fc-mdf/*.dbg
-/fc-mdf/*.cdl
-/fc-mdf/*.nes.ram.nl
 /fc-mdf/*map.txt
 /fc-mdf/mdfourier-*.nes
 /fc-mdf/mdfourier.prg
@@ -41,16 +42,16 @@ __pycache__/
 /gba/.map
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
-/nes/*.n??.deb
 /nes/*.dbg
-/nes/*.cdl
-/nes/*.nes.ram.nl
 /nes/*map.txt
 /nes/240pee-bnrom.nes
 /nes/240pee.nes
 /nes/mdfourier.nsf
 /common/tools/dte
 /common/tools/dte.exe
+/nes-palpar/palpar.nes
+/nes-palpar/obj/nes/*.sav
+/nes-palpar/obj/nes/*.nam
 
 # this is NES and Game Boy homebrew, not DSiWare
 *.DS_Store
