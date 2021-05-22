@@ -20,9 +20,9 @@
 .include "nes.inc"
 .include "global.inc"
 .include "rectfill.inc"
-.importzp helpsect_linearity, helpsect_sharpness, helpsect_ire
+.importzp helpsect_monoscope, helpsect_sharpness, helpsect_ire
 .importzp helpsect_smpte_color_bars, helpsect_color_bars_on_gray
-.importzp helpsect_pluge, helpsect_grid, helpsect_gradient_color_bars
+.importzp helpsect_pluge, helpsect_gradient_color_bars
 .importzp helpsect_gray_ramp, helpsect_color_bleed
 .importzp helpsect_full_screen_stripes, helpsect_solid_color_screen
 .importzp helpsect_chroma_crosstalk, helpsect_convergence
@@ -56,6 +56,9 @@ bricks_tile:
   .byte %11111101
   .byte %11111111
 
+monoscope_levels:
+  .byte $0F,$00,$10,$20
+
 .zeropage
 test_state: .res SIZEOF_TEST_STATE
 
@@ -78,7 +81,7 @@ test_state: .res SIZEOF_TEST_STATE
   jsr ppu_clear_nt
   lda #2
   jsr load_iu53_file
-  
+
   ; Load bricks tile
   ldx #$24
   lda #$FF
@@ -112,6 +115,69 @@ loop:
     eor test_state
     sta test_state
   not_toggle_bricks:
+  lda new_keys
+  and #KEY_B
+  beq loop
+  rts
+.endproc
+
+.proc do_monoscope
+  lda #1
+  sta test_state
+restart:
+  lda #VBLANK_NMI
+  sta help_reload
+  sta PPUCTRL
+  asl a
+  sta PPUMASK
+
+  ; Load main nametable for this TV system
+  ldx #$20
+  lda #$00
+  tay
+  jsr ppu_clear_nt
+  tax
+  jsr ppu_clear_nt
+
+  lda tvSystem
+  beq :+
+    lda #1
+  :
+  jsr load_iu53_file
+
+loop:
+  jsr ppu_wait_vblank
+  lda #$3F
+  sta PPUADDR
+  lda #$00
+  sta PPUADDR
+  lda #$0F
+  sta PPUDATA
+  lda test_state
+  and #$03
+  tay
+  lda monoscope_levels,y
+  sta PPUDATA
+  lda #$16
+  sta PPUDATA
+
+  lda #VBLANK_NMI
+  clc
+  jsr ppu_screen_on_xy0
+
+  lda #helpsect_monoscope
+  jsr read_pads_helpcheck
+  bcs restart
+  lda new_keys
+  and #KEY_UP
+  beq not_inc_brightness
+    inc test_state
+  not_inc_brightness:
+  lda new_keys
+  and #KEY_DOWN
+  beq not_dec_brightness
+    dec test_state
+  not_dec_brightness:
   lda new_keys
   and #KEY_B
   beq loop
@@ -743,69 +809,6 @@ loop:
     eor test_state+0
     sta test_state+0
   not_toggle_screen:
-
-  lda new_keys+0
-  and #KEY_B
-  beq loop
-  rts
-.endproc
-
-; CPS-2 STYLE GRID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-.segment "CODE"
-.proc do_cpsgrid
-whichpage = test_state+0
-bgcolor = test_state+1
-  lda #VBLANK_NMI|BG_0000|OBJ_8X16
-  sta whichpage
-  lda #$0F
-  sta bgcolor
-restart:
-  jsr rf_load_tiles
-  jsr rf_load_yrgb_palette
-  lda #RF_cpsgrid_224
-  jsr rf_load_layout
-  lda #RF_cpsgrid_240
-  jsr rf_load_layout
-  
-loop:
-  jsr ppu_wait_vblank
-  
-  lda #$3F
-  ldx #$00
-  sta PPUADDR
-  stx PPUADDR
-  lda bgcolor
-  sta PPUDATA
-
-  ldy #0
-  lda whichpage
-  lsr a
-  bcs :+
-    ldy #240-8
-  :
-  rol a  ; restores test_state bit 0 and clears carry
-  jsr ppu_screen_on
-
-  lda #helpsect_grid
-  jsr read_pads_helpcheck
-  bcs restart
-
-  lda new_keys+0
-  and #KEY_A
-  beq not_toggle_screen
-    lda #$01
-    eor whichpage
-    sta whichpage
-  not_toggle_screen:
-
-  lda new_keys+0
-  and #KEY_SELECT
-  beq not_toggle_gray
-    lda #$0F
-    eor bgcolor
-    sta bgcolor
-  not_toggle_gray:
 
   lda new_keys+0
   and #KEY_B

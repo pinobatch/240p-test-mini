@@ -77,8 +77,8 @@ GATEDATA_BANK = 1
 .global getTVSystem
 
 ; stills.s
-.global do_linearity, do_sharpness, do_ire, do_smpte, do_601bars
-.global do_pluge, do_gcbars, do_cpsgrid, do_gray_ramp, do_color_bleed
+.global do_monoscope, do_sharpness, do_ire, do_smpte, do_601bars
+.global do_pluge, do_gcbars, do_gray_ramp, do_color_bleed
 .global do_full_stripes, do_solid_color, do_crosstalk, do_convergence
 .global tvSystemFPS
 SIZEOF_TEST_STATE = 24

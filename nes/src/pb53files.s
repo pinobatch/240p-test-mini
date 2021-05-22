@@ -72,8 +72,8 @@ sb53_files:
   .byte <.BANK(greenhillzone_sb53), SB53_PAT_0000|SB53_MAP_WIDE
 
 iu53_files:
-  .addr linearity_ntsc_iu53
-  .addr linearity_pal_iu53
+  .addr monoscope_ntsc_iu53
+  .addr monoscope_pal_iu53
   .addr sharpness_iu53
   .addr stopwatchface_iu53
   .addr crosstalk_iu53
@@ -84,8 +84,8 @@ gus_bg_sb53:         .incbin "obj/nes/gus_bg.sb53"
 greenhillzone_sb53:  .incbin "obj/nes/greenhillzone.sb53"
 
 IU53_BANK = <.bank(*)
-linearity_ntsc_iu53: .incbin "obj/nes/linearity_ntsc.iu53"
-linearity_pal_iu53:  .incbin "obj/nes/linearity_pal.iu53"
+monoscope_ntsc_iu53: .incbin "obj/nes/monoscope60.iu53"
+monoscope_pal_iu53:  .incbin "obj/nes/monoscope50.iu53"
 sharpness_iu53:      .incbin "obj/nes/sharpness.iu53"
 stopwatchface_iu53:  .incbin "obj/nes/stopwatchface.iu53"
 crosstalk_iu53:      .incbin "obj/nes/crosstalk.iu53"

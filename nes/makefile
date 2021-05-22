@@ -17,8 +17,8 @@ version:=0.22
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
 objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
-  main help helppages.hlp stills linearity stopwatch backlight scrolltest \
-  kiki audiosync soundtest crowd mdfourierfe mdfourier \
+  main help helppages.hlp stills monoscope stopwatch backlight \
+  scrolltest kiki audiosync soundtest crowd mdfourierfe mdfourier \
   overscan megaton shadowsprite \
   pads ppuclear unpb53 uniu undte bcd rand rectfill muldiv \
   pb53files rectfiles ntscPeriods
@@ -135,7 +135,7 @@ $(objdir)/mdfourier.o: audio/instsamp1.dmc
 # I can move them from bank to bank more easily
 $(objdir)/pb53files.o: \
   $(objdir)/gus_bg.sb53 $(objdir)/greenhillzone.sb53 \
-  $(objdir)/linearity_ntsc.iu53 $(objdir)/linearity_pal.iu53 \
+  $(objdir)/monoscope50.iu53 $(objdir)/monoscope60.iu53 \
   $(objdir)/sharpness.iu53 $(objdir)/stopwatchface.iu53 \
   $(objdir)/crosstalk.iu53 $(objdir)/gus_portrait.iu53 \
   $(objdir)/gus_sprite.chr.pb53 $(objdir)/stopwatchhand.chr.pb53 \
@@ -156,6 +156,8 @@ $(objdir)/%16.chr: $(imgdir)/%.png
 	$(BMP2) -H 16 --planes "0;1" $< $@
 $(objdir)/%gray.sav: $(imgdir)/%.png
 	$(PY) tools/savtool.py --palette 0f0010200f1616160f1616160f161616 $< $@
+$(objdir)/monoscope%.sav: $(imgdir)/monoscope%.png
+	$(PY) tools/savtool.py --palette 0f2026240f2424240f2424240f242424 $< $@
 $(objdir)/%.sb53: $(objdir)/%.sav
 	$(PY) tools/sav2sb53.py $< $@
 $(objdir)/%.pb53: $(objdir)/%
@@ -163,10 +165,8 @@ $(objdir)/%.pb53: $(objdir)/%
 
 # Specific rules for CHR
 
-$(objdir)/linearity_ntsc.iu53: $(objdir)/linearity_ntscgray.sav
-	$(PY) tools/sav2iu53.py --x-grid 0,1,2,3,4,5,6 $< $@
-$(objdir)/linearity_pal.iu53: $(objdir)/linearity_palgray.sav
-	$(PY) tools/sav2iu53.py --y-grid 8,2,5,8,0,3,6,8,1,4,7 $< $@
+$(objdir)/monoscope%.iu53: $(objdir)/monoscope%.sav
+	$(PY) tools/sav2iu53.py $< $@
 $(objdir)/sharpness.iu53: $(objdir)/sharpness.sav
 	$(PY) tools/sav2iu53.py --with-attrs --with-palette $< $@
 $(objdir)/stopwatchface.iu53: $(objdir)/lag_clock_face.sav

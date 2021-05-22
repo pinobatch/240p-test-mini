@@ -5,8 +5,7 @@ Gradient color bars
 SMPTE color bars
 Color bars on gray
 Color bleed
-Grid
-Linearity
+Monoscope
 Convergence
 Gray ramp
 Solid color screen
@@ -177,46 +176,49 @@ Select: Show or hide
 
 Concept by Konsolkongen
 
-== Grid ==
+== Monoscope ==
 
-This pattern uses the
-screen's full resolution.
-Use it to verify that the
-entire picture is visible,
-including the red border,
-with no distortion.
+This pattern contains
+elements to calibrate
+multiple aspects of a CRT.
+Read your monitor's service
+manual to learn how.
 
-A: Change between 256x224
-   and 256x240 pixel grids
-Select: Toggle gray
-   background
+Convergence:
+Use the center crosshair
+to check static (center
+of screen) convergence.
+Use the patterns at the
+sides to check dynamic
+(edge) convergence.
 
-Many games made for NTSC
-systems show artifacts
-outside the 256x224
-pixel area.
+Adjust convergence at low
+brightness. An overly bright
+pattern causes bloom that
+masks convergence issues.
 
-== Linearity ==
+↑↓: Change brightness
+----
+Corners:
+After setting center and
+edge convergence, use
+magnets to adjust corner
+purity and geometry.
 
-This pattern shows five
-circles at the pixel aspect
-ratio of the NES PPU. NTSC
-is 8:7; PAL is close to 11:8.
+Size and aspect ratio:
+After setting horizontal
+size, use a tape measure to
+adjust vertical size until
+the red squares in the
+pattern are perfect squares.
 
-Use it to verify the
-horizontal to vertical size
-ratio setting of your display
-or scaler or to measure
-barrel distortion on a CRT.
+Linearity:
+The squares in each corner
+should get you started.
+Confirm your adjustment
+using the scroll tests.
 
-Each circle should have
-the same diameter in all
-directions, and the diameter
-of all four small circles
-should be the same.
-
-A: Hide or show a
-   square grid
+Pattern by khmr33
 
 == Convergence ==
 
@@ -818,9 +820,8 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.22 (2020-11-04)
-Safe areas; more color bleed;
-correct SMPTE I/Q phase
+Version 0.23wip (2021-05-22)
+Monoscope
 
 Concept: Artemio Urbina
   🐦 @Artemio

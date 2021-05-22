@@ -27,8 +27,8 @@ rectfill_layouts:
   rectfile RF_gcbars, gcbars_nogrid, $20
   rectfile RF_gcbars_labels, gcbars_labels, $20, $20
   rectfile RF_gcbars_grid, gcbars_grid, $24
-  rectfile RF_cpsgrid_224, cpsgrid_224p_rects, $20
-  rectfile RF_cpsgrid_240, cpsgrid_240p_rects, $24
+  rectfile RF_mdfourier, mdfourier_labels, $20, $20
+  rectfile RF_mdfourier_15k, mdfourier_15k_rects, $2C
   rectfile RF_gray_ramp, gray_ramp_rects, $20
 
   rectfile RF_bleed, bleed_rects, $20
@@ -43,8 +43,6 @@ rectfill_layouts:
   rectfile RF_zapper, zapper_rects, $20, $20
 
   rectfile RF_crowd, crowd_labels, $20, $20
-  rectfile RF_mdfourier, mdfourier_labels, $20, $20
-  rectfile RF_mdfourier_15k, mdfourier_15k_rects, $2C
   rectfile RF_safearea_1, safearea_main_rects, $20, $20
   rectfile RF_safearea_2, safearea_extra_texts, $30, $20
   rectfile RF_safearea_3, safearea_nt2_rects, $24
@@ -181,20 +179,6 @@ gcbars_labels:
   rf_label  48,184, 3, 0
   .byte "White",0
   .byte $00
-
-cpsgrid_224p_rects:
-  rf_rect   0,  0,256,224,$16, RF_ROWXOR|RF_COLXOR
-  rf_rect   0,224,256,240,$00, 0
-  .byte $00
-  rf_attr   0,  0,256,240, 1
-  rf_attr  16, 16,240,208, 0
-  .byte $00, $00
-cpsgrid_240p_rects:
-  rf_rect   0,  0,256,240,$16, RF_ROWXOR|RF_COLXOR
-  .byte $00
-  rf_attr   0,  0,256,240, 1
-  rf_attr  16, 16,240,224, 0
-  .byte $00, $00
 
 gray_ramp_rects:
   rf_rect   0,  0,256,240,$00, 0

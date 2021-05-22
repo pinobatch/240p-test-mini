@@ -1,6 +1,8 @@
 0.23 (future)
 * Solid color screen: Select to windowbox (requested by
   khmr33 and Tianfeng)
+* Replace Grid and Linearity with khmr33's Monoscope
+* Fix typo in Safe areas
 * Chroma crosstalk: add health warning
 * Begin planning Famicom MDFourier tone generator
 
