@@ -17,7 +17,7 @@ version:=0.22
 # PRG ROM.  If it gets too long for one line, you can add a backslash
 # (the \ character) at the end of the line and continue on the next.
 objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
-  main help helppages.hlp stills monoscope stopwatch backlight \
+  main help helppages.hlp stills stopwatch backlight \
   scrolltest kiki audiosync soundtest crowd mdfourierfe mdfourier \
   overscan megaton shadowsprite \
   pads ppuclear unpb53 uniu undte bcd rand rectfill muldiv \

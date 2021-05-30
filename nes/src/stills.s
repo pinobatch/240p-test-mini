@@ -56,8 +56,11 @@ bricks_tile:
   .byte %11111101
   .byte %11111111
 
-monoscope_levels:
-  .byte $0F,$00,$10,$20
+monoscope_fglevels:
+  .byte $0F,$00,$10,$20,$20
+monoscope_fglevels_end:
+monoscope_bglevels:
+  .byte $0F,$0F,$0F,$0F,$00
 
 .zeropage
 test_state: .res SIZEOF_TEST_STATE
@@ -151,12 +154,10 @@ loop:
   sta PPUADDR
   lda #$00
   sta PPUADDR
-  lda #$0F
+  ldy test_state
+  lda monoscope_bglevels,y
   sta PPUDATA
-  lda test_state
-  and #$03
-  tay
-  lda monoscope_levels,y
+  lda monoscope_fglevels,y
   sta PPUDATA
   lda #$16
   sta PPUDATA
@@ -168,16 +169,26 @@ loop:
   lda #helpsect_monoscope
   jsr read_pads_helpcheck
   bcs restart
+
+  ; Adjust brightness up or down, wrapping
+  ldy test_state
   lda new_keys
   and #KEY_UP
   beq not_inc_brightness
-    inc test_state
+    iny
+    cpy #monoscope_fglevels_end-monoscope_fglevels
+    bcc not_inc_brightness
+    ldy #0
   not_inc_brightness:
   lda new_keys
   and #KEY_DOWN
   beq not_dec_brightness
-    dec test_state
+    dey
+    bpl not_dec_brightness
+    ldy #monoscope_fglevels_end-monoscope_fglevels-1
   not_dec_brightness:
+  sty test_state
+
   lda new_keys
   and #KEY_B
   beq loop
