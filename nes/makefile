@@ -23,6 +23,7 @@ objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
   pads ppuclear unpb53 uniu undte bcd rand rectfill muldiv \
   pb53files rectfiles ntscPeriods
 objlistnsf := mdfouriernsf mdfourier ntscPeriods
+objlistmdf4k := mdfourier4kfe mdfourier padsnodas ntscPeriods
 
 AS65:=ca65
 LD65:=ld65
@@ -62,13 +63,16 @@ endif
 DEBUGEMU2 := Mesen.exe
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 
-.PHONY: run runalt runnsf debug debug2 debugalt debugnsf nsf dist zip all clean ctools
+.PHONY: run runalt runnsf runmdf debug debug2 debugalt debugnsf debugmdf \
+        nsf dist zip all clean ctools
 
 run: $(title).nes
 	$(EMU) $<
 runalt: $(title)-bnrom.nes
 	$(EMU) $<
 runnsf: mdfourier.nsf
+	$(EMU) $<
+runmdf: mdfourier4k.nes
 	$(EMU) $<
 debug: $(title).nes
 	$(DEBUGEMU) $<
@@ -77,6 +81,8 @@ debug2: $(title).nes
 debugalt: $(title)-bnrom.nes
 	$(DEBUGEMU2) $<
 debugnsf: mdfourier.nsf
+	$(DEBUGEMU) $<
+debugmdf: mdfourier4k.nes
 	$(DEBUGEMU) $<
 
 # Rule to create or update the distribution zipfile by adding all
@@ -89,11 +95,11 @@ $(title)-$(version).zip: zip.in all \
 	zip -9 -u $@ -@ < $<
 	-advzip -z3 $@
 
-all: $(title)-bnrom.nes $(title).nes mdfourier.nsf
+all: $(title)-bnrom.nes $(title).nes mdfourier.nsf mdfourier4k.nes
 ctools: ../common/tools/dte$(EXE)
 
 $(objdir)/index.txt: makefile
-	echo "Files produced by build tools go here, but caulk goes where?" > $@
+	echo "Files produced by build tools go here" > $@
 
 clean:
 	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.?b53
@@ -104,6 +110,7 @@ clean:
 
 objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
 objlistnsfo = $(foreach o,$(objlistnsf),$(objdir)/$(o).o)
+objlistmdf4ko = $(foreach o,$(objlistmdf4k),$(objdir)/$(o).o)
 
 map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
 	$(LD65) -o $(title).nes -m map.txt --dbgfile $(title).dbg -C $^
@@ -111,11 +118,17 @@ map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
 bnmap.txt $(title)-bnrom.nes: bnrom512kbit.cfg $(objlisto) $(objdir)/bnrom.o
 	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
 
+mdfmap.txt mdfourier4k.nes: mdfourier4k.cfg $(objlistmdf4ko)
+	$(LD65) -o mdfourier4k.nes -m mdfmap.txt --dbgfile mdfourier4k.dbg -C $^
+
 nsfmap.txt mdfourier.nsf: nsf.cfg $(objlistnsfo)
 	$(LD65) -o mdfourier.nsf -m nsfmap.txt --dbgfile mdfourier.dbg -C $^
 
 $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 	$(AS65) $(CFLAGS65) $< -o $@
+
+$(objdir)/padsnodas.o: $(srcdir)/pads.s $(srcdir)/nes.inc $(srcdir)/global.inc
+	$(AS65) $(CFLAGS65) $< -o $@ -DUSE_DAS=0
 
 $(objdir)/%.o: $(objdir)/%.s
 	$(AS65) $(CFLAGS65) $< -o $@
@@ -143,6 +156,7 @@ $(objdir)/pb53files.o: \
   $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
   $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
   $(objdir)/fizzter_digits.chr.pb53 $(objdir)/convergence.chr.pb53
+$(objdir)/mdfourier4kfe.o: $(objdir)/mdf4k_chr.chr
 
 # MDFourier needs the period lookup table
 $(objdir)/ntscPeriods.s: tools/mktables.py
@@ -196,6 +210,8 @@ $(objdir)/crosstalk.sav: $(imgdir)/crosstalk.png
 	$(PY) tools/savtool.py --palette 0F161A120F0F0F0F0F0F0F0F0F0F0F0F $< $@
 $(objdir)/pluge_shark_4color.chr: $(cimgdir)/pluge_shark_4color.png
 	$(BMP2) -H 32 $< $@
+$(objdir)/mdf4k_chr.chr: $(imgdir)/mdf4k_chr.png
+	$(BMP2) -H 16 --planes "0" $< $@
 
 # Help me!
 $(objdir)/%.hlp.s: $(srcdir)/%.txt tools/paginate_help.py \
