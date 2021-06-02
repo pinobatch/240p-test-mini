@@ -31,7 +31,7 @@ callRE = re.compile(r"""
 def parse_argv(argv):
     p = argparse.ArgumentParser()
     p.add_argument("filenames", metavar="filename", nargs="*",
-                   description="names of RGBASM source files")
+                   help="names of RGBASM source files")
     return p.parse_args(argv[1:])
 
 def main(argv=None):

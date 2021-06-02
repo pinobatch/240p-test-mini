@@ -97,16 +97,17 @@ restart:
   sta PPUADDR
   lda #$00
   sta PPUADDR
-  ldy #$FE
+  ldy #$FC
   jsr write_4y_of_a
   lda #$55
-  ldy #2
+  ldy #4
   jsr write_4y_of_a
   
   ; Write copyright notice at very bottom of title safe area
+  ; $2343 = (24, 208)
   lda #$23
   sta PPUADDR
-  lda #$83
+  lda #$43
   sta PPUADDR
   ldx #1
   ldy #27
