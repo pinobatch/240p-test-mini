@@ -73,6 +73,8 @@ Artemio Urbina maintains the upstream suite on five platforms:
 * Sega Dreamcast, as MIL-CD
 * Nintendo GameCube and Wii, as GameCube disc and DOLs for SD loader
 
+[LCD monitor technology and tests]: http://www.techmind.org/lcd/
+
 The name
 --------
 NTSC analog televisions were designed for interlaced video conforming

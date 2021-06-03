@@ -73,8 +73,6 @@ phase by row.  Thus slight level differences between a pixel and its
 inverted counterpart can look like interlace.
 (See "[LCD monitor technology and tests]" by W. Andrew Steer.)
 
-[LCD monitor technology and tests]: http://www.techmind.org/lcd/
-
 Though the NES version of 240p Test Suite uses about 40 KiB of ROM
 data, the [Catskull cartridge] is limited to 32 KiB.  Fortunately,
 the graphics for several tests are smaller than on a 240p platform,
@@ -92,6 +90,8 @@ Artemio Urbina maintains the upstream suite on five platforms:
 * Super NES (Super Famicom), as cartridge
 * Sega Dreamcast, as MIL-CD
 * Nintendo GameCube and Wii, as GameCube disc and DOLs for SD loader
+
+[LCD monitor technology and tests]: http://www.techmind.org/lcd/
 
 The name
 --------
