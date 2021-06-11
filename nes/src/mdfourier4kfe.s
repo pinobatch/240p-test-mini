@@ -83,6 +83,8 @@ restart:
   sta PPUMASK
 
   ; Copy tiles to CHR RAM
+  sty PPUADDR
+  sty PPUADDR
   lda #<chrdata
   sta $00
   lda #>chrdata
