@@ -32,9 +32,9 @@ DAS_SPEED = 3
 
 .segment "LIBCODE"
 .proc read_pads
-thisRead = 0
-firstRead = 2
-lastFrameKeys = 4
+thisRead = $00
+firstRead = $02
+lastFrameKeys = $04
 
   ; store the current keypress state to detect key-down later
   lda cur_keys
@@ -73,15 +73,15 @@ lastFrameKeys = 4
 
 read_pads_once:
 
-  ; Bits from the controllers are shifted into thisRead and
-  ; thisRead+1.  In addition, thisRead+1 serves as the loop counter:
-  ; once the $01 gets shifted left eight times, the 1 bit will
-  ; end up in carry, terminating the loop.
-  lda #$01
-  sta thisRead+1
   ; Write 1 then 0 to JOY1 to send a latch signal, telling the
-  ; controllers to copy button states into a shift register
+  ; controllers to copy button states into a shift register.
+  ; Then shift bits from the controllers into thisRead and
+  ; thisRead+1.  In addition, thisRead+1 serves as the
+  ; loop counter: once the $01 gets shifted left eight times,
+  ; the 1 bit will end up in carry, terminating the loop.
+  lda #$01
   sta JOY1
+  sta thisRead+1
   lsr a
   sta JOY1
   loop:

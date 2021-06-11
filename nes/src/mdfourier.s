@@ -630,7 +630,7 @@ dmc_fading_step4_data:
 instsamp1_dmc:    .incbin "audio/instsamp1.dmc"
 instsamp1_dmc_end:
 
-; there are 64 bytes usable for anything
+; there are 63 bytes usable for anything
 volramp_periods:
   .byte 255, 223, 111, 223, 111
 volramp_addamounts:

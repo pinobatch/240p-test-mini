@@ -18,6 +18,7 @@ test_good_phase := test_state+6
 .byte (MAPPERNUM << 4) & $F0 | MIRRORING
 .byte MAPPERNUM & $F0
 
+; Space for you to patch in whatever initialization your mapper needs
 .segment "STUB15"
 stub15start:
 .repeat 96 - 9
@@ -25,7 +26,7 @@ stub15start:
 .endrepeat
 jmp reset_handler
 .addr nmi_handler, stub15start, irq_handler
-.assert *-stub15start = 96, error, "not 96 bytes!"
+.assert *-stub15start = 96, error, "maper init area not 96 bytes!"
 
 .zeropage
 nmis: .res 1
@@ -37,6 +38,10 @@ test_state: .res SIZEOF_TEST_STATE
 mdfourier_good_phase: .res 1
 
 .code
+; Bare minimum NMI handler allows sync to vblank in a 6-cycle window
+; using a CMP/BEQ loop.  Even if the NMI handler isn't this trivial,
+; the sync can't be improved by much because 6-cycle instructions
+; such as JSR aaaa or STA (dd),Y aren't interruptible.
 nmi_handler:
   inc nmis
 irq_handler:
@@ -48,7 +53,7 @@ irq_handler:
   txs
   inx
   stx PPUCTRL
-  stx PPUCTRL
+  stx PPUMASK
   bit $4015  ; ack some IRQs
   lda #$40
   sta $4017  ; disable frame counter IRQ
