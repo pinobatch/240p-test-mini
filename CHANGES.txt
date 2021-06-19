@@ -1,0 +1,4 @@
+0.23 (2021-06-xx)
+* List changes outside the full ports
+* Put documentation and packaging source in a separate zipfile
+* Add equipment test for testing CD players and other DAC-ADC pairs

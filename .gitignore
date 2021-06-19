@@ -14,6 +14,7 @@
 *.nes.ram.nl
 *.n??.deb
 zip.in
+/*.zip.in
 __pycache__/
 /240p-test-mini-*.zip
 /fc-mdf/obj/fc-mdf/*.s

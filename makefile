@@ -9,7 +9,7 @@
 # This file is offered as-is, without any warranty.
 #
 title := 240p-test-mini
-version := 0.22
+version := 0.23wip
 
 # Make $(MAKE) work correctly even when Make is installed inside
 # C:\Program Files
@@ -21,10 +21,9 @@ alltargets:=\
   nes/240pee.nes nes/240pee-bnrom.nes nes/mdfourier.nsf \
   gameboy/gb240p.gb gba/240pee_mb.gba
 
-.PHONY: all dist zip clean $(alltargets)
+.PHONY: all dist clean $(alltargets)
 all: $(alltargets)
-dist: zip
-zip: $(title)-$(version).zip
+dist: $(title)-docsrc-$(version).zip $(title)-$(version).zip
 
 # Try to minimize the harm of recursive make.
 # 240pee-bnrom.nes depends on 240pee.nes so that parallel make (-j2)
@@ -41,16 +40,26 @@ gba/240pee_mb.gba:
 	$(MAKE) -C gba $(notdir $@)
 
 # Packaging
+DOCSRC_RE:=\.xcf$$|\.odg$$|/Gus_sketch_by_.*.png
+
 $(title)-$(version).zip: zip.in all makefile README.md
 	zip -9 -u $@ -@ < $<
 
+$(title)-docsrc-$(version).zip: docsrc.zip.in makefile
+	zip -9 -u $@ -@ < $<
+
 zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
-	git ls-files | grep -e "^[^.]" > $@
+	git ls-files | egrep -iv "^\.|$(DOCSRC_RE)" > $@
 	echo nes/240pee.nes >> $@
 	echo nes/240pee-bnrom.nes >> $@
 	echo nes/mdfourier.nsf >> $@
 	echo gameboy/gb240p.gb >> $@
 	echo gba/240pee_mb.gba >> $@
+	echo $@ >> $@
+
+docsrc.zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
+	git ls-files | egrep "$(DOCSRC_RE)" > $@
+	echo LICENSE >> $@
 	echo $@ >> $@
 
 clean:
