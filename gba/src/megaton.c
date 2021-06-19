@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_video.h>
 #include "posprintf.h"
 
-extern const unsigned char helpsect_manual_lag_test[];
+extern const unsigned char helpsect_timing_and_reflex_test[];
 #define PFMAP 23
 #define NUM_TRIALS 10
 #define BLANK_TILE 0x0004
@@ -106,7 +106,7 @@ void activity_megaton() {
   loadMapRowMajor(&(MAP[PFMAP][2][2]), 0x30, 2, 10);
 
   do {
-    read_pad_help_check(helpsect_manual_lag_test);
+    read_pad_help_check(helpsect_timing_and_reflex_test);
     
     if (new_keys & KEY_B) {
       break;

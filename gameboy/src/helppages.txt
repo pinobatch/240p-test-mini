@@ -14,7 +14,7 @@ Credits
 ----
 Shadow sprite
 Stopwatch
-Manual lag test
+Timing and reflex test
 Hill zone scroll
 Vertical scroll
 Grid scroll
@@ -354,7 +354,7 @@ drops one frame in 345
 or 607 depending on
 59.94 or 60.00 Hz output.
 
-== Manual lag test ==
+== Timing and reflex test ==
 
 This helps quantify a
 display's processing lag
@@ -740,7 +740,7 @@ Select: Stop sound
 
 == 144p Test Suite ==
 
-Ver. 0.23wip (2021-03-13)
+Ver. 0.23wip (2021-06-xx)
 SGB sound
 
 © 2011-2016

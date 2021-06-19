@@ -16,7 +16,7 @@ Overscan
 ----
 Shadow sprite
 Stopwatch
-Manual lag test
+Timing and reflex test
 Hill zone scroll test
 Vertical scroll test
 Grid scroll test
@@ -326,7 +326,7 @@ To avoid errors caused
 by rolling shutter, put
 the TVs side by side.
 
-== Manual lag test ==
+== Timing and reflex test ==
 
 This helps quantify a
 display's processing lag
@@ -624,11 +624,11 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.22 (2020-11-04)
-If it bleeds, it leads.
+Version 0.23wip (2021-06-xx)
+HDMA is right for you
 
 © 2011-2016 Artemio Urbina
-© 2015-2020 Damian Yerrick
+© 2015-2021 Damian Yerrick
 This is free software; see
 the source for copying
 conditions. The program

@@ -18,7 +18,7 @@ CPU clock speed
 ----
 Shadow sprite
 Stopwatch
-Manual lag test
+Timing and reflex test
 Hill zone scroll test
 Vertical scroll test
 Grid scroll test
@@ -555,7 +555,7 @@ Hi-Def NES compensates
 for this by slowing down
 the CPU and PPU.
 
-== Manual lag test ==
+== Timing and reflex test ==
 
 This helps quantify a
 display's processing lag by
@@ -820,7 +820,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.23wip (2021-05-22)
+Version 0.23wip (2021-06-xx)
 Monoscope
 
 Concept: Artemio Urbina

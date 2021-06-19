@@ -1,5 +1,8 @@
 0.23 (future)
 * Motion blur: add health warning
+* Rename Manual lag test to Timing and reflex test to reflect
+  how it is used
+* Hill zone scroll test: Switch from laggy libgba IRQs to HDMA
 
 0.22 (2020-11-04)
 * Color bars: A to toggle NTSC 7.5% setup

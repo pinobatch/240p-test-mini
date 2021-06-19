@@ -146,7 +146,7 @@ activity_megaton::
   .noprevresults:
 
 .loop:
-  ld b,helpsect_manual_lag_test
+  ld b,helpsect_timing_and_reflex_test
   call read_pad_help_check
   jp nz,.restart
 

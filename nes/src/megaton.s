@@ -20,7 +20,7 @@
 .include "nes.inc"
 .include "global.inc"
 .include "rectfill.inc"
-.importzp helpsect_manual_lag_test
+.importzp helpsect_timing_and_reflex_test
 .importzp RF_megaton, RF_megaton_end
 
 ; Megaton is the manual lag test.
@@ -246,7 +246,7 @@ nobeep_nowhite:
   beq not_help
     ldx #$B0  ; turn off beeper during help
     stx $4000
-    ldx #helpsect_manual_lag_test
+    ldx #helpsect_timing_and_reflex_test
     lda #KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT
     jsr helpscreen
     jmp do_manual_lag::restart

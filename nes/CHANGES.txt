@@ -1,9 +1,12 @@
 0.23 (future)
+* Replace Grid and Linearity with khmr33's Monoscope
 * Solid color screen: Select to windowbox (requested by
   khmr33 and Tianfeng)
-* Replace Grid and Linearity with khmr33's Monoscope
-* Fix typo in Safe areas
+* Safe areas: Fix size typo
 * Chroma crosstalk: add health warning
+* Rename Manual lag test to Timing and reflex test to reflect
+  how it is used
+* Add standalone MDFourier ROM for the smallest flash carts
 * Begin planning Famicom MDFourier tone generator
 
 0.22 (2020-11-04)
