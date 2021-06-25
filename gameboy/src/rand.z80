@@ -36,7 +36,7 @@ section "rand",ROM0
 ; using the LCG formula from cc65 rand():
 ; x[i + 1] = x[i] * 0x01010101 + 0xB3B3B3B3
 ; @return A=B=state bits 31-24 (which have the best entropy),
-; C=state bits 23-16, DHL trashed
+; C=state bits 23-16, HL trashed
 rand::
   ; Add 0xB3 then multiply by 0x01010101
   ld hl, randstate+0
