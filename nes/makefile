@@ -128,7 +128,7 @@ $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 	$(AS65) $(CFLAGS65) $< -o $@
 
 $(objdir)/padsnodas.o: $(srcdir)/pads.s $(srcdir)/nes.inc $(srcdir)/global.inc
-	$(AS65) $(CFLAGS65) $< -o $@ -DUSE_DAS=0
+	$(AS65) $(CFLAGS65) $< -o $@ -DUSE_DAS=0 -DUSE_2P=0
 
 $(objdir)/%.o: $(objdir)/%.s
 	$(AS65) $(CFLAGS65) $< -o $@

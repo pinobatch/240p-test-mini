@@ -24,6 +24,9 @@ JOY2      = $4017
 .ifndef USE_DAS
 USE_DAS = 1
 .endif
+.ifndef USE_2P
+USE_2P = 1
+.endif
 
 ; time until autorepeat starts making keypresses
 DAS_DELAY = 15
@@ -39,36 +42,53 @@ lastFrameKeys = $04
   ; store the current keypress state to detect key-down later
   lda cur_keys
   sta lastFrameKeys
-  lda cur_keys+1
-  sta lastFrameKeys+1
+  .if ::USE_2P
+    lda cur_keys+1
+    sta lastFrameKeys+1
+  .endif
 
   ; Read the joypads twice in case DMC DMA caused a clock glitch.
   jsr read_pads_once
   lda thisRead
   sta firstRead
-  lda thisRead+1
-  sta firstRead+1
+  .if ::USE_2P
+    lda thisRead+1
+    sta firstRead+1
+  .endif
   jsr read_pads_once
 
-  ; For each player, make sure the reads agree, then find newly
-  ; pressed keys.
-  ldx #1
-@fixupKeys:
+  .if ::USE_2P
 
-  ; If the player's keys read out the same way both times, update.
-  ; Otherwise, keep the last frame's keypresses.
-  lda thisRead,x
-  cmp firstRead,x
-  bne @dontUpdateGlitch
-  sta cur_keys,x
-@dontUpdateGlitch:
+    ; For each player, make sure the reads agree, then find newly
+    ; pressed keys.
+    ldx #1
+  @fixupKeys:
+
+    ; If the player's keys read out the same way both times, update.
+    ; Otherwise, keep the last frame's keypresses.
+    lda thisRead,x
+    cmp firstRead,x
+    bne @dontUpdateGlitch
+      sta cur_keys,x
+    @dontUpdateGlitch:
   
-  lda lastFrameKeys,x   ; A = keys that were down last frame
-  eor #$FF              ; A = keys that were up last frame
-  and cur_keys,x        ; A = keys down now and up last frame
-  sta new_keys,x
-  dex
-  bpl @fixupKeys
+    lda lastFrameKeys,x   ; A = keys that were down last frame
+    eor #$FF              ; A = keys that were up last frame
+    and cur_keys,x        ; A = keys down now and up last frame
+    sta new_keys,x
+    dex
+    bpl @fixupKeys
+  .else
+    lda thisRead
+    cmp firstRead
+    bne @dontUpdateGlitch
+      sta cur_keys
+    @dontUpdateGlitch:
+    lda lastFrameKeys   ; A = keys that were down last frame
+    eor #$FF            ; A = keys that were up last frame
+    and cur_keys        ; A = keys down now and up last frame
+    sta new_keys
+  .endif
   rts
 
 read_pads_once:
@@ -81,7 +101,7 @@ read_pads_once:
   ; the 1 bit will end up in carry, terminating the loop.
   lda #$01
   sta JOY1
-  sta thisRead+1
+  sta thisRead+0
   lsr a
   sta JOY1
   loop:
@@ -90,15 +110,17 @@ read_pads_once:
     ; show up in D0 and presses on plug-in controllers show up in D1.
     ; D2-D7 consist of data from the Zapper, Power Pad, Vs. System
     ; DIP switches, and bus capacitance; ignore them.
-    lda JOY1       ; read player 1's controller
-    and #%00000011 ; ignore D2-D7
-    cmp #1         ; CLC if A=0, SEC if A>=1
-    rol thisRead   ; put one bit in the register
-    lda JOY2       ; read player 2's controller the same way
+    .if ::USE_2P
+      lda JOY2       ; read player 2's controller
+      and #%00000011 ; ignore D2-D7
+      cmp #1         ; CLC if A=0, SEC if A>=1
+      rol thisRead+1 ; put one bit in the register
+    .endif
+    lda JOY1         ; read player 1's controller the same way
     and #$03
     cmp #1
-    rol thisRead+1
-    bcc loop       ; once $01 has been shifted 8 times, we're done
+    rol thisRead+0
+    bcc loop         ; once $01 has been shifted 8 times, we're done
   rts
 .endproc
 

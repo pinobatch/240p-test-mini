@@ -5,6 +5,10 @@
 ; Mapper 7 is the most emulator compatible
 MAPPERNUM = 7
 
+; Rumor has it that PPU A13 passes through the audio inverter
+; and can affect noise
+MDF_PA13_HIGH = 1
+
 test_good_phase := test_state+6
 
 
@@ -182,6 +186,12 @@ have_phase_xy:
   stx PPUDATA
   sta PPUADDR
   sta PPUADDR
+
+  .if ::MDF_PA13_HIGH
+    ldx #$20
+    stx PPUADDR
+    sta PPUADDR
+  .endif
 
   jsr mdfourier_run
   jmp restart
