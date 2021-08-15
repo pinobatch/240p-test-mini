@@ -63,12 +63,17 @@ endif
 DEBUGEMU2 := Mesen.exe
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 
-.PHONY: run runalt runnsf runmdf debug debug2 debugalt debugnsf debugmdf \
+.PHONY: run runbn runsg runtg runnsf runmdf \
+        debug debug2 debugbn debugsg debugtg debugnsf debugmdf \
         nsf dist zip all clean ctools
 
 run: $(title).nes
 	$(EMU) $<
-runalt: $(title)-bnrom.nes
+runbn: $(title)-bnrom.nes
+	$(EMU) $<
+runsg: $(title)-sgrom.nes
+	$(EMU) $<
+runtg: $(title)-tgrom.nes
 	$(EMU) $<
 runnsf: mdfourier.nsf
 	$(EMU) $<
@@ -78,7 +83,11 @@ debug: $(title).nes
 	$(DEBUGEMU) $<
 debug2: $(title).nes
 	$(DEBUGEMU2) $<
-debugalt: $(title)-bnrom.nes
+debugbn: $(title)-bnrom.nes
+	$(DEBUGEMU2) $<
+debugsg: $(title)-sgrom.nes
+	$(DEBUGEMU2) $<
+debugtg: $(title)-tgrom.nes
 	$(DEBUGEMU2) $<
 debugnsf: mdfourier.nsf
 	$(DEBUGEMU) $<
@@ -95,7 +104,9 @@ $(title)-$(version).zip: zip.in all \
 	zip -9 -u $@ -@ < $<
 	-advzip -z3 $@
 
-all: $(title)-bnrom.nes $(title).nes mdfourier.nsf mdfourier4k.nes
+all: \
+  $(title).nes $(title)-bnrom.nes $(title)-sgrom.nes $(title)-tgrom.nes \
+  mdfourier.nsf mdfourier4k.nes
 ctools: ../common/tools/dte$(EXE)
 
 $(objdir)/index.txt: makefile
@@ -103,7 +114,7 @@ $(objdir)/index.txt: makefile
 
 clean:
 	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.?b53
-	-rm $(objdir)/*.sav $(objdir)/*.iu53 map.txt bnmap.txt nsfmap.txt
+	-rm $(objdir)/*.sav $(objdir)/*.iu53 map.txt ??map.txt nsfmap.txt
 	-rm ../common/tools/dte$(DOTEXE)
 
 # Rules for PRG ROM
@@ -117,6 +128,12 @@ map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
 
 bnmap.txt $(title)-bnrom.nes: bnrom512kbit.cfg $(objlisto) $(objdir)/bnrom.o
 	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
+
+sgmap.txt $(title)-sgrom.nes: sgrom512kbit.cfg $(objlisto) $(objdir)/mmc1.o
+	$(LD65) -o $(title)-sgrom.nes -m sgmap.txt --dbgfile $(title)-sgrom.dbg -C $^
+
+tgmap.txt $(title)-tgrom.nes: tgrom512kbit.cfg $(objlisto) $(objdir)/mmc3.o
+	$(LD65) -o $(title)-tgrom.nes -m tgmap.txt --dbgfile $(title)-tgrom.dbg -C $^
 
 mdfmap.txt mdfourier4k.nes: mdfourier4k.cfg $(objlistmdf4ko)
 	$(LD65) -o mdfourier4k.nes -m mdfmap.txt --dbgfile mdfourier4k.dbg -C $^

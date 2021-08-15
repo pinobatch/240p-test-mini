@@ -1,6 +1,6 @@
 ;
-; BNROM driver for NES
-; Copyright 2011-2016 Damian Yerrick
+; MMC3 driver for NES
+; Copyright 2011-2021 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided
@@ -17,15 +17,17 @@
 
 .segment "INESHDR"
   .byt "NES",$1A  ; magic signature
-  .byt 4          ; size of PRG ROM in 16384 byte units (two units per BNROM bank!)
+  .byt 4          ; size of PRG ROM in 16384 byte units (two MMC3 banks per unit)
   .byt 0          ; size of CHR ROM in 8192 byte units
-  .byt $21        ; lower mapper nibble, vertical mirroring
-  .byt $20        ; upper mapper nibble
+  .byt $40        ; lower mapper nibble
+  .byt $00        ; upper mapper nibble
 
 ; Fixed code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-MAIN_CODE_BANK = $01
-RESETSTUB_BASE = $FF90
+
+MAIN_CODE_BANK = $02
+GATE_DATA_BANK = $01
+RESETSTUB_BASE = $FF70
 
 .macro resetstub_in segname, scopename
 .segment segname
@@ -33,9 +35,9 @@ RESETSTUB_BASE = $FF90
   .assert * = ::RESETSTUB_BASE, error, "RESETSTUB_BASE doesn't match linker configuration"
 
 ; Call gates
-zerobyte: .byte $00
 unpb53_gate:
-  lsr zerobyte
+  lda #GATE_DATA_BANK
+  sta unpb53_gate+1
   jsr unpb53_some
 rtl:
   ldx #MAIN_CODE_BANK
@@ -43,22 +45,20 @@ rtl:
   rts
 
 load_sb53_file:
-  lsr zerobyte
   jsr load_sb53_file_cb
   jmp rtl
 
 load_iu53_file:
-  lsr zerobyte
   jsr load_iu53_file_cb
   jmp rtl
 
 unpb53_file:
-  lsr zerobyte
   jsr unpb53_file_cb
   jmp rtl
 
 rf_load_layout:
-  lsr zerobyte  ; lsr zerobyte
+  ldx #GATE_DATA_BANK
+  stx rf_load_layout+1
   jsr rf_load_layout_cb
   jmp rtl
 
@@ -66,7 +66,8 @@ rf_vwfClearPuts:
   lda #MAIN_CODE_BANK
   sta rtl+1
   jsr rf_vwfClearPuts_cb
-  lsr zerobyte  ; lsr zerobyte
+  lda #GATE_DATA_BANK
+  sta rf_load_layout+1
   rts
 
 nmi_handler:
@@ -85,13 +86,11 @@ resetstub_entry:
 .endproc
 .endmacro
 
-resetstub_in "STUB0",stub0
-resetstub_in "STUB1",stub1
+resetstub_in "STUB15", stub1
 unpb53_gate = stub1::unpb53_gate
 unpb53_file = stub1::unpb53_file
 load_sb53_file = stub1::load_sb53_file
 load_iu53_file = stub1::load_iu53_file
-rf_vwfClearPuts = stub1::rf_vwfClearPuts
+rf_vwfClearPuts = rf_vwfClearPuts_cb
 rf_load_layout = stub1::rf_load_layout
-
 
