@@ -391,7 +391,7 @@ load_gus:
   ldx #$20
   jsr ppu_clear_nt
   
-  lda #5
+  lda #4
   jmp load_iu53_file
 
 load_fullscreenhorz:

@@ -167,7 +167,7 @@ $(objdir)/pb53files.o: \
   $(objdir)/gus_bg.sb53 $(objdir)/greenhillzone.sb53 \
   $(objdir)/monoscope50.iu53 $(objdir)/monoscope60.iu53 \
   $(objdir)/sharpness.iu53 $(objdir)/stopwatchface.iu53 \
-  $(objdir)/crosstalk.iu53 $(objdir)/gus_portrait.iu53 \
+  $(objdir)/gus_portrait.iu53 \
   $(objdir)/gus_sprite.chr.pb53 $(objdir)/stopwatchhand.chr.pb53 \
   $(objdir)/stdtiles.chr.pb53 $(objdir)/backlight_sprites.chr.pb53 \
   $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \

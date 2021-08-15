@@ -76,7 +76,6 @@ iu53_files:
   .addr monoscope_pal_iu53
   .addr sharpness_iu53
   .addr stopwatchface_iu53
-  .addr crosstalk_iu53
   .addr gus_portrait_iu53
 
 .segment "BANK00"
@@ -88,7 +87,6 @@ monoscope_ntsc_iu53: .incbin "obj/nes/monoscope60.iu53"
 monoscope_pal_iu53:  .incbin "obj/nes/monoscope50.iu53"
 sharpness_iu53:      .incbin "obj/nes/sharpness.iu53"
 stopwatchface_iu53:  .incbin "obj/nes/stopwatchface.iu53"
-crosstalk_iu53:      .incbin "obj/nes/crosstalk.iu53"
 gus_portrait_iu53:   .incbin "obj/nes/gus_portrait.iu53"
 
 stopwatch_balls:     .incbin "obj/nes/stopwatchhand.chr.pb53",2

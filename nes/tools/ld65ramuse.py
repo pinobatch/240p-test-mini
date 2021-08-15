@@ -9,7 +9,7 @@ import os
 from collections import defaultdict
 
 def ld65_map_get_sections(filename):
-    with open(filename, "r") as infp:
+    with open(filename, "r", encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
     sectbreaks = [
         i - 1 for i, line in enumerate(lines)

@@ -62,6 +62,42 @@ monoscope_fglevels_end:
 monoscope_bglevels:
   .byte $0F,$0F,$0F,$0F,$00
 
+xtalk_word_shape:
+  .byte %01111111
+  .byte %01111111
+  .byte %00001110
+  .byte %00011100
+  .byte %00111000
+  .byte %01111111
+  .byte %01111111
+  .byte %00000000
+  .byte %00000001
+  .byte %00000001
+  .byte %01111111
+  .byte %01111111
+  .byte %00000001
+  .byte %00000001
+  .byte %00000000
+  .byte %00100110
+  .byte %01001111
+  .byte %01001101
+  .byte %01011001
+  .byte %01111001
+  .byte %00110010
+  .byte %00000000
+  .byte %00111110
+  .byte %01111111
+  .byte %01000001
+  .byte %01000001
+  .byte %01100011
+  .byte %00100010
+xtalk_word_shape_end:
+
+XTALK_STRIPE_TL = $2160
+XTALK_STRIPE_HT = 9
+XTALK_PHASES = 3
+XTALK_WORD_TL = XTALK_STRIPE_TL + 32 + 2
+
 .zeropage
 test_state: .res SIZEOF_TEST_STATE
 
@@ -192,14 +228,17 @@ loop:
   lda new_keys
   and #KEY_B
   beq loop
+no_flashing_please:
   rts
 .endproc
 
 .proc do_crosstalk
-  jsr flashing_consent
-  beq no_flashing_please
-
 palette_base = test_state + 0
+
+  jsr flashing_consent
+  beq do_monoscope::no_flashing_please
+
+  ; To delete: iu53 file 4
   lda #VBLANK_NMI
   sta help_reload
   sta PPUCTRL
@@ -212,8 +251,77 @@ palette_base = test_state + 0
   jsr ppu_clear_nt
   ldx #$20
   jsr ppu_clear_nt
-  lda #4
-  jsr load_iu53_file
+
+  ; Load pattern table
+  sta PPUADDR
+  lda #$10
+  sta PPUADDR
+  lda #%11011011
+  clc
+  ldx #16*3
+  pt_byteloop:
+    sta PPUDATA
+    ror a
+    dex
+    bne pt_byteloop
+
+  ; Write background pattern
+  ldx #>XTALK_STRIPE_TL
+  stx PPUADDR
+  ldx #<XTALK_STRIPE_TL
+  stx PPUADDR
+  ldx #32 * XTALK_STRIPE_HT / 3
+  clr3loop:
+    ldy #1
+    clr1loop:
+      sty PPUDATA
+      iny
+      cpy #XTALK_PHASES+1
+      bcc clr1loop
+    dex
+    bne clr3loop
+
+  ; Write word
+colphase = $00
+
+  ldy #VBLANK_NMI|VRAM_DOWN
+  sty PPUCTRL
+  ldy #3
+  sty colphase
+  ldy #xtalk_word_shape_end-xtalk_word_shape-1
+  colloop:
+    ldx colphase
+    dex
+    bne :+
+      ldx #XTALK_PHASES
+    :
+    stx colphase
+    lda #>XTALK_WORD_TL
+    sta PPUADDR
+    tya
+    clc
+    adc #<XTALK_WORD_TL
+    sta PPUADDR
+    lda xtalk_word_shape,y
+    bitloop:
+      lsr a
+      pha
+      txa
+      adc #0
+      cmp #XTALK_PHASES+1
+      bcc :+
+        lda #1
+      :
+      sta PPUDATA
+      dex
+      bne :+
+        ldx #XTALK_PHASES
+      :
+      pla
+      bne bitloop
+    dey
+    bpl colloop
+
   lda #$16
   sta palette_base
 
@@ -239,11 +347,14 @@ loop:
   lda #VBLANK_NMI|BG_0000
   clc
   jsr ppu_screen_on_xy0
-  
+
   lda #helpsect_chroma_crosstalk
   jsr read_pads_helpcheck
-  bcs do_crosstalk
+  bcc :+
+    jmp do_crosstalk
+  :
 
+  ; Step the colors once every 16 frames, cycling once every 192
   lda nmis
   and #$0F
   bne noinccolor
@@ -259,7 +370,6 @@ loop:
   lda new_keys
   and #KEY_B
   beq loop
-no_flashing_please:
   rts
 .endproc
 

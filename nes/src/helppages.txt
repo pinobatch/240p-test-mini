@@ -181,7 +181,7 @@ Concept by Konsolkongen
 This pattern contains
 elements to calibrate
 multiple aspects of a CRT.
-Read your monitor's service
+Read your TV's service
 manual to learn how.
 
 Convergence:
@@ -320,11 +320,11 @@ B: Cancel
 
 == Chroma crosstalk ==
 
-This pattern shows colored
-stripes arranged to show
-crosstalk between luma
-and chroma of the composite
-video output.
+This pattern shows
+colored stripes arranged
+to show crosstalk between
+luma and chroma of the
+composite video output.
 
 The 2C02 PPU's output stage
 takes shortcuts to save cost.
@@ -334,8 +334,8 @@ luma, diagonal stripes and
 checkerboard patterns often
 produce crosstalk artifacts.
 
-On an NTSC NES, the word
-"Pass" fades in and out.
+On an NTSC console,
+"NTSC" fades in and out.
 Through S-Video or RGB,
 the stripes are indistinct.
 
@@ -820,7 +820,7 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.23wip (2021-06-xx)
+Version 0.23wip (2021-08-xx)
 Monoscope
 
 Concept: Artemio Urbina
@@ -829,7 +829,7 @@ Program: Damian Yerrick
   🐦 @PinoBatch
 
 © 2011-2016 Artemio Urbina
-© 2015-2020 Damian Yerrick
+© 2015-2021 Damian Yerrick
 This is free software; see the
 source for copying conditions.
 There is NO warranty, not
