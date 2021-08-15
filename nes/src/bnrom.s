@@ -25,7 +25,7 @@
 ; Fixed code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MAIN_CODE_BANK = $01
-RESETSTUB_BASE = $FFA0
+RESETSTUB_BASE = $FF90
 
 .macro resetstub_in segname, scopename
 .segment segname
@@ -79,6 +79,7 @@ resetstub_entry:
   txs
   stx resetstub_entry+2
   jmp reset_handler
+  .assert * <= $FFE0, warn, "reset stub extends into Famicom Box header area"
   .res ::scopename - ::RESETSTUB_BASE + $FFFA - *
   .addr nmi_handler, resetstub_entry, irq_handler
 .endproc
