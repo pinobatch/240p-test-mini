@@ -41,6 +41,7 @@ vram_copydsthi: .res 1
 flashing_ok:    .res 1
 .bss
 help_line_buffer:.res HELP_LINE_LEN
+TITLE_REPEAT_CODE = $0F
 
 .code
 
@@ -275,6 +276,10 @@ done:
   ldx help_cur_doc
   lda helptitles_hi,x
   ldy helptitles_lo,x
+  jsr undte_line
+have_line_buffer:
+  lda #>help_line_buffer
+  ldy #<help_line_buffer
 have_ay:
   ldx #0
 have_axy:
@@ -347,9 +352,7 @@ pagenum_template_done:
   sta help_line_buffer+4
   lda #2
   sta cur_nonblank
-  lda #>help_line_buffer
-  ldy #<help_line_buffer
-  jmp have_ay
+  jmp have_line_buffer
 
 not_pagenum_line:
   cmp #22
@@ -385,20 +388,38 @@ not_pagenum_line:
     sty prev_nonblank
   :
 
-  ; Decompress line  
-  lda ciSrc+1
-  ldy ciSrc
-  jsr undte_line
-  tay
-  dey
-  lda ($00),y
-  cmp #$01
-  tya
-  adc $00
-  sta ciSrc
-  bcc :+
-    inc ciSrc+1
-  :
+  ; Does this line repeat a title (0F xx)?
+  ldy #0
+  lda (ciSrc),y
+  cmp #TITLE_REPEAT_CODE
+  bne normal_dte_line
+    sta $4444
+    iny
+    lda (ciSrc),y
+    tax
+    lda helptitles_hi,x
+    ldy helptitles_lo,x
+    jsr undte_line
+    clc
+    lda #2
+    bpl compressed_line_length_A_CF
+  normal_dte_line:
+    ; Decompress line
+    lda ciSrc+1
+    ldy ciSrc
+    jsr undte_line
+    tay  ; A: number of compressed bytes written
+    dey  ; Read last compressed byte and set CF if not NUL terminator
+    lda ($00),y
+    cmp #$01
+    ; Add Y bytes if on NUL or Y+1 otherwise (usually LF)
+    tya
+  compressed_line_length_A_CF:
+    adc ciSrc
+    sta ciSrc
+    bcc :+
+      inc ciSrc+1
+    :
 
   ; Indent iff a cursor is displayed
   ldx #0

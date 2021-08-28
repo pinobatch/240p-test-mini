@@ -38,7 +38,7 @@ def dtemakeenctable(replacements):
     """Make a greedy encoding table for DTE"""
     encs = [(dtedec(r, replacements), bytes([i + DTE_MIN_CODEUNIT]))
             for i, r in enumerate(replacements)]
-    # try this or try encs.reverse(), whatever works better
+    # put longer replacement first (greedy algorithm)
     encs.sort(key=lambda x: len(x[0]), reverse=True)
     return encs
 
@@ -50,8 +50,8 @@ def dteenc(s, enctable):
 def dtereenc(txt, oldenc, enctable, printoldbetter=False):
     """Encode to DTE then keep the shorter of corresponding lines.
 
-Neither jroatch's algorithm nor my algorithm is optimal.  But if I
-compare them line by line, I can take whatever's best.
+Neither jroatch's algorithm nor my algorithm is optimal.
+So I compare them line by line and take whatever's better.
 """
     newenc = dteenc(txt, enctable).split(b"\n")
     oldenc = oldenc.split(b"\n")
@@ -98,8 +98,7 @@ section "helppages",ROMX
     lines.extend('export helpsect_%s' % (doc[1])
                  for i, doc in enumerate(docs))
 
-    cumul_pages = [0]
-    allpages = []
+    allpages, cumul_pages = [], [0]
     for doc in docs:
         for page in doc[-1]:
             page = [line.encode("cp144p") for line in page]
@@ -107,7 +106,7 @@ section "helppages",ROMX
         assert len(allpages) == cumul_pages[-1] + len(doc[-1])
         cumul_pages.append(len(allpages))
 
-    # DTE compression
+    # DTE compress titles and bodies
     helptitledata = [doc[0].encode("cp144p") for doc in docs]
     dtepages = list(allpages)
     dtepages.extend(helptitledata)
@@ -173,7 +172,7 @@ section "helppages",ROMX
                      dtedec(j, replacements).decode("cp144p")),
                   file=sys.stderr)
 
-    # Try to match lines of text to document titles
+    # Match lines of text to document titles
     # (reuse of title of document id 0 is currently buggy)
     helptitleinv = {t: idx for idx, t in enumerate(helptitledata) if idx}
 
@@ -201,16 +200,13 @@ section "helppages",ROMX
     lines.extend('helptitle_%d: db %s,0'
                  % (i, rgbasm_escape_bytes(dtetitle))
                  for i, dtetitle in enumerate(helptitledata))
-
     lines.append('help_cumul_pages::')
     lines.append(rgbasm_bytearray(cumul_pages))
     lines.append('HELP_NUM_PAGES equ %d' % cumul_pages[-1])
     lines.append('HELP_NUM_SECTS equ %d' % len(docs))
     lines.append('export HELP_NUM_PAGES, HELP_NUM_SECTS')
-    
     lines.append('helppages::')
     lines.extend('  dw helppage_%03d' % i for i in range(cumul_pages[-1]))
-
     lines.append("dte_replacements::")
     lines.extend("  db %s" % rgbasm_escape_bytes(r) for r in replacements)
 
@@ -235,7 +231,6 @@ section "helppages",ROMX
         )
 
     lines.append("")
-
     return "\n".join(lines)
 
 def parse_argv(argv):

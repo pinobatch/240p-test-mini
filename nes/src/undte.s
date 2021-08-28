@@ -7,11 +7,18 @@
 ; is added to a stack, and the first is interpreted as above.
 
 DTE_MIN_CODEUNIT = 136
-MIN_PRINTABLE = 32
+FIRST_PRINTABLE_CU = 32
 
 .import dte_replacements
 
 .segment "LIBCODE"
+
+;;
+; Decompress a line of digram tree encoded text to help_line_buffer.
+; @param AY pointer to start of compressed text, ending with code
+;   unit less than FIRST_PRINTABLE_CU
+; @return $00: initial AY value; A: compressed bytes read;
+;   Y: decompressed bytes written; CF true
 .proc undte_line
 srcaddr = $00
   sty srcaddr
@@ -29,7 +36,7 @@ strlenloop:
   iny
   cpy #HELP_LINE_LEN
   bcs have_strlen
-  cmp #MIN_PRINTABLE
+  cmp #FIRST_PRINTABLE_CU
   bcs strlenloop
 have_strlen:
   tya
@@ -58,7 +65,6 @@ decomp_code:
   cpx #HELP_LINE_LEN
   bcc decomploop
 
-  ; A: compressed bytes read; Y: decompressed bytes written
   pla
   rts
 
