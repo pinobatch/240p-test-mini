@@ -386,9 +386,9 @@ the reticles align.
 
 This shows a scrolling
 background with several
-parallax strips. It can
-be used to notice any
-drops in frame rate.
+parallax strips. Use it
+to notice any drops in
+frame rate.
 
 ↑↓: Change speed
 ←→: Change direction

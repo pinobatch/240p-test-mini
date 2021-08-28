@@ -209,7 +209,7 @@ loop:
   ; Adjust brightness up or down, wrapping
   ldy test_state
   lda new_keys
-  and #KEY_UP
+  and #KEY_UP|KEY_RIGHT
   beq not_inc_brightness
     iny
     cpy #monoscope_fglevels_end-monoscope_fglevels
@@ -217,7 +217,7 @@ loop:
     ldy #0
   not_inc_brightness:
   lda new_keys
-  and #KEY_DOWN
+  and #KEY_DOWN|KEY_LEFT
   beq not_dec_brightness
     dey
     bpl not_dec_brightness

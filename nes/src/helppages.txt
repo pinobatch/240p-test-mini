@@ -197,7 +197,7 @@ brightness. An overly bright
 pattern causes bloom that
 masks convergence issues.
 
-↑↓: Change brightness
+↑↓←→: Change brightness
 ----
 Corners:
 After setting center and
@@ -259,16 +259,16 @@ Some cables produce audio
 buzzing on a white screen.
 
 ←→: Change color among
-   white, black, red,
-   green, or blue
+  white, black, red,
+  green, or blue
 A on black screen: Switch
-   between black and below
-   black (some TVs lose sync)
+  between black and below
+  black (some TVs lose sync)
 A on white screen:
-   Hide or show custom color
+  Hide or show custom color
 ↑↓←→: Change custom color
 Select: Toggle windowbox to
-   test brightness limiter
+  test brightness limiter
 
 == IRE ==
 
@@ -281,7 +281,7 @@ Some TVs lose sync when
 brightness becomes negative.
 A good TV won't.
 
-←→: Change brightness
+↑↓←→: Change brightness
 A: Toggle emphasis
 
 Percentage values measured
@@ -369,9 +369,8 @@ is making 262 or 312 lines:
   NTSC: 15745.80 Hz
   PAL:   15602.18 Hz
 
-From this, it calculates
-CPU clock speed.
-It repeats this calculation
+From this, it calculates speed.
+It repeats the calculation
 every few frames, so if
 the CPU's speed changes
 while the test runs, the
@@ -650,9 +649,9 @@ or weaving frames.
 == Backlight zone test ==
 
 This test displays a small
-moving square, letting you
-check how a display works
-with small bright areas.
+moving square, showing
+how a display treats small
+bright areas.
 Some LED-lit LCDs dim
 dark areas to make blacks
 deeper, which causes
@@ -782,7 +781,7 @@ between audio and video
 with recording equipment
 or an oscilloscope.
 
-A: Start or stop the test
+A: Start or stop
 
 == Zapper test ==
 
