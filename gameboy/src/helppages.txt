@@ -740,7 +740,7 @@ Select: Stop sound
 
 == 144p Test Suite ==
 
-Ver. 0.23wip (2021-06-xx)
+Ver. 0.23b1 (2021-09-25)
 SGB sound
 
 © 2011-2016

@@ -1,4 +1,4 @@
-0.23 (future)
+0.23 (2021-09-30)
 * Add SGB sound test
 * Add health warning to Motion blur and Chroma crosstalk
 * Rename Manual lag test to Timing and reflex test to reflect

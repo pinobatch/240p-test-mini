@@ -624,7 +624,7 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.23wip (2021-06-xx)
+Version 0.23b1 (2021-09-25)
 HDMA is right for you
 
 © 2011-2016 Artemio Urbina
