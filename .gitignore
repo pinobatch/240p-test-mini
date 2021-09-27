@@ -45,7 +45,7 @@ __pycache__/
 /nes/obj/nes/*.sav
 /nes/*.dbg
 /nes/*map.txt
-/nes/240pee-bnrom.nes
+/nes/240pee-*rom.nes
 /nes/240pee.nes
 /nes/mdfourier.nsf
 /nes/mdfourier4k.nes
