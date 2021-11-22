@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+GBC nametable tool
+
+Copyright 2012, 2018, 2019 Damian Yerrick
+License: zlib
+
+"""
 import sys
 import os
 import argparse
@@ -16,7 +23,7 @@ from pilbmp2nes import pilbmp2chr, formatTilePlanar
 def quantizetopalette(silf, palette, dither=False):
     """Convert an RGB or L mode image to use a given P image's palette.
 
-This is a forked version of PIL.Image.Image.quantize() with more
+This is a fork of PIL.Image.Image.quantize() with more
 control over whether Floyd-Steinberg dithering is used.
 """
 
@@ -30,22 +37,28 @@ control over whether Floyd-Steinberg dithering is used.
         raise ValueError(
             "only RGB or L mode images can be quantized to a palette"
             )
+
+    # 0 means turn off dithering
     im = silf.im.convert("P", 1 if dither else 0, palette.im)
-    # the 0 above means turn OFF dithering
+    return silf._new(im)
 
-    try:
-        return silf._new(im)  # Name in Pillow 4+
-    except AttributeError:
-        return silf._makeself(im)  # Name in Pillow 3-
-
-# This is generalized from savtool.py
 def colorround(im, palettes, tilesize, subpalsize):
+    """Find the best palette
+
+im -- a Pillow image (will be converted to RGB)
+palettes -- list of subpalettes [[(r, g, b), ...], ...]
+tilesize -- size in pixels of each tile as (x, y) tuple
+subpalsize -- the maximum number of colors in each subpalette to use
+
+Return a 2-tuple (final image, attribute map)
+"""
+    # Generalized from a function in savtool.py in nesbgeditor
+
     blockw, blockh = tilesize
     if im.mode != 'RGB':
         im = im.convert('RGB')
 
-    trials = []
-    all_colors = []
+    trials, allcolors = [], []
     onetile = Image.new('P', tilesize)
     for p in palettes:
         p = list(p[:subpalsize])
@@ -83,8 +96,11 @@ def colorround(im, palettes, tilesize, subpalsize):
         ]
         trials.append((imp, diff))
 
-    # Find the attribute with the smallest difference
-    # for each color area
+    # trials is a list [(imp, [diff, ...]), ...]
+    # where imp is a Pillow image converted using each subpalette,
+    # and diff is total squared error from quantization of each tile,
+    # arranged row-major.  Find the subpalette with the smallest
+    # difference for each color area.
     attrs = [
         min(enumerate(i), key=lambda i: i[1])[0]
         for i in zip(*(diff for (imp, diff) in trials))
@@ -183,6 +199,7 @@ def im_to_gbc(im, palettes):
 # Input parsing #####################################################
 
 def hextotuple(color):
+    """Translate a hex color (abc, #abc, aabbcc, #aabbcc) to a 3-tuple (r, g, b)"""
     if color.startswith('#'):
         color = color[1:]
     color = color.lower()
