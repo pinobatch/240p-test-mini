@@ -31,8 +31,8 @@ cur_shape rb 1
 shadow_is_striped rb 1
 cur_frame rb 1
 cur_bg_style rb 1
-held_keys rb 1
 wy_countdown rb 1
+held_keys rb 1
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -41,17 +41,23 @@ wy_countdown rb 1
 
 section "shadowsprite",ROM0
 
+SHADOW_SPRITE_INITIAL_X equ 72
+SHADOW_SPRITE_INITIAL_Y equ 96
+
+
 activity_shadow_sprite::
-  ld a,72
-  ldh [xpos],a
-  ldh [ypos],a
+  ld hl, xpos
+  ld [hl], SHADOW_SPRITE_INITIAL_X  ; position the sprite
+  inc l
+  ld [hl], SHADOW_SPRITE_INITIAL_Y
+  inc l
   xor a
-  ldh [cur_facing],a
-  ldh [cur_shape],a
-  ldh [shadow_is_striped],a
-  ldh [cur_frame],a
-  ldh [cur_bg_style],a
-  ldh [wy_countdown],a
+  ld [hl+], a  ; zero rest of test state
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
+  ld [hl+], a
 
 .restart:
   call clear_gbc_attr
@@ -485,82 +491,64 @@ get_shadow_frame_number:
 ; Background loaders ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 shadow_sprite_bg_loaders:
-  dw load_gus_portrait
+  dw load_donna_portrait
   dw load_hillzone_bg_with_lcdc
   dw load_horizontal_stripes
   dw load_diagonal_stripes
 
-Gus_row_top = _SCRN1+14*32
-Gus_topleft = Gus_row_top + 4
+portrait_top_left = _SCRN1 + 14*32
 
 clear_scrn1_bottom:
   ; Clear background
   ld h, 0
-  ld de, Gus_row_top
+  ld de, portrait_top_left
   ld bc, 32*18
   jp memset
 
-load_gus_portrait:
+load_donna_portrait:
   call clear_scrn1_bottom
   ld a,LCDCF_ON|BG_NT1|WINDOW_NT1|BG_CHR21|OBJ_ON
   ldh [vblank_lcdc_value], a
   ld a, 256-144
   ldh [rSCY], a
 
-  ldh a, [hw_capability]
-  add a
-  jr c,load_gus_portrait_gbc
-
   ld a,%11100100
   ldh [rBGP], a
+  ld hl,portrait_pal
+  ld a,$80
+  ldh [rVBK],a
+  ld bc,(4*2)*256+low(rBCPS)
+  call set_gbc_palette
 
-  ; Load Gus portrait for background
+  ; Load Donna portrait for background
   ld l, 7
 .from_l:
-  ld bc,CHRRAM2
+  ld bc,CHRRAM1
   call allhuffdata_unpack_iu_file_l
-  ; fall through
+
+  ; Invert decoded tilemap because it has more than 128 tiles
+  ld hl, SCRN_TMP
+  ld c, 180
+  .invertloop:
+    ld a, $80
+    xor [hl]
+    ld [hl+], a
+    ld a, $80
+    xor [hl]
+    ld [hl+], a
+    dec c
+    jr nz, .invertloop
 
 ;;
-; Draw the rectangle of Gus's portrait.
+; Draw the rectangle of Donna's portrait.
 ; HL (end of IU decoding) is left unchanged.
 .load_nam:
   push hl
   ld hl,SCRN_TMP
-  ld de,Gus_topleft
-  ld bc,13*256+18
-  call load_nam
+  ld de,portrait_top_left
+  call load_full_nam
   pop hl
   ret
-
-load_gus_portrait_gbc:
-  ; Load Gus portrait for background
-  ; Prepare plane 1
-  ld a,1
-  ldh [rVBK],a
-  call clear_scrn1_bottom
-  xor a
-  ldh [rVBK],a
-
-  ; Prepare plane 0
-  ld l, 8
-  call load_gus_portrait.from_l
-
-  ; Prepare plane 1
-  ld d, h
-  ld e, l
-  ld hl,SCRN_TMP
-  ld b,15
-  ld a,b
-  ldh [rVBK],a
-  call pb16_unpack_block
-  call load_gus_portrait.load_nam
-
-  ld hl,portrait_pal
-  ld a,$80
-  ldh [rVBK],a
-  ld bc,(8*4*2)*256+low(rBCPS)
-  jp set_gbc_palette
 
 load_hillzone_bg_with_lcdc:
   call load_hillzone_bg

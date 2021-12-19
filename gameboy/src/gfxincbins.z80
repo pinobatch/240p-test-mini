@@ -101,7 +101,10 @@ export sizeof_megaton_tiles
 
 section "shadowsprite_gfx1",ROMX
 portrait_pal::
-  incbin "obj/gb/Gus_portrait-GBC.pal"
+  drgb $FFFFFF
+  drgb $FFAA66
+  drgb $7777EE
+  drgb $552211
 shadow_reticle_chr::
   incbin "obj/gb/shadow_reticle.chrgb.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4

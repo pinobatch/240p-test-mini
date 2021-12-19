@@ -9,7 +9,7 @@ software free.
   Was Maj. Motoko Kusanagi from Masamune Shirow's
   _Ghost in the Shell_.  Replaced with another illustration of
   Gus by darryl.revok.  (In fourth quarter 2021, upstream replaced
-  it with Donna.)
+  it with Donna, and GB followed suit.)
 - Hepsie  
   Was a badnik from Sega's _Sonic the Hedgehog_.  Replaced with a
   fairy godmother character from a discarded Apple II game design.

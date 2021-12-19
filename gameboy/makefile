@@ -33,7 +33,7 @@ huffdata := \
   obj/gb/sharpness.iu \
   obj/gb/linearity-quadrant.iu \
   obj/gb/stopwatchface.iu \
-  DMG? obj/gb/Gus_portrait.iu obj/gb/Gus_portrait-GBC.iuc
+  obj/gb/Donna_portrait.iu
 
 # Paths to executables
 RGBASM  := rgbasm

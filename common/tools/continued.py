@@ -50,6 +50,11 @@ eval_cf([3,7,16]) also equals (355, 113)
 For an introduction to continued fractions, see this video:
 "The Golden Ratio (why it is so irrational)" by Numberphile
 <https://www.youtube.com/watch?v=sj8Sg8qnjOg>
+
+With pixel aspect ratios, it's often helpful to pick a convergent
+whose numerator or denominator divides 72 to make the DPI setting
+for paint programs easier to remember.  Hence 18/13 for PAL H32,
+pilbmp2nes.py
 """
     it = reversed(terms)
     num, den = next(it), 1
@@ -67,16 +72,25 @@ def make_cf(num, den):
         num, den = den, num - term * den
     return out
 
+testcases = [
+    ("PAL H32 pixel aspect ratio", 2950000, 2128137),
+    ("PAL H40 pixel aspect ratio", 2360000, 2128137),
+    ("Super Game Boy 2 clock divider", 14765625, 2883584),
+    # Though the Nintendo DS has square pixels, its frame timing
+    # relative to system M suggests this ratio.
+    ("Nintendo DS SuperGun pixel aspect ratio", 6328125, 5767168),
+]
+
 def main():
-    num, den = 2950000, 2128137
-    print("PAL H32 pixel aspect ratio: %s/%s" % (num, den))
-    pal_cf = make_cf(num, den)
-    print("As a continued fraction:", pal_cf)
-    print("Convergents:")
-    for i in range(len(pal_cf)):
-        num_terms = i + 1
-        n, d = eval_cf(pal_cf[:num_terms])
-        print("%d. %d/%d = %.9f" % (num_terms, n, d, n/d))
+    for name, num, den in testcases:
+        print("%s: %s/%s" % (name, num, den))
+        pal_cf = make_cf(num, den)
+        print("As a continued fraction:", pal_cf)
+        print("Convergents:")
+        for i in range(len(pal_cf)):
+            num_terms = i + 1
+            n, d = eval_cf(pal_cf[:num_terms])
+            print("%d. %d/%d = %.9f" % (num_terms, n, d, n/d))
 
 if __name__=='__main__':
     main()

@@ -58,7 +58,7 @@ Return a 2-tuple (final image, attribute map)
     if im.mode != 'RGB':
         im = im.convert('RGB')
 
-    trials, allcolors = [], []
+    trials, all_colors = [], []
     onetile = Image.new('P', tilesize)
     for p in palettes:
         p = list(p[:subpalsize])

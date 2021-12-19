@@ -118,13 +118,17 @@ Limits
 ------
 * Linearity: No support for non-square NTSC or PAL pixel aspect
   ratios when used through Super Game Boy.
-* Gradient and SMPTE color bars are not available on SGB.
+* Gradient and SMPTE color bars are not available on SGB because of
+  SGB's limits on what colors can be near other colors.
 * Sound Test: No "Crowd" because GB PCM is limited to 4 bits and
   very fiddly to get right without buzzing artifacts.
 * Alternate 240p/480i: SGB and GB Player offer no control over
   the host systems' interlace modes except through SGB JUMP.
 * The IRE levels of the Super NES and Nintendo GameCube video output
   have not yet been measured.
+* The Suite is not yet ported to Mega Duck or Analogue Pocket, as
+  supply chain problems have prevented the developer from procuring
+  a system on which to test it.
 
 Contributors
 ------------
