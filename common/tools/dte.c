@@ -37,6 +37,15 @@ For more information, please refer to <http://unlicense.org/>
 
 */
 
+/* Changelog
+
+2022-01-22 (Damian Yerrick)
+  - Switch to binary mode (no newline translation) on Windows
+2019-08 (Johnathan Roatch)
+  - Initial release
+
+*/
+
 #include <stdio.h>   /* I/O */
 #include <errno.h>   /* errno */
 #include <stdbool.h> /* bool */
@@ -94,6 +103,27 @@ static void fatal_perror(const char *filename)
   }
   exit(EXIT_FAILURE);
 }
+
+/* Windows defaults to newline translation on standard input.
+   and output.  Disable this.
+   https://stackoverflow.com/q/16888339/2738262
+   https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/setmode?view=msvc-170
+   */
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+static void set_stdout_binary() {
+  _setmode(_fileno(stdout), _O_BINARY);
+}
+static void set_stdin_binary() {
+  _setmode(_fileno(stdin), _O_BINARY);
+}
+#else
+static void set_stdout_binary() {
+}
+static void set_stdin_binary() {
+}
+#endif
 
 size_t read_file_to_memory(uint8_t **returned_data_ptr, FILE *in)
 {
@@ -620,6 +650,7 @@ int main (int argc, char *argv[])
     if (use_stdio_for_data) {
       input_file = stdin;
       input_filename = "<stdin>";
+      set_stdin_binary();
     } else {
       fatal_error("input filename required. Try --help for more info.\n");
     }
@@ -628,6 +659,7 @@ int main (int argc, char *argv[])
     if (use_stdio_for_data) {
       output_file = stdout;
       output_filename = "<stdout>";
+      set_stdout_binary();
     } else {
       fatal_error("output filename required. Try --help for more info.\n");
     }
