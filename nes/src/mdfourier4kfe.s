@@ -163,7 +163,9 @@ have_phase_xy:
     iny
     cpy #uipalette_end-uipalette
     bne :-
-  lda #0
+  lda #VBLANK_NMI
+  sta PPUCTRL
+  asl a
   sta PPUSCROLL
   sta PPUSCROLL
   lda #BG_ON
