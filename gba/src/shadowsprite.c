@@ -32,6 +32,10 @@ extern const unsigned int Gus_portrait_chrTiles[];
 extern const unsigned short Gus_portrait_chrMap[20][14];
 extern const unsigned short Gus_portrait_chrPal[16];
 
+extern const unsigned int Donna_chrTiles[];
+extern const unsigned short Donna_chrMap[20][14];
+extern const unsigned short Donna_chrPal[16];
+
 static void gus_bg_setup(void) {
   LZ77UnCompVram(Gus_portrait_chrTiles, PATRAM4(0, 0));
   dma_memset16(MAP[PFSCROLLTEST], 0x0000, 32*20*2);
@@ -45,6 +49,21 @@ static void gus_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   BG_OFFSET[1].x = 0;
   BG_OFFSET[1].y = 0;
   dmaCopy(Gus_portrait_chrPal, BG_COLORS, sizeof(Gus_portrait_chrPal));
+}
+
+static void donna_bg_setup(void) {
+  LZ77UnCompVram(Donna_chrTiles, PATRAM4(0, 0));
+  dma_memset16(MAP[PFSCROLLTEST], 0x0000, 32*20*2);
+  load_flat_map(&(MAP[PFSCROLLTEST][0][0]), Donna_chrMap[0], 30, 20);
+}
+
+static void donna_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
+  (void)hdmaTable;
+  (void)unused;
+  BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
+  BG_OFFSET[1].x = 0;
+  BG_OFFSET[1].y = 0;
+  dmaCopy(Donna_chrPal, BG_COLORS, sizeof(Donna_chrPal));
 }
 
 static void striped_bg_setup(unsigned int tilenum) {
@@ -75,8 +94,9 @@ typedef struct ShadowSpriteBG {
   void (*set_scroll)(uint16_t *hdmaTable, unsigned int x);
 } ShadowSpriteBG;
 
-const ShadowSpriteBG bgtypes[4] = {
+static const ShadowSpriteBG bgtypes[] = {
   {gus_bg_setup, gus_bg_set_scroll},
+  {donna_bg_setup, donna_bg_set_scroll},
   {hill_zone_load_bg, hill_zone_set_scroll},
   {bg_2_setup, striped_bg_set_scroll},
   {bg_3_setup, striped_bg_set_scroll},

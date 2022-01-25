@@ -7,8 +7,9 @@ License: zlib
 
 The fraction (2950000/2128137) ≈ 1.386188953 appears in the pixel
 aspect ratio (PAR) of several digital picture generators that
-generate a PAL-compatible signal.  A system containing this fraction
-is far more difficult to reason about than the 8/7 of NTSC and tricky
+generate a PAL-compatible signal.  Because of the large prime factor
+of 64489 in its denominator, a system containing this fraction is
+far more difficult to reason about than the 8/7 of NTSC and tricky
 to even approximate because of all the small numbers in its finite
 continued fraction expansion.  There are 10 terms before the first
 greater than 3.
@@ -29,6 +30,7 @@ greater than 3.
 1 + 1/(2 + 1/(1 + 1/(1 + 1/(2 + 1/(3 + 1/(2 + 1/(1 + 1/(1 + 1/(1 + 1/(20 + 1/(1 + 51/203)))))))))))
 1 + 1/(2 + 1/(1 + 1/(1 + 1/(2 + 1/(3 + 1/(2 + 1/(1 + 1/(1 + 1/(1 + 1/(20 + 1/(1 + 1/(3 + 50/51))))))))))))
 1 + 1/(2 + 1/(1 + 1/(1 + 1/(2 + 1/(3 + 1/(2 + 1/(1 + 1/(1 + 1/(1 + 1/(20 + 1/(1 + 1/(3 + 1/(1 + 1/50)))))))))))))
+
 """
 
 def eval_cf(terms):
@@ -53,8 +55,8 @@ For an introduction to continued fractions, see this video:
 
 With pixel aspect ratios, it's often helpful to pick a convergent
 whose numerator or denominator divides 72 to make the DPI setting
-for paint programs easier to remember.  Hence 18/13 for PAL H32,
-pilbmp2nes.py
+for paint programs easier to remember.  Hence 18/13 for PAL H32.
+
 """
     it = reversed(terms)
     num, den = next(it), 1
@@ -75,10 +77,17 @@ def make_cf(num, den):
 testcases = [
     ("PAL H32 pixel aspect ratio", 2950000, 2128137),
     ("PAL H40 pixel aspect ratio", 2360000, 2128137),
+    # NTSC NES system clock is 945/44 MHz; GB clock is 2^22 Hz.
+    # Division by 5, as in the original Super Game Boy, is about
+    # 2.4% fast.  Japan-only Super Game Boy 2 has a separate
+    # crystal at 5*2^22 Hz.
     ("Super Game Boy 2 clock divider", 14765625, 2883584),
     # Though the Nintendo DS has square pixels, its frame timing
     # relative to system M suggests this ratio.
     ("Nintendo DS SuperGun pixel aspect ratio", 6328125, 5767168),
+    # 2^32 cycles of a 105/88 MHz clock, like Atari 2600 CPU and
+    # IBM PC Intel 8253/8254 timer, are very close to an hour
+    ("Hours in 2^32 8253 PIT cycles", 369098752, 369140625),
 ]
 
 def main():
