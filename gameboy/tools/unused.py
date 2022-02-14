@@ -4,7 +4,7 @@ Long run detector for binary files
 Copyright 2018-2019 Damian Yerrick
 insert zlib license here
 """
-import string, bisect, sys
+import string, bisect, sys, os
 
 def addrtosym(s, syms):
     try:
@@ -72,9 +72,10 @@ def load_syms(filename):
             dataranges[-1] = (dataranges[-1][0], k)
     return syms, dataranges
 
-with open("gb240p.gb", "rb") as infp:
+romfolder = os.path.join(os.path.dirname(sys.argv[0]), "..")
+with open(os.path.join(romfolder, "gb240p.gb"), "rb") as infp:
     data = infp.read()
-syms, dataranges = load_syms("gb240p.sym")
+syms, dataranges = load_syms(os.path.join(romfolder, "gb240p.sym"))
 
 runthreshold = 32
 runbyte, runlength, runs = 0xC9, 0, []
@@ -112,11 +113,19 @@ for i, (addr, inst) in enumerate(optimizable_hram_accesses):
         inst = inst + "  ; false alarm? (JR before RET)"
         optimizable_hram_accesses[i] = (addr, inst)
 
+# Optimizable calls #################################################
+
 rstable_calls = [
     (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
     for i, d in enumerate(data[:-3])
     if d == 0xCD and data[i + 2] == 0 and (data[i + 1] & 0xC7) == 0
     and not any(l <= i <= h for l, h in dataranges)
+]
+
+tailcalls = [
+    (i, disassemble_inst(d, data[i + 1] + data[i + 2] * 0x100, syms))
+    for i, d in enumerate(data[:-4])
+    if d == 0xCD and data[i + 3] == 0xC9
 ]
 
 # Optimizable jumps #################################################
@@ -208,6 +217,7 @@ sortedsyms = sorted(syms.items())
 optimizable = []
 optimizable.extend(optimizable_hram_accesses)
 optimizable.extend(rstable_calls)
+optimizable.extend(tailcalls)
 optimizable.extend(jr_forward_1)
 optimizable.extend(jp_to_ret)
 optimizable.extend(jr_to_ret)
