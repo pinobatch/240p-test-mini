@@ -167,7 +167,7 @@ static void help_draw_character(void) {
     SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALETTE(0);
     ++ou;
     SOAM[ou].attr0 = 49 | OBJ_16_COLOR | ATTR0_SQUARE;
-    SOAM[ou].attr1 = 41 | ATTR1_SIZE_8 | OBJ_HFLIP;
+    SOAM[ou].attr1 = 40 | ATTR1_SIZE_8 | OBJ_HFLIP;
     SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALETTE(0);
     ++ou;
   }
