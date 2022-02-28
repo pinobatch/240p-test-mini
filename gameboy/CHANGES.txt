@@ -1,12 +1,15 @@
-0.23 (2021-09-30)
+0.23 (2022-03-xx)
 * Add SGB sound test
 * Add health warning to Motion blur and Chroma crosstalk
+* Shadow sprite: replace GB Gus and GBC Gus with Donna
 * Rename Manual lag test to Timing and reflex test to reflect
   how it is used
 * Delay SGB detection by 8 frames for increased compatibility
 * topcalls.py: Port from awk to Python; list not only top calls but
   also routines called once for more size optimization opportunities
 * Massive micro-optimizations based on topcalls.py results
+* unused.py: list tail calls (call then ret)
+* Add continued fraction tool for pixel aspect ratio experiments
 * Reduce use of "master" per Inclusive Naming Initiative
 
 0.22 (2020-11-04)
