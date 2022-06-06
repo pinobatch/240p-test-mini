@@ -476,6 +476,12 @@ A+↑↓: Change its size
   pixels on a side
 Select: Invert grays
 
+To measure image decay
+time, use a high-speed
+camera to record the
+screen while closing
+this help page.
+
 == Sound test: Frequency ==
 
 8000 Hz

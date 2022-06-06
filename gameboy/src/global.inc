@@ -20,7 +20,7 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
   IF  !DEF(GLOBAL_INC)
-GLOBAL_INC SET 1
+GLOBAL_INC = 1
 
 ; This program contains one use of EQU to allocate local variables
 ; in RAM.  Other more experienced devs want to abolish allocation

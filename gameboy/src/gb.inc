@@ -22,7 +22,7 @@
 
 
   IF  !DEF(GB_INC)
-GB_INC SET 1
+GB_INC = 1
 
 ; hardware.inc comes from
 ; https://github.com/tobiasvl/hardware.inc/blob/master/hardware.inc

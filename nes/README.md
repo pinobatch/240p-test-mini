@@ -120,8 +120,9 @@ Contributors
 * Concept: Artemio Urbina [@Artemio]
 * Code: Damian Yerrick [@PinoBatch]
 * Main menu graphics: Damian Yerrick
-* Portrait in Shadow sprite test: darryl.revok
+* Portrait of Gus in Shadow sprite test: darryl.revok
 * Hill zone background: mikejmoffitt
+* [Monoscope pattern]: Keith Raney
 * Extra patterns and collaboration: Konsolkongen & [shmups] regulars
 * "Crowd" bytebeat player: Kragen & rainwarrior
 
@@ -132,6 +133,7 @@ high-quality displays and scalers.
 
 [@Artemio]: https://twitter.com/Artemio
 [@PinoBatch]: https://twitter.com/PinoBatch
+[Monoscope pattern]: https://www.retrorgb.com/240p-test-suite-monoscope-test-pattern-added.html
 [shmups]: http://shmups.system11.org/
 [development thread]: http://forums.nesdev.com/viewtopic.php?t=13394
 

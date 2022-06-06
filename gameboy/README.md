@@ -135,7 +135,7 @@ Contributors
 * Concept: Artemio Urbina [@Artemio]
 * Code: Damian Yerrick [@PinoBatch]
 * Main menu graphics: Damian Yerrick
-* Portrait in Shadow sprite test: darryl.revok
+* Portrait of Donna in Shadow sprite test: José Salot
 * Hill zone background: mikejmoffitt
 * Extra patterns and collaboration: Konsolkongen & [shmups] regulars
 

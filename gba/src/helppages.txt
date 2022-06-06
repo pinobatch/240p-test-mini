@@ -269,6 +269,8 @@ and negative charge.
 
 Portrait of Gus by
   darryl.revok
+Portrait of Donna by
+  pepe_salot
 Hill zone by mikejmoffitt
   & Damian Yerrick
 
@@ -439,6 +441,11 @@ A: Hide or show the square
 A+↑↓: Change its size among
   1, 2, 4, or 8 pixels on a side
 Select: Invert grays
+----
+To measure image decay time,
+use a high-speed camera to
+record the screen while
+closing this help page.
 
 == Sound test: Frequency ==
 
