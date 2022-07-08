@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys
+import sys, argparse
 from PIL import Image
 
 def hexdump(b, w=32):
@@ -25,21 +25,25 @@ def render_to_texels(data, twidth=16):
     im.putpalette(b'\xC0\xFF\x5F\x80\xBF\x5F\x40\x7F\x5F\x00\x3F\x5F')
     return im
 
+helpText="Visualize space usage in a file by treating it as Game Boy graphics"
+
+def parse_argv(argv):
+    p = argparse.ArgumentParser(description=helpText)
+    p.add_argument("romname", help="name of a Game Boy ROM")
+    p.add_argument("output", nargs='?', default=None,
+                   help="output file (if omitted, display on screen)")
+    p.add_argument("-w", "--width", type=int, default=32,
+                   help="number of 16-byte chunks per line (default: 32)")
+    return p.parse_args(argv[1:])
+
 def main(argv=None):
+    args = parse_argv(argv or sys.argv)
     argv = argv or sys.argv
-    if len(argv) < 2:
-        print("romusage.py: no filename; try romusage.py --help")
-        sys.exit(1)
-    infilename = argv[1]
-    outfilename = argv[2] if len(argv) > 2 else None
-    if infilename in ('--help', '-h'):
-        print("usage: romusage.py ROMNAME [PNGNAME]")
-        return
-    with open(infilename, "rb") as infp:
+    with open(args.romname, "rb") as infp:
         romdata = infp.read()
-    twidth = 32
+    twidth = args.width
     tiles = render_to_texels(romdata, twidth)
-    if outfilename:
+    if args.output:
         tiles.save(outfilename)
     else:
         tiles.show()
