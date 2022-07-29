@@ -91,6 +91,10 @@ restart:
   jsr load_kiki_map_02
 
   ; load palette
+  lda nmis
+  :
+    cmp nmis
+    beq :-  ; remove stripe at top
   ldx #$3F
   stx PPUADDR
   lda #0

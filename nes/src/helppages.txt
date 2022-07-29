@@ -541,7 +541,8 @@ may drop frames because the
 frame rate of the NTSC NES
 and Super NES (60.10 Hz) is
 faster than standard (59.94
-Hz).
+Hz). The displayed time gains
+a second every 10 minutes.
 
 At 59.94 Hz, it drops one
 frame in 345: one per 5.75
