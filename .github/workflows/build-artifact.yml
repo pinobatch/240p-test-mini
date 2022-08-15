@@ -2,7 +2,7 @@ name: build-artifact
 on: push
 
 jobs:
-    nes-build:
+  nes-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,18 +13,18 @@ jobs:
       - name: Run makefile
         run: |
             cd nes
-            make all
+            make 240pee.nes 240pee-bnrom.nes mdfourier.nsf mdfourier4k.nes
 
       - name: Upload ROM binaries
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: 240pee-NES
           path: |
-            240pee.nes 240pee-bnrom.nes 240pee-sgrom.nes 240pee-tgrom.nes
-            mdfourier.nsf mdfourier4k.nes
-            map.txt
-            bnmap.txt
-            sgmap.txt
-            tgmap.txt
-            mdfmap.txt
-            nsfmap.txt
+            nes/240pee.nes
+            nes/240pee-bnrom.nes
+            nes/mdfourier.nsf
+            nes/mdfourier4k.nes
+            nes/map.txt
+            nes/bnmap.txt
+            nes/mdfmap.txt
+            nes/nsfmap.txt
