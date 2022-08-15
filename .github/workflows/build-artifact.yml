@@ -1,0 +1,30 @@
+name: build-artifact
+on: push
+
+jobs:
+    nes-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup dependencies
+        shell: bash
+        run: sudo apt-get install build-essential python3-pil cc65
+
+      - name: Run makefile
+        run: |
+            cd nes
+            make all
+
+      - name: Upload ROM binaries
+        uses: actions/upload-artifact@v1
+        with:
+          name: 240pee-NES
+          path: |
+            240pee.nes 240pee-bnrom.nes 240pee-sgrom.nes 240pee-tgrom.nes
+            mdfourier.nsf mdfourier4k.nes
+            map.txt
+            bnmap.txt
+            sgmap.txt
+            tgmap.txt
+            mdfmap.txt
+            nsfmap.txt
