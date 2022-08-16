@@ -62,19 +62,17 @@ jobs:
 
   gba-build:
     runs-on: ubuntu-latest
+    container: devkitpro/devkitarm
     steps:
       - uses: actions/checkout@v3
       - name: Setup dependencies
-        run: |
-          sudo apt-get install build-essential python3-pil
+        shell: bash
+        run: echo -ne 'y\n' | sudo apt-get install build-essential python3-pil
 
       - name: Run makefile
-        uses: addnab/docker-run-action@v3
-        with:
-          image: devkitpro/devkitarm
-          options: -v ${{ github.workspace }}:/gba
-          run: |
-            make 240pee_mb.gba
+        run: |
+          cd gba
+          make
 
       - name: Upload ROM binaries
         uses: actions/upload-artifact@v3
