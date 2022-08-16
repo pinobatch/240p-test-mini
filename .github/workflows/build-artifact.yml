@@ -28,3 +28,34 @@ jobs:
             nes/bnmap.txt
             nes/mdfmap.txt
             nes/nsfmap.txt
+  gb-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup dependencies
+        shell: bash
+        run: |
+            sudo apt install libpng-dev python3-pil build-essential bison pkg-config
+            mkdir develop
+            cd develop
+            git clone https://github.com/gbdev/rgbds.git
+            cd rgbds
+            make
+            make install PREFIX="$HOME/.local"
+            export PATH="$HOME/.local/bin:$PATH"
+            export MANPATH="$HOME/.local/share/man:$MANPATH"\
+            cd ..
+
+      - name: Run makefile
+        run: |
+            cd gb
+            make gb240p.gb
+
+      - name: Upload ROM binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: 240pee-GB
+          path: |
+            gb/gb240p.gb
+            gb/gb240p.map
+            gb/gb240p.sym
