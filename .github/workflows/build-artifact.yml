@@ -35,7 +35,7 @@ jobs:
       - name: Setup dependencies
         shell: bash
         run: |
-            sudo apt install libpng-dev python3-pil build-essential bison pkg-config
+            sudo apt-get install libpng-dev python3-pil build-essential bison pkg-config
             mkdir develop
             cd develop
             git clone https://github.com/gbdev/rgbds.git
@@ -43,12 +43,12 @@ jobs:
             make
             make install PREFIX="$HOME/.local"
             export PATH="$HOME/.local/bin:$PATH"
-            export MANPATH="$HOME/.local/share/man:$MANPATH"\
-            cd ..
+            export MANPATH="$HOME/.local/share/man:$MANPATH"
+            cd ../..
 
       - name: Run makefile
         run: |
-            cd gb
+            cd gameboy
             make gb240p.gb
 
       - name: Upload ROM binaries
@@ -56,6 +56,32 @@ jobs:
         with:
           name: 240pee-GB
           path: |
-            gb/gb240p.gb
-            gb/gb240p.map
-            gb/gb240p.sym
+            gameboy/gb240p.gb
+            gameboy/gb240p.map
+            gameboy/gb240p.sym
+
+  gba-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup dependencies
+        run: |
+            wget https://apt.devkitpro.org/install-devkitpro-pacman
+            chmod +x ./install-devkitpro-pacman
+            sudo ./install-devkitpro-pacman
+            echo -ne '\ny\n' | sudo dkp-pacman -S gba-dev
+            sudo apt-get install python3-pil
+
+      - name: Run makefile
+        run: |
+            cd gba
+            source /etc/profile.d/devkit-env.sh
+            make 240pee_mb.gba
+
+      - name: Upload ROM binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: 240pee-GB
+          path: |
+            gba/240pee_mb.gba
+            gba/240pee_mb.elf
