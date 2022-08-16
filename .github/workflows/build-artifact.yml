@@ -81,7 +81,7 @@ jobs:
       - name: Upload ROM binaries
         uses: actions/upload-artifact@v3
         with:
-          name: 240pee-GB
+          name: 240pee-GBA
           path: |
             gba/240pee_mb.gba
             gba/240pee_mb.elf
