@@ -12,8 +12,8 @@ jobs:
 
       - name: Run makefile
         run: |
-            cd nes
-            make 240pee.nes 240pee-bnrom.nes mdfourier.nsf mdfourier4k.nes
+          cd nes
+          make 240pee.nes 240pee-bnrom.nes mdfourier.nsf mdfourier4k.nes
 
       - name: Upload ROM binaries
         uses: actions/upload-artifact@v3
@@ -35,16 +35,16 @@ jobs:
       - name: Setup dependencies
         shell: bash
         run: |
-            sudo apt-get install libpng-dev python3-pil build-essential bison pkg-config
-            mkdir develop
-            cd develop
-            git clone https://github.com/gbdev/rgbds.git
-            cd rgbds
-            make
-            make install PREFIX="$HOME/.local"
-            export PATH="$HOME/.local/bin:$PATH"
-            export MANPATH="$HOME/.local/share/man:$MANPATH"
-            cd ../..
+          sudo apt-get install libpng-dev python3-pil build-essential bison pkg-config
+          mkdir develop
+          cd develop
+          git clone https://github.com/gbdev/rgbds.git
+          cd rgbds
+          make
+          make install PREFIX="$HOME/.local"
+          export PATH="$HOME/.local/bin:$PATH"
+          export MANPATH="$HOME/.local/share/man:$MANPATH"
+          cd ../..
 
       - name: Run makefile
         run: |
@@ -66,16 +66,14 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup dependencies
         run: |
-            wget https://apt.devkitpro.org/install-devkitpro-pacman
-            chmod +x ./install-devkitpro-pacman
-            sudo ./install-devkitpro-pacman
-            echo -ne '\ny\n' | sudo dkp-pacman -S gba-dev
-            sudo apt-get install python3-pil
+          sudo apt-get install build-essential python3-pil
 
       - name: Run makefile
-        run: |
-            cd gba
-            source /etc/profile.d/devkit-env.sh
+        uses: addnab/docker-run-action@v3
+        with:
+          image: devkitpro/devkitarm
+          options: -v ${{ github.workspace }}:/gba
+          run: |
             make 240pee_mb.gba
 
       - name: Upload ROM binaries
