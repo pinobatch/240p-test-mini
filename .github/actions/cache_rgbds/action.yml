@@ -13,13 +13,13 @@ runs:
   using: "composite"
   steps:
       # Cache RGBDS
-      - uses: actions/cache@v3
+      - uses: actions/cache@master
         id: cache_rgbds
         with:
           path: ${{ inputs.rgbdsPath }}
           key: ${{ runner.os }}-rgbds-${{ inputs.rgbdsRef }}-${{ hashFiles('.github/actions/cache_rgbds/*') }}
       # Checkout RGBDS
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@master
         if: steps.cache_rgbds.outputs.cache-hit != 'true'
         with:
           repository: gbdev/rgbds
@@ -29,9 +29,11 @@ runs:
       - if: steps.cache_rgbds.outputs.cache-hit != 'true'
         run: |
           cd rgbds
-          PREFIX=${{ inputs.rgbdsPath }} make 
-          PREFIX=${{ inputs.rgbdsPath }} make install
+          sudo PREFIX=${{ inputs.rgbdsPath }} make 
+          sudo PREFIX=${{ inputs.rgbdsPath }} make install
         shell: bash
       # Add RGBDS binaries to path
-      - run: echo "${{ inputs.rgbdsPath }}/bin" >> $GITHUB_PATH
-        shell: bash
+      - shell: bash
+        run: |
+          export PATH="${{ inputs.rgbdsPath }}/bin:$PATH"
+          export MANPATH="${{ inputs.rgbdsPath }}/share/man:$MANPATH"
