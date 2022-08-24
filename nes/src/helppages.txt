@@ -341,8 +341,8 @@ the stripes are indistinct.
 
 == CPU clock speed ==
 
-Kevin Horton's Hi-Def NES
-mod lets ths user overclock
+Some emulators and console
+modifications can overclock
 the CPU to reduce slowdown
 in games. This test measures
 the CPU's clock rate using
@@ -552,7 +552,7 @@ frame in 607: one per 10.12
 seconds or two per 20.24.
 
 Hi-Def NES compensates
-for this by slowing down
+for this by slightly slowing
 the CPU and PPU.
 
 == Timing and reflex test ==
