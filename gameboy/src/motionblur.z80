@@ -276,7 +276,7 @@ motionblur_handle_presses:
   ; When A is pressed, set frames_left to 1 so that the animation
   ; restarts immediately.
   ; ld a, 1  ; frames_left is 1, but so is PADF_A
-  ld [frames_left],a
+  ldh [frames_left],a
 
   ; Toggle running flag and clear its phase
   ldh a,[is_running]
@@ -305,7 +305,7 @@ make_help_vram:
     inc c
     dec b
     jr nz,.loop
-  ld a,[is_stripes]
+  ldh a,[is_stripes]
   add a
   add $2C  ; On/Off text
   ld [hl+],a
@@ -332,12 +332,12 @@ motionblur_calc_bgp:
     add low(on_time)
     ld c,a
     ld a,[$FF00+c]
-    ld [frames_left],a
+    ldh [frames_left],a
 
     ; And toggle to the other frame
     ld a,b
     xor $01
-    ld [is_running],a
+    ldh [is_running],a
   .not_running:
 
   ; Fetch the on and off shades

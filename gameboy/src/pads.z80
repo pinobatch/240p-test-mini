@@ -55,20 +55,20 @@ SECTION "rom_pads", ROM0
 
 read_pad::
   ; Poll half the controller
-  ld a,P1F_BUTTONS
+  ld a,P1F_GET_BTN
   call .onenibble
   ld b,a  ; B7-4 = 1; B3-0 = unpressed buttons
 
   ; Poll the other half
-  ld a,P1F_DPAD
+  ld a,P1F_GET_DPAD
   call .onenibble
   swap a   ; A3-0 = unpressed directions; A7-4 = 1
   xor b    ; A = pressed buttons + directions
   ld b,a   ; B = pressed buttons + directions
 
   ; And release the controller
-  ld a,P1F_NONE
-  ld [rP1],a
+  ld a,P1F_GET_NONE
+  ldh [rP1],a
 
   ; Combine with previous cur_keys to make new_keys
   ldh a,[cur_keys]
@@ -272,9 +272,9 @@ sgb_send::
 
   ; Send $20 $30 as end of packet
   ld a,$20
-  ld [rP1],a
+  ldh [rP1],a
   ld a,$30
-  ld [rP1],a
+  ldh [rP1],a
 
   call sgb_wait
   dec c

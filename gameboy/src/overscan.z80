@@ -86,7 +86,7 @@ activity_overscan::
   ldh [vblank_lcdc_value],a
   ldh [stat_lcdc_value],a
   ldh [rLCDC],a
-  ld a,STAT_LYCIRQ
+  ld a,STATF_LYC
   ldh [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
@@ -115,11 +115,11 @@ activity_overscan::
     and d
     jr z,.a_done
     swap a
-    ld [cur_side],a
+    ldh [cur_side],a
     jr .a_done
   .a_held:
     ; A+Control Pad: Change side value
-    ld a,[cur_side]
+    ldh a,[cur_side]
     call ctz
     ld c,b    ; C: Current side being changed (0-3)
 
@@ -287,7 +287,7 @@ overscan_draw_sprites:
   srl a
   add TILE_RARROW
   ld [hl+],a
-  ld a,1<<BOAM_HFLIP|1<<BOAM_VFLIP
+  ld a,1<<OAMB_XFLIP|1<<OAMB_YFLIP
   ld [hl+],a
 
   ; Now draw the second sprite
@@ -327,7 +327,7 @@ overscan_draw_sprites:
   ; 3. RIGHT BORDER
   ; Window can't be drawn exactly one pixel from the right side on
   ; mono.  Cover up the difference with sprites.
-  ld a,[right_border]
+  ldh a,[right_border]
   cpl
   add 169
   ld c,a

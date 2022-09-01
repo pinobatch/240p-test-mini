@@ -47,8 +47,11 @@ SECTION "stat_handler", ROM0[$0048]
   pop af
   reti
 
-; Tails for RST and interrupt handlers followthe last
-; _used_ interrupt handler.
+; Each RST or interrupt handler exceeding 8 bytes ends with a jump
+; to the tail.  These tails follow the last used interrupt handler.
+; Because of a misbehavior in VisualBoyAdvance's implementation of
+; di halt, a handler is considered used if its bit in IE is ever
+; turned on, even if it's only on during di.)
 vblank_tail:
   ldh a,[nmis]
   inc a

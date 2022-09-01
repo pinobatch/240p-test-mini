@@ -118,7 +118,7 @@ activity_shadow_sprite::
     ld hl,cur_facing
     bit PADB_LEFT,b
     jr z,.not_left
-      set BOAM_HFLIP,[hl]
+      set OAMB_XFLIP,[hl]
       dec a
       cp 8
       jr c,.not_left
@@ -126,7 +126,7 @@ activity_shadow_sprite::
     .not_left:
     bit PADB_RIGHT,b
     jr z,.not_right
-      res BOAM_HFLIP,[hl]
+      res OAMB_XFLIP,[hl]
       inc a
       cp 137
       jr nc,.not_right
@@ -255,7 +255,7 @@ activity_shadow_sprite::
   .no_wy:
 
   ; If GHZ, set scroll
-  ld a,[cur_bg_style]
+  ldh a,[cur_bg_style]
   xor 1
   jr nz,.not_ghz_scroll
     ld h,a
@@ -459,13 +459,13 @@ get_shadow_frame_number:
 
   ; Choose a starting tile based on the chosen shadow style
   ; (flicker or stripe) and frame
-  ld a,[shadow_is_striped]
+  ldh a,[shadow_is_striped]
   or a
   jr nz,.is_striped
 
   ; If flashing reticle, the chosen frame must match the low bit
   ; of the retrace count
-  ld a, [cur_frame]
+  ldh a, [cur_frame]
   ld hl, nmis
   add [hl]
   rra
@@ -475,7 +475,7 @@ get_shadow_frame_number:
   ret
 .is_striped:
   ; Shadow substyles 0-2 use shadow frames 1-3
-  ld a,[cur_frame]
+  ldh a,[cur_frame]
   inc a
   ; The tiles for each shadow frame are 28 tiles apart in CHR RAM.
   ld b,a

@@ -366,7 +366,7 @@ move_player::
 
   ; Accelerate to right only if the player is holding right
   ; on the Control Pad and has a nonnegative velocity.
-  ld a,[player_dxsub]
+  ldh a,[player_dxsub]
   bit PADB_RIGHT,e
   jr z,.notRight
   bit 7,a
@@ -378,9 +378,9 @@ move_player::
   jr c,.walk_speed_not_maxed
   ld a,WALK_SPD
 .walk_speed_not_maxed:
-  ld [player_dxsub],a
+  ldh [player_dxsub],a
   ld hl,player_facing
-  res BOAM_HFLIP,[hl]
+  res OAMB_XFLIP,[hl]
   jr .doneRight
 .notRight:
 
@@ -392,12 +392,12 @@ move_player::
   ld a,WALK_BRAKE
 .notRightStop:
   sub WALK_BRAKE
-  ld [player_dxsub],a
+  ldh [player_dxsub],a
 .doneRight:
 
   ; Accelerate to left only if the player is holding left
   ; on the Control Pad and has a nonpositive velocity.
-  ld a,[player_dxsub]
+  ldh a,[player_dxsub]
   bit PADB_LEFT,e
   jr z,.notLeft
   or a
@@ -411,9 +411,9 @@ move_player::
   jr nc,.walk_speed_not_neg_maxed
   ld a,256-WALK_SPD
 .walk_speed_not_neg_maxed:
-  ld [player_dxsub],a
+  ldh [player_dxsub],a
   ld hl,player_facing
-  set BOAM_HFLIP,[hl]
+  set OAMB_XFLIP,[hl]
   jr .doneLeft
 
   ; Left is not pressed.  Brake if headed left.
@@ -425,13 +425,13 @@ move_player::
   ld a,256-WALK_BRAKE
 .notLeftStop:
   add WALK_BRAKE
-  ld [player_dxsub],a
+  ldh [player_dxsub],a
 
 .doneLeft:
 
   ; Move the player by adding the velocity (in de) to the position
   ; (in hl)
-  ld a,[player_dxsub]
+  ldh a,[player_dxsub]
   ld e,a
   
   ; Idiom for sign extension, per ISSOtm in
@@ -442,9 +442,9 @@ move_player::
   sbc a, a ; $00 if no carry, $FF if carry
   ld d, a
 
-  ld a,[player_xsub]
+  ldh a,[player_xsub]
   ld l,a
-  ld a,[player_x]
+  ldh a,[player_x]
   ld h,a
   add hl,de
   
@@ -465,18 +465,18 @@ move_player::
 
   ; Write back new velocity
   ld a,l
-  ld [player_xsub],a
+  ldh [player_xsub],a
   ld a,h
-  ld [player_x],a
+  ldh [player_x],a
   ld a,e
-  ld [player_dxsub],a
+  ldh [player_dxsub],a
 
   ; Animate the player
   ; If stopped, freeze the animation on frame 0
   or a
   jr nz, .notStop1
   ld a,$C0
-  ld [player_frame_sub],a
+  ldh [player_frame_sub],a
   xor a
   jr .have_player_frame
 .notStop1:
@@ -500,10 +500,10 @@ move_player::
   ld b,a
 
   ; 16-bit add it to player_frame
-  ld a,[player_frame_sub]
+  ldh a,[player_frame_sub]
   add b
-  ld [player_frame_sub],a
-  ld a,[player_frame]
+  ldh [player_frame_sub],a
+  ldh a,[player_frame]
   adc 0
 
   ; Wrap from $800 (after last frame of walk cycle)
@@ -513,7 +513,7 @@ move_player::
   ld a,1
 .have_player_frame:
 
-  ld [player_frame],a
+  ldh [player_frame],a
   ret
 
 ; Sprite drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -537,16 +537,16 @@ draw_player_sprite:
   sub 24  ; ht
   add 16  ; sprite engine's top overscan
   ldh [Lspriterect_y],a
-  ld a,[player_x]
+  ldh a,[player_x]
   add a,8  ; Game Boy sprites start at X=8
   ldh [Lspriterect_x],a
 
-  ld a,[player_facing]
+  ldh a,[player_facing]
   ldh [Lspriterect_attr],a
   ld c,a  ; save for flip detection
   ; The eight frames start at $10, $12, ..., $1E, where
   ; 0 is still and 1-7 are scooting.
-  ld a,[player_frame]
+  ldh a,[player_frame]
   add a
   add PLAYER_TILE_BASE
   ldh [Lspriterect_tile],a

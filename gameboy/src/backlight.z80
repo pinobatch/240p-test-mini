@@ -147,7 +147,7 @@ activity_backlight_zone::
   ld hl,SOAM
   ldh a,[ypos]
   ld b,a
-  ld a,[is_hidden]
+  ldh a,[is_hidden]
   or b
   ld [hl+],a  ; 0: Y position
   ldh a,[xpos]

@@ -545,7 +545,7 @@ activity_sgb_ntsc::
   jr nz, activity_sgb_ntsc
   rst wait_vblank_irq
 
-  ld a, [hIncTime]
+  ldh a, [hIncTime]
   dec a
   jr nz, .no_new_palette
     ld hl, help_line_buffer

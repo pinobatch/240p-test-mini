@@ -174,7 +174,7 @@ activity_audiosync::
     jr nz,.startover
   .not_toggle_pause:
 
-  ld a,[progress]
+  ldh a,[progress]
   cp RISEFALL_FRAMES + BEEP_FRAMES
   jr c,.notstartover
   .startover:
@@ -199,13 +199,13 @@ activity_audiosync::
     scf
   .no_start_beep:
   jr nc,.clock_despite_pause
-  ld a,[unpaused]
+  ldh a,[unpaused]
   or a
   jr z,.skip_clocking
   .clock_despite_pause:
-    ld a,[progress]
+    ldh a,[progress]
     inc a
-    ld [progress],a
+    ldh [progress],a
   .skip_clocking:
   
   audiosync_draw_sprite

@@ -135,7 +135,7 @@ activity_megaton::
   ; Draw previous results
   ld b,0
   .prevresultloop:
-    ld a,[num_tests]
+    ldh a,[num_tests]
     cp b
     jr z,.noprevresults
     push bc
@@ -200,7 +200,7 @@ activity_megaton::
   ld [_SCRN0+32*15+13],a
 
   ; Draw checkbox for randomize
-  ld a,[enableflags]
+  ldh a,[enableflags]
   ldxy hl, 9, 16
   rra
   push af
@@ -408,7 +408,7 @@ grade_press:
   ; was early.
   jr z,.not_early_or_late
     ld d,a
-    ld a,[reticletarget]
+    ldh a,[reticletarget]
     xor b
     and $80
     or d

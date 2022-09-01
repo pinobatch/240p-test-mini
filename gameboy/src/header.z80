@@ -64,7 +64,7 @@ SECTION "header", ROM0[$0100]
   DB "OK"
 
   ; SGB mode
-  DB SGB_SUPPORT
+  DB CART_INDICATOR_SGB
 
   ; Mapper
   DB CART_ROM
@@ -76,7 +76,7 @@ SECTION "header", ROM0[$0100]
   DB $00
 
   ; Region code
-  DB REGION_UE
+  DB CART_DEST_NON_JAPANESE
 
   ; Old hex developer ID: $33 means "see $0144"
   ; Must be $33 for SGB support

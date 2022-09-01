@@ -73,7 +73,7 @@ gray_ramp_sgb_rects:
 ; Expand A tiles from DE to HL, duplicating each 4-byte group 4 times
 ; DE must be 4 byte aligned
 load_gray_ramp_tiles:
-  ld [tilesleft],a
+  ldh [tilesleft],a
   lb bc, 4, 4  ; repeating each C-byte portion B times
   .rowpairloop:
     push bc
@@ -97,7 +97,7 @@ load_gray_ramp_tiles:
   sub e
   ld d, a
 
-  ld a,[tilesleft]
+  ldh a,[tilesleft]
   dec a
   jr nz,load_gray_ramp_tiles
   ret
@@ -488,7 +488,7 @@ activity_linearity::
   jr z,.not_A
     ldh a,[curlcdc]
     xor BG_CHR21^BG_CHR01
-    ld [curlcdc],a
+    ldh [curlcdc],a
     ldh [vblank_lcdc_value],a
   .not_A:
 
@@ -549,7 +549,7 @@ activity_sharpness::
   ld bc,32*18
   call memset
 
-  ld a,[curlcdc]
+  ldh a,[curlcdc]
   ldh [vblank_lcdc_value],a
   ldh [rLCDC],a
   cpl
@@ -1214,7 +1214,7 @@ full_stripes_common::
   ldh [rLYC], a
   ldh a,[curpalette]
   ld b,a
-  ld a,[curtileid]
+  ldh a,[curtileid]
   call load_bleed_frame_a
   call update_bcd_frame_counter
   jr .loop
@@ -1371,7 +1371,7 @@ activity_convergence::
   ; up/down: toggle line style
   and PADF_DOWN|PADF_UP
   jr z, .not_up_down
-    ld a, [curlcdc]
+    ldh a, [curlcdc]
     and LCDCF_BG9C00
     jr z, .up_down_on_grid
     ldh a, [curscry]
@@ -1379,7 +1379,7 @@ activity_convergence::
     ldh [curscry], a
     jr .not_up_down
   .up_down_on_grid:
-    ld a, [curtileid]
+    ldh a, [curtileid]
     inc a
     bit PADB_UP, b
     jr z, .only_one_inc

@@ -260,7 +260,7 @@ activity_stopwatch::
   call sw_blit
 
   ; Show or hide the face
-  ld a,[show_face]  ; $00: hide; $FF: show
+  ldh a,[show_face]  ; $00: hide; $FF: show
   or 40  ; $28: Hide face; $FF: Show
   ldh [rWY],a
   jr .loop

@@ -216,7 +216,7 @@ activity_grid_scroll::
     ld a,PADF_UP|PADF_DOWN|PADF_LEFT|PADF_RIGHT
     and b
     jr z,.a_done
-    ld [cur_dir],a
+    ldh [cur_dir],a
 
     ; Invalidate A hold
     ld hl,held_keys
@@ -371,7 +371,7 @@ move_by_speed:
   ret z
   ldh a,[cur_speed]
   ld b,a
-  ld a,[cur_dir]
+  ldh a,[cur_dir]
 
   add a
   jr nc,.not_down
@@ -577,8 +577,8 @@ load_hillzone_bg::
   ; Enable rSTAT IRQ on rLY=rLYC but put it on hold
   ld a, $FF
   ldh [rLYC],a  ; disable lyc irq
-  ld a,STAT_LYCIRQ
-  ld [rSTAT],a
+  ld a,STATF_LYC
+  ldh [rSTAT],a
   ld a,IEF_VBLANK|IEF_LCDC
   ldh [rIE],a  ; enable rSTAT IRQ
   ret

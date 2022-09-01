@@ -235,7 +235,7 @@ activity_pluge:
   jr z,.not_load_shark_palette
     ld de,pluge_shark_palette
   .not_load_shark_palette:
-  ld a,[curpalette]
+  ldh a,[curpalette]
 
   ; DE: which palette set to use; A: which entry in the set
   ld h,0
@@ -776,7 +776,7 @@ smpte_bars_engine:
   ldh a, [need_sgb_update]
   rra
   jr nc, .not_send_sgb
-    ld a, [curpalette]
+    ldh a, [curpalette]
     add a
     add (cbog_palette_dark-sgb_all_palettes)/8
     ld b, a
