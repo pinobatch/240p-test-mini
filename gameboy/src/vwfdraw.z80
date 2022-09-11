@@ -249,10 +249,10 @@ vwfClearBuf::
 
 ;;
 ; Copies the VWF buffer to VRAM address HL using fg color 3
-; and bg color 0
+; and bg color 0 at 72 cycles per tile
 ; @param HL destination address
 ; @param C tile count (if using _lenC)
-; @param B $00 for FG color 0 or $FF for FG color 3
+; @param B $00 for color 1 on 0 or $FF for color 3 on 0
 ; @return DE end of lineImgBuf; C=0; B unchanged
 vwfPutBuf03::
   ld c,lineImgBufLen/8

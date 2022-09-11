@@ -46,7 +46,7 @@ PLAYER_TILE_BASE = $50
 ;;
 ; Initializes the player character's position and copies its tiles
 ; into CHR RAM bank 0 starting at PLAYER_TILE_BASE.
-load_player_cels: macro
+macro load_player_cels
   xor a
   ld hl, player_xsub
   ld [hl+], a  ; player_xsub
@@ -59,7 +59,7 @@ load_player_cels: macro
   call allhuffdata_fetch_file_l
   ld hl,CHRRAM0+PLAYER_TILE_BASE*16
   call pb16_unpack_block
-  endm
+endm
 
 
 sgb_lame_boy_rects:

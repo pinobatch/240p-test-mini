@@ -21,17 +21,17 @@ include "src/gb.inc"
 ; Help ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "helptiles_gfx1",ROMX
-helptiles:: incbin "obj/gb/helptiles.chrgb16.pb16"
+helptiles:: incbin "obj/gb/helptiles.2bpp16.pb16"
 sizeof_helptiles equ 672
 export sizeof_helptiles
-helptiles_gbc:: incbin "obj/gb/helptiles-gbc.chrgb16.pb16"
+helptiles_gbc:: incbin "obj/gb/helptiles-gbc.2bpp16.pb16"
 sizeof_helptiles_gbc equ 960
 export sizeof_helptiles_gbc
 helptiles_end::
 
 ; section "helptiles_gfx0", ROMX
 helpblink_chr::
-  incbin "obj/gb/helpblink.chrgb"  ; copied to VRAM $88C6
+  incbin "obj/gb/helpblink.2bpp"  ; copied to VRAM $88C6
 
 
 ; Super Game Boy border ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -44,15 +44,15 @@ sgbborder::
 
 section "convergence_gfx0",ROM0
 convergence_chr::
-  incbin "obj/gb/convergence.chrgb.pb16"
+  incbin "obj/gb/convergence.2bpp.pb16"
 sizeof_convergence_chr equ 80
 export sizeof_convergence_chr
 
 section "grayramp_gfx1",ROMX, align[2]
 grayramp_sgb_chr::
-  incbin "obj/gb/grayramp-sgb.chrgb", 0, 36
+  incbin "obj/gb/grayramp-sgb.2bpp", 0, 36
 grayramp_chr::
-  incbin "obj/gb/grayramp.chrgb"
+  incbin "obj/gb/grayramp.2bpp"
 grayramp_bottomhalfmap::
   db 0,18,19,16,15,20,13,12,21,10,9,22,7,6,23,4,3,24,1,0
 grayramp_chr_gbc::
@@ -86,14 +86,14 @@ sharpness_brick_tile::
 
 section "cpsgrid_gfx0",ROM0
 cps_grid_chr::
-  incbin "obj/gb/cps_grid.chrgb.pb16"
+  incbin "obj/gb/cps_grid.2bpp.pb16"
 sizeof_cps_grid_chr equ 128
 export sizeof_cps_grid_chr
 
 ; Manual lag test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "megaton_gfx0",ROM0
-megatontiles_chr:: incbin "obj/gb/megatontiles.chrgb16.pb16"
+megatontiles_chr:: incbin "obj/gb/megatontiles.2bpp16.pb16"
 sizeof_megaton_tiles equ 320
 export sizeof_megaton_tiles
 
@@ -106,11 +106,11 @@ portrait_pal::
   drgb $7777EE
   drgb $552211
 shadow_reticle_chr::
-  incbin "obj/gb/shadow_reticle.chrgb.pb16"
+  incbin "obj/gb/shadow_reticle.2bpp.pb16"
 sizeof_shadow_reticle_chr equ 16*4*4
 export sizeof_shadow_reticle_chr
 hepsie_chr::
-  incbin "obj/gb/hepsie.chrgb.pb16"
+  incbin "obj/gb/hepsie.2bpp.pb16"
 sizeof_hepsie_chr equ 16*3*4
 export sizeof_hepsie_chr
 
@@ -132,7 +132,7 @@ hillzone_nam::
   incbin "obj/gb/greenhillzone.nam.pb16"
 kikitiles_chr::
   dw kikitiles_chr_end-kikitiles_chr-2
-  incbin "obj/gb/kikitiles.chrgb"
+  incbin "obj/gb/kikitiles.2bpp"
 kikitiles_chr_end:
 section "scrolltest_gfx1",ROMX
 kikimap::
@@ -142,21 +142,21 @@ kikimap::
 
 section "backlight_gfx0",ROM0
 backlight_chr::
-  incbin "obj/gb/backlightzone.chrgb.pb16"
+  incbin "obj/gb/backlightzone.2bpp.pb16"
 
 ; Lame boy demo ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Tiles also used by overscan and motion blur
 
 section "lameboy_gfx1",ROMX
 bggfx_chr::
-  incbin "obj/gb/bggfx.chrgb.pb16"
+  incbin "obj/gb/bggfx.2bpp.pb16"
 
 ; GBC exclusive tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section "smptebars_gfx0",ROM0
 smptetiles_chr::
-  incbin "obj/gb/smptetiles.chrgb.pb16"
+  incbin "obj/gb/smptetiles.2bpp.pb16"
 
 section "pluge_shark_gfx1",ROMX
 pluge_shark_chr::
-  incbin "obj/gb/pluge_shark_4color.chrgb.pb16"
+  incbin "obj/gb/pluge_shark_4color.2bpp.pb16"

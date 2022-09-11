@@ -13,19 +13,6 @@ huffnib_symboldefs equs "(help_line_buffer)"
 section "huffnib", ROM0
 
 ;;
-; 7/8 of the time, it takes 5 cycles
-; The other 1/8, it takes 10 cycles
-getbit: macro
-  sla b
-  ; Once out of bits, CF is 1 and B is 0
-  jr nz, .nonewbyte\@
-  ld b, [hl]
-  inc hl
-  rl b
-.nonewbyte\@:
-  endm
-
-;;
 ; Decoder for a canonical Huffman code
 ; code_lengths are in HRAM
 ; assume 23 mcycles per input bit plus 30 per symbol.

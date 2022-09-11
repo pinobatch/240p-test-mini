@@ -42,7 +42,7 @@ PULSE_1K = 2048-131
 
 ; Inline functions called once
 
-audiosync_draw_sprite: macro
+macro audiosync_draw_sprite
   ld hl,SOAM
   ldh a,[progress]
   cp RISEFALL_FRAMES / 2
@@ -62,9 +62,9 @@ audiosync_draw_sprite: macro
   ld a,l
   ld [oam_used],a
   call lcd_clear_oam
-  endm
+endm
 
-audiosync_draw_row: macro
+macro audiosync_draw_row
   ldh a,[progress]
   ld b,a
   cp 40
@@ -126,7 +126,7 @@ audiosync_draw_row: macro
   add hl,de
   dec b
   jr nz,.rowloop
-  endm
+endm
 
 activity_audiosync::
 .restart:

@@ -20,7 +20,7 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
   IF  !DEF(GLOBAL_INC)
-GLOBAL_INC = 1
+GLOBAL_INC equ 1
 
 ; This program contains one use of EQU to allocate local variables
 ; in RAM.  Other more experienced devs want to abolish allocation
@@ -98,10 +98,10 @@ Lspriterect_tilestride rb 1
 
 ; People keep calling the Sharp SM83 in the LR35902 SoC a "GBZ80".
 ; It's closer to "8080 plus prefix CB from Z80".
-djnz: macro
-    dec b
-    jr nz,\1
-    endm
+macro djnz
+  dec b
+  jr nz,\1
+endm
 
 ;;
 ; Syntax: ldxy rp, xpos, ypos[, mapbase]
@@ -112,34 +112,49 @@ djnz: macro
 ; @param y vertical distance in tiles from top (0-31)
 ; @param mapbase start address of 32-cell-wide tilemap:
 ;   _SCRN0 (default), _SCRN1, or a virtual tilemap in WRAM.
-ldxy: macro
+macro ldxy
   if _NARG < 4
     ld \1, (\3) * SCRN_VX_B + (\2) + _SCRN0
   else
     ld \1, (\3) * SCRN_VX_B + (\2) + (\4)
   endc
-  endm
+endm
 
 ;;
 ; Syntax: dwxy xpos, ypos[, mapbase]
 ; Writes an X, Y position within a tilemap as a 16-bit address.
-dwxy: macro
+macro dwxy
   if _NARG < 3
     dw (\2) * SCRN_VX_B + (\1) + _SCRN0
   else
     dw (\2) * SCRN_VX_B + (\1) + (\3)
   endc
-  endm
+endm
 
 ;;
 ; Syntax: lb rp, hivalue, lovalue
 ; Loads hivalue into the upper register of a pair (B, D, or H)
 ; and lovalue into the lower register of the same pair (C, E, or L).
-lb: MACRO ; r, hi, lo
+macro lb
   ld \1, low(\2) << 8 | low(\3)
-  endm
+endm
 
-; Glyphs
+;;
+; Shifts out the high bit of B into CF, then once B empties,
+; refills it from [HL+].
+; 7/8 of the time, it takes 5 cycles
+; The other 1/8, it takes 10 cycles
+macro getbit
+  sla b
+  ; Once out of bits, CF is 1 and B is 0
+  jr nz, .nonewbyte\@
+    ld b, [hl]
+    inc hl
+    rl b
+  .nonewbyte\@:
+endm
+
+; Glyphs in VWF
 GL_RIGHT EQU $1C
 GL_LEFT EQU $1D
 GL_UP EQU $1E

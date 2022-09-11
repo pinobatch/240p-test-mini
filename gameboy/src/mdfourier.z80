@@ -127,7 +127,7 @@ mdfourier_push_apubuffer:
 
 ;;
 ; HL = ((unsigned short *)HL)[A & 0x7F]; A = L
-hl_index_a: macro
+macro hl_index_a
   add a, a
   add a, l    ; A = A+L
   ld l, a    ; L = A+L
@@ -137,7 +137,7 @@ hl_index_a: macro
   ld a, [hl+]
   ld h, [hl]
   ld l, a
-  endm
+endm
 
 ; patterns ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

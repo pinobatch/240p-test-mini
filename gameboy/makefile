@@ -26,10 +26,10 @@ objlist := linkthisfirst \
   linkthislast
 
 huffdata := \
-  obj/gb/stopwatchhand.chrgb.pb16 \
-  obj/gb/stopwatchdigits.chrgb.pb16 \
-  obj/gb/spritegfx.chrgb.pb16 \
-  obj/gb/greenhillzone.u.chrgb.pb16 \
+  obj/gb/stopwatchhand.2bpp.pb16 \
+  obj/gb/stopwatchdigits.2bpp.pb16 \
+  obj/gb/spritegfx.2bpp.pb16 \
+  obj/gb/greenhillzone.u.2bpp.pb16 \
   obj/gb/sharpness.iu \
   obj/gb/linearity-quadrant.iu \
   obj/gb/stopwatchface.iu \
@@ -77,13 +77,13 @@ BMP2GB := $(PY) ../common/tools/pilbmp2nes.py --planes "0,1"
 run: $(title).gb
 	$(GBEMU) $<
 all: $(title).gb
-ctools: ../common/tools/dte$(EXE)
+ctools: ../common/tools/dte$(DOTEXE)
 
 clean:
 	-rm obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
-	-rm obj/gb/*.chrgb obj/gb/*.chrgb16 obj/gb/*.nam obj/gb/*.chr1
+	-rm obj/gb/*.2bpp obj/gb/*.2bpp16 obj/gb/*.nam obj/gb/*.chr1
 	-rm obj/gb/*.iu obj/gb/*.iuc obj/gb/*.huf obj/gb/*.pal
-	-rm obj/gb/*.border
+	-rm obj/gb/*.border obj/gb/*.chrgb*
 	-rm ../common/tools/dte$(DOTEXE)
 
 # Packaging
@@ -130,52 +130,52 @@ obj/gb/%.o: obj/gb/%.z80
 # Files that will be included with incbin
 
 obj/gb/gfxincbins.o: \
-  obj/gb/helptiles.chrgb16.pb16 obj/gb/helptiles-gbc.chrgb16.pb16 \
-  obj/gb/helpblink.chrgb \
-  obj/gb/hepsie.chrgb.pb16 obj/gb/shadow_reticle.chrgb.pb16 \
+  obj/gb/helptiles.2bpp16.pb16 obj/gb/helptiles-gbc.2bpp16.pb16 \
+  obj/gb/helpblink.2bpp \
+  obj/gb/hepsie.2bpp.pb16 obj/gb/shadow_reticle.2bpp.pb16 \
   obj/gb/Gus_portrait.iu \
   obj/gb/Gus_portrait-GBC.iuc obj/gb/Gus_portrait-GBC.pal \
-  obj/gb/pluge_shark_4color.chrgb.pb16 obj/gb/backlightzone.chrgb.pb16 \
-  obj/gb/grayramp-sgb.chrgb obj/gb/grayramp.chrgb \
-  obj/gb/convergence.chrgb.pb16 \
-  obj/gb/cps_grid.chrgb.pb16 obj/gb/linearity-quadrant.iu \
-  obj/gb/sharpness.iu obj/gb/stopwatchdigits.chrgb.pb16.huf \
-  obj/gb/stopwatchhand.chrgb.pb16.huf obj/gb/stopwatchface.iu \
-  obj/gb/spritegfx.chrgb.pb16 obj/gb/bggfx.chrgb.pb16 \
-  obj/gb/kikimap.chr1.pb16 obj/gb/kikitiles.chrgb \
-  obj/gb/greenhillzone.u.chrgb.pb16 obj/gb/greenhillzone.nam.pb16 \
-  obj/gb/smptetiles.chrgb.pb16 obj/gb/megatontiles.chrgb16.pb16 \
+  obj/gb/pluge_shark_4color.2bpp.pb16 obj/gb/backlightzone.2bpp.pb16 \
+  obj/gb/grayramp-sgb.2bpp obj/gb/grayramp.2bpp \
+  obj/gb/convergence.2bpp.pb16 \
+  obj/gb/cps_grid.2bpp.pb16 obj/gb/linearity-quadrant.iu \
+  obj/gb/sharpness.iu obj/gb/stopwatchdigits.2bpp.pb16.huf \
+  obj/gb/stopwatchhand.2bpp.pb16.huf obj/gb/stopwatchface.iu \
+  obj/gb/spritegfx.2bpp.pb16 obj/gb/bggfx.2bpp.pb16 \
+  obj/gb/kikimap.chr1.pb16 obj/gb/kikitiles.2bpp \
+  obj/gb/greenhillzone.u.2bpp.pb16 obj/gb/greenhillzone.nam.pb16 \
+  obj/gb/smptetiles.2bpp.pb16 obj/gb/megatontiles.2bpp16.pb16 \
   obj/gb/sgbborder.border
   
 
 # Graphics conversion
 
-# .chrgb (CHR data for Game Boy) denotes the 2-bit tile format
+# .2bpp (CHR data for Game Boy) denotes the 2-bit tile format
 # used by Game Boy and Game Boy Color, as well as Super NES
 # mode 0 (all planes), mode 1 (third plane), and modes 4 and 5
 # (second plane).
-obj/gb/%.chrgb: tilesets/%.png
+obj/gb/%.2bpp: tilesets/%.png
 	$(BMP2GB) $< $@
 
-obj/gb/%.chrgb16: tilesets/%.png
+obj/gb/%.2bpp16: tilesets/%.png
 	$(BMP2GB) -H 16 $< $@
 
 obj/gb/kikimap.chr1: tilesets/kikimap.png
 	$(BMP2) --planes "0" -H 32 $< $@
 
-obj/gb/pluge_shark_4color.chrgb: ../common/tilesets/pluge_shark_4color.png
+obj/gb/pluge_shark_4color.2bpp: ../common/tilesets/pluge_shark_4color.png
 	$(BMP2GB) -H 32 $< $@
 
 obj/gb/vwf7.z80: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 	$(PY) $^ $@
 
-obj/gb/%.iu: obj/gb/%.chrgb
+obj/gb/%.iu: obj/gb/%.2bpp
 	$(PY) tools/incruniq.py $< $@
 
-obj/gb/%.u.chrgb: obj/gb/%.chrgb
-	$(PY) tools/uniq.py $< $@ $(<:.chrgb=.nam)
+obj/gb/%.u.2bpp: obj/gb/%.2bpp
+	$(PY) tools/uniq.py $< $@ $(<:.2bpp=.nam)
 
-obj/gb/%.nam: obj/gb/%.u.chrgb
+obj/gb/%.nam: obj/gb/%.u.2bpp
 	-touch $@
 
 %.pb16: tools/pb16.py %

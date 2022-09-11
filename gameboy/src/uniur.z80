@@ -31,19 +31,6 @@
 include "src/hardware.inc"
 include "src/global.inc"
 
-;;
-; 7/8 of the time, it takes 5 cycles
-; The other 1/8, it takes 10 cycles
-getbit: macro
-  sla b
-  ; Once out of bits, CF is 1 and B is 0
-  jr nz, .nonewbyte\@
-    ld b, [hl]
-    inc hl
-    rl b
-  .nonewbyte\@:
-  endm
-
 hBytesLeftHi = hLocals + $00
 hInNewRun    = hLocals + $01
 hMaxTile     = hLocals + $02

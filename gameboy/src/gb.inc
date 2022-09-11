@@ -21,7 +21,7 @@
 ;
 
   IF  !DEF(GB_INC)
-GB_INC = 1
+GB_INC equ 1
 
 ; hardware.inc comes from
 ; https://github.com/gbdev/hardware.inc/blob/master/hardware.inc
@@ -48,8 +48,8 @@ WINDOW_NT1   EQU LCDCF_WINON|LCDCF_WIN9C00
 ;;
 ; Syntax: drgb $FF9966 for color #FF9966
 ; Divides each hex tuplet by 8 and rounds down. 
-drgb: macro
+macro drgb
   dw (\1 & $F80000) >> 19 | (\1 & $00F800) >> 6 | (\1 & $0000F8) << 7
-  endm
+endm
 
   ENDC
