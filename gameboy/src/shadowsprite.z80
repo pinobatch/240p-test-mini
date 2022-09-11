@@ -44,6 +44,9 @@ section "shadowsprite",ROM0
 SHADOW_SPRITE_INITIAL_X equ 72
 SHADOW_SPRITE_INITIAL_Y equ 96
 
+NUM_FRAME_TYPES equ 5
+FRAME_TYPE_TILE_LEN equ 7
+FRAME_TYPE_TILE_BASE equ $80 - FRAME_TYPE_TILE_LEN * NUM_FRAME_TYPES
 
 activity_shadow_sprite::
   ld hl, xpos
@@ -245,10 +248,13 @@ activity_shadow_sprite::
     ldh a,[cur_frame]
     add b
     ; Convert to a tile number
+    assert FRAME_TYPE_TILE_LEN == 7
+    ld b, a
     add a
     add a
     add a
-    add $D8
+    sub b
+    add FRAME_TYPE_TILE_BASE
     ld c,8
     ld hl,_SCRN1
     call memset_inc
@@ -271,7 +277,7 @@ activity_shadow_sprite::
 ;;
 ; Fills tiles $D8-$FF with messages about what framestyle is in
 load_frame_type_names:
-  ld de,CHRRAM0+$D8*16
+  ld de,CHRRAM2 + FRAME_TYPE_TILE_BASE * 16
   ld hl,frame_type_msg0
 .lineloop:
   push de
@@ -285,7 +291,7 @@ load_frame_type_names:
   push hl
   ld l,e
   ld h,d
-  ld bc,$FF08  ; $FF: use colors 0 and 3; $08: copy 8 tiles
+  lb bc, $FF, FRAME_TYPE_TILE_LEN  ; $FF: use colors 0 and 3
   call vwfPutBuf03_lenC
   ld d,h
   ld e,l
@@ -448,8 +454,6 @@ draw_shadow_sprite:
   add 12
   ldh [Lspriterect_tile],a
   jp draw_spriterect
-
-  ret
 
 ;;
 ; Finds which shadow frame number should be drawn this frame.
