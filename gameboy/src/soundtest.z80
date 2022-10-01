@@ -37,12 +37,13 @@ waveram_end::
 
 init_apu::
   ld hl, rNR52
+  xor a
+  ld [hl], a    ; Reset audio circuit
   ld [hl], $80  ; Bring audio circuit out of reset
   dec l
   ld [hl], $FF  ; Set center pan
   dec l
   ld [hl], $77  ; Set channel volumes to maximum
-  xor a
   ldh [rNR10],a  ; Disable pulse 1 sweep
   ret
 
@@ -87,7 +88,7 @@ soundtest_handlers:
   dw soundtest_8k, soundtest_4k, soundtest_2k, soundtest_1k
   dw soundtest_500, soundtest_250, soundtest_125, soundtest_62
   dw soundtest_1kleft, soundtest_1kright, soundtest_1kpulse
-  dw soundtest_hiss, soundtest_buzz
+  dw soundtest_surround, soundtest_hiss, soundtest_buzz
 
 soundtest_8k:
   ld hl,waveram_sin16x
@@ -194,6 +195,34 @@ soundtest_1kpulse:
   ld a,$80
   ldh [rNR14],a  ; freq hi and note start
   ret
+
+soundtest_surround:
+  call init_apu   ; Synchronize channels' timers
+  ld a, $21
+  ldh [rNR51], a
+  ld hl,rNR11     ; When loading 4+ regs, [hl+] is 1+ byte smaller than ldh
+  ld a,$C0
+  ld [hl+],a      ; NR11: Duty 75%
+  ld a,$40
+  ldh [rNR21], a  ; NR21: Duty 25%
+  ld a,$A0
+  ldh [rNR22], a
+  ld [hl+],a      ; NR12, NR22: volume and decay
+  ld a,low(PULSE_1K)
+  ldh [rNR23], a
+  ld [hl+],a      ; NR13xx, NR23: freq lo
+  ld a,high(PULSE_1K) | $80
+  ldh [rNR24], a
+  ld [hl+],a      ; NR14, NR24: freq hi
+
+  call wait30frames
+  xor a
+  ldh [rNR12],a  ; volume and decay
+  ldh [rNR22],a  ; volume and decay
+  ld a,$80
+  ldh [rNR14],a  ; freq hi and note start
+  ldh [rNR24],a  ; volume and decay
+  jp init_apu
 
 soundtest_hiss:
   ld a,$24

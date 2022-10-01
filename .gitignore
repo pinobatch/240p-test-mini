@@ -2,8 +2,7 @@
 *.o
 *~
 *.chr
-*.chrgb
-*.chrgb16
+*.2bpp
 *.chr1
 *.pb16
 *.pb53

@@ -495,6 +495,7 @@ this help page.
 1000 Hz left
 1000 Hz right
 1000 Hz (pulse)
+1000 Hz (surround)
 Hiss noise
 Buzz noise
 
@@ -523,9 +524,12 @@ overtone 5 octaves up.
 
 The CPU generates noise
 with a polynomial counter
-in one of two modes:
-hiss (32767 steps)
-or buzz (127 steps).
+at period 32767 for hiss
+or 127 for buzz.
+
+For surround test, use
+Dolby Pro Logic or other
+matrix surround decoder.
 
 == MDFourier ==
 
