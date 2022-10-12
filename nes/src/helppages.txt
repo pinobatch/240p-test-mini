@@ -658,11 +658,25 @@ dark areas to make blacks
 deeper, which causes
 problems with scenes such
 as starfields and credits.
-
+Some CRTs' phosphors
+cause bright moving
+objects to leave a trail.
+----
 ↑↓←→: Move the square
-Select: Change its size among
-  1, 2, 4, or 8 pixels on a side
-A: Hide or show the square
+A: Hide or show square
+A+↑↓: Change width
+  (1, 2, 4, or 8 pixels)
+A+←→: Change speed
+  low: 1 pixel per frame
+  high: 1 width per frame
+Select: Invert grays
+
+To measure image decay
+time, use a high-speed
+camera to record the
+screen while closing
+this help page or
+moving at high speed.
 
 == Sound test: Frequency ==
 

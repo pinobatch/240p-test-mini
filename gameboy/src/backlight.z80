@@ -26,6 +26,7 @@ ypos rb 1
 held_keys rb 1
 is_hidden rb 1
 cursize rb 1
+high_gear rb 1
 
 section "backlight",ROM0
 activity_backlight_zone::
@@ -34,6 +35,7 @@ activity_backlight_zone::
   ldh [ypos],a
   xor a
   ldh [is_hidden],a
+  ldh [high_gear], a
   dec a
   ldh [curpalette],a
   ld a, 1
@@ -74,6 +76,16 @@ activity_backlight_zone::
   rra
   jr nc,.not_A
 
+    ; A+Left/Right: Change gear
+    ld a, b
+    and PADF_LEFT|PADF_RIGHT
+    jr z,.gear_unchanged
+      ldh a, [high_gear]
+      xor 1
+      ldh [high_gear], a
+      jr .clear_held_A
+    .gear_unchanged:
+
     ; A+Up/Down: Change size
     ld a, b
     and PADF_UP|PADF_DOWN
@@ -89,7 +101,7 @@ activity_backlight_zone::
       .not_size_down:
       and $03
       ldh [cursize],a
-
+    .clear_held_A:
       ; If a size key was pressed, cancel releasing A to
       ; hide/show
       ld hl,held_keys
@@ -98,38 +110,57 @@ activity_backlight_zone::
     jr .done_A
 
   .not_A:
+    ld b, 1
+    ldh a, [high_gear]
+    or a
+    jr z, .in_low_gear
+    ldh a, [cursize]
+    or a
+    jr z, .in_low_gear
+    .gearloop:
+      sla b
+      dec a
+      jr nz, .gearloop
+    .in_low_gear:
+
     ; cur_keys in C
     ldh a,[xpos]
     bit PADB_LEFT,c
     jr z,.not_left
-      dec a
+      sub b
       cp 8
-      jr c,.not_left
-      ldh [xpos],a
+      jr nc,.not_off_left
+        ld a, 8
+      .not_off_left:
     .not_left:
     bit PADB_RIGHT,c
     jr z,.not_right
-      inc a
+      add b
       cp 168
-      jr nc,.not_right
-      ldh [xpos],a
+      jr c,.not_off_right
+        ld a, 167
+      .not_off_right:
     .not_right:
+    ldh [xpos],a
 
     ldh a,[ypos]
     bit PADB_UP,c
     jr z,.not_up
-      dec a
+      sub b
       cp 16
-      jr c,.not_up
-      ldh [ypos],a
+      jr nc,.not_off_top
+        ld a, 16
+      .not_off_top:
     .not_up:
     bit PADB_DOWN,c
     jr z,.not_down
-      inc a
+      add b
       cp 160
-      jr nc,.not_down
-      ldh [ypos],a
+      jr c,.not_off_bottom
+        ld a, 159
+      .not_off_bottom:
     .not_down:
+    ldh [ypos],a
   
     ; Release A: Invert
     ldh a,[held_keys]

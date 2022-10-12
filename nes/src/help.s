@@ -114,18 +114,29 @@ return:
   ; This is the only time the compressed data bank is accessed.
   ; After this, all data comes from the help bank.
   lda help_reload
-  bpl :+
+  bpl partial_reload
     jsr helpscreen_load
     lda #0
     sta prev_nonblank
     sta help_reload
-  :
+    beq reload_done
+  partial_reload:
+    lda #<.bank(helpscreen_load_palette)
+    sta partial_reload+1
+    jsr helpscreen_load_palette
+  reload_done:
   jmp helpscreen_cb
 .endproc
 
 ; the rest is in the help bank
 .segment "CODE02"
 .proc helpscreen_cb
+  ldx #0
+  ldy #8
+  lda #VBLANK_NMI|BG_0000|OBJ_8X16
+  stx PPUSCROLL
+  sty PPUSCROLL
+  sta PPUCTRL
 
   ; If not within this document, move to the first page
   ldx help_cur_doc
@@ -175,7 +186,6 @@ vramdone:
   lda #VBLANK_NMI|BG_0000|OBJ_8X16
   sec
   jsr ppu_screen_on
-  
   jsr read_pads
   ldx #0
   jsr autorepeat
@@ -566,17 +576,6 @@ sprstripdone:
   ldy #$E0
   lda #6
   jsr unpb53_file
-  ; Load palette for sprite and VWF text
-  lda #$3F
-  sta PPUADDR
-  ldy #$09
-  sty PPUADDR
-palloop:
-  lda helpscreen_palette-$09,y
-  iny
-  sta PPUDATA
-  cpy #9 + helpscreen_palette_size
-  bcc palloop
 
   ; Load tilemap for VWF
 dstlo   = $00
@@ -608,6 +607,8 @@ vwfmap_rowloop:
   cpx #0
   bne vwfmap_rowloop
 
+  jsr helpscreen_load_palette
+
   ; Clear out the tiles in the VWF text area ($0500-$0FFF)
   lda #$FF
   tay
@@ -632,6 +633,27 @@ vwfmap_tileloop:
   inx
   dey
   bne vwfmap_tileloop
+  rts
+  ; fall through to helpscreen_load_palette
+.endproc
+.proc helpscreen_load_palette
+  ; Wait for actual vblank
+  lda nmis
+  :
+    cmp nmis
+    beq :-
+
+  ; Load palette for sprite and VWF text
+  lda #$3F
+  sta PPUADDR
+  ldy #helpscreen_palette_skip
+  sty PPUADDR
+palloop:
+  lda helpscreen_palette-helpscreen_palette_skip,y
+  iny
+  sta PPUDATA
+  cpy #helpscreen_palette_skip + helpscreen_palette_size
+  bcc palloop
   rts
 .endproc
 
@@ -673,8 +695,9 @@ gus_eyes2:  ; eyes shut
   .byte  87,$15,$02,64, 1
   .byte $FF
 
+helpscreen_palette_skip = $09
 helpscreen_palette:
-  .byte     $20,$0F,$20,$0F,$0F,$20,$20
+  .byte                                       $20,$0F,$20, $0F,$0F,$20,$20
   .byte $0F,$02,$27,$38, $0F,$18,$27,$38, $0F,$02,$27,$20, $0F,$02,$27,$12
 helpscreen_palette_size = * - helpscreen_palette
 pagenum_template:  .byte 134," 1/1 ",135,0

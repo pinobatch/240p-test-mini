@@ -27,6 +27,10 @@ sprite_x = test_state+0
 sprite_y = test_state+1
 sprite_size = test_state+2
 sprite_hide = test_state+3
+high_gear = test_state+4
+held_keys = test_state+5
+invert = test_state+6
+
   lda #$FD
   sta sprite_size
   lda #128
@@ -34,6 +38,10 @@ sprite_hide = test_state+3
   sta sprite_y
   asl a
   sta sprite_hide
+  sta high_gear
+  sta held_keys
+  lda #$0F
+  sta invert
 
 restart:
   lda #0
@@ -55,6 +63,20 @@ loop:
   lda sprite_size
   sta OAM+1
   jsr ppu_wait_vblank
+
+  ; draw the palette
+  ldx #$3F
+  stx PPUADDR
+  ldy #$00
+  sty PPUADDR
+  lda invert
+  sta PPUDATA
+  stx PPUADDR
+  ldy #$1B
+  sty PPUADDR
+  eor #$2F
+  sta PPUDATA
+  
   ; do not use ppu_screen_on because BG is not used
   lda #OBJ_ON
   sta PPUMASK
@@ -70,54 +92,126 @@ loop:
   bcs restart
 
   lda new_keys+0
-  and #KEY_A
-  beq not_toggle_hide
-    lda #$F0
-    eor sprite_hide
-    sta sprite_hide
-  not_toggle_hide:
+  and #KEY_SELECT
+  beq :+
+    lda #$2F
+    eor invert
+    sta invert
+  :
 
   lda new_keys+0
-  and #KEY_SELECT
-  beq not_toggle_size
-    inc sprite_size
-    bne not_toggle_size
-    lda #$FC
+  ora held_keys
+  sta held_keys
+  lda cur_keys
+  and #KEY_A
+  beq A_not_held
+
+    ; A+direction: change size or speed
+    ; (and disable tasks on releasing A until A is repressed)
+    lda new_keys
+    and #KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
+    beq done_no_A_long
+
+    lda new_keys+0
+    and #KEY_UP
+    beq not_inc_size
+      inc sprite_size
+    not_inc_size:
+    lda new_keys+0
+    and #KEY_DOWN
+    beq not_dec_size
+      dec sprite_size
+    not_dec_size:
+    lda sprite_size
+    ora #$FC
     sta sprite_size
-  not_toggle_size:
 
-  lda cur_keys+0
-  and #KEY_RIGHT
-  beq not_right
-    inc sprite_x
-    bne not_right
-    dec sprite_x
-  not_right:
+    lda new_keys+0
+    and #KEY_LEFT|KEY_RIGHT
+    beq not_toggle_speed
+      lda #1
+      eor high_gear
+      sta high_gear
+    not_toggle_speed:
 
-  lda cur_keys+0
-  and #KEY_DOWN
-  beq not_down
-    lda sprite_y
-    cmp #238
-    bcs not_down
-    inc sprite_y
-  not_down:
+    lda held_keys
+    and #<~KEY_A
+    sta held_keys
+  done_no_A_long:
+    jmp done_no_A
+  A_not_held:
 
-  lda cur_keys+0
-  and #KEY_LEFT
-  beq not_left
-    lda sprite_x
+move_speed = $00
+
+    ; Release A: toggle hidden sprite
+    lda held_keys
+    and #KEY_A
+    beq not_toggle_hide
+      eor held_keys
+      sta held_keys
+      lda #$F0
+      eor sprite_hide
+      sta sprite_hide
+    not_toggle_hide:
+
+    lda high_gear
+    beq :+
+      lda sprite_size
+      and #$03
+    :
+    tax  ; X = index into one_shl_x for movement speed
+
+    lda cur_keys+0
+    and #KEY_RIGHT
+    beq not_right
+      lda sprite_x
+      clc
+      adc move_speeds,x
+      bcc :+
+        lda #255
+      :
+      sta sprite_x
+    not_right:
+
+    lda cur_keys+0
+    and #KEY_DOWN
+    beq not_down
+      lda sprite_y
+      clc
+      adc move_speeds,x
+      bcs down_clamp_y
+      cmp #238
+      bcc down_have_y
+      down_clamp_y:
+        lda #238
+      down_have_y:
+      sta sprite_y
+    not_down:
+
+    lda cur_keys+0
+    and #KEY_LEFT
     beq not_left
-    dec sprite_x
-  not_left:
+      lda sprite_x
+      sec
+      sbc move_speeds,x
+      bcs :+
+        lda #0
+      :
+      sta sprite_x
+    not_left:
 
-  lda cur_keys+0
-  and #KEY_UP
-  beq not_up
-    lda sprite_y
+    lda cur_keys+0
+    and #KEY_UP
     beq not_up
-    dec sprite_y
-  not_up:
+      lda sprite_y
+      sec
+      sbc move_speeds,x
+      bcs :+
+        lda #0
+      :
+      sta sprite_y
+    not_up:
+  done_no_A:
 
   lda new_keys+0
   and #KEY_B
@@ -126,3 +220,7 @@ loop:
 done:
   rts
 .endproc
+
+.rodata
+move_speeds:
+  .byte $01, $02, $04, $08

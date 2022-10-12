@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern const unsigned char helpsect_backlight_zones[];
 
 void activity_backlight_zone(void) {
-  unsigned int inverted = 0, hidden = 0, held_keys = 0, sz = 1;
+  unsigned inverted = 0, hidden = 0, high_gear = 0, held_keys = 0, sz = 1;
   unsigned int x = 119, y = 79;
 
   load_common_obj_tiles();
@@ -46,24 +46,34 @@ void activity_backlight_zone(void) {
         sz = (sz - 1) & 0x03;
         held_keys &= ~KEY_A;
       }
+      if (new_keys & (KEY_LEFT | KEY_RIGHT)) {
+        high_gear = !high_gear;
+        held_keys &= ~KEY_A;
+      }
     } else {
       if (held_keys & KEY_A) {
         held_keys &= ~KEY_A;
         hidden = !hidden;
       }
-      if ((cur_keys & KEY_UP) && y > 0) {
-        y -= 1;
+      unsigned move_speed = high_gear ? (1 << sz) : 1;
+      if (cur_keys & KEY_UP) {
+        y = y >= move_speed ? y - move_speed : 0;
       }
-      if ((cur_keys & KEY_DOWN) && y < 159) {
-        y += 1;
+      if (cur_keys & KEY_LEFT) {
+        x = x >= move_speed ? x - move_speed : 0;
       }
-      if ((cur_keys & KEY_LEFT) && x > 0) {
-        x -= 1;
+      if (cur_keys & KEY_DOWN) {
+        y += move_speed;
       }
-      if ((cur_keys & KEY_RIGHT) && x < 239) {
-        x += 1;
+      if (cur_keys & KEY_RIGHT) {
+        x += move_speed;
       }
     }
+
+    unsigned ymax = 160 - (1 << sz);
+    if (y > ymax) y = ymax;
+    unsigned xmax = 240 - (1 << sz);
+    if (x > xmax) x = xmax;
 
     // Draw the sprite
     oam_used = 0;
