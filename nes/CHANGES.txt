@@ -1,13 +1,16 @@
-0.23 (2022-03-xx)
+0.23 (2022-10-xx)
 * Help: Compress duplicate lines of text (GB parity)
 * Replace Grid and Linearity with khmr33's Monoscope
-* Solid color screen: Select to windowbox (requested by
+* Solid color screen: Select to windowbox (SGB parity; requested by
   khmr33 and Tianfeng)
 * Safe areas: Fix PocketNES size typo
 * Chroma crosstalk: Add health warning; simplify pattern (SGB parity)
 * Shadow sprite: replace Gus portrait with Donna
+* Stopwatch: be up front about gaining a second per minute
+  (requested by zeta0134)
 * Rename Manual lag test to Timing and reflex test to reflect
   how it is used
+* Backlight zones: add speed control and inverted video
 * Add standalone 4096-byte MDFourier ROM for the smallest flash carts
 * Begin planning Famicom MDFourier tone generator and MMC1/MMC3 ports
 * Stay out of $FFE0-$FFF9 (FamicomBox header address range)
