@@ -51,20 +51,21 @@ wndmap:
 
 MONO_MAX_GRAY = 3
 COLOR_MAX_GRAY = 31
+MAX_PHASE_DURATION = 60
 
 row_high_low:  ; low and high-low+1 values for each row, monochrome
   db 0, MONO_MAX_GRAY+1
-  db 1, 20
+  db 1, MAX_PHASE_DURATION
   db 0, MONO_MAX_GRAY+1
-  db 1, 20
+  db 1, MAX_PHASE_DURATION
   db 0, MONO_MAX_GRAY+1
   db 0, 2
 
 row_high_low_gbc:  ; low and high-low+1 values for each row, SGB/GBC
   db 0, COLOR_MAX_GRAY+1
-  db 1, 20
+  db 1, MAX_PHASE_DURATION
   db 0, COLOR_MAX_GRAY+1
-  db 1, 20
+  db 1, MAX_PHASE_DURATION
   db 0, COLOR_MAX_GRAY+1
   db 0, 2
 

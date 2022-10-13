@@ -32,7 +32,7 @@ extern const unsigned char helpsect_motion_blur[];
 
 // back shade, on time, on shade, off time, off shade, stripes
 static const unsigned char param_max[NUM_PARAMS] = {
-  31, 20, 31, 20, 31, 1
+  31, 60, 31, 60, 31, 1
 };
 static const unsigned char param_min[NUM_PARAMS] = {
   0, 1, 0, 1, 0, 0
