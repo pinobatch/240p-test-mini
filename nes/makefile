@@ -24,6 +24,7 @@ objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
   pb53files rectfiles ntscPeriods
 objlistnsf := mdfouriernsf mdfourier ntscPeriods
 objlistmdf4k := mdfourier4kfe mdfourier padsnodas ntscPeriods
+objlistmdf4kchr := mdfourier4kfe-chrrom mdfourier padsnodas ntscPeriods
 
 AS65:=ca65
 LD65:=ld65
@@ -79,6 +80,8 @@ runnsf: mdfourier.nsf
 	$(EMU) $<
 runmdf: mdfourier4k.nes
 	$(EMU) $<
+runmdfchr: mdfourier4k-chrrom.nes
+	$(EMU) $<
 debug: $(title).nes
 	$(DEBUGEMU) $<
 debug2: $(title).nes
@@ -93,6 +96,8 @@ debugnsf: mdfourier.nsf
 	$(DEBUGEMU) $<
 debugmdf: mdfourier4k.nes
 	$(DEBUGEMU) $<
+debugmdfchr: mdfourier4k-chrrom.nes
+	$(DEBUGEMU) $<
 
 # Rule to create or update the distribution zipfile by adding all
 # files listed in zip.in.  Use changes to the compiled program and
@@ -106,7 +111,7 @@ $(title)-$(version).zip: zip.in all \
 
 all: \
   $(title).nes $(title)-bnrom.nes $(title)-sgrom.nes $(title)-tgrom.nes \
-  mdfourier.nsf mdfourier4k.nes
+  mdfourier.nsf mdfourier4k.nes mdfourier4k-chrrom.nes
 ctools: ../common/tools/dte$(EXE)
 
 $(objdir)/index.txt: makefile
@@ -119,9 +124,10 @@ clean:
 
 # Rules for PRG ROM
 
-objlisto = $(foreach o,$(objlist),$(objdir)/$(o).o)
-objlistnsfo = $(foreach o,$(objlistnsf),$(objdir)/$(o).o)
-objlistmdf4ko = $(foreach o,$(objlistmdf4k),$(objdir)/$(o).o)
+objlisto := $(foreach o,$(objlist),$(objdir)/$(o).o)
+objlistnsfo := $(foreach o,$(objlistnsf),$(objdir)/$(o).o)
+objlistmdf4ko := $(foreach o,$(objlistmdf4k),$(objdir)/$(o).o)
+objlistmdf4kchro := $(foreach o,$(objlistmdf4kchr),$(objdir)/$(o).o)
 
 map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
 	$(LD65) -o $(title).nes -m map.txt --dbgfile $(title).dbg -C $^
@@ -136,13 +142,21 @@ tgmap.txt $(title)-tgrom.nes: tgrom512kbit.cfg $(objlisto) $(objdir)/mmc3.o
 	$(LD65) -o $(title)-tgrom.nes -m tgmap.txt --dbgfile $(title)-tgrom.dbg -C $^
 
 mdfmap.txt mdfourier4k.nes: mdfourier4k.cfg $(objlistmdf4ko)
-	$(LD65) -o mdfourier4k.nes -m mdfmap.txt --dbgfile mdfourier4k.dbg -C $^
+	$(LD65) -o mdfourier4k.nes -m mdfmap.txt \
+	  --dbgfile mdfourier4k.dbg -C $^
+
+mdfchrmap.txt mdfourier4k-chrrom.nes: mdfourier4k-chrrom.cfg $(objlistmdf4kchro)
+	$(LD65) -o mdfourier4k-chrrom.nes -m mdfchrmap.txt \
+	  --dbgfile mdfourier4k-chrrom.dbg -C $^
 
 nsfmap.txt mdfourier.nsf: nsf.cfg $(objlistnsfo)
 	$(LD65) -o mdfourier.nsf -m nsfmap.txt --dbgfile mdfourier.dbg -C $^
 
 $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 	$(AS65) $(CFLAGS65) $< -o $@
+
+$(objdir)/%-chrrom.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
+	$(AS65) $(CFLAGS65) $< -DCHRROM=1 -o $@
 
 $(objdir)/padsnodas.o: $(srcdir)/pads.s $(srcdir)/nes.inc $(srcdir)/global.inc
 	$(AS65) $(CFLAGS65) $< -o $@ -DUSE_DAS=0 -DUSE_2P=0
@@ -173,7 +187,8 @@ $(objdir)/pb53files.o: \
   $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
   $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
   $(objdir)/fizzter_digits.chr.pb53 $(objdir)/convergence.chr.pb53
-$(objdir)/mdfourier4kfe.o: $(objdir)/mdf4k_chr.chr
+$(objdir)/mdfourier4kfe-chrrom.o $(objdir)/mdfourier4kfe.o: \
+  $(objdir)/mdf4k_chr.chr
 
 # MDFourier needs the period lookup table
 $(objdir)/ntscPeriods.s: tools/mktables.py

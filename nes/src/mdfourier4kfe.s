@@ -18,7 +18,12 @@ test_good_phase := test_state+6
 .else
   MIRRORING = 1
 .endif
-.byte "NES", $1A, 1, 0
+.ifdef CHRROM
+  CHRBANKS = 1
+.else
+  CHRBANKS = 0
+.endif
+.byte "NES", $1A, 1, CHRBANKS
 .byte (MAPPERNUM << 4) & $F0 | MIRRORING
 .byte MAPPERNUM & $F0
 
@@ -30,7 +35,7 @@ stub15start:
 .endrepeat
 jmp reset_handler
 .addr nmi_handler, stub15start, irq_handler
-.assert *-stub15start = 96, error, "maper init area not 96 bytes!"
+.assert *-stub15start = 96, error, "mapper init area not 96 bytes!"
 
 .zeropage
 nmis: .res 1
@@ -86,6 +91,7 @@ restart:
   tay
   sta PPUMASK
 
+.ifndef CHRROM
   ; Copy tiles to CHR RAM
   sty PPUADDR
   sty PPUADDR
@@ -102,11 +108,12 @@ restart:
     inc $01
     dex
     bne :-
+.endif
 
   ; Clear nametable
   lda #$20
   sta PPUADDR
-  lda #$00
+  tya
   sta PPUADDR
   ldy #$FC
   jsr write_4y_of_a
@@ -238,9 +245,14 @@ have_phase_xy:
   rts
 .endproc
 
+.ifdef CHRROM
+.segment "CHR"
+.else
 .rodata
+.endif
 chrdata: .incbin "obj/nes/mdf4k_chr.chr"
 chrdata_end:
 
+.rodata
 uipalette: .byte $0F, $20, $0F, $20, $0F, $0F, $10, $10
 uipalette_end:

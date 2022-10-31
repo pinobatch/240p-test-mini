@@ -19,7 +19,8 @@ endif
 
 alltargets:=\
   nes/240pee.nes nes/240pee-bnrom.nes nes/mdfourier.nsf \
-  nes/mdfourier4k.nes gameboy/gb240p.gb gba/240pee_mb.gba
+  nes/mdfourier4k.nes nes/mdfourier4k-chrrom.nes \
+  gameboy/gb240p.gb gba/240pee_mb.gba
 
 .PHONY: all dist clean $(alltargets)
 all: $(alltargets)
@@ -30,7 +31,8 @@ dist: $(title)-docsrc-$(version).zip $(title)-$(version).zip
 # doesn't try double-building compiling each file in both
 nes/240pee.nes:
 	$(MAKE) -C nes $(notdir $@)
-nes/240pee-bnrom.nes nes/mdfourier.nsf nes/mdfourier4k.nes: \
+nes/240pee-bnrom.nes nes/mdfourier.nsf nes/mdfourier4k.nes \
+nes/mdfourier4k-chrrom.nes: \
   nes/240pee.nes
 	$(MAKE) -C nes $(notdir $@)
 gameboy/gb240p.gb:
