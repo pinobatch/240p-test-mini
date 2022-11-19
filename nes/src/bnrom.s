@@ -8,19 +8,20 @@
 ; code copies.  This file is offered as-is, without any warranty.
 ;
 
+.include "nes2header.inc"
+nes2prg 65536
+nes2chr 0
+nes2chrram 8192
+nes2mirror 'V'
+nes2mapper 34
+nes2end
+
 .import reset_handler
 .importzp nmis
 .import unpb53_some, unpb53_file_cb, load_sb53_file_cb, load_iu53_file_cb
 .export unpb53_gate, unpb53_file, load_sb53_file, load_iu53_file
 .import rf_vwfClearPuts_cb, rf_load_layout_cb
 .export rf_vwfClearPuts, rf_load_layout
-
-.segment "INESHDR"
-  .byt "NES",$1A  ; magic signature
-  .byt 4          ; size of PRG ROM in 16384 byte units (two units per BNROM bank!)
-  .byt 0          ; size of CHR ROM in 8192 byte units
-  .byt $21        ; lower mapper nibble, vertical mirroring
-  .byt $20        ; upper mapper nibble
 
 ; Fixed code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -93,5 +94,3 @@ load_sb53_file = stub1::load_sb53_file
 load_iu53_file = stub1::load_iu53_file
 rf_vwfClearPuts = stub1::rf_vwfClearPuts
 rf_load_layout = stub1::rf_load_layout
-
-
