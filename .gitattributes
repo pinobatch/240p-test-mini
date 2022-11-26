@@ -1,2 +1,11 @@
-gameboy/src/*.z80 linguist-language=8080-Family-Assembly
-nes/src/*.s linguist-language=6502-Assembly
+# There is no m68k or UNIX assembly code in this repository.
+# (For m68k see <https://github.com/ArtemioUrbina/240pTestSuite>)
+#
+# Unfortunately, GitHub includes only a hand-picked set of languages
+# in statistics.  This means I have to classify 6502 and SM83 code
+# under the broader "assembly" category.
+# <https://github.com/github/linguist/blob/master/lib/linguist/languages.yml>
+gameboy/src/*.z80 linguist-language=Assembly
+gameboy/src/*.inc linguist-language=Assembly
+nes/src/*.s linguist-language=Assembly
+nes/src/*.inc linguist-language=Assembly
