@@ -1,0 +1,2 @@
+gameboy/src/*.z80 linguist-language=8080-Family-Assembly
+nes/src/*.s linguist-language=6502-Assembly
