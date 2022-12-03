@@ -71,6 +71,7 @@ def main(argv=None):
     iutmrows = iur_encode_tilemap(b''.join(utmrows))
 
     palette = im.getpalette()[:48]
+    palette.extend(bytes(48 - len(palette)))
     snespalette = bytearray()
     for i in range(0, 48, 3):
         r = palette[i] >> 3

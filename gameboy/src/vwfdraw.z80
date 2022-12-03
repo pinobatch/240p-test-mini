@@ -108,7 +108,7 @@ vwfPutTile_shifter:
 
   ; Shift each row
 vwfPutTile_rowloop:
-  ; Read an 8x1 sliver of the glyph into B
+  ; Read an 8x1 sliver of the glyph into A
   ld a,[de]
   inc e
   or a
@@ -119,7 +119,7 @@ vwfPutTile_rowloop:
   ld l, b
   jp hl
 
-  ; Special handling for blank slivers
+  ; Fast path handling for blank slivers
 .sliver_is_blank:
   ldh a,[Ldstoffset]
   inc a
@@ -128,7 +128,7 @@ vwfPutTile_rowloop:
 ;;
 ; Draws the tile for glyph A at horizontal position B
 ; using the font at vwfChrData, which must be aligned to
-; GLYPH_HEIGHT bits
+; LOG_GLYPH_HEIGHT bits
 vwfPutTile::
 
   ; Calculate address of glyph
@@ -162,7 +162,7 @@ vwfPutTile::
   ; Calculate the address of the shift routine
   ld a,low(vwfPutTile_shifter) + CHAR_BIT - 1
   sub e
-  ld b, a
+  ld b, a  ; B: which shifter to use
 
   ld d,h
   ld e,l
@@ -183,7 +183,7 @@ vwfPuts::
   ld c,a
   push hl
   push bc
-  cp 32  ; Skip drawing the space character
+  cp " "  ; Optimization: Don't draw glyph for space character
   call nz, vwfPutTile
   pop bc
   pop hl
@@ -211,7 +211,7 @@ vwfPuts::
 
 ;;
 ; Calculates the width of a string in pixels
-; @param HL
+; @param HL pointer to unprintable-terminated string
 ; @return A: last char; B: width; HL points at end of string;
 ; C unchanged; DE trashed
 vwfStrWidth::
@@ -234,7 +234,7 @@ vwfStrWidth::
 
 ;;
 ; Clears the line image.
-; Clobbers HL; C=0
+; @return A = C = 0; HL = lineImgBuf + lineImgBufLen
 vwfClearBuf::
   ld hl,lineImgBuf
   ld c,lineImgBufLen/4
@@ -248,7 +248,7 @@ vwfClearBuf::
   ret
 
 ;;
-; Copies the VWF buffer to VRAM address HL using fg color 3
+; Copies the VWF buffer to VRAM address HL using fg color 1 or 3
 ; and bg color 0 at 72 cycles per tile
 ; @param HL destination address
 ; @param C tile count (if using _lenC)
@@ -257,8 +257,9 @@ vwfClearBuf::
 vwfPutBuf03::
   ld c,lineImgBufLen/8
 vwfPutBuf03_lenC::
-  sla c
   ld de,lineImgBuf
+vwfPutBuf03_continue_lenC::  ; this entry for intermediate WRAM buffer
+  sla c
 .loop:
   rept 4
     ld a,[de]

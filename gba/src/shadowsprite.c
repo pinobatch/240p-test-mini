@@ -102,6 +102,8 @@ static const ShadowSpriteBG bgtypes[] = {
   {bg_3_setup, striped_bg_set_scroll},
 };
 
+#define NUM_BGTYPES (sizeof bgtypes / sizeof bgtypes[0])
+
 extern const VBTILE hepsie_chrTiles[32];
 
 static const unsigned short shadow_sprite_palettes[3][3] = {
@@ -167,13 +169,13 @@ void activity_shadow_sprite() {
     }
     if (cur_keys & KEY_A) {
       if (new_keys & KEY_RIGHT) {
-        cur_bg = (cur_bg + 1) & 0x03;
+        if (++cur_bg >= NUM_BGTYPES) cur_bg = 0;
         REG_DISPCNT = MODE_0 | BG0_ON | OBJ_ON;
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
       }
       if (new_keys & KEY_LEFT) {
-        cur_bg = (cur_bg - 1) & 0x03;
+        cur_bg = cur_bg ? cur_bg - 1 : NUM_BGTYPES - 1;
         REG_DISPCNT = MODE_0 | BG0_ON | OBJ_ON;
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
