@@ -24,7 +24,7 @@ Vertical scroll test
 Grid scroll test
 Full screen stripes
 Backlight zone test
-Zapper test
+Input test
 Sound test
 Audio sync test
 MDFourier
@@ -798,10 +798,30 @@ or an oscilloscope.
 
 A: Start or stop
 
+== Input test: Menu ==
+
+Zapper
+
+== Input test ==
+
+Choose the test
+corresponding to the
+connected input devices.
+
+Use the serial analyzer to
+inspect the packet format
+of homemade or newly
+discovered input devices.
+
+Because the B Button is
+under test, some tests
+are closed by holding the
+Select and Start Buttons.
+
 == Zapper test ==
 
-This tests whether a Zapper
-light gun plugged into port
+This tests whether a
+Zapper light gun in port
 2 will work with your TV.
 
 Arrows at the right side

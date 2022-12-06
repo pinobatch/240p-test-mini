@@ -137,7 +137,7 @@ have_help_result:
   lsr a  ; carry clear for 0 or set for 1
 
   ; Save position on menu to be restored even if the user views
-  ; a different help page, Sound test, About, or Credits.
+  ; a different help page, Sound test, Input test, About, or Credits.
   lda help_cur_page
   sta help_last_page
   sty help_last_y
@@ -204,7 +204,7 @@ routines:
   .addr do_grid_scroll-1
   .addr do_full_stripes-1
   .addr do_backlight-1
-  .addr do_zapper_test-1
+  .addr do_input_test-1
   .addr do_sound_test-1
   .addr do_audiosync-1
 ::mdfourier_item_id = (* - routines)/2

@@ -51,6 +51,8 @@ unpb53_files:
   .byte <.BANK(pluge_shark_pb53), 16
   .addr convergence_pb53
   .byte <.BANK(convergence_pb53), 5
+  .addr serialanalyzer_pb53
+  .byte <.BANK(serialanalyzer_pb53), 5
 
 ;
 ; 7654 3210
@@ -99,6 +101,7 @@ overscan_pb53:       .incbin "obj/nes/overscan.chr.pb53",2
 backlight_sprites:   .incbin "obj/nes/backlight_sprites.chr.pb53",2
 stdtiles_pb53:       .incbin "obj/nes/stdtiles.chr.pb53",2
 convergence_pb53:    .incbin "obj/nes/convergence.chr.pb53",2
+serialanalyzer_pb53: .incbin "obj/nes/serialanalyzer.chr.pb53",2
 
 help_cursor_pb53:
   .byte $87  ; blank tile

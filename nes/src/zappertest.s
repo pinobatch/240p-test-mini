@@ -252,7 +252,7 @@ not_s0:
   lda #KEY_B
   and new_keys+0
   beq forever
-  rts
+  jmp do_input_test
 .endproc
 
 ;;

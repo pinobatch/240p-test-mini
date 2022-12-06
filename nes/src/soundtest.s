@@ -82,15 +82,13 @@ tvSystem_redtint:
     jsr beep_octave_y
     jmp do_sound_test
   not_beep:
-  
+
   lda #helpsect_sound_test
   jsr helpcheck
   bcs do_sound_test
   lda new_keys+0
   and #KEY_B
-  bne done
-  jmp do_sound_test
-done:
+  beq do_sound_test
   rts
 .endproc
 

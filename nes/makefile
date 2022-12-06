@@ -19,7 +19,7 @@ version:=0.23b1
 objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
   main help helppages.hlp stills stopwatch backlight \
   scrolltest kiki audiosync soundtest crowd mdfourierfe mdfourier \
-  overscan megaton shadowsprite \
+  overscan megaton shadowsprite padstest \
   pads ppuclear unpb53 uniu undte bcd rand rectfill muldiv \
   pb53files rectfiles ntscPeriods
 objlistnsf := mdfouriernsf mdfourier ntscPeriods
@@ -186,7 +186,8 @@ $(objdir)/pb53files.o: \
   $(objdir)/stdtiles.chr.pb53 $(objdir)/backlight_sprites.chr.pb53 \
   $(objdir)/kikitiles16.chr.pb53 $(objdir)/megatontiles.chr.pb53 \
   $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
-  $(objdir)/fizzter_digits.chr.pb53 $(objdir)/convergence.chr.pb53
+  $(objdir)/fizzter_digits.chr.pb53 $(objdir)/convergence.chr.pb53 \
+  $(objdir)/serialanalyzer.chr.pb53
 $(objdir)/mdfourier4kfe-chrrom.o $(objdir)/mdfourier4kfe.o: \
   $(objdir)/mdf4k_chr.chr
 

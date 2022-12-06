@@ -140,6 +140,9 @@ bcd_highdigits = $0000
 .globalzp prodlo, prodmlo, prodmhi, prodhi, fac1lo, fac1hi, fac2lo, fac2hi
 .global mul16x16, div32x16
 
+; padstest.s
+.global do_input_test
+
 ; zapper.s
 .global do_zapper_test, vwfPut3Digits
 
