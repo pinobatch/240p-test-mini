@@ -46,6 +46,7 @@ rectfill_layouts:
   rectfile RF_safearea_1, safearea_main_rects, $20, $20
   rectfile RF_safearea_2, safearea_extra_texts, $30, $20
   rectfile RF_safearea_3, safearea_nt2_rects, $24
+  rectfile RF_serial_analyzer, serial_analyzer_rects, $20, $20
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
@@ -515,4 +516,23 @@ safearea_nt2_rects:
   rf_attr   0,  0,256,240, 2  ; action safe (most of screen)
   rf_attr   0,224,256,240, 1  ; danger zone
   .byte 0
+  .byte 0
+
+serial_analyzer_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
+  rf_rect  24, 80, 48, 88,$02, RF_INCR  ; $4016
+  rf_rect  48, 80, 56,120,$06, 0        ; D
+  rf_rect  56, 80, 64,120,$07, RF_INCR  ;  0-4
+  rf_rect  24,128, 40,136,$02, RF_INCR  ; $40
+  rf_rect  40,128, 48,136,$05, 0        ;    17
+  rf_rect  48,128, 56,168,$06, 0        ; D
+  rf_rect  56,128, 64,168,$07, RF_INCR  ;  0-4
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  .byte 0
+  rf_label 24, 48, 3, 0
+  .byte "Serial Analyzer", 0
+  rf_label 112, 48, 3, 0
+  .byte "Hold Select+Start to close", 0
+  ; rf_label in_left, in_top, in_fgc, in_bgc
   .byte 0

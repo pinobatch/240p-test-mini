@@ -1,13 +1,16 @@
 .include "nes.inc"
 .include "global.inc"
+.include "rectfill.inc"
 .importzp helpsect_input_test_menu, helpsect_input_test
+.importzp helpsect_under_construction
+.importzp RF_serial_analyzer
 
-; 8 activities within padstest
-; - [ ] 10-channel serial analyzer
+; 8 activities within padstest (issue #42)
+; - [X] 10-channel serial analyzer
 ; - [ ] Standard controller 1 and 2, Famicom expansion controllers,
 ;       and microphone
 ; - [ ] NES Four Score
-; - [ ] Zapper (move Zapper test to this submenu)
+; - [X] Zapper (move Zapper test to this submenu)
 ; - [ ] Power Pad for NES
 ; - [ ] Arkanoid controller for NES
 ; - [ ] Super NES controller
@@ -17,11 +20,17 @@
 .code
 ; Menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.proc do_input_unfinished
+  ldx #helpsect_under_construction
+  lda #KEY_A|KEY_B|KEY_START
+  jsr helpscreen
+  ; fall through to input unfinished
+.endproc
+
 .proc do_input_test
   ldx #helpsect_input_test_menu
   lda #KEY_A|KEY_B|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
   jsr helpscreen
-  ; helpscreen leaves bank pointed at CODE02
 
   lda new_keys+0
   and #KEY_A
@@ -46,10 +55,16 @@
 .endproc
 
 input_tests:
+  .addr do_serial_analyzer-1
+  .addr do_input_unfinished-1
+  .addr do_input_unfinished-1
   .addr do_zapper_test-1
+  .addr do_input_unfinished-1
+  .addr do_input_unfinished-1
+  .addr do_input_unfinished-1
+  .addr do_input_unfinished-1
 
 ; Serial analyzer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Unfinished!
 
 NUM_READS = 32
 NUM_PORTS = 2
@@ -62,6 +77,7 @@ serial_disp_data = serial_read_data1 + NUM_READS
 SIZEOF_SERIAL_DISP_DATA = NUM_READS / 2 * LA_NUM_CHANNELS
 SERIAL_BLANK_TILE = $00
 SERIAL_BASE_TILE = $0C
+SERIAL_EXIT_HOLD_TIME = 30
 
 .proc serial_read
   ldx #1
@@ -89,24 +105,27 @@ SERIAL_BASE_TILE = $0C
   lda #SERIAL_BASE_TILE/4
   clear_disp_loop:
     sta serial_disp_data,x
-    sta serial_disp_data+SIZEOF_SERIAL_DISP_DATA/2-1
+    sta serial_disp_data+SIZEOF_SERIAL_DISP_DATA/2,x
     dex
     bpl clear_disp_loop
   inx
 
   format_disp_loop:
+    ; put 1 bit from each line of each controller into each output cell
     lda serial_read_data0,y
     jsr shift1byte
     lda serial_read_data1,y
     jsr shift1byte
+
+    ; put a second bit from each controller into the same output cell
     txa
     sec
     sbc #LA_NUM_CHANNELS
     tax
     iny
-    lda serial_read_data1,y
+    lda serial_read_data0,y
     jsr shift1byte
-    lda serial_read_data1+1,y
+    lda serial_read_data1,y
     jsr shift1byte
     iny
     cpy #NUM_READS
@@ -131,7 +150,7 @@ SERIAL_BASE_TILE = $0C
       .if I>0
         sty PPUDATA
       .endif
-      .repeat 3, J
+      .repeat 4, J
         lda serial_disp_data+LA_NUM_CHANNELS*(4*I+J),x
         sta PPUDATA
       .endrepeat
@@ -161,11 +180,39 @@ shift1byte:
 .endproc
 
 .proc do_serial_analyzer
+  exit_time = test_state + 0
+  lda #VBLANK_NMI
+  sta help_reload
+  sta PPUCTRL
+  asl a
+  sta PPUMASK
+  tax
+  tay
+  lda #12
+  sta exit_time
+  jsr unpb53_file
+  jsr rf_load_yrgb_palette
+  lda #RF_serial_analyzer
+  jsr rf_load_layout
+  
+
+  loop:
+    jsr serial_read
+    jsr serial_present
+    lda serial_read_data0+2  ; SELECT
+    and serial_read_data0+3  ; START
+    lsr a  ; CF set if select and start are held
+    bcs :+
+      lda #SERIAL_EXIT_HOLD_TIME
+      sta exit_time
+    :
+    dec exit_time
+    bne loop    
   jmp do_input_test
 .endproc
 
 SERIAL_LEFT = 10
-SERIAL_TOP = 12
+SERIAL_TOP = 10
 SERIAL_ROWS_BETWEEN_PORTS = 1
 .define SERIAL_ROW_ADDR(port, bitnum) $2000 + SERIAL_LEFT + 32 * (SERIAL_TOP + port * (BITS_PER_PORT + SERIAL_ROWS_BETWEEN_PORTS) + bitnum)
 serial_dst_hi:
@@ -180,3 +227,4 @@ serial_dst_lo:
     .byte <(SERIAL_ROW_ADDR P, B)
   .endrepeat
 .endrepeat
+

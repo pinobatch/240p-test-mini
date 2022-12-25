@@ -52,7 +52,7 @@ unpb53_files:
   .addr convergence_pb53
   .byte <.BANK(convergence_pb53), 5
   .addr serialanalyzer_pb53
-  .byte <.BANK(serialanalyzer_pb53), 5
+  .byte <.BANK(serialanalyzer_pb53), 16
 
 ;
 ; 7654 3210

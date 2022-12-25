@@ -800,14 +800,28 @@ A: Start or stop
 
 == Input test: Menu ==
 
+Serial analyzer
+*Standard controllers & mic
+*Four Score
 Zapper
+*Power Pad in 2P
+*Arkanoid Controller in 2P
+*Super NES Controller
+*Super NES Mouse in 2P
+
+== Under construction ==
+
+This part of Input test
+isn't built yet.
+
+https://github.com/pinobatch/
+  240p-test-mini/issues/42
 
 == Input test ==
 
 Choose the test
 corresponding to the
 connected input devices.
-
 Use the serial analyzer to
 inspect the packet format
 of homemade or newly
@@ -817,6 +831,11 @@ Because the B Button is
 under test, some tests
 are closed by holding the
 Select and Start Buttons.
+
+Caution: Hot-swapping
+controllers causes a CPU
+voltage sag. Press the
+Reset Button to recover.
 
 == Zapper test ==
 
