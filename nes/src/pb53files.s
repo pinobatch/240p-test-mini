@@ -53,6 +53,10 @@ unpb53_files:
   .byte <.BANK(convergence_pb53), 5
   .addr serialanalyzer_pb53
   .byte <.BANK(serialanalyzer_pb53), 16
+  .addr controllerimages_pb53
+  .byte <.BANK(controllerimages_pb53), 128
+  .addr powerpad_pb53
+  .byte <.BANK(powerpad_pb53), 64
 
 ;
 ; 7654 3210
@@ -91,8 +95,6 @@ sharpness_iu53:      .incbin "obj/nes/sharpness.iu53"
 stopwatchface_iu53:  .incbin "obj/nes/stopwatchface.iu53"
 gus_portrait_iu53:   .incbin "obj/nes/gus_portrait.iu53"
 
-stopwatch_balls:     .incbin "obj/nes/stopwatchhand.chr.pb53",2
-fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
 kikitiles_pb53:      .incbin "obj/nes/kikitiles16.chr.pb53",2
 gus_sprite:          .incbin "obj/nes/gus_sprite.chr.pb53",2
 megatontiles_pb53:   .incbin "obj/nes/megatontiles.chr.pb53",2
@@ -102,6 +104,8 @@ backlight_sprites:   .incbin "obj/nes/backlight_sprites.chr.pb53",2
 stdtiles_pb53:       .incbin "obj/nes/stdtiles.chr.pb53",2
 convergence_pb53:    .incbin "obj/nes/convergence.chr.pb53",2
 serialanalyzer_pb53: .incbin "obj/nes/serialanalyzer.chr.pb53",2
+controllerimages_pb53:.incbin "obj/nes/controllerimages.chr.pb53",2
+powerpad_pb53:       .incbin "obj/nes/powerpad.chr.pb53",2
 
 help_cursor_pb53:
   .byte $87  ; blank tile
@@ -112,5 +116,12 @@ overclock_s0_pb53:
 
 .segment "BANK01"
 
-; Overflow pb53/sb53 files can go in bank 1, but the only ones left
-; are gatedata (Shadow sprite tiles and Kiki map).
+; Overflow pb53/sb53 files can go in bank 1.
+; 
+; For a long time, all files left in bank 1 were gatedata, or
+; data decompressed to work RAM for further processing instead of
+; straight to VRAM. (These are Shadow sprite tiles and Kiki map.)
+; At the end of 2022, a controller test was added, needing more
+; space for compressed tiles.
+stopwatch_balls:     .incbin "obj/nes/stopwatchhand.chr.pb53",2
+fizzter_digits:      .incbin "obj/nes/fizzter_digits.chr.pb53",2
