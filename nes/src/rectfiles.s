@@ -47,6 +47,10 @@ rectfill_layouts:
   rectfile RF_safearea_2, safearea_extra_texts, $30, $20
   rectfile RF_safearea_3, safearea_nt2_rects, $24
   rectfile RF_serial_analyzer, serial_analyzer_rects, $20, $20
+  rectfile RF_input_fcpads, input_fcpads_rects, $20, $10
+  rectfile RF_input_fourscore, input_fourscore_rects, $20, $10
+  rectfile RF_input_power_pad, input_power_pad_rects, $20, $10
+  rectfile RF_input_snes_pad, input_snes_pad_rects, $20, $10
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
@@ -534,5 +538,86 @@ serial_analyzer_rects:
   .byte "Serial Analyzer", 0
   rf_label 112, 48, 3, 0
   .byte "Hold Select+Start to close", 0
-  ; rf_label in_left, in_top, in_fgc, in_bgc
+  .byte 0
+
+input_fcpads_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen
+  rf_rect  96, 40,160, 72,$c0, RF_INCR  ; Famicom I
+  rf_rect  96, 80,160,112,$e0, RF_INCR  ; Famicom II
+  rf_rect  96,120,160,152,$80, RF_INCR  ; NES
+  rf_rect  96,160,160,192,$80, RF_INCR  ; NES
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  rf_attr  96,112,160,192, 1  ; FC are red and gold; NES are red and gray
+  .byte 0
+  rf_label 24, 24, 1, 0
+  .byte "FC Controllers", 0
+  rf_label 112, 24, 1, 0
+  .byte "Hold Select+Start to close", 0
+  rf_label  83, 40, 1, 0
+  .byte "1", 0
+  rf_label  83, 80, 1, 0
+  .byte "2", 0
+  rf_label  64,120, 1, 0
+  .byte "Exp 1", 0
+  rf_label  64,160, 1, 0
+  .byte "Exp 2", 0
+  .byte 0
+
+input_fourscore_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen
+  rf_rect  96, 40,160, 72,$80, RF_INCR  ; NES 1P
+  rf_rect  96, 80,160,112,$80, RF_INCR  ; NES 2P
+  rf_rect  96,120,160,152,$80, RF_INCR  ; NES 3P
+  rf_rect  96,160,160,192,$80, RF_INCR  ; NES 4P
+  rf_rect  96,200,160,216,$01, 0  ; Sig grid
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  rf_attr  96, 32,160,224, 1  ; NES pads are gray, and so is sig grid
+  .byte 0
+  rf_label 24, 24, 1, 0
+  .byte "NES Four Score", 0
+  rf_label 112, 24, 1, 0
+  .byte "Hold Select+Start to close", 0
+  rf_label  81, 40, 1, 0
+  .byte "1", 0
+  rf_label  81, 80, 1, 0
+  .byte "2", 0
+  rf_label  81,120, 1, 0
+  .byte "3", 0
+  rf_label  81,160, 1, 0
+  .byte "4", 0
+  rf_label  72,200, 1, 0
+  .byte "Sig", 0
+  .byte 0
+
+input_power_pad_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen
+  rf_rect  96, 80,160,144,$80, RF_INCR  ; Power Pad
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  rf_attr  96, 80,160,144, 3  ; Power Pad is blue and red
+  .byte 0
+  rf_label  56, 56, 1, 0
+  .byte "Power Pad", 0
+  rf_label 152, 56, 1, 0
+  .byte "B: close", 0
+  .byte 0
+
+input_snes_pad_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen
+  rf_rect  96, 80,160,112,$A0, RF_INCR  ; SNES 1P
+  rf_rect  96,120,160,152,$A0, RF_INCR  ; SNES 2P
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  rf_attr  96, 80,160,160, 2  ; NES pads are gray and lavender
+  .byte 0
+  rf_label  82,  40, 1, 0
+  .byte "Super NES Controller", 0
+  rf_label  68,  56, 1, 0
+  .byte "Hold Select+Start to close", 0
+  rf_label  81,  80, 1, 0
+  .byte "1", 0
+  rf_label  81, 120, 1, 0
+  .byte "2", 0
   .byte 0

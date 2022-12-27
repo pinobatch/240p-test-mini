@@ -801,12 +801,12 @@ A: Start or stop
 == Input test: Menu ==
 
 Serial analyzer
-*Standard controllers & mic
-*Four Score
+FC controllers & mic
+NES with Four Score
 Zapper
-*Power Pad in 2P
+Power Pad in 2P
 *Arkanoid Controller in 2P
-*Super NES Controller
+Super NES Controller
 *Super NES Mouse in 2P
 
 == Under construction ==
