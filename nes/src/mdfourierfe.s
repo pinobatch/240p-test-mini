@@ -109,7 +109,6 @@ done:
   ; MGP nonzero and TGP nonzero: OK
   ; TGP nonzero, MGP zero: Complete
   ; TGP zero: Trash
-;  sta $4444
   lda test_good_phase
   beq dont_write_good_phase
     ; Erase "Trash. Press Reset" message

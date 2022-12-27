@@ -403,7 +403,6 @@ not_pagenum_line:
   lda (ciSrc),y
   cmp #TITLE_REPEAT_CODE
   bne normal_dte_line
-    sta $4444
     iny
     lda (ciSrc),y
     tax

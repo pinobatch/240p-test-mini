@@ -52,7 +52,6 @@ test_state: .res SIZEOF_TEST_STATE
 ;;
 ; Saves coroutine state and returns to the NSF player
 .proc mdfourier_present
-  sta $4444
   tsx
   txa
   eor #$FF
@@ -72,7 +71,6 @@ test_state: .res SIZEOF_TEST_STATE
 .endproc
 
 .proc mdfourier_nsf_play
-  sta $4444
   jsr mdfourier_push_apu
 
   ; Figure out how much stack we'll have to save next time

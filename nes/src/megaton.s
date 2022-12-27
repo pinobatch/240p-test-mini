@@ -29,6 +29,8 @@ CENTERPOS = 128
 LEFTWALL = 128-36
 RIGHTWALL = 128+36
 MAX_TESTS = 10
+; If nonzero, don't run the test; instead show constants in results
+MT_SKIP_TO_RESULTS = 0
 ; Normally sides are 72 apart. When randomize is on, the side is
 ; temporarily moved (rand()&0x0F)-8 pixels to the right of its
 ; normal position.
@@ -87,17 +89,17 @@ reticle_x:     .byte <-16, <-8,   0,   8,<-16,   8,<-16,   8,<-16, <-8,   0,   8
   lda #EN_RANDOM|EN_BEEP  ; SNES 1.03 made beeping the default
   sta enableflags
 
-.if 0
-  ldy #MAX_TESTS-1
-:
-  tya
-  asl a
-  asl a
-  sta test_state,y
-  dey
-  bpl :-
-  jmp megaton_show_results
-.endif
+  .if ::MT_SKIP_TO_RESULTS
+    ldy #MAX_TESTS-1
+    :
+      tya
+      asl a
+      asl a
+      sta test_state,y
+      dey
+      bpl :-
+    jmp megaton_show_results
+  .endif
 
 restart:
   lda #MT_DIRTY_CBOXCOLOR
