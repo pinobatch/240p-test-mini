@@ -756,12 +756,12 @@ Select: Stop sound
 
 == 144p Test Suite ==
 
-Ver. 0.23b1 (2021-09-25)
+Ver. 0.23b1 (2023-xx-xx)
 SGB sound
 
 © 2011-2016
   Artemio Urbina
-© 2015-2021
+© 2015-2023
   Damian Yerrick
 This is free software; see
 the source for copying

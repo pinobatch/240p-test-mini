@@ -638,11 +638,11 @@ Select: Show or hide
 
 == 160p Test Suite ==
 
-Version 0.23b1 (2021-09-25)
+Version 0.23b1 (2023-xx-xx)
 HDMA is right for you
 
 © 2011-2016 Artemio Urbina
-© 2015-2021 Damian Yerrick
+© 2015-2023 Damian Yerrick
 This is free software; see
 the source for copying
 conditions. The program

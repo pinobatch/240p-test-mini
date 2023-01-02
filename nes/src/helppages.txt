@@ -873,8 +873,8 @@ less than 5 lines (317 us).
 
 == 240p Test Suite ==
 
-Version 0.23b1 (2021-09-25)
-Monoscope
+Version 0.23b1 (2023-xx-xx)
+Monoscope; input test
 
 Concept: Artemio Urbina
   🐦 @Artemio
@@ -882,7 +882,7 @@ Program: Damian Yerrick
   🐦 @PinoBatch
 
 © 2011-2016 Artemio Urbina
-© 2015-2021 Damian Yerrick
+© 2015-2023 Damian Yerrick
 This is free software; see the
 source for copying conditions.
 There is NO warranty, not
