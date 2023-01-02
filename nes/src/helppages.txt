@@ -805,7 +805,7 @@ FC controllers & mic
 NES with Four Score
 Zapper
 Power Pad in 2P
-*Arkanoid Controller in 2P
+Arkanoid Controller in 2P
 Super NES Controller
 *Super NES Mouse in 2P
 

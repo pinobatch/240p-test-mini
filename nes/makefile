@@ -188,7 +188,7 @@ $(objdir)/pb53files.o: \
   $(objdir)/overscan.chr.pb53 $(objdir)/pluge_shark_4color.chr.pb53 \
   $(objdir)/controllerimages.chr.pb53 $(objdir)/powerpad.chr.pb53 \
   $(objdir)/fizzter_digits.chr.pb53 $(objdir)/convergence.chr.pb53 \
-  $(objdir)/serialanalyzer.chr.pb53
+  $(objdir)/serialanalyzer.chr.pb53 $(objdir)/arkanoidchr.chr.pb53
 $(objdir)/mdfourier4kfe-chrrom.o $(objdir)/mdfourier4kfe.o: \
   $(objdir)/mdf4k_chr.chr
 

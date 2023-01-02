@@ -115,9 +115,8 @@ blo = $04
   rts
 .endproc
 
-
 ;;
-; Writes a decimal number to a string buffer.
+; Writes a converted decimal number to a string buffer.
 ; @param A high byte of destination address
 ; @param Y low byte of destination address
 ; @param X number of decimal places
@@ -174,4 +173,3 @@ skip_digit:
 bcdTableLo:   .lobytes   bcdtens1, bcdtens2, bcdtens3
 bcdTableHi:   .hibytes   bcdtens1, bcdtens2, bcdtens3
 bcdTableBank: .bankbytes bcdtens1, bcdtens2, bcdtens3
-

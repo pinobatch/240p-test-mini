@@ -51,6 +51,7 @@ rectfill_layouts:
   rectfile RF_input_fourscore, input_fourscore_rects, $20, $10
   rectfile RF_input_power_pad, input_power_pad_rects, $20, $10
   rectfile RF_input_snes_pad, input_snes_pad_rects, $20, $10
+  rectfile RF_input_vaus, input_vaus_rects, $20, $10
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
@@ -600,7 +601,7 @@ input_power_pad_rects:
   .byte 0
   rf_label  56, 56, 1, 0
   .byte "Power Pad", 0
-  rf_label 152, 56, 1, 0
+  rf_label 166, 56, 1, 0
   .byte "B: close", 0
   .byte 0
 
@@ -620,4 +621,21 @@ input_snes_pad_rects:
   .byte "1", 0
   rf_label  81, 120, 1, 0
   .byte "2", 0
+  .byte 0
+
+input_vaus_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen
+  rf_rect 128,128,144,136,$08, RF_INCR  ; Current value
+  rf_rect 128,136,168,144,$0A, RF_INCR  ; Range
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  .byte 0
+  rf_label  56, 72, 3, 0
+  .byte "Arkanoid Controller", 0
+  rf_label 166, 72, 3, 0
+  .byte "B: close", 0
+  rf_label  96, 128, 3, 0
+  .byte "Value", 0
+  rf_label  96, 136, 3, 0
+  .byte "Range", 0
   .byte 0

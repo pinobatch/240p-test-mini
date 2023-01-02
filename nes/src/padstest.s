@@ -1,13 +1,16 @@
+; NES controller test
+; Copyright 2023 Damian Yerrick
+; license: GNU GPL version 2 or later
+
 .include "nes.inc"
 .include "global.inc"
 .include "rectfill.inc"
 .importzp helpsect_input_test_menu, helpsect_input_test
 .importzp helpsect_under_construction
 .importzp RF_serial_analyzer, RF_input_fcpads, RF_input_fourscore
-.importzp RF_input_power_pad, RF_input_snes_pad
+.importzp RF_input_power_pad, RF_input_snes_pad, RF_input_vaus
 
 ; Remaining activities within padstest (issue #42)
-; - [ ] Arkanoid controller for NES
 ; - [ ] Super NES Mouse
 
 exit_time = test_state + 0
@@ -24,6 +27,7 @@ buttonset = test_state + 1
 .endproc
 
 .proc do_input_test
+  jsr read_pads  ; read them once because B to exit may double trigger
   ldx #helpsect_input_test_menu
   lda #KEY_A|KEY_B|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
   jsr helpscreen
@@ -56,9 +60,9 @@ input_tests:
   .addr do_fourscore_test-1
   .addr do_zapper_test-1
   .addr do_power_pad_test-1
-  .addr do_input_unfinished-1  ; TODO: Arkanoid
+  .addr do_vaus_test-1
   .addr do_snes_pad_test-1
-  .addr do_input_unfinished-1  ; TODO: SNES Mouse
+  .addr do_mouse_test-1
 
 ; Serial analyzer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -81,6 +85,10 @@ SERIAL_EXIT_HOLD_TIME = 30
   dex
   stx $4016
   readloop:
+    ; Burn a few cycles because the Hyper Click mouse is slow
+    ; to set up its 17th bit
+    pha
+    pla
     lda $4016
     sta serial_read_data0,x
     lda $4017
@@ -130,10 +138,7 @@ SERIAL_EXIT_HOLD_TIME = 30
   ldy #SERIAL_BLANK_TILE
   ldx #LA_NUM_CHANNELS-1
   bit PPUSTATUS
-  lda nmis
-  :
-    cmp nmis
-    beq :-
+  jsr input_vsync
   xferloop:
     ; seek (16)
     lda serial_dst_hi,x
@@ -189,7 +194,7 @@ shift1byte:
   jsr rf_load_yrgb_palette
   lda #RF_serial_analyzer
   jsr rf_load_layout
-  
+
   loop:
     jsr serial_read
     jsr serial_present
@@ -356,18 +361,8 @@ count = $01
     jsr nes_buttons_draw_obj
     ldx oam_used
     jsr ppu_clear_oam
-    lda nmis
-    :
-      cmp nmis
-      beq :-
-    ldx #0
-    stx OAMADDR
-    lda #>OAM
-    sta OAM_DMA
-    ldy #0
-    lda #VBLANK_NMI|BG_0000|OBJ_0000
-    sec
-    jsr ppu_screen_on
+    jsr input_vsync
+    jsr input_screen_on
     lda buttonset
     cmp #first_non_selectstart_button_set - button_sets_base
     bcc is_select_start_exit
@@ -387,6 +382,25 @@ count = $01
     dec exit_time
     bne loop    
   jmp do_input_test
+.endproc
+
+.proc input_vsync
+  lda nmis
+  :
+    cmp nmis
+    beq :-
+  rts
+.endproc
+
+.proc input_screen_on
+  ldx #0
+  stx OAMADDR
+  lda #>OAM
+  sta OAM_DMA
+  ldy #0
+  lda #VBLANK_NMI|BG_0000|OBJ_0000
+  sec
+  jmp ppu_screen_on
 .endproc
 
 controller_test_palette:
@@ -431,7 +445,7 @@ power_pad_button_sets:
 
 button_xpos_base:
 nes_button_xpos:
-  .byte 147, 137, 118, 126, 104, 104,  99, 109
+  .byte 147, 138, 118, 126, 104, 104,  99, 109
 fourscore_sig_xpos:
   .byte  96, 104, 112, 120, 128, 136, 144, 152
 snes_button_xpos:
@@ -448,3 +462,263 @@ button_ypos_base:
   .byte  57,  51,  54,  54,  47,  55,  51,  51, 52,  46,  35,  35  ; SNES
   .byte  99, 99, 115, 131, 115, 131, 131, 115, 99, 99, 131, 115  ; Power Pad
   .byte  92  ; FC mic
+
+; Mouse test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.proc do_mouse_test
+  jmp do_input_unfinished
+.endproc
+
+; Arkanoid controller test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+vaus_value_lo = test_state + 2
+vaus_value_hi = test_state + 3
+rangeleft_lo = test_state + 4
+rangeleft_hi = test_state + 5
+rangeright_lo = test_state + 6
+rangeright_hi = test_state + 7
+
+VAUS_Y = 96
+VAUS_BUTTON_Y = 128
+VAUS_GRID_TL = $2000 + (VAUS_Y / 8) * 32
+VAUS_VALUE_TARGET = $0800
+.proc do_vaus_test
+  jsr input_vsync
+  jsr vaus_poll
+  ldx #VBLANK_NMI
+  stx help_reload
+  stx PPUCTRL
+  stx vram_copydstlo
+  stx rangeleft_hi
+  ldx #$00
+  stx vram_copydsthi
+  stx rangeright_lo
+  stx rangeright_hi
+  ldy #$00
+  sty PPUMASK
+  lda #15
+  jsr unpb53_file
+  lda #RF_input_vaus
+  jsr rf_load_layout
+  lda #>VAUS_GRID_TL
+  sta PPUADDR
+  lda #<VAUS_GRID_TL
+  sta PPUADDR
+  jsr vaus_draw_grid_strip
+  jsr vaus_draw_grid_strip
+  ldx #0
+  :
+    lda vaus_oam_data,x
+    sta OAM,x
+    inx
+    cpx #vaus_oam_data_end-vaus_oam_data
+    bcc :-
+  jsr ppu_clear_oam
+  jsr input_vsync
+  lda #$00
+  jsr vaus_load_palette
+  lda #$10
+  jsr vaus_load_palette
+
+  loop:
+    jsr vaus_poll
+    jsr vaus_draw
+    jsr input_vsync
+    jsr rf_copy8tiles
+    lda #$3F
+    sta PPUADDR
+    lda #$15  ; palette 1: current position
+    sta PPUADDR
+    lda vaus_value_lo
+    lsr a
+    lda #$16
+    ldx #$26
+    bcs :+
+      txa
+    :
+    sta PPUDATA
+    stx PPUDATA
+    eor #$30
+    sta PPUDATA
+    jsr input_screen_on
+    lda cur_keys
+    and #KEY_B
+    beq loop
+  done:
+  jmp do_input_test
+.endproc
+
+.proc vaus_poll
+  ; Arkanoid controller is weird.  It should be read *before*
+  ; strobing, or only the 8 most significant bits will be correct.
+  ; The least significant bit is readable only after the conversion
+  ; has finished, which takes about 8 ms.
+  lda #1 << (16 - 9)  ; Ring counter: when this 1 shifts out we're done
+  sta vaus_value_lo
+  ldx #0
+  stx vaus_value_hi
+  player2_loop:
+    lda $4017
+    tay
+    inx
+    and #$10
+    eor #$10
+    cmp #$01
+    rol vaus_value_lo
+    rol vaus_value_hi
+    bcc player2_loop
+  tya
+  and #$08  ; get button state from last poll
+  sta cur_keys+1
+
+  ; Now we can strobe it to start the next conversion.
+  lda #1
+  sta $4016
+  sta cur_keys+0
+  lsr a
+  sta $4016
+  player1_loop:
+    lda $4016
+    lsr a
+    rol cur_keys+0
+    bcc player1_loop
+
+  ldy vaus_value_lo
+  ldx vaus_value_hi
+  cpy rangeleft_lo
+  txa
+  sbc rangeleft_hi
+  bcs not_decrease_left
+    stx rangeleft_hi
+    sty rangeleft_lo
+  not_decrease_left:
+  cpy rangeright_lo
+  txa
+  sbc rangeright_hi
+  bcc not_increase_right
+    stx rangeright_hi
+    sty rangeright_lo
+  not_increase_right:
+  rts
+.endproc
+
+.proc vaus_draw
+  ; Move fire button into place
+  lda cur_keys+1
+  beq :+
+    lda #(VAUS_BUTTON_Y-1) ^ $FF
+  :
+  eor #$FF
+  sta OAM+4
+  lda vaus_value_hi
+  lsr a
+  lda vaus_value_lo
+  ror a
+  sta OAM+3
+  lda rangeleft_hi
+  lsr a
+  lda rangeleft_lo
+  ror a
+  sta OAM+11
+  lda rangeright_hi
+  lsr a
+  lda rangeright_lo
+  ror a
+  sec
+  sbc #5
+  sta OAM+15
+
+  jsr clearLineImg
+
+  ldy vaus_value_lo
+  lda vaus_value_hi
+  ldx #0
+  jsr vaus_3digits
+  ldy rangeleft_lo
+  lda rangeleft_hi
+  ldx #16
+  jsr vaus_3digits
+  ldy rangeright_lo
+  lda rangeright_hi
+  ldx #36
+  jsr vaus_3digits
+  lda #'-'
+  ldx #31
+  jsr vwfPutTile
+
+  lda #%0011
+  jmp rf_color_lineImgBuf  ; finish drawing text
+.endproc
+
+.proc vaus_draw_grid_strip
+  ldx #0
+  loop:
+    lda vaus_grid_strip_data,x
+    and #$03
+    sta PPUDATA
+    eor vaus_grid_strip_data,x
+    sta PPUDATA
+    inx
+    cpx #16
+    bcc loop
+  rts
+.endproc
+
+.proc vaus_load_palette
+  ldx #$3F
+  stx PPUADDR
+  sta PPUADDR
+  stx PPUDATA
+  lda #$16
+  sta PPUDATA
+  lda #$20
+  sta PPUDATA
+  sta PPUDATA
+  rts
+.endproc
+
+;;
+; Writes 3-digit number AY (0 to 999) at position X
+.proc vaus_3digits
+xposition = $0F
+  sty bcdNum+0
+  sta bcdNum+1
+  lda #0
+  sta bcdNum+2
+  stx xposition
+  jsr bcdConvert24
+  lda bcdResult+2
+  beq no_hundreds
+    ldx xposition
+    ora #'0'
+    jsr vwfPutTile
+    jmp yes_tens
+  no_hundreds:
+  lda bcdResult+1
+  beq no_tens
+  yes_tens:
+    lda #5
+    clc
+    adc xposition
+    tax
+    lda bcdResult+1
+    ora #'0'
+    jsr vwfPutTile
+  no_tens:
+  lda #10
+  clc
+  adc xposition
+  tax
+  lda bcdResult+0
+  ora #'0'
+  jmp vwfPutTile
+.endproc
+
+vaus_grid_strip_data:
+  .byte 3,1,2,1,2,1,2,1,3,1,2,1,2,1,2,5
+vaus_oam_data:
+  .byte VAUS_Y + 4 - 1, $05, $01, $FF  ; OAM+0: current position
+  .byte $FF,            $07, $00, 152  ; OAM+4: fire button
+  .byte VAUS_Y + 4 - 1, $06, $00, $FF  ; OAM+8: left side of range
+  .byte VAUS_Y + 4 - 1, $06, $40, $FF  ; OAM+12: right side of range
+vaus_oam_data_end:
