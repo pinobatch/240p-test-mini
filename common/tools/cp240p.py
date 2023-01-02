@@ -9,8 +9,8 @@ import codecs
 # The rest are as follows, beginning at 0x80.
 name = 'cp240p'
 extra_codepoints = [
-    # copyright, bird, unknown, unkonwn,
-    0x00A9, 0x1F426, 0xFFFE, 0xFFFE,
+    # copyright, bird, Greek lowercase mu, unkonwn,
+    0x00A9, 0x1F426, 0x03bc, 0xFFFE,
     # up arrow, down arrow, left arrow, right arrow
     0x2191, 0x2193, 0x2190, 0x2192,
 ]

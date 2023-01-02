@@ -821,11 +821,14 @@ https://github.com/pinobatch/
 
 Choose the test
 corresponding to the
-connected input devices.
-Use the serial analyzer to
-inspect the packet format
-of homemade or newly
-discovered input devices.
+connected input devices,
+then press buttons.
+
+The serial analyzer strobes
+then polls every 32 cycles
+(18 μs). Use it to inspect the
+packet format of homemade
+or newly found input devices.
 
 Because the B Button is
 under test, some tests
@@ -869,7 +872,7 @@ with every other line dark,
 such as a line doubler that
 draws "scanlines" between
 picture lines and has delay
-less than 5 lines (317 us).
+less than 5 lines (317 μs).
 
 == 240p Test Suite ==
 
