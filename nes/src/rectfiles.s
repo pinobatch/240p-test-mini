@@ -443,15 +443,16 @@ mdfourier_15k_rects:
 ; Safe area consists of 3 files:
 ; - the main screen (Pat $0000, NT $2000)
 ; - the bottom half of the text (Pat $1000, NT $2000)
-; - above and below the PocketNES safe area (Pat $0000, NT $2400)
+; - above and below the post-1985 safe area (Pat $0000, NT $2400)
 safearea_main_rects:
-  rf_rect   0,  0,256,240,$1C, RF_ROWXOR|RF_COLXOR  ; background
-  rf_rect  48, 16,208,208,$00, 0  ; title safe cutout
-  rf_rect  24, 24,232,200,$00, 0
+  rf_rect   0,  0,256,240,$1C, RF_ROWXOR|RF_COLXOR  ; border
+  rf_rect  16, 16,240,208,$16, RF_ROWXOR|RF_COLXOR  ; inner area
+  rf_rect  24, 16,232,208,$00, 0  ; title safe cutout
+  rf_rect  16, 24,240,200,$00, 0
   rf_rect  32, 40, 48, 56,$14, RF_ROWXOR|RF_COLXOR  ; danger symbol
   rf_rect  32, 88, 48,104,$14, RF_ROWXOR|RF_COLXOR  ; action symbol
   rf_rect  32,120, 48,136,$14, RF_ROWXOR|RF_COLXOR  ; pnes symbol
-  rf_rect  32,160, 48,176,$14, RF_ROWXOR|RF_COLXOR  ; title symbol
+  rf_rect  32,160, 48,176,$16, RF_ROWXOR|RF_COLXOR  ; title symbol
   .byte 0
   rf_attr   0,  0,256,240, 3  ; pnes safe (most of screen)
   rf_attr  16, 16,240,208, 0  ; title safe (inner rectangle)
@@ -459,26 +460,22 @@ safearea_main_rects:
   rf_attr  32, 80, 48,112, 2  ; action symbol
   rf_attr  32,112, 48,144, 3  ; pnes symbol
   .byte 0
-  rf_label  53, 24, 2, 0
-  .byte "Safe Area on 5.37 MHz",0
-  rf_label 153, 24, 2, 0
-  .byte "NTSC VDPs",0
+  rf_label  76, 24, 2, 0
+  .byte "Safe Area on 60 Hz NES",0
   rf_label  56, 40, 2, 0
   .byte "Danger Zone",0
   rf_label  56, 48, 2, 0
   .byte "Top and bottom 8 lines",0
   rf_label  56, 56, 2, 0
-  .byte "Most TVs hide all of",0
-  rf_label 146, 56, 2, 0
-  .byte "this. Keep NES",0
+  .byte "Most 60 Hz TVs hide",0
+  rf_label 147, 56, 2, 0
+  .byte "all of this. Keep",0
   rf_label  56, 64, 2, 0
   .byte "scroll seam artifacts here",0
   rf_label 171, 64, 2, 0
   .byte "if possible.",0
   rf_label  56, 72, 2, 0
-  .byte "Later consoles don't even",0
-  rf_label 171, 72, 2, 0
-  .byte "generate this.",0
+  .byte "(Visible at 50 Hz)",0
   rf_label  56, 88, 2, 0
   .byte "Action Safe Area",0
   rf_label  56, 96, 2, 0
@@ -486,14 +483,14 @@ safearea_main_rects:
   rf_label  56,104, 2, 0
   .byte "Most TVs show some of this.",0
   rf_label  56,120, 2, 0
-  .byte "PocketNES Safe Area",0
+  .byte "Post-1985 Safe Area",0
   rf_label  56,128, 2, 0
   .byte "240x212, (8, 16)-(247, 227)",0
   rf_label  56,136, 2, 0
   .byte "Practically all TVs show this.",0
-  rf_label 186,136, 2, 0
-  .byte "Platforms,",0
   rf_label  56,144, 2, 0
+  .byte "Platforms,",0
+  rf_label 104,144, 2, 0
   .byte "pits, and indicators are fine.",0
   .byte 0
 

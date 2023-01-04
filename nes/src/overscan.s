@@ -568,7 +568,7 @@ restart:
   palloop2:
     ldy #$00
     palloop:
-      lda gcbars_palette,y
+      lda safe_areas_palette,y
       sta PPUDATA
       iny
       cpy #16
@@ -676,5 +676,6 @@ waitminusxy:
   rts
 
 .rodata
-gcbars_palette:
+safe_areas_palette:
+  ; the duplicate $0F is for sprite 0
   .byte $0F,$00,$10,$0F, $0F,$16,$26,$36, $0F,$28,$38,$30, $0F,$12,$22,$32
