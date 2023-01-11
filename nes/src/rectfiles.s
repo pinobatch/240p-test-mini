@@ -53,6 +53,8 @@ rectfill_layouts:
   rectfile RF_input_snes_pad, input_snes_pad_rects, $20, $10
   rectfile RF_input_vaus, input_vaus_rects, $20, $10
 
+  rectfile RF_input_mouse, input_mouse_rects, $20, $18
+
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
   rf_rect  64, 64,192,176,$0C, 0  ; Color 3: inside
@@ -635,4 +637,35 @@ input_vaus_rects:
   .byte "Value", 0
   rf_label  96, 136, 3, 0
   .byte "Range", 0
+  .byte 0
+
+input_mouse_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen
+  rf_rect 136, 88,168,104,$08, RF_INCR  ; Current position and velocity
+  rf_rect 136,104,152,112,$10, RF_INCR  ; Peak vel.
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  .byte 0
+  rf_label 142,128, 1, 0
+  .byte "Slow", 0
+  rf_label 137,128, 1, 0
+  .byte "Medium", 0
+  rf_label 142,128, 1, 0
+  .byte "Fast", 0
+  rf_label 141,128, 1, 0
+  .byte "(???)", 0
+  rf_label  56, 64, 1, 0
+  .byte "Super NES Mouse", 0
+  rf_label 166, 64, 1, 0
+  .byte "B: close", 0
+  rf_label  85, 88, 1, 0
+  .byte "Position", 0
+  rf_label  84, 96, 1, 0
+  .byte "Velocity", 0
+  rf_label  80,104, 1, 0
+  .byte "Peak Vel.", 0
+  rf_label  85,120, 1, 0
+  .byte "Buttons", 0
+  rf_label  32,128, 1, 0
+  .byte "Select: Acceleration", 0
   .byte 0

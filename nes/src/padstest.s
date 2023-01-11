@@ -9,6 +9,7 @@
 .importzp helpsect_under_construction
 .importzp RF_serial_analyzer, RF_input_fcpads, RF_input_fourscore
 .importzp RF_input_power_pad, RF_input_snes_pad, RF_input_vaus
+.importzp RF_input_mouse
 
 ; Remaining activities within padstest (issue #42)
 ; - [ ] Super NES Mouse
@@ -96,6 +97,7 @@ SERIAL_EXIT_HOLD_TIME = 30
     inx
     cpx #NUM_READS
     bcc readloop
+  .assert >* = >readloop, error, "serial read loop crosses back boundary invalidating rate in help text"
   rts
 .endproc
 
@@ -240,11 +242,14 @@ serial_dst_lo:
   sty PPUMASK
   ldx #$08
   stx exit_time
-  jsr unpb53_file
+  ora #0
+  bmi :+
+    jsr unpb53_file
+  :
+
   ldx #$00
   stx PPUADDR
   stx PPUADDR
-  lda #$20
   chrloop:
     lda controller_test_obj_chr,x
     sta PPUDATA
@@ -252,6 +257,7 @@ serial_dst_lo:
     cpx #controller_test_obj_chr_end-controller_test_obj_chr
     bne chrloop
 
+  jsr input_vsync
   ldx #0
   lda #$3F
   sta PPUADDR
@@ -411,10 +417,7 @@ controller_test_palette:
 controller_test_palette_end:
 
 controller_test_obj_chr:
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
-  .byte $38, $7C, $FE, $FE, $FE, $FE, $7C, $38
-  .byte $38, $44, $82, $82, $82, $82, $44, $38
+  .incbin "obj/nes/pads_buttons16.chr"
 controller_test_obj_chr_end:
 
 ; serial_read_data0 offset, mask, Y offset, xypos offset, count
@@ -465,9 +468,221 @@ button_ypos_base:
 
 ; Mouse test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+mouse_dirty_peak = test_state + 0
+mouse_x = test_state + 4
+mouse_y = test_state + 5
+mouse_dx = test_state + 6
+mouse_dy = test_state + 7 
+mouse_peak_vel = test_state + 8
+mouse_accel_tile = test_state + 13
+
+MOUSE_ACCEL_TL = $2000 + 17 + 16*32
+
 .proc do_mouse_test
-  jmp do_input_unfinished
+  lda #160
+  sta mouse_x
+  lsr a
+  sta mouse_y
+  lda #0
+  sta mouse_peak_vel
+  jsr mouse_poll
+  lda #$FF
+  jsr load_controller_images_A
+  lda #RF_input_mouse
+  jsr rf_load_layout
+  ldx #0
+  :
+    lda mouse_oam_data,x
+    sta OAM,x
+    inx
+    cpx #mouse_oam_data_end-mouse_oam_data
+    bcc :-
+  jsr ppu_clear_oam
+
+  loop:
+    jsr mouse_poll
+    lda serial_read_data0+1  ; B Button
+    lsr a
+    bcs done
+    lda cur_keys
+    eor #$FF
+    and serial_read_data0+2  ; Select Button
+    and #$01
+    beq no_pulse
+      sta $4016
+      nop
+      bit $4017
+      lsr a
+      sta $4016
+    no_pulse:
+    lda serial_read_data0+2  ; Select Button
+    sta cur_keys
+    jsr mouse_draw
+    lda #%0001
+    jsr rf_color_lineImgBuf  ; finish drawing text
+    jsr input_vsync
+    jsr rf_copy8tiles
+    lda #>MOUSE_ACCEL_TL
+    sta PPUADDR
+    lda #<MOUSE_ACCEL_TL
+    sta PPUADDR
+    ldy #4
+    ldx mouse_accel_tile
+    : 
+      stx PPUDATA
+      inx
+      dey
+      bne :-
+    jsr input_screen_on
+    jmp loop
+  done:
+  jmp do_input_test
 .endproc
+
+.proc mouse_poll
+  jsr serial_read
+  ldy #16
+  ldx #1
+  jsr get_one_coord
+  dex
+get_one_coord:
+  lda #1
+  sta $00
+  bitloop:
+    lda serial_read_data1,y
+    lsr a
+    iny
+    rol $00
+    bcc bitloop
+  lda $00
+  sta mouse_dx,x
+  and #$7F
+  cmp mouse_peak_vel
+  bcc :+
+  beq :+
+    sta mouse_peak_vel
+    inc mouse_dirty_peak
+  :
+  lda $00
+  bmi is_negative
+    clc
+    adc mouse_x,x
+    bcs xclamp
+    cmp mouse_xy_max,x
+    bcc have_x
+    xclamp:
+      lda mouse_xy_max,x
+    have_x:
+    sta mouse_x,x
+    rts
+  is_negative:
+    eor #$7F  ; 128-255 to 255-128
+    sec       ; 255-128 to 256-129 
+    adc mouse_x,x
+    bcs have_x
+    lda #0
+    bcc have_x
+.endproc
+
+MOUSE_PEAK_CHR_DST = $0100
+MOUSE_POS_CHR_DST = $0080
+MOUSE_B_X = 144
+MOUSE_B_Y = 120
+MOUSE_SPEED_NAMES_BASE_TILE = $18
+
+.proc mouse_draw
+  lda mouse_x
+  sta OAM+7
+  sta OAM+3
+  lda mouse_y
+  tay
+  clc
+  adc #7
+  sta OAM+4
+  dey
+  sty OAM+0
+  lda serial_read_data1+9  ; LMB
+  and #$01
+  eor #$01
+  sta OAM+10
+  lda serial_read_data1+8  ; RMB
+  and #$01
+  eor #$01
+  sta OAM+14
+  lda serial_read_data1+11  ; accel low
+  lsr a
+  lda serial_read_data1+10  ; accel high
+  and #$01
+  rol a
+  asl a
+  asl a
+  adc #MOUSE_SPEED_NAMES_BASE_TILE
+  sta mouse_accel_tile
+
+  jsr clearLineImg
+  lda mouse_dirty_peak
+  beq not_dirty_peak
+    lda #<MOUSE_PEAK_CHR_DST
+    sta vram_copydstlo
+    .if ::MOUSE_PEAK_CHR_DST <> 0
+      lda #0
+    .endif
+    sta mouse_dirty_peak
+    lda #>MOUSE_PEAK_CHR_DST
+    sta vram_copydsthi
+    ldy mouse_peak_vel
+    ldx #0
+    jmp mouse_3digits
+  not_dirty_peak:
+    lda #<MOUSE_POS_CHR_DST
+    sta vram_copydstlo
+    lda #>MOUSE_POS_CHR_DST
+    sta vram_copydsthi
+    ldx #0
+    ldy mouse_x
+    jsr mouse_3digits
+    ldx #15
+    lda #','
+    jsr vwfPutTile
+    ldx #17
+    ldy mouse_y
+    jsr mouse_3digits
+    ldx #32
+    lda mouse_dx
+    jsr mouse_low7bits
+    ldx #32
+    lda mouse_dx
+    jsr put_sign
+    ldx #47
+    lda #','
+    jsr vwfPutTile
+    ldx #49
+    lda mouse_dy
+    jsr mouse_low7bits
+    ldx #49
+    lda mouse_dy
+    ; fall through to put_sign
+
+put_sign:
+  asl a
+  beq no_dy_sign
+    lda #'+'
+    bcc :+
+      lda #'-'
+    :
+    jsr vwfPutTile
+  no_dy_sign:
+  rts
+.endproc
+
+mouse_oam_data:
+  .byte $FF,           $02, $00, $FF  ; OAM+0: top half of arrow
+  .byte $FF,           $03, $00, $FF  ; OAM+4: bottom half of arrow
+  .byte MOUSE_B_Y - 1, $01, $00, MOUSE_B_X    ; OAM+8: LMB
+  .byte MOUSE_B_Y - 1, $01, $00, MOUSE_B_X+8  ; OAM+12: RMB
+mouse_oam_data_end:
+mouse_xy_max:
+  .byte 255, 239
 
 ; Arkanoid controller test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -677,6 +892,17 @@ VAUS_VALUE_TARGET = $0800
   rts
 .endproc
 
+
+.proc mouse_low7bits
+  and #$7F
+  tay
+.endproc
+
+;;
+; Writes 3-digit number Y (0 to 255) at position X
+.proc mouse_3digits
+  lda #0
+.endproc
 ;;
 ; Writes 3-digit number AY (0 to 999) at position X
 .proc vaus_3digits

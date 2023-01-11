@@ -191,6 +191,7 @@ $(objdir)/pb53files.o: \
   $(objdir)/serialanalyzer.chr.pb53 $(objdir)/arkanoidchr.chr.pb53
 $(objdir)/mdfourier4kfe-chrrom.o $(objdir)/mdfourier4kfe.o: \
   $(objdir)/mdf4k_chr.chr
+$(objdir)/padstest.o: $(objdir)/pads_buttons16.chr
 
 # MDFourier needs the period lookup table
 $(objdir)/ntscPeriods.s: tools/mktables.py
