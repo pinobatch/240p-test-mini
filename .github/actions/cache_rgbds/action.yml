@@ -1,0 +1,39 @@
+name: Cache RGBDS
+description: Caches RGBDS and builds it from source if missing. Based on Cache CC65 by jroweboy (MIT)
+inputs:
+  rgbdsRef:
+    description: "RGBDS Git Ref (used to checkout a fixed version)"
+    required: false
+    default: "0105779789909e2daad5aa09450dd3101aa5e723"
+  rgbdsPath:
+    description: "RGBDS path to cache"
+    required: false
+    default: ${{ github.workspace }}/opt/rgbds
+runs:
+  using: "composite"
+  steps:
+      # Cache RGBDS
+      - uses: actions/cache@master
+        id: cache_rgbds
+        with:
+          path: ${{ inputs.rgbdsPath }}
+          key: ${{ runner.os }}-rgbds-${{ inputs.rgbdsRef }}-${{ hashFiles('.github/actions/cache_rgbds/*') }}
+      # Checkout RGBDS
+      - uses: actions/checkout@master
+        if: steps.cache_rgbds.outputs.cache-hit != 'true'
+        with:
+          repository: gbdev/rgbds
+          ref: ${{ inputs.rgbdsRef }}
+          path: './rgbds'
+      # Build RGBDS
+      - if: steps.cache_rgbds.outputs.cache-hit != 'true'
+        run: |
+          cd rgbds
+          sudo PREFIX=${{ inputs.rgbdsPath }} make 
+          sudo PREFIX=${{ inputs.rgbdsPath }} make install
+        shell: bash
+      # Add RGBDS binaries to path
+      - shell: bash
+        run: |
+          export PATH="${{ inputs.rgbdsPath }}/bin:$PATH"
+          export MANPATH="${{ inputs.rgbdsPath }}/share/man:$MANPATH"
