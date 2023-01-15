@@ -15,6 +15,11 @@ mdfourier_good_phase: .res 1
 
 .code
 .proc do_mdfourier
+  lda #1
+  sta skip_ppu
+  lsr a
+  sta PPUMASK
+  jsr mdfourier_ready_tone
   lda #0
   sta skip_ppu
 restart:

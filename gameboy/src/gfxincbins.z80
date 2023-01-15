@@ -140,7 +140,7 @@ kikimap::
 
 ; Backlight zone ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-section "backlight_gfx0",ROM0
+section "backlight_gfx1",ROMX
 backlight_chr::
   incbin "obj/gb/backlightzone.2bpp.pb16"
 

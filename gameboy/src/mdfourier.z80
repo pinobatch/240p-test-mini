@@ -9,11 +9,7 @@ apubuffer equs "help_line_buffer"
 SECTION "mdfourier", ROM0
 
 run_mdfourier::
-  ld de, apucmd_reset_apu
-  call load_de_and_present
-  ld hl, waveram_sinx
-  call load_waveram_hl
-  call pattern_sync
+  call init_and_sync
   
   ld c, $00
   call pattern_tone_scale_duty_c
@@ -49,12 +45,14 @@ run_mdfourier::
 
   call pattern_sync
 
-
 .halt:
   xor a
   ldh [rNR52], a
-
   ret
+
+mdfourier_ready_tone::
+  call init_and_sync
+  jr run_mdfourier.halt
 
 load_apucmd_de:
   ld hl, apubuffer
@@ -141,6 +139,12 @@ endm
 
 ; patterns ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+init_and_sync:
+  ld de, apucmd_reset_apu
+  call load_de_and_present
+  ld hl, waveram_sinx
+  call load_waveram_hl
+  ; fall through to pattern_sync
 pattern_sync:
   call silence_20_frames
   ld b, 10

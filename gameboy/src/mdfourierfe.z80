@@ -6,7 +6,23 @@ include "src/global.inc"
 
 section "mdfourierfe",ROM0
 
+;;
+; make the background dark on GBC and light on DMG  
+mdfourier_blank:
+  ld a, $FF
+  call set_bgp
+  xor a
+  ldh [rBGP], a
+mdfourier_screen_on:
+  ld a,LCDCF_ON|BG_NT0|BG_CHR21
+  ldh [vblank_lcdc_value],a
+  ldh [rLCDC],a
+  ret
+
 activity_mdfourier::
+  call clear_gbc_attr
+  call mdfourier_blank
+  call mdfourier_ready_tone
 .restart:
   call clear_gbc_attr
   ld hl, CHRRAM2
@@ -18,10 +34,7 @@ activity_mdfourier::
   call vwfDrawLabels
   ld a, %01011100
   call set_bgp
-  
-  ld a,LCDCF_ON|BG_NT0|BG_CHR21
-  ldh [vblank_lcdc_value],a
-  ldh [rLCDC],a
+  call mdfourier_screen_on
   ld b, 7
   call sgb_set_palette_b
 
@@ -36,13 +49,7 @@ activity_mdfourier::
   rra
   jr nc, .loop
 
-  ; Start test.  First make the background dark on GBC
-  ; and light on DMG  
-  ld a, $FF
-  call set_bgp
-  xor a
-  ldh [rBGP], a
-
+  call mdfourier_blank
   call run_mdfourier
   jr .restart
 

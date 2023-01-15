@@ -80,6 +80,7 @@ irq_handler:
     bpl vwait2
   lda #1
   sta mdfourier_good_phase
+  jsr mdfourier_ready_tone
   ; fall through
 restart:
   jsr mdfourier_init_apu

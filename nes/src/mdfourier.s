@@ -121,10 +121,7 @@ skip_trash_beep:
 .endproc
 
 .proc pattern_sync
-  ldy #silence_data - pattern_y_data
-  jsr load_pattern_y
-  lda #20
-  jsr wait_a_ticks
+  jsr silence_20_ticks
   lda #10
   sta test_ticksleft
   syncloop:
@@ -144,8 +141,7 @@ skip_trash_beep:
 .endproc
 .proc silence_a_ticks
   pha
-  ldy #silence_data - pattern_y_data
-  jsr load_pattern_y
+  jsr mdfourier_init_apu
   pla
   ; fall through to wait_a_ticks
 .endproc
@@ -157,7 +153,10 @@ skip_trash_beep:
     bne waitloop
   rts
 .endproc
+mdfourier_ready_tone = pattern_sync
 
+;;
+; Loads the silence pattern into the address and data buffer
 .proc mdfourier_init_apu
   ldy #silence_data - pattern_y_data
   ; fall through to load_pattern_y

@@ -148,7 +148,8 @@ bcd_highdigits = $0000
 
 ; mdfourierfe.s and mdfourier.s
 .global do_mdfourier, mdfourier_present
-.global mdfourier_init_apu, mdfourier_run, mdfourier_push_apu
+.global mdfourier_init_apu, mdfourier_run, mdfourier_ready_tone
+.global mdfourier_push_apu
 .global mdfourier_good_phase
 INITIAL_GOOD_PHASE = (IS_MULTICART = 0)
 
