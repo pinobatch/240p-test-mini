@@ -17,6 +17,25 @@
 exit_time = test_state + 0
 buttonset = test_state + 1
 
+mouse_dirty_peak = test_state + 0
+mouse_x = test_state + 4
+mouse_y = test_state + 5
+mouse_dx = test_state + 6
+mouse_dy = test_state + 7 
+mouse_peak_vel = test_state + 8
+mouse_accel_tile = test_state + 13
+
+vaus_value_lo = test_state + 2
+vaus_value_hi = test_state + 3
+rangeleft_lo = test_state + 4
+rangeleft_hi = test_state + 5
+rangeright_lo = test_state + 6
+rangeright_hi = test_state + 7
+
+cur_semitone = test_state + 14
+
+
+
 .code
 ; Menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -29,6 +48,8 @@ buttonset = test_state + 1
 
 .proc do_input_test
   jsr read_pads  ; read them once because B to exit may double trigger
+  ldy #$FF
+  jsr pads_play_semitone_y
   ldx #helpsect_input_test_menu
   lda #KEY_A|KEY_B|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
   jsr helpscreen
@@ -238,6 +259,7 @@ serial_dst_lo:
   ldx #VBLANK_NMI
   stx help_reload
   stx PPUCTRL
+  stx cur_semitone
   ldy #0
   sty PPUMASK
   ldx #$08
@@ -280,19 +302,31 @@ PRESSED_BUTTON_CIRCLE_TILE = 1
 ; @param X offset from button_sets_base
 .proc nes_buttons_draw_obj
 setdef_offset = $00
-read_data_offset = $05
-mask = $04
-yoffset = $03
-xypos_offset = $02
+
+found_same_button = $0E
+found_other_button = $0F
+
+SIZEOF_BUTTON_PARAMS = 6
+read_data_offset = $06
+mask = $05
+yoffset = $04
+xypos_offset = $03
+scale_degree = $02
 count = $01
 
-  ldy #5
+  ldy #$FF
+  sty found_same_button
+  sty found_other_button
+
+next_group:
+  ldy #SIZEOF_BUTTON_PARAMS
   :
     lda button_sets_base,x
     sta $0000,y
     inx
     dey
     bne :-
+
   stx setdef_offset
   ldx oam_used
   buttonloop:
@@ -315,19 +349,60 @@ count = $01
       inx
       lda button_xpos_base,y
       sta OAM,x
+      ; send to speaker too
+      ldy scale_degree
+      bmi find_semitone_done
+      lda SCALES,y
+      cmp cur_semitone
+      beq find_semitone_same
+        sta found_other_button
+        bne find_semitone_done
+      find_semitone_same:
+        sta found_same_button
+      find_semitone_done:
       inx
     next_obj:
     inc read_data_offset
     inc xypos_offset
+    inc scale_degree
     dec count
     bne buttonloop
   stx oam_used
   ldx setdef_offset
   lda button_sets_base,x
-  bpl nes_buttons_draw_obj
-  rts
-.endproc
+  bpl next_group
 
+  ; same button takes priority over different button
+  ldy found_same_button
+  bpl pads_play_semitone_y
+  ldy found_other_button
+.endproc
+.proc pads_play_semitone_y
+  ; If no buttons were found, silence the tone
+  tya
+  bpl not_silent
+    ; Neither same nor other button was found. End note
+    sty cur_semitone
+    lda #$B0
+    sta $4000
+  play_semitone_done:
+    rts
+  not_silent:
+    lda #$01
+    sta $4015
+    lda #$BC
+    sta $4000  ; Set volume to 12
+    lda #$08
+    sta $4001  ; Disable sweep
+    cpy cur_semitone
+    beq play_semitone_done  ; Change pitch only if changed
+    lda periodTableLo,y
+    sta $4002
+    lda periodTableHi,y
+    sta $4003
+    sty cur_semitone
+    rts
+.endproc
 
 .proc do_fourscore_test
   jsr load_std_controller_images
@@ -420,32 +495,34 @@ controller_test_obj_chr:
   .incbin "obj/nes/pads_buttons16.chr"
 controller_test_obj_chr_end:
 
-; serial_read_data0 offset, mask, Y offset, xypos offset, count
+; serial_read_data0 offset, mask, Y offset, xypos offset, scale, count
 button_sets_base:
 fcpads_button_sets:
-  .byte  0, $01,   0, nes_button_xpos-button_xpos_base, 8
-  .byte 32, $01,  40, nes_button_xpos-button_xpos_base, 8
-  .byte  0, $02,  80, nes_button_xpos-button_xpos_base, 8
-  .byte 32, $02, 120, nes_button_xpos-button_xpos_base, 8
-  .byte  0, $04,   0, fc_mic_xpos-button_xpos_base, 1
+  .byte  0, $01,   0, nes_button_xpos-BTNBASE, major_scale-SCALES, 8
+  .byte 32, $01,  40, nes_button_xpos-BTNBASE, major_scale-SCALES, 8
+  .byte  0, $02,  80, nes_button_xpos-BTNBASE, major_scale-SCALES, 8
+  .byte 32, $02, 120, nes_button_xpos-BTNBASE, major_scale-SCALES, 8
+  .byte  0, $04,   0, fc_mic_xpos-BTNBASE,     fc_mic_scale-SCALES, 1
   .byte $FF
 fourscore_button_sets:
-  .byte  0, $01,   0, nes_button_xpos-button_xpos_base, 8
-  .byte  8, $01,  80, nes_button_xpos-button_xpos_base, 8
-  .byte 16, $01, 112, fourscore_sig_xpos-button_xpos_base, 8
-  .byte 32, $01,  40, nes_button_xpos-button_xpos_base, 8
-  .byte 40, $01, 120, nes_button_xpos-button_xpos_base, 16
+  .byte  0, $01,   0, nes_button_xpos-BTNBASE,    major_scale-SCALES, 8
+  .byte  8, $01,  80, nes_button_xpos-BTNBASE,    major_scale-SCALES, 8
+  .byte 16, $01, 112, fourscore_sig_xpos-BTNBASE, $80, 8
+  .byte 32, $01,  40, nes_button_xpos-BTNBASE,    major_scale-SCALES, 8
+  .byte 40, $01, 120, nes_button_xpos-BTNBASE,    major_scale-SCALES, 8
+  .byte 48, $01, 120, fourscore_sig_xpos-BTNBASE, $80, 8
   .byte $FF
 snes_pad_button_sets:
-  .byte  0, $01,  40, snes_button_xpos-button_xpos_base, 12
-  .byte 32, $01,  80, snes_button_xpos-button_xpos_base, 12
+  .byte  0, $01,  40, snes_button_xpos-BTNBASE, chromatic_scale-SCALES, 12
+  .byte 32, $01,  80, snes_button_xpos-BTNBASE, chromatic_scale-SCALES, 12
   .byte $FF
 first_non_selectstart_button_set:
 power_pad_button_sets:
-  .byte 32, $08,   0, power_pad_xpos-button_xpos_base, 8
-  .byte 32, $10,   0, power_pad_d4_xpos-button_xpos_base, 4
+  .byte 32, $08,   0, power_pad_xpos-BTNBASE,    chromatic_scale-SCALES, 8
+  .byte 32, $10,   0, power_pad_d4_xpos-BTNBASE, chromatic_scale+8-SCALES, 4
   .byte $FF
 
+BTNBASE:
 button_xpos_base:
 nes_button_xpos:
   .byte 147, 138, 118, 126, 104, 104,  99, 109
@@ -466,15 +543,17 @@ button_ypos_base:
   .byte  99, 99, 115, 131, 115, 131, 131, 115, 99, 99, 131, 115  ; Power Pad
   .byte  92  ; FC mic
 
-; Mouse test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SCALES:
+major_scale:
+  .byte 27, 29, 31, 32, 34, 36, 38, 39
+chromatic_scale:
+  .repeat 12, I
+    .byte 27+I
+  .endrepeat
+fc_mic_scale:
+  .byte 50
 
-mouse_dirty_peak = test_state + 0
-mouse_x = test_state + 4
-mouse_y = test_state + 5
-mouse_dx = test_state + 6
-mouse_dy = test_state + 7 
-mouse_peak_vel = test_state + 8
-mouse_accel_tile = test_state + 13
+; Mouse test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MOUSE_ACCEL_TL = $2000 + 17 + 16*32
 
@@ -590,6 +669,9 @@ MOUSE_B_X = 144
 MOUSE_B_Y = 120
 MOUSE_SPEED_NAMES_BASE_TILE = $18
 
+MOUSE_LMB = serial_read_data1+9
+MOUSE_RMB = serial_read_data1+8
+
 .proc mouse_draw
   lda mouse_x
   sta OAM+7
@@ -601,11 +683,11 @@ MOUSE_SPEED_NAMES_BASE_TILE = $18
   sta OAM+4
   dey
   sty OAM+0
-  lda serial_read_data1+9  ; LMB
+  lda MOUSE_LMB
   and #$01
   eor #$01
   sta OAM+10
-  lda serial_read_data1+8  ; RMB
+  lda MOUSE_RMB
   and #$01
   eor #$01
   sta OAM+14
@@ -618,6 +700,18 @@ MOUSE_SPEED_NAMES_BASE_TILE = $18
   asl a
   adc #MOUSE_SPEED_NAMES_BASE_TILE
   sta mouse_accel_tile
+  
+  ldy #27
+  lda MOUSE_LMB
+  lsr a
+  bcs have_semitone
+  ldy #29
+  lda MOUSE_RMB
+  lsr a
+  bcs have_semitone
+    ldy #$FF
+  have_semitone:
+  jsr pads_play_semitone_y
 
   jsr clearLineImg
   lda mouse_dirty_peak
@@ -685,13 +779,6 @@ mouse_xy_max:
   .byte 255, 239
 
 ; Arkanoid controller test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-vaus_value_lo = test_state + 2
-vaus_value_hi = test_state + 3
-rangeleft_lo = test_state + 4
-rangeleft_hi = test_state + 5
-rangeright_lo = test_state + 6
-rangeright_hi = test_state + 7
 
 VAUS_Y = 96
 VAUS_BUTTON_Y = 128
@@ -819,12 +906,15 @@ VAUS_VALUE_TARGET = $0800
 
 .proc vaus_draw
   ; Move fire button into place
+  ldy #$FF
   lda cur_keys+1
   beq :+
+    ldy #39
     lda #(VAUS_BUTTON_Y-1) ^ $FF
   :
   eor #$FF
   sta OAM+4
+  jsr pads_play_semitone_y
   lda vaus_value_hi
   lsr a
   lda vaus_value_lo
