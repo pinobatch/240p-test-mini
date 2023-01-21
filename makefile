@@ -18,8 +18,8 @@ MAKE:="$(MAKE)"
 endif
 
 alltargets:=\
-  nes/240pee.nes nes/240pee-bnrom.nes nes/mdfourier.nsf \
-  nes/mdfourier4k.nes nes/mdfourier4k-chrrom.nes \
+  nes/240pee.nes nes/240pee-bnrom.nes nes/240pee-tgrom.nes \
+  nes/mdfourier.nsf nes/mdfourier4k.nes nes/mdfourier4k-chrrom.nes \
   gameboy/gb240p.gb gba/240pee_mb.gba
 
 .PHONY: all dist clean $(alltargets)

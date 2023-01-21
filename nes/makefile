@@ -168,6 +168,9 @@ $(objdir)/padsnodas.o: $(srcdir)/pads.s $(srcdir)/nes.inc $(srcdir)/global.inc
 $(objdir)/%.o: $(objdir)/%.s
 	$(AS65) $(CFLAGS65) $< -o $@
 
+$(objdir)/%-mmc.o: $(objdir)/%.s
+	$(AS65) $(CFLAGS65) $< -o $@
+
 # Files that depend on included files (.include, .incbin)
 
 $(objdir)/stills.o $(objdir)/shadowsprite.o \

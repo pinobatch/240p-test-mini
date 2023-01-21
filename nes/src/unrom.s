@@ -65,14 +65,6 @@ rf_load_layout:
   jsr rf_load_layout_cb
   jmp rtl
 
-rf_vwfClearPuts:
-  lda #MAIN_CODE_BANK
-  sta rtl+1
-  jsr rf_vwfClearPuts_cb
-  lda #GATE_DATA_BANK
-  sta rf_load_layout+1
-  rts
-
 nmi_handler:
   inc nmis
 irq_handler:

@@ -14,7 +14,7 @@
 .export unpb53_gate, unpb53_file, load_sb53_file, load_iu53_file
 .import rf_vwfClearPuts_cb, rf_load_layout_cb
 .export rf_vwfClearPuts, rf_load_layout
-.export rtl
+.export rtl, mmc_bank_a
 
 .segment "INESHDR"
   .byt "NES",$1A  ; magic signature
@@ -31,7 +31,8 @@ GATE_DATA_BANK = $02
 RESETSTUB_BASE = $FF70
 
 .segment "STUB15"
-.assert * = ::RESETSTUB_BASE, error, "RESETSTUB_BASE doesn't match linker configuration"
+resetstub_start:
+.assert resetstub_start = ::RESETSTUB_BASE, error, "RESETSTUB_BASE doesn't match linker configuration"
 
 ; Call gates
 unpb53_gate:
@@ -70,15 +71,6 @@ rf_load_layout:
   jsr rf_load_layout_cb
   jmp rtl
 
-rf_vwfClearPuts:
-  jsr rtl
-  jsr rf_vwfClearPuts_cb
-  pha
-  lda #GATE_DATA_BANK
-  jsr mmc_bank_a
-  pla
-  rts
-
 nmi_handler:
   inc nmis
 irq_handler:
@@ -95,9 +87,9 @@ resetstub_entry:
   txs
   jmp reset_handler
 
-mmc3_initial_banks: .bank 0, 2, 4, 5, 6, 7, 0, 1
+mmc3_initial_banks: .byte 0, 2, 4, 5, 6, 7, 0, 1
   .assert * <= $FFE0, warn, "reset stub extends into Famicom Box header area"
-  .res ::scopename - ::RESETSTUB_BASE + $FFFA - *
+  .res ::resetstub_start - ::RESETSTUB_BASE + $FFFA - *
   .addr nmi_handler, resetstub_entry, irq_handler
 
 rf_vwfClearPuts = rf_vwfClearPuts_cb

@@ -9,7 +9,7 @@
 ;
 .include "nes.inc"
 .export unpb53_some, unpb53_xtiles, unpb53_file_cb, load_sb53_file_cb
-.import unpb53_files, sb53_files
+.import unpb53_files, sb53_files, mmc_bank_a
 .export PB53_outbuf
 .exportzp ciSrc, ciDst, ciBufStart, ciBufEnd
 .importzp nmis
