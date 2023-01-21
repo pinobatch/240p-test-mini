@@ -125,6 +125,7 @@ clean:
 # Rules for PRG ROM
 
 objlisto := $(foreach o,$(objlist),$(objdir)/$(o).o)
+objlistmmco := $(foreach o,$(objlist),$(objdir)/$(o)-mmc.o)
 objlistnsfo := $(foreach o,$(objlistnsf),$(objdir)/$(o).o)
 objlistmdf4ko := $(foreach o,$(objlistmdf4k),$(objdir)/$(o).o)
 objlistmdf4kchro := $(foreach o,$(objlistmdf4kchr),$(objdir)/$(o).o)
@@ -135,10 +136,10 @@ map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
 bnmap.txt $(title)-bnrom.nes: bnrom512kbit.cfg $(objlisto) $(objdir)/bnrom.o
 	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
 
-sgmap.txt $(title)-sgrom.nes: sgrom512kbit.cfg $(objlisto) $(objdir)/mmc1.o
+sgmap.txt $(title)-sgrom.nes: sgrom512kbit.cfg $(objlistmmco) $(objdir)/mmc1.o
 	$(LD65) -o $(title)-sgrom.nes -m sgmap.txt --dbgfile $(title)-sgrom.dbg -C $^
 
-tgmap.txt $(title)-tgrom.nes: tgrom512kbit.cfg $(objlisto) $(objdir)/mmc3.o
+tgmap.txt $(title)-tgrom.nes: tgrom512kbit.cfg $(objlistmmco) $(objdir)/mmc3.o
 	$(LD65) -o $(title)-tgrom.nes -m tgmap.txt --dbgfile $(title)-tgrom.dbg -C $^
 
 mdfmap.txt mdfourier4k.nes: mdfourier4k.cfg $(objlistmdf4ko)
@@ -151,6 +152,9 @@ mdfchrmap.txt mdfourier4k-chrrom.nes: mdfourier4k-chrrom.cfg $(objlistmdf4kchro)
 
 nsfmap.txt mdfourier.nsf: nsf.cfg $(objlistnsfo)
 	$(LD65) -o mdfourier.nsf -m nsfmap.txt --dbgfile mdfourier.dbg -C $^
+
+$(objdir)/%-mmc.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
+	$(AS65) $(CFLAGS65) $< -DUSE_MMC=1 -o $@
 
 $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 	$(AS65) $(CFLAGS65) $< -o $@

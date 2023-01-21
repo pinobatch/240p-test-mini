@@ -105,10 +105,11 @@ lapIndicatorAddr = lineImgBuf+96+24
   ldy #$00
   lda #1
   jsr unpb53_file
-
+.if 0
 :
   lda #<.BANK(stopwatch_body)
   sta :-+1
+.endif
   jmp stopwatch_body
 .endproc
 

@@ -24,6 +24,8 @@ IS_MULTICART = 0
 
 ; init.s
 .global reset_handler
+.global rtl
+.global mmc_bank_a
 
 ; main.s
 .global OAM

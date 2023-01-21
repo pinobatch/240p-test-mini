@@ -147,9 +147,11 @@ loop:
   lda #7
   jsr unpb53_file
 
+.if 0
 :
   lda #<.BANK(s0_rise_to_rise)
   sta :-+1
+.endif
 
   ; Blank the text window
   lda #0

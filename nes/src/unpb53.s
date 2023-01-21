@@ -192,7 +192,11 @@ copyloop:
   lda unpb53_files+1,y
   sta ciSrc+1
   lda unpb53_files+2,y
-  sta unpb53_files+2,y
+  .ifdef ::USE_MMC
+    jsr mmc_bank_a
+  .else
+    sta unpb53_files+2,y
+  .endif
   ldx unpb53_files+3,y
   jmp unpb53_xtiles
 .endproc
@@ -212,7 +216,11 @@ copyloop:
   lda sb53_files+1,y
   sta ciSrc+1
   lda sb53_files+2,y
-  sta sb53_files+2,y  ; switch bank
+  .ifdef ::USE_MMC
+    jsr mmc_bank_a
+  .else
+    sta sb53_files+2,y
+  .endif
   ldx sb53_files+3,y
 .endproc
 .proc load_sb53

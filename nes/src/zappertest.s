@@ -144,9 +144,11 @@ zapper_palette:
 
 .proc do_zapper_test
   jsr rf_load_tiles
+.if 0
 :
   lda #<.BANK(do_zapper_test_body)
   sta :-+1
+.endif
   jmp do_zapper_test_body
 .endproc
 

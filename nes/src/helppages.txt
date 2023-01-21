@@ -197,7 +197,7 @@ brightness. An overly bright
 pattern causes bloom that
 masks convergence issues.
 
-↑↓←→: Change brightness
+↑↓: Change brightness
 ----
 Corners:
 After setting center and
@@ -281,7 +281,7 @@ Some TVs lose sync when
 brightness becomes negative.
 A good TV won't.
 
-↑↓←→: Change brightness
+↑↓: Change brightness
 A: Toggle emphasis
 
 Percentage values measured

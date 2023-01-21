@@ -22,6 +22,7 @@ nes2end
 .export unpb53_gate, unpb53_file, load_sb53_file, load_iu53_file
 .import rf_vwfClearPuts_cb, rf_load_layout_cb
 .export rf_vwfClearPuts, rf_load_layout
+.export rtl
 
 ; Fixed code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -38,6 +39,7 @@ zerobyte: .byte $00
 unpb53_gate:
   lsr zerobyte
   jsr unpb53_some
+; Switch back to the main code bank
 rtl:
   ldx #MAIN_CODE_BANK
   stx rtl+1
@@ -94,3 +96,4 @@ load_sb53_file = stub1::load_sb53_file
 load_iu53_file = stub1::load_iu53_file
 rf_vwfClearPuts = stub1::rf_vwfClearPuts
 rf_load_layout = stub1::rf_load_layout
+rtl := stub1::rtl

@@ -396,6 +396,7 @@ txtcolors    = $0E
   lsr a
   lsr a
   sta width
+  tay
 
   ; Calculate destination address in nametable
   lda ycoord
@@ -413,12 +414,12 @@ txtcolors    = $0E
   ; Write tiles to nametable
   ldx rf_tilenum
   txa
-  ldy width
-:
-  stx PPUDATA
-  inx
-  dey
-  bne :-
+  ; Y = width
+  :
+    stx PPUDATA
+    inx
+    dey
+    bne :-
   stx rf_tilenum
 
   ; Calculate destination address in pattern table

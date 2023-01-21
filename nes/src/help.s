@@ -121,8 +121,7 @@ return:
     sta help_reload
     beq reload_done
   partial_reload:
-    lda #<.bank(helpscreen_load_palette)
-    sta partial_reload+1
+    jsr rtl  ; switch in CODE02
     jsr helpscreen_load_palette
   reload_done:
   jmp helpscreen_cb

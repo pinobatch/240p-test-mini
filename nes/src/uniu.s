@@ -153,7 +153,11 @@ uniu_seen_tiles = $07
   asl a
   tax
   lda #IU53_BANK
-  sta *-1
+  .ifdef ::USE_MMC
+    jsr mmc_bank_a
+  .else
+    sta *-1
+  .endif
   ldy iu53_files+0,x
   lda iu53_files+1,x
 .endproc

@@ -1,6 +1,6 @@
 ;
 ; MMC1 driver for NES
-; Copyright 2011-2021 Damian Yerrick
+; Copyright 2011-2023 Damian Yerrick
 ;
 ; Copying and distribution of this file, with or without
 ; modification, are permitted in any medium without royalty provided
