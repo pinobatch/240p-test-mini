@@ -153,7 +153,7 @@ mdfchrmap.txt mdfourier4k-chrrom.nes: mdfourier4k-chrrom.cfg $(objlistmdf4kchro)
 nsfmap.txt mdfourier.nsf: nsf.cfg $(objlistnsfo)
 	$(LD65) -o mdfourier.nsf -m nsfmap.txt --dbgfile mdfourier.dbg -C $^
 
-$(objdir)/%-mmc.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
+$(objdir)/%-mmc.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc $(objdir)/%.o
 	$(AS65) $(CFLAGS65) $< -DUSE_MMC=1 -o $@
 
 $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc

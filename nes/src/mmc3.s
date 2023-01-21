@@ -37,7 +37,7 @@ resetstub_start:
 ; Call gates
 unpb53_gate:
   lda #GATE_DATA_BANK
-  sta unpb53_gate+1
+  jsr mmc_bank_a
   jsr unpb53_some
 rtl:
   lda #MAIN_CODE_BANK
