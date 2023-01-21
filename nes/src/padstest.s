@@ -388,8 +388,6 @@ next_group:
   play_semitone_done:
     rts
   not_silent:
-    lda #$01
-    sta $4015
     lda #$BC
     sta $4000  ; Set volume to 12
     lda #$08
