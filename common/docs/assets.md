@@ -12,7 +12,7 @@ software free.
   it with Donna, and GB followed suit.)
 - Hepsie  
   Was a badnik from Sega's _Sonic the Hedgehog_.  Replaced with a
-  fairy godmother character from a discarded Apple II game design.
+  fairy godmother character from a discarded Apple II game pitch.
 - Scroll test  
   Was Green Hill Zone from _Sonic_.  Replaced with a lookalike by
   Michael Moffitt and Damian Yerrick.

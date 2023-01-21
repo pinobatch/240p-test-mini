@@ -121,6 +121,7 @@ $(objdir)/index.txt: makefile
 clean:
 	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(objdir)/*.?b53
 	-rm $(objdir)/*.sav $(objdir)/*.iu53 map.txt ??map.txt nsfmap.txt
+	-rm $(objdir)/last-commit*
 	-rm ../common/tools/dte$(DOTEXE)
 
 # Rules for PRG ROM
@@ -267,3 +268,11 @@ $(objdir)/%.hlp.s: $(srcdir)/%.txt tools/paginate_help.py \
 
 ../common/tools/dte$(DOTEXE): ../common/tools/dte.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+# Print the commit tag
+$(objdir)/last-commit-now:
+	git describe --tags | tr -d '\r\n' > $@
+# Update last-commit only if it has changed
+$(objdir)/last-commit: $(objdir)/last-commit-now
+	if test -f $@; then true; else touch $@; fi
+	cmp $< $@ || cp $< $@

@@ -5,7 +5,7 @@
   khmr33 and Tianfeng)
 * Safe areas: rename PocketNES to Post-1985 and fix size typo
 * Chroma crosstalk: Add health warning; simplify pattern (SGB parity)
-* Stopwatch: be up front about gaining a second per minute
+* Stopwatch: be up front about gaining a second per 10 minutes
   (requested by zeta0134)
 * Rename Manual lag test to Timing and reflex test to reflect
   how it is used
@@ -14,13 +14,14 @@
   FC microphone, Four Score, Super NES controller and mouse,
   Power Pad, and Arkanoid controller
 * MDFourier: play sync pattern when menu opens
+* Move the hyphen down a pixel
 * Add standalone 4096-byte MDFourier ROM for the smallest flash carts
-* Stay out of $FFE0-$FFF9 to leave room for a FamicomBox header
-  (requested by j4m13c0)
+* Add a FamicomBox header (requested by j4m13c0; thanks to Fiskbit
+  for code review)
 * Port to MMC1 (SGROM board) and MMC3 (TGROM board)
-* Build in GitHub Actions (thanks Persune)
 * Design a label
-* Move manual source code to a separate zipfile
+* Move instruction manual source code to a separate zipfile
+* Build in GitHub Actions (thanks Persune)
 * Add continued fraction tool for pixel aspect ratio experiments
 * Begin planning Famicom MDFourier tone generator
 

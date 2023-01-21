@@ -83,7 +83,7 @@ clean:
 	-rm obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
 	-rm obj/gb/*.2bpp obj/gb/*.2bpp16 obj/gb/*.nam obj/gb/*.chr1
 	-rm obj/gb/*.iu obj/gb/*.iuc obj/gb/*.huf obj/gb/*.pal
-	-rm obj/gb/*.border obj/gb/*.chrgb*
+	-rm obj/gb/*.border obj/gb/*.chrgb* obj/gb/last-commit*
 	-rm ../common/tools/dte$(DOTEXE)
 
 # Packaging
@@ -207,3 +207,11 @@ obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
 # So, pitch!
 obj/gb/pitchtable.z80: tools/pitchtable.py
 	$(PY) $< > $@
+
+# Print the commit tag
+obj/gb/last-commit-now:
+	git describe --tags | tr -d '\r\n' > $@
+# Update last-commit only if it has changed
+obj/gb/last-commit: obj/gb/last-commit-now
+	if test -f $@; then true; else touch $@; fi
+	cmp $< $@ || cp $< $@

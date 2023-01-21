@@ -171,14 +171,18 @@ $(OFILES_SOURCES) : $(HFILES)
 #---------------------------------------------------------------------------------
 	grit $< -ff$(word 2,$^) -fts -o$*_chr
 
+# Convert a proportional font
+vwf7.s: vwf7_cp144p.png ../tools/vwfbuild.py last-commit
+	$(PY) ../tools/vwfbuild.py $< $@
 
-# This rule converts a proportional font
+# Update last-commit if it has changed
+last-commit-now:
+	git describe --tags | tr -d '\r\n' > $@
+last-commit: last-commit-now
+	if test -f $@; then true; else touch $@; fi
+	cmp $< $@ || cp $< $@
 
-vwf7.s: ../tools/vwfbuild.py vwf7_cp144p.png
-	$(PY) $^ $@
-
-# This rule converts help files
-
+# Convert help files
 helppages.s: ../tools/paginate_help.py helppages.txt
 	$(PY) $^ > $@
 
