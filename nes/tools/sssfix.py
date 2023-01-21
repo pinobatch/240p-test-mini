@@ -54,8 +54,6 @@ def multifix(prgrom, header, banksize=0x4000):
 
 def fix_AOROM(prgrom, header):
     assert len(header) == 26
-    header = bytearray(header)
-    header[0x14] = 0x28  # 32K PRG ROM, 8K CHR RAM
     return multifix(prgrom, header, 0x8000)
 
 def fix_GNROM(prgrom, header):
@@ -101,24 +99,39 @@ def fix_MMC1(prgrom, header):
                          % len(prgrom))
     return multifix(prgrom, header, 0x4000)
 
+def fix_MMC3(prgrom, header):
+    bankC000 = prgrom[-0x4000:-0x2000]
+    first_zero = bankC000.index(0)
+    if first_zero % 2:
+        raise ValueError("MMC3: first zero in second to last bank should be at an even address; found at $%04X"
+                         % (first_zero + 0xC000))
+    return fix_MMC_generic(prgrom, header)
+
 ines_mapper_to_action = {
     0: ("NROM", 0, fix_NROM),
     3: ("CNROM", 1, fix_NROM),
     66: ("GNROM", 2, fix_GNROM),
-    7: ("AOROM", 2, fix_AOROM),
-    34: ("BNROM", 2, fix_AOROM),
+    7: ("AOROM", 0, fix_AOROM),
+    34: ("BNROM", 0, fix_AOROM),
     2: ("UNROM", 3, fix_UNROM),
     1: ("MMC1", 4, fix_MMC1),
     9: ("MMC2", 4, fix_MMC_generic),
-    4: ("MMC3", 4, fix_MMC_generic),
-    118: ("MMC3 TLSROM", 4, fix_MMC_generic),
-    119: ("MMC3 TQROM", 4, fix_MMC_generic),
+    4: ("MMC3", 4, fix_MMC3),
+    118: ("MMC3 TLSROM", 4, fix_MMC3),
+    119: ("MMC3 TQROM", 4, fix_MMC3),
     10: ("MMC4", 4, fix_MMC_generic),
 }
 
-KiB_to_SSS_size = {
-    8: 0, 16: 1, 32: 2, 64: 0, 128: 3, 256: 4, 512: 5
+KiB_to_SSS_PRG_size = {
+    64: 0x00, 16: 0x10, 32: 0x20, 128: 0x30, 256: 0x40, 512: 0x50
 }
+KiB_to_SSS_CHR_size = {
+    8: 0x00, 16: 0x01, 32: 0x02, 64: 0x03, 128: 0x03, 256: 0x04, 512: 0x05
+}
+
+ROMSIZE_CHRRAM = 0x08
+TITLEENC_NONE = 0x00
+TITLEENC_ASCII = 0x01
 
 def unpack_ines(inesdata):
     inesheader = inesdata[:16]
@@ -131,25 +144,31 @@ def unpack_ines(inesdata):
     chrrom = inesdata[chrromstart:chrromend]
     return inesheader, prgrom, chrrom
 
-def form_sss_header(title, inesheader, chrsum, publisher=254, verbose=False):
+def form_sss_header(title, inesheader, chrsum, publisher=0, verbose=False):
     prgsize_KiB, chrsize_KiB = inesheader[4] * 16, inesheader[5] * 8
     inesmapper = (inesheader[6] >> 4) | (inesheader[7] & 0xF0)
     sssmirroring = 0x00 if inesheader[6] & 1 else 0x80
     del inesheader
 
-    header = bytearray(26)
-    btitle = title.strip().encode("ascii") if title else b''
+    header = bytearray(b' ') * 16 + bytearray(10)
+    title = title.strip().upper() if title else ''
+    if not all(' ' <= c <= '?' or 'A' <= c <= 'Z' for c in title):
+        raise ValueError("title contains unsupported characters: %s" % repr(title))
+    btitle = title.encode("ascii")
     if len(btitle) > 16:
         raise ValueError("title too long: %s" % repr(title))
+    if len(btitle) == 1: btitle = btitle + " "
     header[16 - len(btitle):16] = btitle
     header[18] = (chrsum >> 8) & 0xFF
     header[19] = (chrsum >> 0) & 0xFF
-    prgsize_SSS = KiB_to_SSS_size[prgsize_KiB]
-    chrsize_SSS = KiB_to_SSS_size[chrsize_KiB] if chrsize_KiB else 8
-    header[20] = (prgsize_SSS << 4) | chrsize_SSS
+    prgsize_SSS = KiB_to_SSS_PRG_size[prgsize_KiB]
+    chrsize_SSS = (KiB_to_SSS_CHR_size[chrsize_KiB]
+                   if chrsize_KiB
+                   else ROMSIZE_CHRRAM)
+    header[20] = prgsize_SSS | chrsize_SSS
     action = ines_mapper_to_action[inesmapper]
     header[21] = action[1] | sssmirroring
-    header[22] = 1 if btitle else 0
+    header[22] = TITLEENC_ASCII if btitle else TITLEENC_NONE
     header[23] = len(btitle) - 1 if btitle else 0
     header[24] = publisher
     header[25] = -sum(header[18:25]) & 0xFF
@@ -170,9 +189,9 @@ def parse_argv(argv):
     p.add_argument("-o", "--output",
                    help="name of output ROM (default: overwrite input)")
     p.add_argument("-t", "--title",
-                   help="set the title (2-16 ASCII characters)")
+                   help="set the title (2-16 characters; U+0020 through U+003F and U+0041 through U+005A are supported)")
     p.add_argument("-l", "--old-licensee", metavar="licensee_id",
-                   type=parse_int, default=254,
+                   type=parse_int, default=0,
                    help="set the publisher code ($01: Nintendo; $02-$FE: third party)")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="show work")
