@@ -63,6 +63,7 @@ DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
 endif
 DEBUGEMU2 := Mesen.exe
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py
+FIX := $(PY) tools/sssfix.py -v -l 0 -t "240P TEST SUITE"
 
 .PHONY: run runbn runsg runtg runnsf runmdf \
         debug debug2 debugbn debugsg debugtg debugnsf debugmdf \
@@ -132,15 +133,19 @@ objlistmdf4kchro := $(foreach o,$(objlistmdf4kchr),$(objdir)/$(o).o)
 
 map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
 	$(LD65) -o $(title).nes -m map.txt --dbgfile $(title).dbg -C $^
+	$(FIX) $(title).nes
 
 bnmap.txt $(title)-bnrom.nes: bnrom512kbit.cfg $(objlisto) $(objdir)/bnrom.o
 	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
+	$(FIX) $(title)-bnrom.nes
 
 sgmap.txt $(title)-sgrom.nes: sgrom512kbit.cfg $(objlistmmco) $(objdir)/mmc1.o
 	$(LD65) -o $(title)-sgrom.nes -m sgmap.txt --dbgfile $(title)-sgrom.dbg -C $^
+	$(FIX) $(title)-sgrom.nes
 
 tgmap.txt $(title)-tgrom.nes: tgrom512kbit.cfg $(objlistmmco) $(objdir)/mmc3.o
 	$(LD65) -o $(title)-tgrom.nes -m tgmap.txt --dbgfile $(title)-tgrom.dbg -C $^
+	$(FIX) $(title)-tgrom.nes
 
 mdfmap.txt mdfourier4k.nes: mdfourier4k.cfg $(objlistmdf4ko)
 	$(LD65) -o mdfourier4k.nes -m mdfmap.txt \

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Prototype header fixer for FamicomBox
-copyright 2021 Damian Yerrick
+copyright 2023 Damian Yerrick
 (insert zlib license here)
 
 WARNING: completely untested
@@ -37,9 +37,26 @@ def fix_NROM(prgrom, header):
                          % len(prgrom))
     prgrom[-32:-6] = header
     sumvalue = sum(prgrom)
-    prgrom[-16] = (sum >> 8) & 0xFF
-    prgrom[-15] = (sum >> 0) & 0xFF
+    prgrom[-16] = (sumvalue >> 8) & 0xFF
+    prgrom[-15] = (sumvalue >> 0) & 0xFF
     return prgrom
+
+def multifix(prgrom, header, banksize=0x4000):
+    out = []
+    for i in range(0, len(prgrom), banksize):
+        bank = bytearray(prgrom[i:i + banksize])
+        bank[-32:-6] = header
+        sumvalue = sum(bank)
+        bank[-16] = (sumvalue >> 8) & 0xFF
+        bank[-15] = (sumvalue >> 0) & 0xFF
+        out.append(bank)
+    return b"".join(out)
+
+def fix_AOROM(prgrom, header):
+    assert len(header) == 26
+    header = bytearray(header)
+    header[0x14] = 0x28  # 32K PRG ROM, 8K CHR RAM
+    return multifix(prgrom, header, 0x8000)
 
 def fix_GNROM(prgrom, header):
     assert len(header) == 26
@@ -57,8 +74,9 @@ def fix_UNROM(prgrom, header):
         raise ValueError("UNROM PRG ROM size must be 64K, 128K, or 256K, not %d"
                          % len(prgrom))
     if len(prgrom) != 1<<17:
-        raise ValueError("FFF0/FFF1-skipping behavior of checksum of UNROM PRG ROM with size other than 128K is not documented in Everynes or wiki.nesdev.com (PRG ROM size is %d)"
-                         % len(prgrom))
+        # instead of accounting for double-counting, treat unusually
+        # sized UNROM as a generic MMC
+        return fix_MMC_generic(prgrom, header)
     prgrom[-32:-6] = header
     sumvalue = sum(prgrom[:1<<17])
     prgrom[-16] = (sum >> 8) & 0xFF
@@ -78,18 +96,18 @@ def fix_MMC1(prgrom, header):
     prgrom = bytearray(prgrom)
     if len(prgrom) == 1<<15: # SEROM
         return fix_MMC_generic(prgrom, header)
-        prgrom[-16384:] = fix_NROM(prgrom[-16384:], header)
-        return prgrom
     if len(prgrom) not in (1<<16, 1<<17, 1<<18):
         raise ValueError("MMC1 PRG ROM size must be 32K, 64K, 128K, or 256K, not %d"
                          % len(prgrom))
-    pass
+    return multifix(prgrom, header, 0x4000)
 
 ines_mapper_to_action = {
     0: ("NROM", 0, fix_NROM),
     3: ("CNROM", 1, fix_NROM),
-    0: ("GNROM", 2, fix_GNROM),
-    0: ("UNROM", 3, fix_UNROM),
+    66: ("GNROM", 2, fix_GNROM),
+    7: ("AOROM", 2, fix_AOROM),
+    34: ("BNROM", 2, fix_AOROM),
+    2: ("UNROM", 3, fix_UNROM),
     1: ("MMC1", 4, fix_MMC1),
     9: ("MMC2", 4, fix_MMC_generic),
     4: ("MMC3", 4, fix_MMC_generic),
@@ -113,13 +131,13 @@ def unpack_ines(inesdata):
     chrrom = inesdata[chrromstart:chrromend]
     return inesheader, prgrom, chrrom
 
-def form_sss_header(title, inesheader, chrsum, publisher=254):
+def form_sss_header(title, inesheader, chrsum, publisher=254, verbose=False):
     prgsize_KiB, chrsize_KiB = inesheader[4] * 16, inesheader[5] * 8
-    inesmapper = (inesheader[6] >> 4) | (inesheader[7] & 0xFF)
+    inesmapper = (inesheader[6] >> 4) | (inesheader[7] & 0xF0)
     sssmirroring = 0x00 if inesheader[6] & 1 else 0x80
     del inesheader
 
-    header = bytes(26)
+    header = bytearray(26)
     btitle = title.strip().encode("ascii") if title else b''
     if len(btitle) > 16:
         raise ValueError("title too long: %s" % repr(title))
@@ -127,7 +145,7 @@ def form_sss_header(title, inesheader, chrsum, publisher=254):
     header[18] = (chrsum >> 8) & 0xFF
     header[19] = (chrsum >> 0) & 0xFF
     prgsize_SSS = KiB_to_SSS_size[prgsize_KiB]
-    chrsize_SSS = KiB_to_SSS_size[chrsize_KiB] if chrsize else 8
+    chrsize_SSS = KiB_to_SSS_size[chrsize_KiB] if chrsize_KiB else 8
     header[20] = (prgsize_SSS << 4) | chrsize_SSS
     action = ines_mapper_to_action[inesmapper]
     header[21] = action[1] | sssmirroring
@@ -135,7 +153,10 @@ def form_sss_header(title, inesheader, chrsum, publisher=254):
     header[23] = len(btitle) - 1 if btitle else 0
     header[24] = publisher
     header[25] = -sum(header[18:25]) & 0xFF
-    return header, action
+    if verbose:
+        print("Board type: %s (#%d)" % (action[0], inesmapper))
+        print("Fixer type: %s" % action[2].__name__)
+    return bytes(header), action
 
 def parse_int(s):
     if s.startswith("$"): return int(s[1:], 16)
@@ -153,19 +174,23 @@ def parse_argv(argv):
     p.add_argument("-l", "--old-licensee", metavar="licensee_id",
                    type=parse_int, default=254,
                    help="set the publisher code ($01: Nintendo; $02-$FE: third party)")
+    p.add_argument("-v", "--verbose", action="store_true",
+                   help="show work")
     return p.parse_args(argv[1:])
 
 def main(argv=None):
     args = parse_argv(argv or sys.argv)
-    print(args)
     with open(args.input, "rb") as infp:
         inesheader, prgrom, chrrom = unpack_ines(infp.read(16 + (1<<20)))
-    header, action = form_sss_header(args.title, inesheader, sum(chrrom), args.old_licensee)
+    header, action = form_sss_header(
+        args.title, inesheader, sum(chrrom), args.old_licensee,
+        verbose=args.verbose
+    )
     fixer = action[2]
     new_prgrom = fixer(prgrom, header)
     with open(args.output or args.input, "wb") as outfp:
-        outfp.write(header)
-        outfp.write(prgrom)
+        outfp.write(inesheader)
+        outfp.write(new_prgrom)
         outfp.write(chrrom)
 
 if __name__=='__main__':

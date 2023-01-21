@@ -1,4 +1,4 @@
-0.23 (2022-10-xx)
+0.23 (2023-01-xx)
 * Help: Compress duplicate lines of text (GB parity)
 * Replace Grid and Linearity with khmr33's Monoscope
 * Solid color screen: Select to windowbox (SGB parity; requested by
@@ -13,9 +13,10 @@
 * Add input test with serial analyzer, standard controllers including
   FC microphone, Four Score, Super NES controller and mouse,
   Power Pad, and Arkanoid controller
-* MDFourier: 
+* MDFourier: play sync pattern when menu opens
 * Add standalone 4096-byte MDFourier ROM for the smallest flash carts
-* Stay out of $FFE0-$FFF9 (FamicomBox header address range)
+* Stay out of $FFE0-$FFF9 to leave room for a FamicomBox header
+  (requested by j4m13c0)
 * Port to MMC1 (SGROM board) and MMC3 (TGROM board)
 * Build in GitHub Actions (thanks Persune)
 * Design a label

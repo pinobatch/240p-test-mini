@@ -1,4 +1,4 @@
-0.23 (2022-10-xx)
+0.23 (2023-01-xx)
 * Add SGB sound test
 * Add health warning to Motion blur and Chroma crosstalk
 * Motion blur: increase duration cap to 60 frames
