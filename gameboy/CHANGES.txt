@@ -8,6 +8,7 @@
   how it is used
 * Backlight zones: add speed control
 * Sound test: add surround option
+* MDFourier: play sync pattern when menu opens
 * Delay SGB detection by 8 frames for increased compatibility
 * topcalls.py: Port from awk to Python; list not only top calls but
   also routines called once for more size optimization opportunities
@@ -15,6 +16,7 @@
 * Make all HRAM optimizations explicit (for RGBDS 0.6.0)
 * unused.py: list tail calls (call then ret)
 * romusage.py: make width configurable (requested by Rangi)
+* Build in GitHub Actions (thanks Persune)
 * Add continued fraction tool for pixel aspect ratio experiments
 * Reduce use of "master" per Inclusive Naming Initiative
 

@@ -1,4 +1,4 @@
-0.23 (2022-10-xx)
+0.23 (2023-01-xx)
 * Help: fix blink sprite alignment
 * Motion blur: add health warning
 * Motion blur: increase duration cap to 60 frames
@@ -7,6 +7,7 @@
 * Backlight zones: add speed control
 * Rename Manual lag test to Timing and reflex test to reflect
   how it is used
+* Build in GitHub Actions (thanks Persune)
 * Hill zone scroll test: Switch from laggy libgba IRQs to HDMA
   to reduce split artifacts
 
