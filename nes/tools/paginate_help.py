@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, os, argparse
+import sys, os, argparse, string
 from vwfbuild import ca65_bytearray
 from collections import Counter
 from itertools import chain
@@ -87,7 +87,7 @@ def ca65_escape_bytes(blo):
                     else '%d' % r
                     for r in runs)
 
-def render_help(docs, verbose=False, inputlog=None):
+def render_help(docs, defines=None, verbose=False, inputlog=None):
     lines = ["""
 ; Help data generated with paginate_help.py - do not edit
 .export helptitles_hi, helptitles_lo
@@ -103,11 +103,14 @@ HELP_BANK = <.bank(*)
     lines.extend('helpsect_%s = %d' % (doc[1], i)
                  for i, doc in enumerate(docs))
 
+    defines = dict(defines or {})
     allpages, cumul_pages = [], [0]
     for doc in docs:
         for page in doc[-1]:
-            page = [line.encode("cp240p") for line in page]
-            allpages.append(b"\x0A".join(page) + b"\x00")
+            page = [string.Template(line).safe_substitute(defines)
+                    for line in page]
+            page = b"\x0A".join(line.encode("cp240p") for line in page)
+            allpages.append(page + b"\x00")
         assert len(allpages) == cumul_pages[-1] + len(doc[-1])
         cumul_pages.append(len(allpages))
 
@@ -231,23 +234,37 @@ HELP_BANK = <.bank(*)
 
     return "\n".join(lines)
 
-def main(argv=None):
-    argv = argv or sys.argv
-    if len(argv) > 1 and argv[1] == '--help':
-        print("usage: paginate_help.py INFILE.txt")
-        return
-    if len(argv) != 2:
-        print("paginate_help.py: wrong number of arguments; try paginate_help.py --help")
-        sys.exit(1)
+def parse_define(s):
+    kv = s.split('=', 1)
+    if len(kv) < 2:
+        raise ValueError("expected KEY=value; got %s" % s)
+    return tuple(kv)
 
-    filename = argv[1]
-    with open(filename, 'r', encoding="utf-8") as infp:
+def parse_argv(argv):
+    p = argparse.ArgumentParser()
+    p.add_argument("input",
+                   help="help file with pages introduced by ==title==")
+    p.add_argument("-o", "--output", default="-",
+                   help="assembly file to write (default: standard output)")
+    p.add_argument("-D", metavar="WORD=value",
+                   type=parse_define, dest="defines", nargs='*',
+                   help="define a word for $WORD or ${WORD} substitution")
+    return p.parse_args(argv[1:])
+
+def main(argv=None):
+    args = parse_argv(argv or sys.argv)
+    with open(args.input, 'r', encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
-    docs = lines_to_docs(filename, lines, maxpagelen=20)
-    print(render_help(docs))
+    docs = lines_to_docs(args.input, lines, maxpagelen=20)
+    out = render_help(docs, defines=args.defines)
+    if args.output != '-':
+        with open(args.output, "w", encoding="utf-8") as outfp:
+            outfp.write(out)
+    else:
+        sys.stdout.write(out)
 
 if __name__=='__main__':
     if 'idlelib' in sys.modules:
-        main(['paginate_help.py', '../src/helppages.txt'])
+        main(['paginate_help.py', "-DCOMMIT=commit goes here", '../src/helppages.txt'])
     else:
         main()

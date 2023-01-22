@@ -29,6 +29,7 @@ __pycache__/
 /gameboy/obj/gb/*.pal
 /gameboy/obj/gb/*.huf
 /gameboy/obj/gb/*.border
+/gameboy/obj/gb/last-commit*
 /gameboy/gb240p.gb
 /gameboy/gb240p.map
 /gameboy/gb240p.sym
@@ -42,6 +43,7 @@ __pycache__/
 /gba/.map
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
+/nes/obj/nes/last-commit*
 /nes/*.dbg
 /nes/*map.txt
 /nes/240pee-*rom.nes

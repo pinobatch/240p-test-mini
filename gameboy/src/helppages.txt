@@ -756,7 +756,7 @@ Select: Stop sound
 
 == 144p Test Suite ==
 
-Ver. 0.23b1 (2023-xx-xx)
+$COMMIT
 SGB sound
 
 © 2011-2016

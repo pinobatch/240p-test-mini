@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, os, argparse
+import sys, os, argparse, string
 from vwfbuild import rgbasm_bytearray
 from collections import Counter
 from itertools import chain
@@ -87,7 +87,7 @@ def rgbasm_escape_bytes(blo):
             for r in runs]
     return ','.join(runs)
 
-def render_help(docs, verbose=False, inputlog=None):
+def render_help(docs, defines=None, verbose=False, inputlog=None):
     lines = ["""
 ; Help data generated with paginate_help.py - do not edit
 
@@ -98,11 +98,14 @@ section "helppages",ROMX
     lines.extend('export helpsect_%s' % (doc[1])
                  for i, doc in enumerate(docs))
 
+    defines = dict(defines or {})
     allpages, cumul_pages = [], [0]
     for doc in docs:
         for page in doc[-1]:
-            page = [line.encode("cp144p") for line in page]
-            allpages.append(b"\x0A".join(page) + b"\x00")
+            page = [string.Template(line).safe_substitute(defines)
+                    for line in page]
+            page = b"\x0A".join(line.encode("cp144p") for line in page)
+            allpages.append(page + b"\x00")
         assert len(allpages) == cumul_pages[-1] + len(doc[-1])
         cumul_pages.append(len(allpages))
 
@@ -116,8 +119,7 @@ section "helppages",ROMX
     dtepages, replacements, pairfreqs = result
     newsize = 2 * len(replacements) + sum(len(x) for x in dtepages)
 
-    # 2020-04-01: I realized I could beat jroatch's encoder
-    # even with the same dictionary
+    # Try an alternate encoder with the same dictionary
     reenctable = dtemakeenctable(replacements)
     greedysaved = 0
     for i, txt in enumerate(chain(allpages, helptitledata)):
@@ -233,6 +235,12 @@ section "helppages",ROMX
     lines.append("")
     return "\n".join(lines)
 
+def parse_define(s):
+    kv = s.split('=', 1)
+    if len(kv) < 2:
+        raise ValueError("expected KEY=value; got %s" % s)
+    return tuple(kv)
+
 def parse_argv(argv):
     p = argparse.ArgumentParser()
     p.add_argument("INFILE")
@@ -240,6 +248,9 @@ def parse_argv(argv):
                    help="write asm output here instead of standard output")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="write replacements")
+    p.add_argument("-D", metavar="WORD=value",
+                   type=parse_define, dest="defines", nargs='*',
+                   help="define a word for $WORD or ${WORD} substitution")
     p.add_argument("--dte-input-log",
                    help="store input to jroatch's DTE here")
     return p.parse_args(argv[1:])
@@ -250,10 +261,10 @@ def main(argv=None):
     with open(args.INFILE, 'r', encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
     docs = lines_to_docs(args.INFILE, lines, maxpagelen=14)
-    help_asm = render_help(docs, verbose=args.verbose,
+    help_asm = render_help(docs, defines=args.defines, verbose=args.verbose,
                            inputlog=args.dte_input_log)
     if args.output != '-':
-        with open(args.output, "w") as outfp:
+        with open(args.output, "w", encoding="utf-8") as outfp:
             outfp.write(help_asm)
     else:
         sys.stdout.write(help_asm)

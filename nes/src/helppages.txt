@@ -876,7 +876,7 @@ less than 5 lines (317 μs).
 
 == 240p Test Suite ==
 
-Version 0.23b1 (2023-xx-xx)
+$COMMIT
 Monoscope; input test
 
 Concept: Artemio Urbina

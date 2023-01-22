@@ -183,8 +183,8 @@ last-commit: last-commit-now
 	cmp $< $@ || cp $< $@
 
 # Convert help files
-helppages.s: ../tools/paginate_help.py helppages.txt
-	$(PY) $^ > $@
+helppages.s: helppages.txt last-commit ../tools/paginate_help.py 
+	$(PY) ../tools/paginate_help.py -DCOMMIT="$$(cat last-commit)" $< -o $@
 
 -include $(DEPSDIR)/*.d
 #---------------------------------------------------------------------------------------

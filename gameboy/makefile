@@ -198,8 +198,9 @@ obj/gb/allhuffdata.z80: tools/allhuffdata.py $(filter-out DMG?,$(huffdata))
 
 # Help me!
 obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
-  ../common/tools/cp144p.py ../common/tools/dtefe.py ../common/tools/dte$(DOTEXE)
-	$(PY) tools/paginate_help.py $< > $@
+  ../common/tools/dtefe.py ../common/tools/dte$(DOTEXE) \
+  ../common/tools/cp144p.py obj/gb/last-commit
+	$(PY) tools/paginate_help.py -DCOMMIT="$$(cat obj/gb/last-commit)"  $< -o $@
 
 ../common/tools/dte$(DOTEXE): ../common/tools/dte.c
 	$(CC) $(CFLAGS) -o $@ $^

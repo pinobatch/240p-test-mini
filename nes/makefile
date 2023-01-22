@@ -263,8 +263,9 @@ $(objdir)/mdf4k_chr.chr: $(imgdir)/mdf4k_chr.png
 
 # Help me!
 $(objdir)/%.hlp.s: $(srcdir)/%.txt tools/paginate_help.py \
-  ../common/tools/dtefe.py ../common/tools/dte$(DOTEXE)
-	$(PY) tools/paginate_help.py $< > $@
+  ../common/tools/dtefe.py ../common/tools/dte$(DOTEXE) \
+  ../common/tools/cp240p.py $(objdir)/last-commit
+	$(PY) tools/paginate_help.py -DCOMMIT="$$(cat $(objdir)/last-commit)"  $< -o $@
 
 ../common/tools/dte$(DOTEXE): ../common/tools/dte.c
 	$(CC) $(CFLAGS) -o $@ $^
