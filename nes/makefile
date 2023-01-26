@@ -67,7 +67,8 @@ FIX := $(PY) tools/sssfix.py -v -l 0 -t "240P TEST SUITE"
 
 .PHONY: run runbn runsg runtg runnsf runmdf \
         debug debug2 debugbn debugsg debugtg debugnsf debugmdf \
-        nsf dist zip all clean ctools
+        nsf dist zip all clean ctools \
+        $(objdir)/last-commit-now
 
 run: $(title).nes
 	$(EMU) $<

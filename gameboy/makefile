@@ -72,7 +72,8 @@ BMP2 := $(PY) ../common/tools/pilbmp2nes.py
 BMP2GB := $(PY) ../common/tools/pilbmp2nes.py --planes "0,1"
 
 .SUFFIXES:
-.PHONY: run all dist zip ctools clean
+.PHONY: run all dist zip ctools clean \
+  obj/gb/last-commit-now
 
 run: $(title).gb
 	$(GBEMU) $<
