@@ -13,6 +13,7 @@
 .export PB53_outbuf
 .exportzp ciSrc, ciDst, ciBufStart, ciBufEnd
 .importzp nmis
+.import load_palette_from_ciSrc
 
 .segment "ZEROPAGE"
 ciSrc: .res 2
@@ -264,24 +265,5 @@ have_all_pat:
   lda #$00
   sta PPUADDR
   jsr unpb53_xtiles
-
-  ; Load the palette
-  ; ppu_wait_vblank is inlined because on BNROM, it's in another bank
-  lda nmis
-  :
-    cmp nmis
-    beq :-
-  lda #$3F
-  sta PPUADDR
-  ldy #$00
-  sty PPUADDR
-palloop:
-  lda (ciSrc),y
-  sta PPUDATA
-  sta PB53_outbuf,y
-  iny
-  cpy #16
-  bcc palloop
-  rts
+  jmp load_palette_from_ciSrc
 .endproc
-

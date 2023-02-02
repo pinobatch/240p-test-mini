@@ -90,9 +90,22 @@ restart:
   jsr unpb53_gate
   jsr load_kiki_map_02
 
-  lda #>kiki_palette
-  ldy #<kiki_palette
-  jsr load_palette_ay
+  ; load palette
+  lda nmis
+  :
+    cmp nmis
+    beq :-  ; remove stripe at top
+  ldx #$3F
+  stx PPUADDR
+  lda #0
+  sta PPUADDR
+  tax
+  :
+    lda kiki_palette,x
+    sta PPUDATA
+    inx
+    cpx #12
+    bcc :-
   
   ; Set up sprite 0
   ldx #4
