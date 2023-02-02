@@ -84,6 +84,7 @@ resetstub_entry:
     sta $8001
     dex
     bpl loop
+  sta $A000  ; set vertical mirroring
   txs
   jmp reset_handler
 

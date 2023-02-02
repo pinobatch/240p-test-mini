@@ -151,11 +151,15 @@ uniu_seen_tiles = $07
 
 .proc load_iu53_file_cb
   asl a
-  tax
-  lda #IU53_BANK
   .ifdef ::USE_MMC
+    pha
+    lda #IU53_BANK
     jsr mmc_bank_a
+    pla
+    tax
   .else
+    tax
+    lda #IU53_BANK
     sta *-1
   .endif
   ldy iu53_files+0,x
@@ -234,9 +238,26 @@ uniu_seen_tiles = $07
     pla
   no_attributes:
 
-  ldy #$00
   asl a
-  bcc no_palette
+  bcs load_palette_from_ciSrc
+  rts
+.endproc
+
+SIZEOF_BGPALETTE = 16
+;;
+; Waits for vblank then copies 16 bytes from [AY] to PPU $3F00
+; @return ciSrc = start of palette; Y = 16
+.proc load_palette_ay
+  sta ciSrc+1
+  sty ciSrc+0
+  ; fall through
+.endproc
+.proc load_palette_from_ciSrc
+    ldy #$00
+    lda nmis
+    :
+      cmp nmis
+      beq :-
     lda #$3F
     sta PPUADDR
     sty PPUADDR
@@ -244,9 +265,10 @@ uniu_seen_tiles = $07
       lda (ciSrc),y
       sta PPUDATA
       iny
-      cpy #16
+      cpy #SIZEOF_BGPALETTE
       bcc palloop
   no_palette:
-
   rts
 .endproc
+
+.global load_palette_ay, load_palette_from_ciSrc

@@ -67,7 +67,7 @@ HELP_LINE_LEN = 40
 GATEDATA_BANK = 1
 
 ; uniu.c
-.global load_iu53_file
+.global load_iu53_file, load_palette_ay, load_palette_from_ciSrc
 
 ; vwf_draw.s
 .global vwfPutTile, vwfPuts, vwfPuts0
