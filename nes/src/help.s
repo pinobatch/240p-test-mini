@@ -60,7 +60,15 @@ TITLE_REPEAT_CODE = $0F
   lda new_keys+0
   and #KEY_START
   beq not_help
+    lda help_cur_page
+    pha
+    lda help_cursor_y
+    pha
     jsr helpscreen_abslr
+    pla
+    sta help_cursor_y
+    pla
+    sta help_cur_page
     sec
     rts
   not_help:
