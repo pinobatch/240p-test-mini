@@ -9,8 +9,8 @@ import codecs
 # The rest are as follows, beginning at 0x80.
 name = 'cp144p'
 extra_codepoints = [
-    # A button, B button, copyright, bird,
-    0x24B6, 0x24B7, 0x00A9, 0x1F426,
+    # mammoth, unknown, copyright, bird,
+    0x1F9A3, 0xFFFE, 0x00A9, 0x1F426,
     # right arrow, left arrow, up arrow, down arrow
     0x2192, 0x2190, 0x2191, 0x2193
 ]

@@ -885,9 +885,10 @@ $COMMIT
 Monoscope; input test
 
 Concept: Artemio Urbina
-  🐦 @Artemio
+   🐦 @Artemio
 Program: Damian Yerrick
-  🐦 @PinoBatch
+   🦣 @pinobatch@
+       peoplemaking.games
 
 © 2011-2016 Artemio Urbina
 © 2015-2023 Damian Yerrick

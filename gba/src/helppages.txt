@@ -650,9 +650,10 @@ is provided AS IS with NO
 warranty whatsoever.
 ----
 Concept: Artemio Urbina
-  🐦 @Artemio
+   🐦 @Artemio
 Program: Damian Yerrick
-  🐦 @PinoBatch
+   🦣 @pinobatch@
+       peoplemaking.games
 
 Special thanks:
   Shmups Forum
