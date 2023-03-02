@@ -1,8 +1,11 @@
-0.23 (2023-01-xx)
+0.23 (2023-03-03)
 * Help: fix blink sprite alignment
+* Credits: Display version from Git commit tag and ID
+* Credits: Pino has moved to the Fediverse
 * Motion blur: add health warning
 * Motion blur: increase duration cap to 60 frames
   (requested by zeta0134)
+* Motion blur: do not edit parameters while running
 * Shadow sprite: add Donna
 * Rename Manual lag test to Timing and reflex test to reflect
   how it is used

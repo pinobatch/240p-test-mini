@@ -1,9 +1,13 @@
-0.23 (2023-01-xx)
+0.23 (2023-03-03)
+* Credits: Display version from Git commit tag and ID
+* Credits: Pino has moved to the Fediverse
 * Add SGB sound test
 * Add health warning to Motion blur and Chroma crosstalk
 * Motion blur: increase duration cap to 60 frames
   (requested by zeta0134)
 * Shadow sprite: replace GB Gus and GBC Gus with Donna
+* Shadow sprite: move Green Hill Zone tiles to $8800 to avoid
+  overwriting shadow style tiles
 * Rename Manual lag test to Timing and reflex test to reflect
   how it is used
 * Backlight zones: add speed control

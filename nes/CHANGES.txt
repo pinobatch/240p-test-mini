@@ -1,9 +1,11 @@
-0.23 (2023-01-xx)
+0.23 (2023-03-03)
 * Help: Compress duplicate lines of text (GB parity)
+* Credits: Display version from Git commit tag and ID
+* Credits: Pino has moved to the Fediverse
 * Replace Grid and Linearity with khmr33's Monoscope
 * Solid color screen: Select to windowbox (SGB parity; requested by
   khmr33 and Tianfeng)
-* Safe areas: rename PocketNES to Post-1985 and fix size typo
+* Safe areas: Rename PocketNES to Post-1985 and fix size typo
 * Chroma crosstalk: Add health warning; simplify pattern (SGB parity)
 * Stopwatch: be up front about gaining a second per 10 minutes
   (requested by zeta0134)
@@ -13,6 +15,7 @@
 * Add input test with serial analyzer, standard controllers including
   FC microphone, Four Score, Super NES controller and mouse,
   Power Pad, and Arkanoid controller
+* Sound test: don't move cursor when returning
 * MDFourier: play sync pattern when menu opens
 * Move the hyphen down a pixel
 * Add standalone 4096-byte MDFourier ROM for the smallest flash carts

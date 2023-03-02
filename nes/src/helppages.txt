@@ -44,7 +44,8 @@ two goals:
    a test signal generator
    to help in calibrating the
    black, white, and color
-   levels of a display.
+   levels and geometry of
+   a display.
 
 The Nintendo Entertainment
 System (NES) outputs 240
@@ -900,8 +901,10 @@ or FITNESS FOR A
 PARTICULAR PURPOSE.
 ----
 Thank you to my patrons:
-Rin Marina, Artemio Urbina,
-Joe Parsell, and Brad Smith
+Artemio Urbina, Joe Parsell,
+Brad Smith, Rin Mari, Jeremy Z,
+zeta0134, Jason Richmond,
+Guto Maia, birdybro
 
 You can help this project by
 running the test on authentic

@@ -35,9 +35,9 @@ has two goals:
    ability to handle retro
    console video signals.
 2. Provide a test signal
-   generator to help
-   in calibrating the
-   levels of a display.
+   generator to help in
+   calibrating levels and
+   geometry of a display.
 ----
 The Game Boy outputs
 144 lines of progressive
@@ -774,14 +774,21 @@ Concept: Artemio Urbina
 Program: Damian Yerrick
    🦣 @pinobatch@
        peoplemaking.games
+
 Special thanks:
   Shmups Forum
   gbdev contributors
+----
 Thank you to my patrons:
-  Rin Marina
   Artemio Urbina
   Joe Parsell
   Brad Smith
+  Rin Mari
+  zeta0134
+  Jeremy Z
+  Jason Richmond
+  Guto Maia
+  birdybro
 ----
 You can help:
 - Run tests on authentic

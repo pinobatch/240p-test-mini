@@ -41,7 +41,8 @@ has two goals:
    a test signal generator
    to help in calibrating the
    black, white, and color
-   levels of a display.
+   levels and geometry of
+   a display.
 ----
 The Game Boy Advance
 system outputs 160 lines of
@@ -654,14 +655,16 @@ Concept: Artemio Urbina
 Program: Damian Yerrick
    🦣 @pinobatch@
        peoplemaking.games
-
 Special thanks:
   Shmups Forum
   gbadev.org
+  gbadev.net
 
 Thank you to my patrons:
-Rin Marina, Artemio Urbina,
-Joe Parsell, and Brad Smith
+Artemio Urbina, Joe Parsell,
+Brad Smith, Rin Mari, Jeremy Z,
+zeta0134, Jason Richmond,
+Guto Maia, birdybro
 ----
 You can help:
 - Run tests on authentic

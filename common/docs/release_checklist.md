@@ -7,9 +7,11 @@ First open relevant files and forums:
         gameboy/src/helppages.txt gba/src/helppages.txt private/* \
         common/docs/ &
     firefox 'https://github.com/pinobatch/240p-test-mini/releases' \
-        'https://forums.nesdev.com/viewtopic.php?f=22&t=13394' \
+        'https://forums.nesdev.org/viewtopic.php?f=22&t=13394' \
         'https://gbdev.gg8.se/forums/viewtopic.php?id=542' \
-        'https://forum.gbadev.org/viewtopic.php?f=6&t=18168' &
+        'https://forum.gbadev.net/forum/1-announcements' \
+        'https://www.patreon.com/' &
+    git log --oneline
 
 1. `CHANGES.txt` (3): Ensure version and release date are updated,
    and all common changes have the same wording
@@ -17,7 +19,7 @@ First open relevant files and forums:
    based on this version's `CHANGES.txt` files, and split into
    user-visible and behind-the-scenes changes
 3. `makefile` (3): Ensure version is updated
-4. `helppages.txt` (3): Ensure version, release date, and patron list
+4. `helppages.txt` (3): Ensure release year, and patron list
    are updated
 5. `make all` to ensure all versions are built, including the
    sometimes neglected NES-BNROM version

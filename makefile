@@ -9,7 +9,7 @@
 # This file is offered as-is, without any warranty.
 #
 title := 240p-test-mini
-version := 0.23b1
+version := 0.23
 
 # Make $(MAKE) work correctly even when Make is installed inside
 # C:\Program Files
@@ -20,7 +20,7 @@ endif
 alltargets:=\
   nes/240pee.nes nes/240pee-bnrom.nes nes/240pee-tgrom.nes \
   nes/mdfourier.nsf nes/mdfourier4k.nes nes/mdfourier4k-chrrom.nes \
-  gameboy/gb240p.gb gba/240pee_mb.gba
+  gameboy/gb240p.gb gba/240pee_mb.gba nes/240pee-sgrom.nes
 
 .PHONY: all dist clean $(alltargets)
 all: $(alltargets)
