@@ -317,7 +317,7 @@ frame_type_msg2:
 frame_type_msg3:
   db "vertical",10
 frame_type_msg4:
-  db "diagonal",0
+  db "checker",0
 
 ; Sprite drawing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

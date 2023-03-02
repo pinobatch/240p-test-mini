@@ -13,9 +13,9 @@ def parse_argv(argv):
     parser.add_argument("TILEFILE")
     parser.add_argument("MAPFILE")
     parser.add_argument("--block-size", type=int, default=16,
-                        help="size of each tile (NES, GB: 16; SMS, MD, SNES: 32)")
-    parser.add_argument("--map-add", type=int, default=0,
-                        help="add this to all map entries")
+                        help="size of tile in bytes (NES, GB: 16; SMS, MD, SNES: 32)")
+    parser.add_argument('-b', "--map-add", "--base-tiles", type=lambda x: int(x, 0), default=0,
+                        help="add this value to all map entries")
     args = parser.parse_args(argv[1:])
     return args
 

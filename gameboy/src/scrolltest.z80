@@ -46,7 +46,7 @@ hillzone_palette_gbc:
   drgb $FFFFFF  ; Clouds, water
   drgb $8FA1FF
   drgb $D1D8FF
-  drgb $FF00FF
+  drgb $342800  ; Unused except for window
   drgb $8FA1FF  ; Mountain peaks and near squares
   drgb $BDAC2C
   drgb $6D5C00
@@ -483,7 +483,7 @@ load_hillzone_bg::
   ; Load tiles
   ld l, 3
   call allhuffdata_fetch_file_l
-  ld hl,CHRRAM2
+  ld hl,CHRRAM1
   call pb16_unpack_block
 
   ; Set up palette

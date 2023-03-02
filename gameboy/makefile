@@ -173,11 +173,10 @@ obj/gb/vwf7.z80: tools/vwfbuild.py ../common/tilesets/vwf7_cp144p.png
 obj/gb/%.iu: obj/gb/%.2bpp
 	$(PY) tools/incruniq.py $< $@
 
-obj/gb/%.u.2bpp: obj/gb/%.2bpp
-	$(PY) tools/uniq.py $< $@ $(<:.2bpp=.nam)
-
-obj/gb/%.nam: obj/gb/%.u.2bpp
-	-touch $@
+# rules with multiple outputs handle parallel building correctly
+# in GNU Make pre-4.3 only if they have a % in the name
+obj/gb/%.u.2bpp obj/gb/%.nam: obj/gb/%.2bpp
+	$(PY) tools/uniq.py -b0x80 $< $@ $(<:.2bpp=.nam)
 
 %.pb16: tools/pb16.py %
 	$(PY) $^ $@
