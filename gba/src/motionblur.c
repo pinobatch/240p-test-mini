@@ -79,24 +79,25 @@ void activity_motion_blur() {
       timeleft = 1;
       running = !running;
     }
-    if ((new_keys & KEY_UP) && y > 0) {
-      y -= 1;
-    }
-    if ((new_keys & KEY_DOWN) && y < NUM_PARAMS - 1) {
-      y += 1;
-    }
-    if ((new_keys & KEY_LEFT) && params[y] > param_min[y]) {
-      params[y] -= 1;
-    }
-    if ((new_keys & KEY_RIGHT) && params[y] < param_max[y]) {
-      params[y] += 1;
-    }
 
     if (running) {
       timeleft -= 1;
       if (timeleft == 0) {
         phase = !phase;
         timeleft = params[phase ? 1 : 3];
+      }
+    } else {
+      if ((new_keys & KEY_UP) && y > 0) {
+        y -= 1;
+      }
+      if ((new_keys & KEY_DOWN) && y < NUM_PARAMS - 1) {
+        y += 1;
+      }
+      if ((new_keys & KEY_LEFT) && params[y] > param_min[y]) {
+        params[y] -= 1;
+      }
+      if ((new_keys & KEY_RIGHT) && params[y] < param_max[y]) {
+        params[y] += 1;
       }
     }
 
