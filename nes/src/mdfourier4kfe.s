@@ -80,12 +80,13 @@ irq_handler:
     bpl vwait2
   lda #1
   sta mdfourier_good_phase
+  lda #VBLANK_NMI
+  sta PPUCTRL
   jsr mdfourier_ready_tone
   ; fall through
 restart:
   jsr mdfourier_init_apu
   jsr mdfourier_push_apu
-  lda #$FF
   lda #VBLANK_NMI
   sta PPUCTRL
   asl a
