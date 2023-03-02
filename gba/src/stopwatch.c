@@ -44,6 +44,8 @@ static const unsigned char sw_face_x[NUM_FACE_PHASES] = {
   76, 98, 112, 112, 98, 76, 54, 40, 40, 54
 };
 
+// A small dot is drawn halfway between the center and the number on
+// the face.  Its Y coordinate is slightly uneven because of rounding.
 static const unsigned char sw_face_y[NUM_FACE_PHASES] = {
   58, 65, 84, 108, 127, 134, 127, 108, 84, 65
 };

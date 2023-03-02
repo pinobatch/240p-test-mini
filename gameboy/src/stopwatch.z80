@@ -51,6 +51,8 @@ sw_shape:
   db      &211,&321,     $FF
 
 ; X, Y coordinates of each position of the frames hand
+; A small dot is drawn halfway between the center and the number on
+; the face.  Its Y coordinate is slightly uneven because of rounding.
 sw_hand_xy:
   db  72, 54
   db  94, 61
