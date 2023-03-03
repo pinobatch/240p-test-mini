@@ -35,6 +35,10 @@ nes/240pee-bnrom.nes nes/mdfourier.nsf nes/mdfourier4k.nes \
 nes/mdfourier4k-chrrom.nes: \
   nes/240pee.nes
 	$(MAKE) -C nes $(notdir $@)
+nes/240pee-sgrom.s: 240pee-bnrom.nes
+	$(MAKE) -C nes $(notdir $@)
+nes/240pee-tgrom.s: 240pee-sgrom.nes
+	$(MAKE) -C nes $(notdir $@)
 gameboy/gb240p.gb:
 	$(MAKE) -C gameboy $(notdir $@)
 gba/240pee_mb.gba:
@@ -50,12 +54,12 @@ $(title)-docsrc-$(version).zip: docsrc.zip.in makefile
 	zip -9 -u $@ -@ < $<
 
 zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
-	git ls-files | egrep -iv "^\.|$(DOCSRC_RE)" > $@
+	git ls-files | grep -Eiv "^\.|$(DOCSRC_RE)" > $@
 	printf '%s\n' $(alltargets) >> $@
 	echo $@ >> $@
 
 docsrc.zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
-	git ls-files | egrep "$(DOCSRC_RE)" > $@
+	git ls-files | grep -E "$(DOCSRC_RE)" > $@
 	echo LICENSE >> $@
 	echo $@ >> $@
 
