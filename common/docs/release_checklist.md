@@ -1,22 +1,29 @@
 Checklist before release
 ========================
 
+Day 1
+-----
 First test all six NES builds on NES, the GB build on all GB models,
 and the GBA build on a GBA.  Start with Credits and touch every
-test at least once.
+test at least once.  Make screenshots of new features and alt text
+for those screenshots. Sleep on it.
 
-Then open relevant files and forums:
+Day 2
+-----
+Open relevant files and forums:
 
     mousepad nes/CHANGES.txt gameboy/CHANGES.txt gba/CHANGES.txt \
         makefile nes/makefile gameboy/makefile nes/src/helppages.txt \
-        gameboy/src/helppages.txt gba/src/helppages.txt
-    xdg-open common/docs/
+        gameboy/src/helppages.txt gba/src/helppages.txt \
+        common/docs/junkerhq/index.html
     xdg-open private/
-    firefox 'https://github.com/pinobatch/240p-test-mini/releases' \
+    firefox 'common/docs/junkerhq/index.html' \
+        'https://github.com/pinobatch/240p-test-mini/releases' \
         'https://forums.nesdev.org/viewtopic.php?f=22&t=13394' \
         'https://gbdev.gg8.se/forums/viewtopic.php?id=542' \
         'https://forum.gbadev.net/topic/22-160p-test-suite' \
-        'https://www.patreon.com/' &
+        'https://www.patreon.com/' 'https://peoplemaking.games/' \
+        'https://www.retroveteran.com/masthead/' &
     git log --oneline
 
 1. `CHANGES.txt` (3): Ensure version and release date are updated,
@@ -40,12 +47,17 @@ Then open relevant files and forums:
 9. `git tag v0.xx && git push && git push --tags`
 10. `make clean && make -j2 dist` to put the new tag in credits
 11. On GitHub, draft a new release titled
-    "240p Test Suite (NES, GB, GBA) v0.xx`
-    and attach six .nes files, one .nsf, one .gb, one .gba
-12. Upload to junkerhq per private steps
+    `240p Test Suite (NES, GB, GBA) v0.xx`
+    and attach six .nes files, one .nsf, one .gb, and one .gba,
+    along with the screenshots
+12. In `junkerhq/index.html`, update file sizes and release year.
+    Upload to junkerhq per private steps, then verify at
+    <https://junkerhq.net/240pTestSuite/PinoBatch/>
 13. Post highlights and link to GitHub release page to NESdev topic
-    and Patreon, attaching ROM and source zipfile
+    and Patreon, attaching screenshots and ROM and source zipfile
 14. Post platform-relevant highlights, link to GitHub release, and
     link to NESdev attachment on gbdev.gg8.se and forum.gbadev.net
 15. Mail highlights and link to GitHub release page to the
-    address shown at <https://pdroms.de/submit-news>
+    address shown at <https://www.retroveteran.com/masthead/>
+16. Post highlights, screenshots, and link to GitHub release to
+    Mastodon
