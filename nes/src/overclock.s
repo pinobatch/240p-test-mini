@@ -58,8 +58,10 @@ prpos           = vram_copydstlo
 string_buffer   = test_state + 13
 
 .segment "CODE02"
-; Alignment sensitive code comes first
+; Alignment sensitive code comes first.  The alignment must be
+; a power of two greater than the biggest alignment signature.
 .align 64
+
 ;;
 ; Counts how long it takes from a sprite 0 rise to another fall
 ; and rise.  Used to determine cycles per frame.
@@ -80,7 +82,7 @@ loop3:
 :
   bit PPUSTATUS
   bvs loop3
-  .assert >*=>loop3, error, "sov_to_s0 crosses page"
+  .assert >*=>loop3, error, "s0_rise_to_rise loop crosses page"
 loop4:
   inx
   bne :+
@@ -88,9 +90,9 @@ loop4:
 :
   bit PPUSTATUS
   bvc loop4
-  .assert >*=>loop4, error, "sov_to_s0 crosses page"
+loop4end:
+  .assert >*=>loop4, error, "s0_rise_to_rise loop crosses page"
   rts
-;  .out .sprintf("%d bytes so far", *-::s0_rise_to_rise)
 .endproc
 
 ;;
@@ -114,7 +116,8 @@ loop3:
 :
   bit PPUSTATUS
   bvc loop3
-;  .assert >*=>loop3, error, "sov_to_s0 crosses page"
+loop3end:
+  .assert >*=>loop3, error, "sov_to_s0 crosses page"
   rts
 .endproc
 
@@ -129,9 +132,19 @@ loop:
   :
   cmp a:nmis
   beq loop
-;  .assert >*=>loop, error, "now_to_nmi crosses page"
+loopend:
+  .assert >*=>loop, error, "now_to_nmi crosses page"
   rts
 .endproc
+
+; Alignment signatures are the XOR of the offsets of the start and
+; end of each loop from the start of the alignment-sensitive area.
+.out .sprintf("overclock.s: note: size of alignment-sensitive code is %u bytes", *-s0_rise_to_rise)
+alignsig0=(s0_rise_to_rise::loop3-s0_rise_to_rise)^(s0_rise_to_rise::loop4-s0_rise_to_rise)
+alignsig1=(s0_rise_to_rise::loop4-s0_rise_to_rise)^(s0_rise_to_rise::loop4end-s0_rise_to_rise)
+alignsig2=(sov_to_s0::loop3-s0_rise_to_rise)^(sov_to_s0::loop3end-s0_rise_to_rise)
+alignsig3=(now_to_nmi::loop-s0_rise_to_rise)^(now_to_nmi::loopend-s0_rise_to_rise)
+.out .sprintf("    alignment signatures: %02x %02x %02x %02x", alignsig0, alignsig1, alignsig2, alignsig3)
 
 .proc do_overclock
   lda #VBLANK_NMI
@@ -397,22 +410,17 @@ done:
 ; @param string_buffer[0] number of decimal places
 .proc write_result_number
   jsr bcdConvert24
-  ldx string_buffer
+  ldx string_buffer+0
   lda #>string_buffer
   ldy #<string_buffer
   jsr bcdWrite
+
+  ; add NUL terminator
   txa
   tay
-
-  ; Right-pad with spaces (to erase previous number) and NUL-terminate
-  lda #' '
-:
-  sta (0),y
-  iny
-  cpy #10
-  bcc :-
   lda #0
   sta (0),y
+  ; fall through to write_result_string
 .endproc
 ;;
 ; Writes the NUL-terminated string at (0) to a line of result.
