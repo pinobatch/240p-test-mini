@@ -382,12 +382,15 @@ sgb_set_palettes_bcde_attr_a::
   jp sgb_send
 
 
+; There's a 29th row whose top scanline gets shown briefly while the
+; SGB system software is processing something.  Hide it.
+BORDER_NUM_ROWS = 30
+
 ; The border consists
 ; Up to 64 tiles in Super NES format, compressed with PB16
 ; A number of rows of tilemap data, compressed with IUR
-; 28 bytes: in what order the rows are stored
+; 30 bytes: in what order the rows are stored
 ; 16 bytes: palette
-
 sgb_load_border::
   call sgb_freeze
   call sgb_load_trn_tilemap
@@ -409,7 +412,7 @@ sgb_load_border::
   ; the blank rows at top and bottom and the left and right borders
   ; beside the GB screen.
   call iur_unpack_2hl_bytes
-  ld b, 28
+  ld b, BORDER_NUM_ROWS
   ld de, CHRRAM0
   .rowloop:
     ld a, [hl+]
