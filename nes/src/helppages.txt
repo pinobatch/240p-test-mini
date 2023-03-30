@@ -138,12 +138,16 @@ Select: Play 1 kHz tone
 
 Use blue filters or some TVs'
 blue-only mode to confirm
-color balance. Because the
-NES's composite encoder
-does not attempt to produce
-accurate RGB hues, these
-colors will not be pure.
-
+color balance. Because of
+shortcuts in the NES PPU's
+composite output stage,
+these colors are impure.
+On NTSC, green and magenta
+have correct hues, and
+yellow, cyan, red, and blue
+are about 15 degrees off.
+PAL is the other way around.
+----
 The mini-PLUGE at bottom
 right causes some TVs
 to distort or lose sync.
