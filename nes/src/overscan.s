@@ -650,13 +650,25 @@ loop:
   bmi s0nope
     lda #VBLANK_NMI|BG_0000|OBJ_0000|0
     sta PPUCTRL
-    ldx #>-3328
-    ldy #<-3328
+    ldx #>-3326
+    ldy #<-3326
+    lda tvSystem
+    cmp #1
+    bne notPalNES1
+      ldx #>-3118
+      ldy #<-3118
+    notPalNES1:
     jsr waitminusxy
     lda #VBLANK_NMI|BG_1000|OBJ_0000|0
     sta PPUCTRL
-    ldx #>-1470
-    ldy #<-1470
+    ldx #>-1469
+    ldy #<-1469
+    lda tvSystem
+    cmp #1
+    bne notPalNES2
+      ldx #>-1377
+      ldy #<-1377
+    notPalNES2:
     jsr waitminusxy
     lda #VBLANK_NMI|BG_0000|OBJ_0000|1
     sta PPUCTRL
