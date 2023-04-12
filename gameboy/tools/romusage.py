@@ -44,7 +44,7 @@ def main(argv=None):
     twidth = args.width
     tiles = render_to_texels(romdata, twidth)
     if args.output:
-        tiles.save(outfilename)
+        tiles.save(args.output)
     else:
         tiles.show()
 

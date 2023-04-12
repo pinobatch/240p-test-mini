@@ -67,11 +67,8 @@ SECTION "lcd_off", ROM0
 ;;
 ; Waits for blanking and turns off rendering.
 ;
-; Unlike NES and Super NES, which continuously generate a video
-; signal to keep the TV's hsync and vsync circuits occupied, the
-; Game Boy LCD uses freesync.  Thus the LCD driver halts entirely
-; when rendering is off, not increasing rLY.  Stopping the video
-; signal outside vblank confuses the circuitry in the LCD panel,
+; The Game Boy PPU halts entirely when rendering is off.  Stopping
+; the signal outside vblank confuses the circuitry in the LCD panel,
 ; causing it to get stuck on a scanline.  This stuck state is the
 ; same as the dark horizontal line when you turn off the Game Boy.
 ;
@@ -118,11 +115,8 @@ busy_wait_vblank::
   rlca
   ret nc
 
-  ; Otherwise, wait for rLCDC to become 144 (not 145) because rLY=0
-  ; represents both the prerender line and the first visible line.
-  ; This differs from Super NES, where the first visible line is 1,
-  ; and NES, which has a post-render line numbered 240 between
-  ; picture and vblank.
+  ; Otherwise, wait for LY to become 144 through 152.
+  ; Most of line 153 is prerender, during which LY reads back as 0.
 .wait:
   ldh a, [rLY]
   cp 144
