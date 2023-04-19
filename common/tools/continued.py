@@ -46,17 +46,28 @@ You can get a reasonable-for-length approximation by cutting the
 fraction before a high number: [3,7,15,1]
 eval_cf([3,7,15,1]) = (355, 113) where 355/113 approximates math.pi
 
-If the last term is 1, you may truncate it and add 1 to the remaining last term
+If the last term is 1, the last two terms represent a fraction
+1/(x + 1/(1)).  This is just 1/(x + 1).  Thus you may truncate
+a final 1 and add 1 to the remaining last term.
 eval_cf([3,7,16]) also equals (355, 113)
+
+When squeezing the denominator under some limit, such as a limit
+imposed by a file format, you can find in-between approximations by
+reducing the last term to no less than half its value.  For example:
+eval_cf([3,7,8]) = (179, 57) or 3 + 8/57
+eval_cf([3,7,10]) = (223, 71) or 3 + 10/71
+Archimedes of Syracuse established that 3 + 10/71 < math.pi < 3 + 1/7.
 
 For an introduction to continued fractions, see this video:
 "The Golden Ratio (why it is so irrational)" by Numberphile
 <https://www.youtube.com/watch?v=sj8Sg8qnjOg>
 
 With pixel aspect ratios, it's often helpful to pick a convergent
-whose numerator or denominator divides 72 to make the DPI setting
-for paint programs easier to remember.  Hence 18/13 for PAL H32.
+whose numerator or denominator divides 72 or 96 to make the DPI
+setting for paint programs easier to remember.  Using 18/13 for
+PAL H32 corresponds to a 52 by 72 DPI image.
 
+Return a 2-tuple (numerator, denominator).
 """
     it = reversed(terms)
     num, den = next(it), 1
