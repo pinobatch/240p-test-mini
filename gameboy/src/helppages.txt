@@ -532,10 +532,14 @@ The CPU generates noise
 with a polynomial counter
 at period 32767 for hiss
 or 127 for buzz.
-
-For surround test, use
-Dolby Pro Logic or other
-matrix surround decoder.
+----
+Surround is played 180
+degrees out of phase and
+should be silent on the
+mono internal speaker.
+Matrix surround decoders
+such as Dolby Pro Logic
+send it to the rear.
 
 == MDFourier ==
 
