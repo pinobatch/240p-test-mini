@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+Pitch table generator
+2020 Damian Yerrick
+No rights reserved
+"""
 
 print('section "pitch_table",ROM0,align[1]')
 print("pitch_table::")

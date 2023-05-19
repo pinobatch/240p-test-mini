@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+YUV table generator
+2019 Damian Yerrick
+no rights reserved
+"""
 from math import sin, cos, pi
 
 for i in range(12):
