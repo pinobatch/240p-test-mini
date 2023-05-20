@@ -61,9 +61,14 @@ def vflipSNES(tile):
     return vflipGB(tile[0:16]) + vflipGB(tile[16:32])
 
 def flipuniq(it):
-    """Convert list of tiles to unique tiles and 16-bit tilemap"""
-    tiles = []
-    tile2id = {}
+    """Convert list of tiles to unique tiles and 16-bit tilemap.
+
+Tile 0 is hardcoded to the transparent tile.  If tile 0 is not
+transparent, the border transition on Super Game Boy briefly blinks
+black between the fade out and fade in.
+"""
+    tiles = [bytes(32)]
+    tile2id = {bytes(32): 0}
     tilemap = []
     for tile in it:
         if tile not in tile2id:
