@@ -67,7 +67,12 @@ def main(argv=None):
     if args.output:
         tiles.save(args.output)
     else:
-        tiles.show()
+        try:
+            tiles.show()
+        except Exception:
+            # Pillow 9.4.0 is giving "conversion not supported"
+            # if I try to show() an indexed (mode "P") image
+            tiles.convert("RGB").show()
 
 if __name__=='__main__':
     if 'idlelib' in sys.modules:
