@@ -61,6 +61,12 @@ the A and Select Buttons.
 Start: Show relevant help
 B: Close activity
 
+CRT users can navigate menus
+with a Zapper in port 2.
+Shoot item: Choose
+Shoot bottom: Change page
+Shoot top/offscreen: Back
+
 The test suite is also
 available for several other
 consoles. For more info, visit
@@ -887,7 +893,7 @@ less than 5 lines (317 μs).
 == 240p Test Suite ==
 
 $COMMIT
-Monoscope; input test
+Safe area safety
 
 Concept: Artemio Urbina
    🐦 @Artemio

@@ -1,3 +1,8 @@
+0.24 (future)
+* Monoscope: update pattern (thanks khmr33)
+* Safe areas: don't flicker on PAL NES
+* Menus and help pages can be navigated with a Zapper in port 2
+
 0.23 (2023-03-03)
 * Help: Compress duplicate lines of text (GB parity)
 * Credits: Display version from Git commit tag and ID

@@ -39,9 +39,13 @@ cursor_dirty:   .res 1
 vram_copydstlo: .res 1
 vram_copydsthi: .res 1
 flashing_ok:    .res 1
+
 .bss
 help_line_buffer:.res HELP_LINE_LEN
 TITLE_REPEAT_CODE = $0F
+
+zapper_y:       .res 1
+zapper_trigger: .res 1  ; bit 7: last; bit 6: 2nd last. $40 is fire
 
 .code
 
@@ -159,6 +163,7 @@ movetofirstpage:
   sta help_cursor_y
 nomovepage:
   lda #0
+  sta zapper_trigger
   sta help_cur_line
   lda #2
   sta cursor_dirty
@@ -196,6 +201,60 @@ vramdone:
   jsr read_pads
   ldx #0
   jsr autorepeat
+
+  ; If this is a menu, and the Zapper is pointed at the screen,
+  ; move the cursor to the Zapper's position
+  lda zapper_y
+  bmi zapper_offscreen
+    lda help_ok_keys
+    and #KEY_DOWN
+    beq zapper_below_bottom_of_menu
+    lda zapper_y
+    clc
+    adc #2
+    cmp cur_nonblank
+    bcs zapper_below_bottom_of_menu
+    lda zapper_y
+    cmp help_cursor_y
+    beq zapper_cursor_unchanged
+      sta help_cursor_y
+      inc cursor_dirty
+    zapper_cursor_unchanged:
+
+    ; Shoot menu: Activate
+    ldy #KEY_A
+    bne zapper_have_trigger_key_Y
+  zapper_below_bottom_of_menu:
+    ; Shoot below menu: Next page
+    lda zapper_trigger
+    cmp #$40
+    bne zapper_done
+    ldx help_cur_doc
+    lda help_cumul_pages+1,x
+    clc
+    sbc help_cumul_pages,x
+    beq zapper_done    ; there is no next page
+    lda #0
+    sta help_cur_line  ; trigger new page
+    inc help_cur_page
+    lda help_cur_page
+    cmp help_cumul_pages+1,x  ; check for wraparound
+    bcc zapper_done
+    lda help_cumul_pages,x
+    sta help_cur_page
+    bcs zapper_done 
+  zapper_offscreen:
+    ; Shoot offscreen: B
+    ldy #KEY_B
+  zapper_have_trigger_key_Y:
+    lda zapper_trigger
+    cmp #$40
+    bne zapper_done
+    tya
+    ora new_keys
+    sta new_keys
+  zapper_done:
+
   lda das_keys+0
   and #KEY_UP|KEY_DOWN
   sta das_keys+0
@@ -214,7 +273,7 @@ vramdone:
   bcc notNextPage
   inc help_cur_page
   lda #0
-  sta help_cur_line  ; 0 in current line triggers new page
+  sta help_cur_line  ; trigger new page
 notNextPage:
 
   lda new_keys+0
@@ -278,7 +337,68 @@ done:
   rts
 .endproc
 
+ZAPPER_LIGHT   = %00001000  ; active low
+ZAPPER_TRIGGER = %00010000  ; active high
+ZAPPER_MAX_Y   = 176        ; 20 rows of text + 2 rows of bottom status
+
 .proc help_prepare_line
+  lda #$80
+  sta zapper_y
+  and zapper_trigger
+  lsr a
+  sta zapper_trigger
+
+  ; If there's no text to draw, poll the Zapper instead
+  lda help_cur_line
+  bpl has_line_to_prepare
+
+    ; Wait for vblank to end, and then check if a Zapper is connected
+    zapper_s0wait0:
+      bit PPUSTATUS
+      bvs zapper_s0wait0
+    lda P2  ; photodiode bit is 1 if Zapper is connected and sensor is dark
+    tay
+    and #ZAPPER_LIGHT
+    beq no_poll_zapper  ; usually means no Zapper
+    ; (or fairly bad luck with a Power Pad or Arkanoid controller)
+    tya
+    and #ZAPPER_TRIGGER
+    beq :+
+      lda #$80
+      ora zapper_trigger
+      sta zapper_trigger
+    :
+    lda #$C0
+    zapper_s0wait1:
+      bit PPUSTATUS
+      beq zapper_s0wait1
+    bmi no_poll_zapper  ; safety for not having a sprite 0 at all
+    
+    ldy #ZAPPER_MAX_Y
+    ldx #1
+    jsr zapkernel_yonoff_ntsc
+zapper_ypos    = $0000
+    lda tvSystem
+    and #1
+    beq no_pal_nes_correct
+      lda zapper_ypos
+      lsr a
+      lsr a
+      lsr a
+      lsr a
+    no_pal_nes_correct:
+    clc
+    adc zapper_ypos  ; A = Y position in scanlines
+    cmp #ZAPPER_MAX_Y
+    bcs no_poll_zapper
+    lsr a
+    lsr a
+    lsr a            ; A = Y position in rows
+    sta zapper_y
+  no_poll_zapper:
+    rts
+  has_line_to_prepare:
+
   jsr clearLineImg
   lda help_cur_line
   bne not_title_line
@@ -372,8 +492,6 @@ pagenum_template_done:
   jmp have_line_buffer
 
 not_pagenum_line:
-  cmp #22
-  bcs page_done
 
   ; 0: End of page
   ; 1: End of page if not multicart
@@ -461,16 +579,14 @@ is_null_line:
   lda help_cur_line
   cmp prev_nonblank
   bcs page_done
-;  lda #'n'
-;  ldx #16
-;  jsr vwfPutTile
   jmp finish_line
-page_done:
-  lda cur_nonblank
-  sta prev_nonblank
-  lda #$FF
-  sta help_cur_line
-  rts
+
+  page_done:
+    lda cur_nonblank
+    sta prev_nonblank
+    lda #$FF
+    sta help_cur_line
+    rts
 .endproc
 
 .proc help_draw_cursor
@@ -666,9 +782,10 @@ palloop:
 .segment "HELPDATA"
 ; Y, Start tile, Attr, X, Height
 gus_sprite_strips:
+  .byte  38,$01,$A0, 0, 1  ; Sprite 0 (for zapper use)
+
   .byte 115,$21,$41,32, 3  ; Elbows
   .byte 115,$21,$01,88, 3
-
 
   .byte  69,$11,$43,48, 2  ; Head excl. eye
   .byte  55,$01,$43,56, 2

@@ -145,8 +145,8 @@ bcd_highdigits = $0000
 ; padstest.s
 .global do_input_test
 
-; zapper.s
-.global do_zapper_test, vwfPut3Digits
+; zappertest.s
+.global do_zapper_test, vwfPut3Digits, zapkernel_yonoff_ntsc
 
 ; mdfourierfe.s and mdfourier.s
 .global do_mdfourier, mdfourier_present
