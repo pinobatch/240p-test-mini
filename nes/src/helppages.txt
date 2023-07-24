@@ -896,7 +896,7 @@ $COMMIT
 Safe area safety
 
 Concept: Artemio Urbina
-   🐦 @Artemio
+   𝕏 @Artemio
 Program: Damian Yerrick
    🦣 @pinobatch@
        peoplemaking.games
