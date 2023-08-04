@@ -476,12 +476,14 @@ A+↑: Change shadow type
   (flicker or stripes)
 A+←→: Change background
 Select: Change sprite shape
+  (Star of Lakshmi or
+  Hepsie the fairy godmother)
 
 These shouldn't happen:
 - Background loses detail
 - Shadow disappears
 - Thin horizontal stripes
-  in flicker pattern
+  in flicker mode
 
 Portrait of Gus by
   darryl.revok

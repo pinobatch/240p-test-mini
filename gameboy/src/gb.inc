@@ -50,7 +50,10 @@ WINDOW_NT1   EQU LCDCF_WINON|LCDCF_WIN9C00
 ; Divides each hex tuplet by 8 and rounds down, forming an RGB555
 ; color word suitable for SNES/SGB or GBC/GBA/DS.
 macro drgb
-  dw (\1 & $F80000) >> 19 | (\1 & $00F800) >> 6 | (\1 & $0000F8) << 7
+  REPT _NARG
+    dw (\1 & $F80000) >> 19 | (\1 & $00F800) >> 6 | (\1 & $0000F8) << 7
+    shift 1
+  ENDR
 endm
 
   ENDC

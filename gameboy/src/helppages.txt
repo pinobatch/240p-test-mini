@@ -279,7 +279,7 @@ These shouldn't happen:
 - Background loses detail
 - Shadow disappears
 - Thin horizontal stripes
-  in flicker pattern
+  in flicker mode
 ----
 Row inversion to balance
 charge on an LCD may
