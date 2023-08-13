@@ -20,26 +20,25 @@ include "src/gb.inc"
 include "src/global.inc"
 
   rsset hTestState
-curpalette rb 1
-held_keys rb 1
-cur_x rb 2
-cur_y rb 2
-unpaused rb 1
-cur_speed rb 1
-cur_dir rb 1
+def curpalette rb 1
+def held_keys rb 1
+def cur_x rb 2
+def cur_y rb 2
+def unpaused rb 1
+def cur_speed rb 1
+def cur_dir rb 1
 
-
-KT_SAND0 equ $00
-KT_SAND1 equ $01
-KT_WALLTOP equ $02
-KT_FLOORTILE equ $03
-KT_WALL equ $04
-KT_SHADOW_L equ $05
-KT_SHADOW_U equ $06
-KT_SHADOW_UL equ $07
-KT_SHADOW_U_L equ $08
-KT_SHADOW_UL_U equ $09
-KT_SHADOW_UL_L equ $0A
+def KT_SAND0 equ $00
+def KT_SAND1 equ $01
+def KT_WALLTOP equ $02
+def KT_FLOORTILE equ $03
+def KT_WALL equ $04
+def KT_SHADOW_L equ $05
+def KT_SHADOW_U equ $06
+def KT_SHADOW_UL equ $07
+def KT_SHADOW_U_L equ $08
+def KT_SHADOW_UL_U equ $09
+def KT_SHADOW_UL_L equ $0A
 
 section "scrolltest_color0",ROM0
 hillzone_palette_gbc:
@@ -586,9 +585,9 @@ load_hillzone_bg::
 ; Kiki's tilemap is compressed. Hard.
 
   rsset hLocals
-Lwallbits rb 3
-Lpathbits rb 2
-Ltiletotopleft rb 1
+def Lwallbits rb 3
+def Lpathbits rb 2
+def Ltiletotopleft rb 1
 
 load_kiki_bg:
   call clear_gbc_attr

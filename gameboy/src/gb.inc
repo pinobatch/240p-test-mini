@@ -21,7 +21,7 @@
 ;
 
   IF  !DEF(GB_INC)
-GB_INC equ 1
+def GB_INC equ 1
 
 ; hardware.inc comes from
 ; https://github.com/gbdev/hardware.inc/blob/master/hardware.inc
@@ -29,19 +29,19 @@ INCLUDE "src/hardware.inc"
 
 ; VRAM on the Game Boy consists of three 2K banks of CHR RAM and
 ; two 1K nametables.
-CHRRAM0 EQU $8000  ; Sprite tiles 0-127; BG tiles 0-127 if BG_CHR01 on
-CHRRAM1 EQU $8800  ; Sprite and BG tiles 128-255
-CHRRAM2 EQU $9000  ; BG tiles 0-127 if BG_CHR01 off
+def CHRRAM0 EQU $8000  ; Sprite tiles 0-127; BG tiles 0-127 if BG_CHR01 on
+def CHRRAM1 EQU $8800  ; Sprite and BG tiles 128-255
+def CHRRAM2 EQU $9000  ; BG tiles 0-127 if BG_CHR01 off
 
 ; Common combinations of LCDC flags
-OBJ_ON       EQU LCDCF_OBJON
-OBJ_8X16     EQU LCDCF_OBJON|LCDCF_OBJ16
-BG_NT0       EQU LCDCF_BGON|LCDCF_BG9800
-BG_NT1       EQU LCDCF_BGON|LCDCF_BG9C00
-BG_CHR21     EQU LCDCF_BG8800
-BG_CHR01     EQU LCDCF_BG8000
-WINDOW_NT0   EQU LCDCF_WINON|LCDCF_WIN9800
-WINDOW_NT1   EQU LCDCF_WINON|LCDCF_WIN9C00
+def OBJ_ON       EQU LCDCF_OBJON
+def OBJ_8X16     EQU LCDCF_OBJON|LCDCF_OBJ16
+def BG_NT0       EQU LCDCF_BGON|LCDCF_BG9800
+def BG_NT1       EQU LCDCF_BGON|LCDCF_BG9C00
+def BG_CHR21     EQU LCDCF_BG8800
+def BG_CHR01     EQU LCDCF_BG8000
+def WINDOW_NT0   EQU LCDCF_WINON|LCDCF_WIN9800
+def WINDOW_NT1   EQU LCDCF_WINON|LCDCF_WIN9C00
 
 ; Palette ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

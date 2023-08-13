@@ -22,24 +22,24 @@ include "src/hardware.inc"
 include "src/global.inc"
 
   rsset hLocals
-Lshiftermask rb 1
-Ldstoffset rb 1
+def Lshiftermask rb 1
+def Ldstoffset rb 1
 
-lineImgBufLen EQU 128  ; number of 1bpp planes
+def lineImgBufLen EQU 128  ; number of 1bpp planes
 
 ; Align is a logarithm in rgbasm, unlike in ca65 where it's an actual
 ; byte count
 section "lineImgBuf",wram0,align[8]
 lineImgBuf:: ds lineImgBufLen * 2
 
-CHAR_BIT EQU 8
-LOG_GLYPH_HEIGHT EQU 3
-GLYPH_HEIGHT EQU (1 << LOG_GLYPH_HEIGHT)
-GLYPH_HEIGHT_MINUS_1 EQU GLYPH_HEIGHT + (-1)
+def CHAR_BIT EQU 8
+def LOG_GLYPH_HEIGHT EQU 3
+def GLYPH_HEIGHT EQU (1 << LOG_GLYPH_HEIGHT)
+def GLYPH_HEIGHT_MINUS_1 EQU GLYPH_HEIGHT + (-1)
 
-NUM_GLYPHS EQU 104
+def NUM_GLYPHS EQU 104
 export NUM_GLYPHS
-FIRST_PRINTABLE_CU EQU $18
+def FIRST_PRINTABLE_CU EQU $18
 
 ; vwfInit is in huffnib.z80 to save 3 bytes
 section "vwfHuffUnComp", wram0, align[LOG_GLYPH_HEIGHT]

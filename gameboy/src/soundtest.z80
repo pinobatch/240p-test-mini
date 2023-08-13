@@ -177,7 +177,7 @@ wait30frames:
   ld a,$80
   jp set_gbc_palette
 
-PULSE_1K = 2048-131
+def PULSE_1K equ 2048-131
 
 soundtest_1kpulse:
   ld hl,rNR11  ; When loading 4+ regs, [hl+] is 1+ byte smaller than ldh

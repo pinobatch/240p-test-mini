@@ -20,11 +20,11 @@ include "src/gb.inc"
 include "src/global.inc"
 
   rsset hTestState
-curhelpsect rb 1
-curpalette rb 1
-curvolume rb 1
-cur_lcdc rb 1
-need_sgb_update rb 1
+def curhelpsect rb 1
+def curpalette rb 1
+def curvolume rb 1
+def cur_lcdc rb 1
+def need_sgb_update rb 1
 
 ; Game Boy Color tests menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 section "gbctestmenu_about", ROM0
@@ -577,7 +577,7 @@ smpte_load_map::
 
 ; There's no wave channel period that is exactly 1 kHz, but there's
 ; a 500 Hz.  So load the wave RAM with two sine cycles and play that.
-HALF_KHZ equ 2048-131
+def HALF_KHZ equ 2048-131
 
 section "smptebars", ROM0
 ; The SMPTE bars test shares cbog_palette_* with the Color bars on

@@ -1,14 +1,14 @@
 include "src/global.inc"
 
-HUFFNIB_INCLUDE_TESTS equ 0
-WIDTHS_4BIT equ 1
+def HUFFNIB_INCLUDE_TESTS equ 0
+def WIDTHS_4BIT equ 1
 
-hCodeLengths equ hLocals + $00
-hBitAccum    equ hLocals + $0F
+def hCodeLengths equ hLocals + $00
+def hBitAccum    equ hLocals + $0F
 
 ; huffnib_bytecountlo is top of stack
-huffnib_bytecounthi equs "(help_line_buffer + 31)"
-huffnib_symboldefs equs "(help_line_buffer)"
+def huffnib_bytecounthi equs "(help_line_buffer + 31)"
+def huffnib_symboldefs equs "(help_line_buffer)"
 
 section "huffnib", ROM0
 

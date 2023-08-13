@@ -19,26 +19,26 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-WALL_TILE EQU $80
-ARROW_SPRITE_TILE EQU $80
-WINDOW_TL_TILE EQU $82
-WINDOW_LEFT_TILE EQU $85
-WINDOW_BL_TILE EQU $83
-WINDOW_HLINE_TILE EQU $84
-WHITE_TILE EQU $8A
-WALLBOTTOM_TILE EQU $8B
-FLOORTOP_TILE EQU $90
-FLOOR_TILE EQU $91
-WALL_HEIGHT EQU 12  ; Height of back wall including bottom border
-WINDOW_WIDTH EQU 14  ; Width of window in tiles not including left border
-WXBASE = 167 - ((WINDOW_WIDTH + 1) * 8)
-CHARACTER_Y EQU 4
-CHARACTER_OBJ_COUNT EQU 16
-HELP_CURSOR_Y_BASE EQU 24
-MENU_INDENT_WIDTH EQU 6
+def WALL_TILE EQU $80
+def ARROW_SPRITE_TILE EQU $80
+def WINDOW_TL_TILE EQU $82
+def WINDOW_LEFT_TILE EQU $85
+def WINDOW_BL_TILE EQU $83
+def WINDOW_HLINE_TILE EQU $84
+def WHITE_TILE EQU $8A
+def WALLBOTTOM_TILE EQU $8B
+def FLOORTOP_TILE EQU $90
+def FLOOR_TILE EQU $91
+def WALL_HEIGHT EQU 12  ; Height of back wall including bottom border
+def WINDOW_WIDTH EQU 14  ; Width of window in tiles not including left border
+def WXBASE equ 167 - ((WINDOW_WIDTH + 1) * 8)
+def CHARACTER_Y EQU 4
+def CHARACTER_OBJ_COUNT EQU 16
+def HELP_CURSOR_Y_BASE EQU 24
+def MENU_INDENT_WIDTH EQU 6
 
 ; Character constants
-LF EQU 10
+def LF EQU 10
 
 section "help_line_buffer", WRAM0, align[4]
 help_line_buffer:: ds 32

@@ -19,12 +19,12 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
 include "src/global.inc"
-CHRRAM0 equ $8000
-CHRRAM2 equ $9000
+def CHRRAM0 equ $8000
+def CHRRAM2 equ $9000
 
 
   rsset hLocals
-pb16_byte0 rb 1
+def pb16_byte0 rb 1
 
 section "pb16", ROM0
 

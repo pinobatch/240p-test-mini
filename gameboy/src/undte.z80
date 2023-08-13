@@ -20,9 +20,9 @@
 ;
 include "src/global.inc"
 
-DTE_STACK_SIZE equ 8
-DTE_MIN_CODEUNIT equ 128
-FIRST_PRINTABLE_CU equ 24
+def DTE_STACK_SIZE equ 8
+def DTE_MIN_CODEUNIT equ 128
+def FIRST_PRINTABLE_CU equ 24
 
 section "dtestack",WRAM0,align[3]
 dtestack: ds DTE_STACK_SIZE

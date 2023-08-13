@@ -384,7 +384,7 @@ sgb_set_palettes_bcde_attr_a::
 
 ; There's a 29th row whose top scanline gets shown briefly while the
 ; SGB system software is processing something.  Hide it.
-BORDER_NUM_ROWS = 30
+def BORDER_NUM_ROWS equ 30
 
 ; The border consists
 ; Up to 64 tiles in Super NES format, compressed with PB16
@@ -461,8 +461,8 @@ sgb_load_border::
 ; NTSC chroma crosstalk test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   rsset hTestState
-hIncTime    rb 1
-hCurPalette rb 1
+def hIncTime    rb 1
+def hCurPalette rb 1
 
 activity_sgb_ntsc::
   call flashing_consent
@@ -661,12 +661,12 @@ pass_pattern:
 ; SGB sound test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   rsset hTestState
-hEffectA rb 1
-hPitchA  rb 1
-hVolumeA rb 1
-hEffectB rb 1
-hPitchB  rb 1
-hVolumeB rb 1
+def hEffectA rb 1
+def hPitchA  rb 1
+def hVolumeA rb 1
+def hEffectB rb 1
+def hPitchB  rb 1
+def hVolumeB rb 1
 
 activity_sgb_sound::
   ld a, 1

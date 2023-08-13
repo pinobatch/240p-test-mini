@@ -20,27 +20,27 @@ include "src/gb.inc"
 include "src/global.inc"
 
 
-MAX_TESTS equ 10
-CHECKBOXTILE equ $02
-OFFONTILE equ $80
-CENTERPOS = 128
-LEFTWALL = 128-36
-RIGHTWALL = 128+36
-DIGITSPACE_TILE = $E0
+def MAX_TESTS equ 10
+def CHECKBOXTILE equ $02
+def OFFONTILE equ $80
+def CENTERPOS equ 128
+def LEFTWALL equ 128-36
+def RIGHTWALL equ 128+36
+def DIGITSPACE_TILE equ $E0
 
   rsset hTestState
-framecounts   rb 9
-lastrawlag    rb 1  ; in signed magnitude (7 set: early); overlaps framecounts
+def framecounts   rb 9
+def lastrawlag    rb 1  ; in signed magnitude (7 set: early); overlaps framecounts
 
-num_tests     rb 1
-cursor_y      rb 1
-reticledir    rb 1  ; 1: horizontal; 2: vertical; 3: both
-enableflags   rb 1
-reticlepos    rb 1
-reticletarget rb 1
+def num_tests     rb 1
+def cursor_y      rb 1
+def reticledir    rb 1  ; 1: horizontal; 2: vertical; 3: both
+def enableflags   rb 1
+def reticlepos    rb 1
+def reticletarget rb 1
 
-CROSSING_BEEP_FREQ = 2048-131
-A_PRESS_BEEP_FREQ = 2048-262
+def CROSSING_BEEP_FREQ equ 2048-131
+def A_PRESS_BEEP_FREQ equ 2048-262
 
 section "megaton",ROM0
 

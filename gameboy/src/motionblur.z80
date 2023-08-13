@@ -23,15 +23,15 @@ include "src/global.inc"
 ; This motion blur test also replaces 100 IRE.
 
   rsset hTestState
-back_shade   rb 1  ; 0-3 or 0-31
-on_time      rb 1  ; 1-20
-on_shade     rb 1  ; 0-3 or 0-31
-off_time     rb 1  ; 1-20
-off_shade    rb 1  ; 0-3 or 0-31
-is_stripes   rb 1  ; 0: colors 2 and 3 both on or off; 1: one on, other off
-is_running   rb 1  ; $00: off; $80: in off time; $80: in on time
-frames_left  rb 1  ; until toggle bit 0
-bgp_value    rb 8
+def back_shade   rb 1  ; 0-3 or 0-31
+def on_time      rb 1  ; 1-20
+def on_shade     rb 1  ; 0-3 or 0-31
+def off_time     rb 1  ; 1-20
+def off_shade    rb 1  ; 0-3 or 0-31
+def is_stripes   rb 1  ; 0: colors 2 and 3 both on or off; 1: one on, other off
+def is_running   rb 1  ; $00: off; $80: in off time; $80: in on time
+def frames_left  rb 1  ; until toggle bit 0
+def bgp_value    rb 8
 
 section "motionblur_map0",ROM0
 wndtxt:
@@ -49,9 +49,9 @@ wndmap:
   db $00,$00,$00,$23,$24,$25  ;     shade
   db $28,$29,$2A,$2B,$00,$00  ; Stripes
 
-MONO_MAX_GRAY = 3
-COLOR_MAX_GRAY = 31
-MAX_PHASE_DURATION = 60
+def MONO_MAX_GRAY equ 3
+def COLOR_MAX_GRAY equ 31
+def MAX_PHASE_DURATION equ 60
 
 row_high_low:  ; low and high-low+1 values for each row, monochrome
   db 0, MONO_MAX_GRAY+1

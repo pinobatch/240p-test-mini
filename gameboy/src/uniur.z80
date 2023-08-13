@@ -31,10 +31,11 @@
 include "src/hardware.inc"
 include "src/global.inc"
 
-hBytesLeftHi = hLocals + $00
-hInNewRun    = hLocals + $01
-hMaxTile     = hLocals + $02
-hPrevTile    = hLocals + $03
+  rsset hLocals
+def hBytesLeftHi rb 1
+def hInNewRun    rb 1
+def hMaxTile     rb 1
+def hPrevTile    rb 1
 
 SECTION "incruniq", ROM0
 

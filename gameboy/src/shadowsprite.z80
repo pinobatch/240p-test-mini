@@ -20,19 +20,19 @@ include "src/gb.inc"
 include "src/global.inc"
 
   rsset hLocals
-Ltopbyte rb 1
-Lbottombyte rb 1
+def Ltopbyte rb 1
+def Lbottombyte rb 1
 
   rsset hTestState
-xpos rb 1
-ypos rb 1
-cur_facing rb 1
-cur_shape rb 1
-shadow_is_striped rb 1
-cur_frame rb 1
-cur_bg_style rb 1
-wy_countdown rb 1
-held_keys rb 1
+def xpos rb 1
+def ypos rb 1
+def cur_facing rb 1
+def cur_shape rb 1
+def shadow_is_striped rb 1
+def cur_frame rb 1
+def cur_bg_style rb 1
+def wy_countdown rb 1
+def held_keys rb 1
 
 ; Shadow sprite ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -41,12 +41,12 @@ held_keys rb 1
 
 section "shadowsprite",ROM0
 
-SHADOW_SPRITE_INITIAL_X equ 72
-SHADOW_SPRITE_INITIAL_Y equ 96
+def SHADOW_SPRITE_INITIAL_X equ 72
+def SHADOW_SPRITE_INITIAL_Y equ 96
 
-NUM_FRAME_TYPES equ 5
-FRAME_TYPE_TILE_LEN equ 7
-FRAME_TYPE_TILE_BASE equ $80 - FRAME_TYPE_TILE_LEN * NUM_FRAME_TYPES
+def NUM_FRAME_TYPES equ 5
+def FRAME_TYPE_TILE_LEN equ 7
+def FRAME_TYPE_TILE_BASE equ $80 - FRAME_TYPE_TILE_LEN * NUM_FRAME_TYPES
 
 activity_shadow_sprite::
   ld hl, xpos
@@ -500,7 +500,7 @@ shadow_sprite_bg_loaders:
   dw load_horizontal_stripes
   dw load_diagonal_stripes
 
-portrait_top_left = _SCRN1 + 14*32
+def portrait_top_left equ _SCRN1 + 14*32
 
 clear_scrn1_bottom:
   ; Clear background

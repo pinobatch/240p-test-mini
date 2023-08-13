@@ -28,7 +28,7 @@ include "src/global.inc"
 ; break on read (reset) is on, BGB complains about copying
 ; uninitialized data to OAM even if said data is provably unused.
 ; So put "shut BGB up" commands behind a conditional.
-bgbcompat equ 1
+def bgbcompat equ 1
 
 ; Like the NES and Super NES, DMA on the Game Boy takes access to RAM
 ; and ROM away from the CPU.  But unlike those two, the CPU continues
@@ -43,7 +43,7 @@ section "hram_locals", HRAM[hLocals]
 section "hram_teststate", HRAM[hTestState]
   ds test_state_size
 
-STACK_SIZE EQU 64
+def STACK_SIZE EQU 64
 section "stack", WRAM0, ALIGN[2]
 stack_top: ds STACK_SIZE
 

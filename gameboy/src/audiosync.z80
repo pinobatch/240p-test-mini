@@ -20,31 +20,31 @@ include "src/gb.inc"
 include "src/global.inc"
 
   rsset hTestState
-progress rb 1
-unpaused rb 1
+def hProgress rb 1
+def hRunning rb 1
 
   rsset hLocals
-dtr_t0 rb 1
-dtr_t1 rb 1
-dtr_t2 rb 1
-dtr_t3 rb 1
+def hCeilingTile0 rb 1
+def hCeilingTile1 rb 1
+def hCeilingTile2 rb 1
+def hCeilingTile3 rb 1
 
 section "audiosync",ROM0
 
-CEILING_Y = 32
-CEILING_HT = 16
-FLOOR_Y = 120
-RISEFALL_FRAMES = 120
-BEEP_FRAMES = 2
-FLOOR_TILE = $03
-DOT_TILE = $01
-PULSE_1K = 2048-131
+def CEILING_Y equ 32
+def CEILING_HT equ 16
+def FLOOR_Y equ 120
+def RISEFALL_FRAMES equ 120
+def BEEP_FRAMES equ 2
+def FLOOR_TILE equ $03
+def DOT_TILE equ $01
+def PULSE_1K equ 2048-131
 
 ; Inline functions called once
 
 macro audiosync_draw_sprite
   ld hl,SOAM
-  ldh a,[progress]
+  ldh a,[hProgress]
   cp RISEFALL_FRAMES / 2
   jr nc,.is_descending
     cpl
@@ -65,62 +65,63 @@ macro audiosync_draw_sprite
 endm
 
 macro audiosync_draw_row
-  ldh a,[progress]
+  ldh a,[hProgress]
   ld b,a
   cp 40
   sbc a
   cpl
   add 4
-  ldh [dtr_t0],a
+  ld hl, hCeilingTile0
+  ld [hl+], a
   ld a,b
   cp 60
   sbc a
   cpl
   add 4
-  ldh [dtr_t1],a
+  ld [hl+], a
   ld a,b
   cp 80
   sbc a
   cpl
   add 4
-  ldh [dtr_t2],a
+  ld [hl+], a
   ld a,b
   cp 100
   sbc a
   cpl
   add 4
-  ldh [dtr_t3],a
+  ld [hl+], a
 
   ld b,CEILING_HT / 8
   ldxy hl, 0, CEILING_Y / 8
   ld de,12
 .rowloop:
-  ldh a,[dtr_t0]
+  ldh a,[hCeilingTile0]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[dtr_t1]
+  ldh a,[hCeilingTile1]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[dtr_t2]
+  ldh a,[hCeilingTile2]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[dtr_t3]
+  ldh a,[hCeilingTile3]
   ld [hl+],a
   ld [hl+],a
   inc l
   inc l
   inc l
   inc l
-;  ldh a,[dtr_t3]
+;  ldh a,[hCeilingTile3]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[dtr_t2]
+  ldh a,[hCeilingTile2]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[dtr_t1]
+  ldh a,[hCeilingTile1]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[dtr_t0]
+  ldh a,[hCeilingTile0]
   ld [hl+],a
   ld [hl+],a
   add hl,de
@@ -131,8 +132,8 @@ endm
 activity_audiosync::
 .restart:
   call clear_gbc_attr
-  ldh [unpaused],a
-  ldh [progress],a
+  ldh [hRunning],a
+  ldh [hProgress],a
 
   ; Load tiles
   call load_backlight_chr
@@ -168,18 +169,18 @@ activity_audiosync::
   ; A: Toggle pause, and start over if paused
   bit PADB_A,b
   jr z,.not_toggle_pause
-    ldh a,[unpaused]
+    ldh a,[hRunning]
     xor $01  ; CPL doesn't set Z
-    ldh [unpaused],a
+    ldh [hRunning],a
     jr nz,.startover
   .not_toggle_pause:
 
-  ldh a,[progress]
+  ldh a,[hProgress]
   cp RISEFALL_FRAMES + BEEP_FRAMES
   jr c,.notstartover
   .startover:
     xor a
-    ldh [progress],a
+    ldh [hProgress],a
 
     ; End beep
     ldh [rNR12],a  ; volume and decay
@@ -199,20 +200,20 @@ activity_audiosync::
     scf
   .no_start_beep:
   jr nc,.clock_despite_pause
-  ldh a,[unpaused]
+  ldh a,[hRunning]
   or a
   jr z,.skip_clocking
   .clock_despite_pause:
-    ldh a,[progress]
+    ldh a,[hProgress]
     inc a
-    ldh [progress],a
+    ldh [hProgress],a
   .skip_clocking:
   
   audiosync_draw_sprite
   rst wait_vblank_run_dma
   audiosync_draw_row
 
-  ldh a,[progress]
+  ldh a,[hProgress]
   cp RISEFALL_FRAMES
   sbc a  ; A=$00 during beep or $FF during test
   and %00000011

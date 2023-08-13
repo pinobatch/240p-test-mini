@@ -27,21 +27,21 @@ include "src/global.inc"
 ; generate random timing of the reticle's motion.  I tested the LCG
 ; inside this activity because at the time, it was easiest to get the
 ; output on the screen.  Removing the RNG test saves 79 bytes.
-SHOW_RNG equ 0
+def SHOW_RNG equ 0
 
   rsset hTestState
-player_xsub      rb 1
-player_x         rb 1
-player_dxsub     rb 1
-player_facing    rb 1
-player_frame_sub rb 1
-player_frame     rb 1
+def player_xsub      rb 1
+def player_x         rb 1
+def player_dxsub     rb 1
+def player_facing    rb 1
+def player_frame_sub rb 1
+def player_frame     rb 1
 
 section "lameboy", ROM0
 
-PLAYER_Y = 128
-PLAYER_INITIAL_X = 40
-PLAYER_TILE_BASE = $50
+def PLAYER_Y equ 128
+def PLAYER_INITIAL_X equ 40
+def PLAYER_TILE_BASE equ $50
 
 ;;
 ; Initializes the player character's position and copies its tiles
@@ -353,12 +353,12 @@ putnibble::
 
 ; Player movement ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-WALK_SPD equ 105  ; speed limit in 1/256 px/frame
-WALK_ACCEL equ 4  ; movement acceleration in 1/256 px/frame^2
-WALK_BRAKE equ 8  ; stopping acceleration in 1/256 px/frame^2
+def WALK_SPD equ 105  ; speed limit in 1/256 px/frame
+def WALK_ACCEL equ 4  ; movement acceleration in 1/256 px/frame^2
+def WALK_BRAKE equ 8  ; stopping acceleration in 1/256 px/frame^2
 
-LEFT_WALL equ 24
-RIGHT_WALL equ 136
+def LEFT_WALL equ 24
+def RIGHT_WALL equ 136
 
 move_player::
   ldh a,[cur_keys]
@@ -570,7 +570,7 @@ draw_player_sprite:
 
 draw_spriterect::
   rsset hLocals+8
-Lx_add                 rb 1
+def Lx_add                 rb 1
 
   ; Set up increments based on flip value
   ldh a,[Lspriterect_attr]

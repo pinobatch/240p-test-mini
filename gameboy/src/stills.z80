@@ -20,19 +20,19 @@ include "src/gb.inc"
 include "src/global.inc"
 
   rsset hLocals
-tilesleft rb 1
+def tilesleft rb 1
 
   rsset hTestState
-curpalette rb 1
-curtileid rb 1
-curscry rb 1
-curlcdc rb 1
-lastlcdc rb 1
-customred   rb 1
-customgreen rb 1
-customblue  rb 1
-bleed_help_page rb 1
-curframe_bcd rb 1
+def curpalette rb 1
+def curtileid rb 1
+def curscry rb 1
+def curlcdc rb 1
+def lastlcdc rb 1
+def customred   rb 1
+def customgreen rb 1
+def customblue  rb 1
+def bleed_help_page rb 1
+def curframe_bcd rb 1
 
 ; Gray ramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -326,7 +326,7 @@ activity_gray_ramp::
 
 ; Linearity ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-linearity_SCRN0_pivot = _SCRN0 + _SCRN0 + 32 * 17 + 19
+def linearity_SCRN0_pivot equ _SCRN0 + _SCRN0 + 32 * 17 + 19
 
 section "linearity",ROM0
 activity_linearity::

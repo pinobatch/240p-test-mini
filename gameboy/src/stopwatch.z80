@@ -22,16 +22,16 @@ include "src/global.inc"
 ; Stopwatch: Lag test
 
   rsset hTestState
-hours       rb 1
-minutes_bcd rb 1
-seconds_bcd rb 1
-frames_bcd  rb 1
-is_running  rb 1
+def hours       rb 1
+def minutes_bcd rb 1
+def seconds_bcd rb 1
+def frames_bcd  rb 1
+def is_running  rb 1
 
 ; "Lap" pauses blitting (instead "LAP" is shown) but continues running
-is_lap      rb 1
-is_ruler    rb 1
-show_face   rb 1
+def is_lap      rb 1
+def is_ruler    rb 1
+def show_face   rb 1
 
 section "stopwatch",ROM0
 
@@ -443,7 +443,7 @@ sw_blit:
 ; 13-30 left column
 ; 31-39 unused
 
-SPRITES_BEFORE_RULER = 13
+def SPRITES_BEFORE_RULER equ 13
 
 sw_init_oam:
 

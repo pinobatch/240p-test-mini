@@ -20,13 +20,13 @@ include "src/gb.inc"
 include "src/global.inc"
 
   rsset hTestState
-curpalette rb 1
-xpos rb 1
-ypos rb 1
-held_keys rb 1
-is_hidden rb 1
-cursize rb 1
-high_gear rb 1
+def curpalette rb 1
+def xpos rb 1
+def ypos rb 1
+def held_keys rb 1
+def is_hidden rb 1
+def cursize rb 1
+def high_gear rb 1
 
 section "backlight",ROM0
 activity_backlight_zone::

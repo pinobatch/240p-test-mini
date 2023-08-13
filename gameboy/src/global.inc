@@ -20,7 +20,22 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
   IF  !DEF(GLOBAL_INC)
-GLOBAL_INC equ 1
+def GLOBAL_INC equ 1
+
+; call graph annotation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+macro fallthrough
+  assert (\1) == @
+endm
+
+macro calls
+endm
+
+macro tailcalls
+endm
+
+macro jumptable
+endm
 
 ; This program contains one use of EQU to allocate local variables
 ; in RAM.  Other more experienced devs want to abolish allocation
@@ -71,10 +86,10 @@ GLOBAL_INC equ 1
 ;
 ; This should be revisited after the introduction of SECTION UNION
 ; in RGBDS 0.4.0.
-hLocals EQU $FF80
-locals_size EQU 16
-hTestState EQU $FF90
-test_state_size EQU 16
+def hLocals EQU $FF80
+def locals_size EQU 16
+def hTestState EQU $FF90
+def test_state_size EQU 16
 
 ; RGBASM once required that RST arguments be constexpr,
 ; not imported. Fixed in 0.4.0
@@ -83,18 +98,18 @@ test_state_size EQU 16
 ; while LCD is off.  An entire screen's worth of tilemap data
 ; (up to 20x18 cells) fits here, and it's below the visible area
 ; in activities that don't scroll vertically.
-SCRN_TMP EQU $9800+640
+def SCRN_TMP EQU $9800+640
 
 ; Arguments for draw_spriterect
   rsset hLocals
-Lspriterect_y          rb 1
-Lspriterect_x          rb 1
-Lspriterect_tile       rb 1
-Lspriterect_attr       rb 1
-Lspriterect_height     rb 1
-Lspriterect_width      rb 1
-Lspriterect_rowht      rb 1
-Lspriterect_tilestride rb 1
+def Lspriterect_y          rb 1
+def Lspriterect_x          rb 1
+def Lspriterect_tile       rb 1
+def Lspriterect_attr       rb 1
+def Lspriterect_height     rb 1
+def Lspriterect_width      rb 1
+def Lspriterect_rowht      rb 1
+def Lspriterect_tilestride rb 1
 
 ; People keep calling the Sharp SM83 in the LR35902 SoC a "GBZ80".
 ; It's closer to "8080 plus prefix CB from Z80".
@@ -144,6 +159,7 @@ endm
 ; refills it from [HL+].
 ; 7/8 of the time, it takes 5 cycles
 ; The other 1/8, it takes 10 cycles
+; Used by huffnib and uniur
 macro getbit
   sla b
   ; Once out of bits, CF is 1 and B is 0
@@ -155,9 +171,9 @@ macro getbit
 endm
 
 ; Glyphs in VWF
-GL_RIGHT EQU $1C
-GL_LEFT EQU $1D
-GL_UP EQU $1E
-GL_DOWN EQU $1F
+def GL_RIGHT EQU $1C
+def GL_LEFT EQU $1D
+def GL_UP EQU $1E
+def GL_DOWN EQU $1F
 
   ENDC

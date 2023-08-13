@@ -4,7 +4,7 @@ include "src/global.inc"
 SECTION "apubuffer", WRAM0
 
 ; Null terminated (address, data) pairs
-apubuffer equs "help_line_buffer"	
+def apubuffer equs "help_line_buffer"	
 
 SECTION "mdfourier", ROM0
 
