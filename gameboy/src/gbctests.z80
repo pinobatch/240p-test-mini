@@ -76,6 +76,8 @@ activity_gbc_tests_menu::
   and (super_handlers - color_handlers) / 2
   add b  ; add cursor Y saved above
   call jumptable_de_a
+  calls color_handlers
+  calls super_handlers
 .skip_activity:
 
   ; Restore menu selection

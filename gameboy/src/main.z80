@@ -88,6 +88,9 @@ main::
     ld de, ptr_to_activity_about
   .not_start:
   call jumptable_de_a
+  calls page_one_handlers
+  calls ptr_to_activity_about
+  calls page_two_handlers
 
   ; Turn off sound
   xor a
@@ -103,6 +106,7 @@ main::
 
 section "main_handlers", ROM0
 page_one_handlers:
+  jumptable
   ; PLUGE, Color bars, and Color bleed aren't relevant on DMG/MGB
   dw activity_gbc_tests_menu
   
@@ -115,10 +119,12 @@ page_one_handlers:
   dw activity_sharpness
   dw activity_overscan
 ptr_to_activity_about:
+  jumptable
   dw activity_about
   dw activity_credits
 
 page_two_handlers:
+  jumptable
   dw activity_shadow_sprite  ; Integrates "drop shadow" & "stripped"
   dw activity_stopwatch  ; aka "Lag test" in Artemio's
   dw activity_megaton  ; Tell me w/ straight face this isn't Megaton Punch

@@ -82,6 +82,7 @@ activity_soundtest::
   ld a,[help_cursor_y]
   ld de,soundtest_handlers
   call jumptable_de_a
+  calls soundtest_handlers
   jr activity_soundtest
 
 soundtest_handlers:

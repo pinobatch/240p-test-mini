@@ -84,6 +84,7 @@ activity_shadow_sprite::
   ldh a,[cur_bg_style]
   ld de,shadow_sprite_bg_loaders
   call jumptable_de_a
+  calls shadow_sprite_bg_loaders
 
   ldh a, [vblank_lcdc_value]
   ldh [stat_lcdc_value],a

@@ -119,6 +119,7 @@ vwfPutTile_rowloop:
   ld h,high(vwfPutTile_shifter)
   ld l, b
   jp hl
+  tailcalls vwfPutTile_shifter
 
   ; Fast path handling for blank slivers
 .sliver_is_blank:

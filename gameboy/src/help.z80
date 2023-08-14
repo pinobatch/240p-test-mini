@@ -1121,9 +1121,12 @@ de_index_a::
   ld l,a
   ret
 
-; This is experimental untested code to be used for saving space
-; later on when I need to read down, up, left, and right actions
-; from a lookup table.
+
+
+; Experimental ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; This is untested code to be used for saving space later on when I
+; need to read down, up, left, and right actions from a lookup table.
   if 0
 section "help_table_lead0",ROM0
 
