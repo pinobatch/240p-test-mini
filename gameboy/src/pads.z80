@@ -93,13 +93,14 @@ autorepeat_60hz_if_sgb::
   ldh a, [hw_capability]
   rra
   jr nc, autorepeat
+  fallthrough autorepeat_60hz
 autorepeat_60hz::
   ld a,[das_timer]
   cp 4
   jr nc, autorepeat
   ld a,1
   ld [das_timer],a
-  ; fall through
+  fallthrough autorepeat
 
 ;;
 ; Adds held keys to new_keys, DAS_DELAY frames after press and
@@ -175,21 +176,21 @@ detect_sgb::
 
   ; Now turn off 2-player mode
   ld b, 0
-  ; fall through
+  fallthrough sgb_set_bplus1_players
 
 ;;
 ; Set the number of controllers to read to B + 1, where B is
 ; 0, 1, or 3 for 1, 2, or 4 (multitap only) players.
 sgb_set_bplus1_players::
   ld a, ($11 << 3) + 1
-  ; fall through
+  fallthrough sgb_send_ab
 
 ;;
 ; Send a 1-packet SGB command whose first two bytes are A and B
 ; and whose remainder is zero filled.
 sgb_send_ab::
   ld c, 0
-  ; fall through
+  fallthrough sgb_send_abc
 
 ;;
 ; Send a 1-packet SGB command whose first three bytes are A, B, and C
@@ -215,10 +216,12 @@ def CHAR_BIT EQU 8
 ; Clears the Super Game Boy attribute table to 0.
 clear_sgb_attr::
   ld hl, sgb_cmd_clear_attrs
+  fallthrough sgb_send_if_sgb
 sgb_send_if_sgb::
   ldh a, [hw_capability]
   rra
   ret nc
+  fallthrough sgb_send
 
 ;;
 ; Sends a Super Game Boy packet starting at HL.

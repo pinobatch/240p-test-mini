@@ -142,6 +142,7 @@ puthex_raw::
   swap a
   call putnibble_raw
   pop af
+  fallthrough putnibble_raw
 
 ;;
 ; Writes bits 3-0 of A OR $10 to HL
@@ -320,12 +321,13 @@ bg_draw_one_block:
 spacelettercolonhex:
   ld [hl]," "
   inc hl
-
+  fallthrough lettercolonhex
 lettercolonhex:
   ld [hl],b
   inc hl
   ld [hl],":"
   inc hl
+  fallthrough puthex
 
 ;;
 ; Writes two hex nibbles ("0123456789ABCDEF") to HL
@@ -334,7 +336,7 @@ puthex::
   swap a
   call putnibble
   pop af
-  ; fall through
+  fallthrough putnibble
 
 ;;
 ; Writes bits 3-0 as an ASCII hex digit to HL
@@ -566,7 +568,7 @@ draw_player_sprite:
 .not_frame_7:
 
   .no_adjust_hotspot:
-  ; Fall through to draw_spriterect
+  fallthrough draw_spriterect
 
 draw_spriterect::
   rsset hLocals+8

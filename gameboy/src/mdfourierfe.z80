@@ -13,6 +13,7 @@ mdfourier_blank:
   call set_bgp
   xor a
   ldh [rBGP], a
+  fallthrough mdfourier_screen_on
 mdfourier_screen_on:
   ld a,LCDCF_ON|BG_NT0|BG_CHR21
   ldh [vblank_lcdc_value],a

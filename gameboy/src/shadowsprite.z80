@@ -495,6 +495,7 @@ get_shadow_frame_number:
 ; Background loaders ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 shadow_sprite_bg_loaders:
+  jumptable
   dw load_donna_portrait
   dw load_hillzone_bg_with_lcdc
   dw load_horizontal_stripes
@@ -568,6 +569,7 @@ load_horizontal_stripes:
 load_diagonal_stripes:
   call clear_gbc_attr
   ld a,$55
+  fallthrough load_shadow_sprite_bg_stripes
 load_shadow_sprite_bg_stripes:
   ld hl,CHRRAM2
   ld b,8

@@ -105,6 +105,7 @@ vwfPutTile_shifter:
   ; Advance to next row
   and GLYPH_HEIGHT-1
   ret z
+  fallthrough vwfPutTile_rowloop
 
   ; Shift each row
 vwfPutTile_rowloop:
@@ -256,8 +257,10 @@ vwfClearBuf::
 ; @return DE end of lineImgBuf; C=0; B unchanged
 vwfPutBuf03::
   ld c,lineImgBufLen/8
+  fallthrough vwfPutBuf03_lenC
 vwfPutBuf03_lenC::
   ld de,lineImgBuf
+  fallthrough vwfPutBuf03_continue_lenC
 vwfPutBuf03_continue_lenC::  ; this entry for intermediate WRAM buffer
   sla c
 .loop:

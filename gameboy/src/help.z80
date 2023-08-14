@@ -207,9 +207,10 @@ activity_about::
 
 activity_credits::
   ld b,helpsect_144p_test_suite
+  fallthrough helpscreen_abslr
 helpscreen_abslr::
   ld a,PADF_A|PADF_B|PADF_START|PADF_LEFT|PADF_RIGHT
-  ; Fall through to helpscreen
+  fallthrough helpscreen
 
 ;;
 ; Views a help page.
@@ -892,7 +893,7 @@ help_draw_wanted_page:
   ld [help_cur_page],a
   ld de,helppages
   call de_index_a
-  ; fall through to help_draw_multiline
+  fallthrough help_draw_multiline
 
 ;;
 ; Draws the page
@@ -998,8 +999,7 @@ help_draw_multiline:
   ld a, [help_font_loaded]
   cp 2
   ret c
-
-  ; Otherwise, fall through to help_draw_status_line
+  fallthrough help_draw_status_line
 
 help_draw_status_line:
   ; If at least 2 pages, draw page count
@@ -1069,7 +1069,7 @@ help_draw_status_line:
   call vwfPuts
 
   ld b,15
-  ; fall through to help_putlineb
+  fallthrough help_putlineb
 
 help_putlineb:
   ; Calculate destination address:
@@ -1093,6 +1093,7 @@ section "help_get_doc_bounds",ROM0
 ;   E: first page after those of this document
 help_get_doc_bounds:
   ld a,[help_cur_doc]
+  fallthrough help_doc_a_bounds
 help_doc_a_bounds:
   ld hl,help_cumul_pages
   ld e,a
@@ -1137,7 +1138,7 @@ section "help_table_lead0",ROM0
 ; execution does not resume after the end of the table
 table_lead0_pc:
   pop hl
-  ; fall through to table_lead0_hl
+  fallthrough table_lead0_hl
 
 ;;
 ; Jumps to an entry in the following table indexed by

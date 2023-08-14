@@ -300,7 +300,7 @@ sgb_load_all_palettes::
   ; Do the transfer
   ld a, $0B*8+1
   ld b, 0
-  ; fall through to sgb_send_trn_ab
+  fallthrough sgb_send_trn_ab
 
 ;;
 ; Turns on rendering, sends a *_TRN packet with first two bytes
@@ -315,12 +315,12 @@ sgb_send_trn_ab:
 
 sgb_set_palette_gray::
   ld b, 0
-  ; fall through
+  fallthrough sgb_set_palette_b
 sgb_set_palette_b::
   ld c, b
   ld d, b
   ld e, b
-  ; fall through
+  fallthrough sgb_set_palettes_bcde
 
 ;;
 ; Sets Super Game Boy palettes and unfreezes the display.
@@ -334,7 +334,7 @@ sgb_set_palettes_bcde::
   rra
   ret nc
   ld a, $40
-  ; fall through
+  fallthrough sgb_set_palettes_bcde_attr_a
 
 ;;
 ; Sets Super Game Boy palettes defined through PAL_TRN
@@ -724,11 +724,12 @@ activity_sgb_sound::
   ldh a,[new_keys]
   bit PADB_B,a
   jr z, .loop
-  ; Fall through to sgb_stop_sound
+  fallthrough sgb_stop_sound
 
 sgb_stop_sound:
   ld bc, $8080
   ld d, $00
+  fallthrough sgb_send_fxb_bgfxc_paramd
 sgb_send_fxb_bgfxc_paramd:
   ld hl, help_line_buffer
   push hl

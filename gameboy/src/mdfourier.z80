@@ -70,6 +70,7 @@ apu_stpcpyloop:
   ld a,[de]
   inc de
   ld [hl+],a
+  fallthrough apu_stpcpy
 apu_stpcpy::
   ld a,[de]
   and a
@@ -92,6 +93,7 @@ load_waveram_hl::
 
 load_de_and_present:
   call load_apucmd_de
+  fallthrough mdfourier_present
 mdfourier_present:
   ldh a, [new_keys]
   bit PADB_B, a
@@ -99,7 +101,7 @@ mdfourier_present:
 
   call read_pad
   rst wait_vblank_irq
-  ; fall through
+  fallthrough mdfourier_push_apubuffer
 mdfourier_push_apubuffer:
   ld hl, apubuffer
   jr .loopcontinue
@@ -144,7 +146,7 @@ init_and_sync:
   call load_de_and_present
   ld hl, waveram_sinx
   call load_waveram_hl
-  ; fall through to pattern_sync
+  fallthrough pattern_sync
 pattern_sync:
   call silence_20_frames
   ld b, 10
@@ -156,12 +158,16 @@ pattern_sync:
     call silence_b_frames
     pop bc
     djnz .loop
+  fallthrough silence_20_frames
 silence_20_frames:
   ld b, 20
+  fallthrough silence_b_frames
 silence_b_frames:
   ld de, apucmd_silence
-load_de_wait_b:
+  fallthrough load_apucmd_de_wait_b
+load_apucmd_de_wait_b:
   call load_apucmd_de
+  fallthrough wait_b_frames
 wait_b_frames:
   push bc
   call mdfourier_present
@@ -226,6 +232,7 @@ pattern_tone_scale_duty_c:
     ld a, b
     cp 73
     jr c, .loop
+  fallthrough silence_10_frames
 silence_10_frames:
   ld b, 10
   jr silence_b_frames
@@ -234,7 +241,7 @@ pattern_steady_noise:
   call silence_20_frames
   ld de, apucmd_noise_tone
   ld b, 80
-  call load_de_wait_b
+  call load_apucmd_de_wait_b
   ld b, 110
   jr silence_b_frames
   ; 110 because it formerly accidentally fell through to
@@ -291,8 +298,10 @@ pattern_sweep_up_duty_c:
     ld hl, apubuffer
     inc b
     jr nz, .loop
+  fallthrough wait_20_silence_10
 wait_20_silence_10:
   ld de, apucmd_nul
+  fallthrough pattern_pulse_reset_de
 
 ;;
 ; Runs APU command DE 20 frames in a row then silence for 10

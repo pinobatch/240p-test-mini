@@ -143,7 +143,7 @@ load_gray_ramp:
   add a
   jr c, load_gray_ramp_gbc
   jr nz, load_gray_ramp_sgb
-  ; fall through
+  fallthrough load_gray_ramp_mono
 load_gray_ramp_mono:
 
   ; Tiles 1-24 are compressed: 2 rows (4 bytes) are written 4 times
@@ -180,13 +180,15 @@ load_gray_ramp_mono:
     jr nz,.bottomhalfrowloop
   ld a,%00011011
   ldh [rBGP], a
-  ; Row 19: Fall through to oneblanktilerow
+  fallthrough oneblanktilerow ; Row 19
 
 oneblanktilerow:
   xor a
+  fallthrough oneconsttilerow
 oneconsttilerow:
   ld c,20
   rst memset_tiny
+  fallthrough add_hl_12
 add_hl_12:
   ld de,12
   add hl,de
@@ -510,6 +512,7 @@ section "sharpness",ROM0
 ; @param C height (load_full_pb16_nam forces 18)
 load_full_pb16_nam::
   ld bc,20*256+18
+  fallthrough load_pb16_nam
 load_pb16_nam::
   push bc
   push hl
@@ -1101,8 +1104,10 @@ load_bleed_frame_a:
 activity_color_bleed::
   ld a,helpsect_color_bleed
   db $01  ; ld bc, next_opcode
+  fallthrough activity_full_stripes
 activity_full_stripes::
   ld a,helpsect_full_screen_stripes
+  fallthrough full_stripes_common
 full_stripes_common::
   ldh [bleed_help_page],a
   xor a
@@ -1256,7 +1261,10 @@ update_bcd_frame_counter:
   call vwfPutBufHBlank
   call bleed_stripwait
   call bleed_stripwait
+  fallthrough bleed_stripwait
 
+;;
+; Skip 4 scanlines, wait for STAT IRQ, and move LYC down 28 lines
 bleed_stripwait:
   ldh a, [rSCY]
   add 4
@@ -1275,6 +1283,7 @@ bleed_stripwait:
 stpcpyloop:
   inc de
   ld [hl+],a
+  fallthrough stpcpy
 stpcpy::
   ld a,[de]
   and a
@@ -1470,6 +1479,7 @@ convergenceB_p1_onerow:
 ; Write 10010010010010010010
 convergenceB_p0_onerow:
   ld e, $01
+  fallthrough convergenceB_draw_onerow
 convergenceB_draw_onerow:
   ld d, 8
   .loop:

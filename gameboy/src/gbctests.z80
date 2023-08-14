@@ -87,12 +87,14 @@ activity_gbc_tests_menu::
   jr .loop
 
 color_handlers:
+  jumptable
   dw activity_pluge
   dw activity_gradient_bars
   dw activity_smpte_bars
   dw activity_barsongray
   dw activity_color_bleed
 super_handlers:
+  jumptable
   dw activity_pluge
   dw activity_barsongray
   dw activity_color_bleed
@@ -501,6 +503,7 @@ gray_ramp_rowmap::
 
 smpte_load_map_SCRN0::
   ld hl, _SCRN0
+  fallthrough smpte_load_map
 
 ;;
 ; @param DE pointer to rowmap
@@ -662,8 +665,10 @@ cbog_sgb_rects:
 activity_barsongray:
   ld a,helpsect_color_bars_on_gray
   db $01  ; was jr smpte_bars_engine but is now LD BC, (the next instruction)
+  fallthrough activity_smpte_bars
 activity_smpte_bars:
   ld a,helpsect_smpte_color_bars
+  fallthrough smpte_bars_engine
 smpte_bars_engine:
   ldh [curhelpsect],a
   xor a

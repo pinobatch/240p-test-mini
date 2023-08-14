@@ -85,6 +85,7 @@ activity_soundtest::
   jr activity_soundtest
 
 soundtest_handlers:
+  jumptable
   dw soundtest_8k, soundtest_4k, soundtest_2k, soundtest_1k
   dw soundtest_500, soundtest_250, soundtest_125, soundtest_62
   dw soundtest_1kleft, soundtest_1kright, soundtest_1kpulse
@@ -104,14 +105,17 @@ soundtest_2k:
 
 soundtest_1kright:
   ld a,$0F
-  ldh [rNR51],a  ; Set panning
-  jr soundtest_1k
-
+  db $01 ; was jr soundtest_1k_pan_A but is now LD BC, (the next instruction)
+  fallthrough soundtest_1kleft
 soundtest_1kleft:
   ld a,$F0
+  fallthrough soundtest_1k_pan_A
+soundtest_1k_pan_A:
   ldh [rNR51],a  ; Set panning
+  fallthrough soundtest_1k
 soundtest_1k:
   ld hl,waveram_sin2x
+  fallthrough soundtest_hl_wave
 soundtest_hl_wave:
   ld de,2048-131+32768
   jr soundtest_de_hl
@@ -130,8 +134,10 @@ soundtest_125:
 
 soundtest_62:
   ld de,2048-1048+32768
+  fallthrough soundtest_de_period
 soundtest_de_period:
   ld hl,waveram_sinx
+  fallthrough soundtest_de_hl
 
 ;;
 ; @param de wave frequency, with bit 15 set for new note
@@ -227,8 +233,10 @@ soundtest_surround:
 soundtest_hiss:
   ld a,$24
   db $01 ; was jr soundtest_noise_a but is now LD BC, (the next instruction)
+  fallthrough soundtest_buzz
 soundtest_buzz:
   ld a,$2C
+  fallthrough soundtest_noise_a
 soundtest_noise_a:
   ldh [rNR43],a  ; freq lo
   ld a,$A0

@@ -75,6 +75,7 @@ pb16_unpack_packet:
 
 load_common_obj_tiles::
   ld hl,CHRRAM0
+  fallthrough load_common_tiles_hl
 load_common_tiles_hl::
   ld de,bggfx_chr
   ld b,32
@@ -104,11 +105,11 @@ load_smpte_tiles::
 load_backlight_chr::
   ld de,backlight_chr
   ld b,5
-  ; fall through
+  fallthrough pb16_unpack_to_CHRRAM0
 
 pb16_unpack_to_CHRRAM0::
   ld hl, CHRRAM0
-  ; fall through
+  fallthrough pb16_unpack_block
 
 ;;
 ; Unpacks 2*B packets from DE to HL (opposite direction vs. memcpy),

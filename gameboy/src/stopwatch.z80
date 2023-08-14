@@ -464,7 +464,7 @@ sw_init_oam:
     ld [hl+],a  ; 3. black
     dec b
     jr nz,.rulerobjloop
-  ; Fall through to sw_draw_ruler
+  fallthrough sw_draw_ruler
 
 sw_draw_ruler:
   ld hl,SOAM+SPRITES_BEFORE_RULER*4

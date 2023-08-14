@@ -362,7 +362,7 @@ process_1d_input:
   ; Change speed in range 1-16
   ld c, 17
   call process_speed_input
-  ; Fall through to move_by_speed
+  fallthrough move_by_speed
 
 move_by_speed:
   ldh a,[unpaused]
@@ -422,6 +422,7 @@ move_by_speed:
 ; @param HL scroll distance
 set_hillzone_scroll_pos::
   ld de, hillzone_bgp_dmg
+  fallthrough set_hillzone_scroll_pos_de
 set_hillzone_scroll_pos_de:
   add hl,hl
   add hl,hl

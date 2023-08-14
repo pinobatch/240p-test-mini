@@ -166,6 +166,7 @@ huffnib_decode_block::
   cp $30
   jp nc, memcpy_pascal16
   dec hl
+  fallthrough huffnib_decode_compressed_block
 
 huffnib_decode_compressed_block::
   call canohuff_read_lengths

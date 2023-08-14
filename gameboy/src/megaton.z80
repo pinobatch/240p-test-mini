@@ -252,10 +252,11 @@ activity_megaton::
   ld a,$80|HIGH(CROSSING_BEEP_FREQ)
   ldh [rNR14],a
 
-  ; If not done, fall through to activity_megaton_complete
+  ; Once done, continue to activity_megaton_complete
   ldh a,[num_tests]
   cp MAX_TESTS
   jp c,.loop
+  fallthrough activity_megaton_complete
 
 activity_megaton_complete:
   ld a,LCDCF_ON|BG_NT0|BG_CHR01
@@ -431,7 +432,7 @@ grade_press:
   ld c, a  ; C = where to write result
   ld a, d
   ld [$FF00+c],a
-  ; fall through to draw_result_b
+  fallthrough draw_result_b
 
 draw_result_b:
   push bc
@@ -542,6 +543,7 @@ draw_h_reticle:
   ldh [Lspriterect_x],a
   ld a,64
   ldh [Lspriterect_y],a
+  fallthrough draw_sprite_reticle
 draw_sprite_reticle:
   ld a,$04
   ldh [Lspriterect_tile],a
@@ -558,11 +560,11 @@ draw_sprite_reticle:
   jp draw_spriterect
 
 draw_v_reticle:
+  ld a,72
+  ldh [Lspriterect_x],a
   ldh a,[reticlepos]
   sub 64
   ldh [Lspriterect_y],a
-  ld a,72
-  ldh [Lspriterect_x],a
   jr draw_sprite_reticle
 
 write_carry_boolean:

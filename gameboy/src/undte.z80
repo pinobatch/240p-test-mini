@@ -34,12 +34,12 @@ section "undte",ROM0
 undte_helptitle_a::
   ld de,helptitles
   call de_index_a
-  ; fall through
+  fallthrough undte_to_help_line_buffer
 
 ;; Decompresses DTE text at HL to the line buffer.
 undte_to_help_line_buffer::
   ld de,help_line_buffer
-  ; fall through
+  fallthrough undte_line
 
 ;;
 ; Decompresses digram tree encoded (DTE) text from HL to DE.

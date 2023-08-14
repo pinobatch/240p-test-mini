@@ -169,10 +169,11 @@ reset_handler::
 section "memcpy", ROM0
 clear_scrn0_to_0::
   ld h, 0
+  fallthrough clear_scrn0_to_h
 clear_scrn0_to_h::
   ld de,_SCRN0
   ld bc,32*32
-  ; fall through to memset
+  fallthrough memset
 
 ;;
 ; Writes BC bytes of value H starting at DE.
@@ -200,7 +201,7 @@ memcpy_pascal16::
   ld c, a
   ld a, [hl+]
   ld b, a
-  ; fall through to memcpy
+  fallthrough memcpy
 
 ;;
 ; Copies BC bytes from HL to DE.
