@@ -105,10 +105,9 @@ vwfPutTile_shifter:
   ; Advance to next row
   and GLYPH_HEIGHT-1
   ret z
-  fallthrough vwfPutTile_rowloop
 
   ; Shift each row
-vwfPutTile_rowloop:
+.rowloop:
   ; Read an 8x1 sliver of the glyph into A
   ld a,[de]
   inc e
@@ -119,13 +118,12 @@ vwfPutTile_rowloop:
   ld h,high(vwfPutTile_shifter)
   ld l, b
   jp hl
-  tailcalls vwfPutTile_shifter
 
   ; Fast path handling for blank slivers
 .sliver_is_blank:
   ldh a,[Ldstoffset]
   inc a
-  jr vwfPutTile_shifter.have_new_dstoffset
+  jr .have_new_dstoffset
 
 ;;
 ; Draws the tile for glyph A at horizontal position B
@@ -168,7 +166,7 @@ vwfPutTile::
 
   ld d,h
   ld e,l
-  jr vwfPutTile_rowloop
+  jr vwfPutTile_shifter.rowloop
 
 ;;
 ; Write glyphs for the 8-bit-encoded characters string at (hl) to

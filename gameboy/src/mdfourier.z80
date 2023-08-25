@@ -58,23 +58,24 @@ load_apucmd_de:
   ld hl, apubuffer
   jr apu_stpcpy
 
+; If you get an error about scope, upgrade to RGBDS 0.6.2 or later,
+; or a build after 2023-08-19 when #1159 was merged.
+apu_stpcpy.loop:
+  inc de
+  ld [hl+],a
+  ld a,[de]
+  inc de
+  ld [hl+],a
 ;;
 ; Copies a string consisting of alternating addresses and data,
 ; terminated by a zero address.
 ; @param HL destination pointer
 ; @param DE source string, NUL-terminated
 ; @return DE and HL both point to the trailing NUL, BC unchanged
-apu_stpcpyloop:
-  inc de
-  ld [hl+],a
-  ld a,[de]
-  inc de
-  ld [hl+],a
-  fallthrough apu_stpcpy
 apu_stpcpy::
   ld a,[de]
   and a
-  jr nz,apu_stpcpyloop
+  jr nz,.loop
   ld [hl],a
   ret
 

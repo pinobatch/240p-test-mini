@@ -15,15 +15,13 @@ This program is a port of Artemio Urbina's 240p Test Suite
 to the Game Boy, as a way of learning the Game Boy CPU.
 It also contains an MDFourier tone generator.
 
-Build requirements: RGBDS, Python 3, Pillow, and GNU Make
-
 [240p Test Suite]: http://junkerhq.net/xrgb/index.php/240p_test_suite
 [MDFourier]: http://junkerhq.net/MDFourier/
 
 Usage
 -----
 To run this on a Game Boy, load the ROM onto your [EverDrive-GB]
-or [Catskull cartridge].
+or EZ-Flash Junior.
 
 In menus and help:
 
@@ -50,7 +48,6 @@ To skip straight to MDFourier tone generator, hold the Start Button
 as the console maker's logo disappears.
 
 [EverDrive-GB]: https://krikzz.com/store/home/48-everdrive-gb.html
-[Catskull cartridge]: https://catskullelectronics.com/32kcart
 
 Versions
 --------
@@ -130,6 +127,42 @@ Limits
   supply chain problems have prevented the developer from procuring
   a system on which to test it.
 
+Building
+--------
+
+Building the Suite requires [RGBDS] 0.6.2 or later, [Python] 3,
+[Pillow], [GNU Make], and either a C compiler or an executable of
+JRoatch's DTE text compressor.  Once you have these installed,
+run this command:
+
+    make
+
+Until RGBDS 0.6.2 is released, use the development version (`master`)
+instead.  To install the development version on Windows without WSL:
+
+1. Open "Installing [RGBDS]".
+2. Follow "using a development version".
+3. Scroll down to "Using our CI" and follow "made available on
+   GitHub".
+4. Under "workflow run results", follow the name of the most recent
+   pull request with a green checkmark next to `master`.
+5. Scroll down to "Artifacts" and follow `rgbds-canary-win64`, which
+   is a link to a zip archive.
+6. Install the programs in the archive per the instructions in
+   "Installing RGBDS".
+
+To add GNU Make to an installation of [Git for Windows], follow
+[evanwill's instructions] to download the latest Make without Guile
+from [ezwinports].
+
+[RGBDS]: https://rgbds.gbdev.io/install
+[Python]: https://www.python.org/
+[Pillow]: https://pillow.readthedocs.io/
+[GNU Make]: https://www.gnu.org/software/make/
+[Git for Windows]: https://git-scm.com/download/win
+[evanwill's instructions]: https://gist.github.com/evanwill/0207876c3243bbb6863e65ec5dc3f058
+[ezwinports]: https://sourceforge.net/projects/ezwinports/files/
+
 Contributors
 ------------
 * Concept: Artemio Urbina [@Artemio]
@@ -144,7 +177,7 @@ invited to post in its [NESdev thread] or [GBDev thread] or join
 the [gbdev chat server] on Discord or Matrix.
 
 [@Artemio]: https://twitter.com/Artemio
-[@PinoBatch]: https://twitter.com/PinoBatch
+[@PinoBatch]: https://peoplemaking.games/@PinoBatch
 [shmups]: http://shmups.system11.org/
 [NESdev thread]: https://forums.nesdev.com/viewtopic.php?f=20&t=17221
 [GBDev thread]: http://gbdev.gg8.se/forums/viewtopic.php?id=542

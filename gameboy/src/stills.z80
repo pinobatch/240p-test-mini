@@ -1275,19 +1275,20 @@ bleed_stripwait:
   ldh [rLYC], a
   ret
 
+; If you get an error about scope, upgrade to RGBDS 0.6.2 or later,
+; or a build after 2023-08-19 when #1159 was merged.
+stpcpy.loop:
+  inc de
+  ld [hl+],a
 ;;
 ; Copies a nul-terminated string.
 ; @param HL destination pointer
 ; @param DE source string, NUL-terminated
 ; @return DE and HL both point to the trailing NUL
-stpcpyloop:
-  inc de
-  ld [hl+],a
-  fallthrough stpcpy
 stpcpy::
   ld a,[de]
   and a
-  jr nz,stpcpyloop
+  jr nz, .loop
   ld [hl],a
   ret
 
