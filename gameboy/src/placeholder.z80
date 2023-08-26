@@ -528,30 +528,30 @@ draw_player_sprite:
 
   ; Set up sprite parameters
   ld a,3
-  ldh [Lspriterect_height],a
+  ldh [draw_spriterect.height],a
   dec a
-  ldh [Lspriterect_width],a
+  ldh [draw_spriterect.width],a
   ld a,8
-  ldh [Lspriterect_rowht],a
+  ldh [draw_spriterect.rowht],a
   add a
-  ldh [Lspriterect_tilestride],a
+  ldh [draw_spriterect.tilestride],a
   ld a,PLAYER_Y
   sub 24  ; ht
   add 16  ; sprite engine's top overscan
-  ldh [Lspriterect_y],a
+  ldh [draw_spriterect.ypos],a
   ldh a,[player_x]
   add a,8  ; Game Boy sprites start at X=8
-  ldh [Lspriterect_x],a
+  ldh [draw_spriterect.xpos],a
 
   ldh a,[player_facing]
-  ldh [Lspriterect_attr],a
+  ldh [draw_spriterect.attr],a
   ld c,a  ; save for flip detection
   ; The eight frames start at $10, $12, ..., $1E, where
   ; 0 is still and 1-7 are scooting.
   ldh a,[player_frame]
   add a
   add PLAYER_TILE_BASE
-  ldh [Lspriterect_tile],a
+  ldh [draw_spriterect.tile],a
 
   ; Frame 7 is special: its hotspot is 1 unit forward.  Find which
   ; direction "forward" is.
@@ -562,27 +562,36 @@ draw_player_sprite:
   jr z,.f7_not_flipped
   ld b,low(-1)
 .f7_not_flipped:
-  ldh a,[Lspriterect_x]
+  ldh a,[draw_spriterect.xpos]
   add b
-  ldh [Lspriterect_x],a
+  ldh [draw_spriterect.xpos],a
 .not_frame_7:
 
   .no_adjust_hotspot:
   fallthrough draw_spriterect
 
 draw_spriterect::
-  rsset hLocals+8
-def Lx_add                 rb 1
+  local ypos
+  local xpos
+  local tile
+  local attr
+  local height
+  local width
+  local rowht
+  local tilestride
+
+  ; internal
+  local x_add
 
   ; Set up increments based on flip value
-  ldh a,[Lspriterect_attr]
+  ldh a,[.attr]
   ld c,a
-  ldh a,[Lspriterect_x]
+  ldh a,[.xpos]
   ld b,8
   bit 5,c  ; Attribute bit 5 is set if facing left
   jr z,.not_flipped
   ld d,a
-  ldh a,[Lspriterect_width]
+  ldh a,[.width]
   dec a
   add a
   add a
@@ -590,27 +599,27 @@ def Lx_add                 rb 1
   add d
   ld b,256-8
 .not_flipped:
-  ldh [Lspriterect_x],a
+  ldh [.xpos],a
   ld a,b
-  ldh [Lx_add],a
+  ldh [.x_add],a
 
   ld hl, oam_used
   ld l, [hl]
 .rowloop:
-  ldh a,[Lspriterect_width]
+  ldh a,[.width]
   ld b,a  ; B: remaining width on this row in 8px units
-  ldh a,[Lspriterect_tile]
+  ldh a,[.tile]
   ld d,a  ; D: current tile
-  ldh a,[Lspriterect_x]
+  ldh a,[.xpos]
   ld e,a  ; E: current X
 .tileloop:
   ; Draw an 8x8 pixel chunk of the character using one 4-byte entry
   ; in the display list.
-  ldh a,[Lspriterect_y]
+  ldh a,[.ypos]
   ld [hl+],a
   ld a,e  ; X position of sprite
   ld [hl+],a
-  ldh a,[Lx_add]
+  ldh a,[.x_add]
   add e
   ld e,a
 
@@ -631,19 +640,19 @@ def Lx_add                 rb 1
   
   ; Move to the next row, which is 8 pixels down and on the next
   ; row of tiles in the pattern table.
-  ldh a,[Lspriterect_y]
+  ldh a,[.ypos]
   ld b,a
-  ldh a,[Lspriterect_rowht]
+  ldh a,[.rowht]
   add b
-  ldh [Lspriterect_y],a
-  ldh a,[Lspriterect_tile]
+  ldh [.ypos],a
+  ldh a,[.tile]
   ld b,a
-  ldh a,[Lspriterect_tilestride]
+  ldh a,[.tilestride]
   add b
-  ldh [Lspriterect_tile],a
-  ldh a,[Lspriterect_height]
+  ldh [.tile],a
+  ldh a,[.height]
   dec a
-  ldh [Lspriterect_height],a
+  ldh [.height],a
   jr nz,.rowloop
   
   ld a,l

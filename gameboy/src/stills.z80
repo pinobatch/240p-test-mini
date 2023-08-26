@@ -19,9 +19,6 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-  rsset hLocals
-def tilesleft rb 1
-
   rsset hTestState
 def curpalette rb 1
 def curtileid rb 1
@@ -73,7 +70,9 @@ gray_ramp_sgb_rects:
 ; Expand A tiles from DE to HL, duplicating each 4-byte group 4 times
 ; DE must be 4 byte aligned
 load_gray_ramp_tiles:
-  ldh [tilesleft],a
+  local hTilesLeft
+
+  ldh [.hTilesLeft],a
   lb bc, 4, 4  ; repeating each C-byte portion B times
   .rowpairloop:
     push bc
@@ -97,7 +96,7 @@ load_gray_ramp_tiles:
   sub e
   ld d, a
 
-  ldh a,[tilesleft]
+  ldh a,[.hTilesLeft]
   dec a
   jr nz,load_gray_ramp_tiles
   ret

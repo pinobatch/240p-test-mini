@@ -31,14 +31,7 @@
 include "src/hardware.inc"
 include "src/global.inc"
 
-  rsset hLocals
-def hBytesLeftHi rb 1
-def hInNewRun    rb 1
-def hMaxTile     rb 1
-def hPrevTile    rb 1
-
 SECTION "incruniq", ROM0
-
 
 ;;
 ; @param BC tile data base address
@@ -100,19 +93,23 @@ iur_unpack_2a_bytes::
 ; (N.B.: this is broken, but fixed in the SMS version)
 ; @return HL: end of source; DE: end of destination
 iur_unpack::
+  local hBytesLeftHi
+  local hInNewRun
+  local hMaxTile
+  local hPrevTile
 
   ; Initial codec state
-  ldh [hMaxTile], a
-  ldh [hPrevTile], a
+  ldh [.hMaxTile], a
+  ldh [.hPrevTile], a
   xor a
-  ldh [hInNewRun], a
+  ldh [.hInNewRun], a
 
   ; Correct tile count for 16-bit pseudo-dec
   dec bc
   inc b
   inc c
   ld a, b
-  ldh [hBytesLeftHi], a
+  ldh [.hBytesLeftHi], a
 
   ; Prime bit fetcher loop
   scf
@@ -120,18 +117,18 @@ iur_unpack::
 .byteloop:
   ; 0: same runtype
   getbit
-  ldh a, [hInNewRun]
+  ldh a, [.hInNewRun]
   jr nc, .do_runtype_a
 
   ; 10: opposite runtype
   getbit
   inc a
-  ldh [hInNewRun], a
+  ldh [.hInNewRun], a
   jr nc, .do_runtype_a
 
   ; 11: Read literal byte and go to runtype 0
   xor a
-  ldh [hInNewRun], a
+  ldh [.hInNewRun], a
   ld a, [hl+]
   jr .write_byte_a
 
@@ -140,21 +137,21 @@ iur_unpack::
   rra
   jr nc, .is_repeat
   ; Runtype 1: Write 1 more than last runtype 1 tile
-  ldh a, [hMaxTile]
+  ldh a, [.hMaxTile]
   inc a
-  ldh [hMaxTile], a
+  ldh [.hMaxTile], a
   db $D2 ; was jr .write_byte_a, now jp nc, dont_care
 
 .is_repeat:
-  ldh a, [hPrevTile]
+  ldh a, [.hPrevTile]
 .write_byte_a:
-  ldh [hPrevTile], a
+  ldh [.hPrevTile], a
   ld [de], a
   inc de
   dec c
   jr nz, .byteloop
-  ldh a, [hBytesLeftHi]
+  ldh a, [.hBytesLeftHi]
   dec a
-  ldh [hBytesLeftHi], a
+  ldh [.hBytesLeftHi], a
   jr nz, .byteloop
   ret

@@ -540,31 +540,31 @@ draw_still_reticle_piece:
 draw_h_reticle:
   ldh a,[reticlepos]
   sub 56
-  ldh [Lspriterect_x],a
+  ldh [draw_spriterect.xpos],a
   ld a,64
-  ldh [Lspriterect_y],a
+  ldh [draw_spriterect.ypos],a
   fallthrough draw_sprite_reticle
 draw_sprite_reticle:
   ld a,$04
-  ldh [Lspriterect_tile],a
+  ldh [draw_spriterect.tile],a
   xor a
-  ldh [Lspriterect_attr],a
+  ldh [draw_spriterect.attr],a
   ld a,2
-  ldh [Lspriterect_height],a
+  ldh [draw_spriterect.height],a
   add a
-  ldh [Lspriterect_width],a
+  ldh [draw_spriterect.width],a
   add a
-  ldh [Lspriterect_tilestride],a
+  ldh [draw_spriterect.tilestride],a
   add a
-  ldh [Lspriterect_rowht],a
+  ldh [draw_spriterect.rowht],a
   jp draw_spriterect
 
 draw_v_reticle:
   ld a,72
-  ldh [Lspriterect_x],a
+  ldh [draw_spriterect.xpos],a
   ldh a,[reticlepos]
   sub 64
-  ldh [Lspriterect_y],a
+  ldh [draw_spriterect.ypos],a
   jr draw_sprite_reticle
 
 write_carry_boolean:

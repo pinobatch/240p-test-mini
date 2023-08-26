@@ -3,9 +3,6 @@ include "src/global.inc"
 def HUFFNIB_INCLUDE_TESTS equ 0
 def WIDTHS_4BIT equ 1
 
-def hCodeLengths equ hLocals + $00
-def hBitAccum    equ hLocals + $0F
-
 ; huffnib_bytecountlo is top of stack
 def huffnib_bytecounthi equs "(help_line_buffer + 31)"
 def huffnib_symboldefs equs "(help_line_buffer)"
@@ -17,6 +14,8 @@ section "huffnib", ROM0
 ; code_lengths are in HRAM
 ; assume 23 mcycles per input bit plus 30 per symbol.
 canohuff_decode_symbol:
+  local hCodeLengths, 15
+  local hBitAccum, 1
   ; Regmap:
   ; B  remaining bits in this byte of input
   ; C  pointer into bit lengths
@@ -28,8 +27,8 @@ canohuff_decode_symbol:
   push de
   xor a
   ld e, a  ; E: range end
-  ldh [hBitAccum], a
-  ld c, low(hCodeLengths) - 1
+  ldh [.hBitAccum], a
+  ld c, low(.hCodeLengths) - 1
 .loop:
   ; 4 Fetch number of codes of this length
   inc c
@@ -46,10 +45,10 @@ canohuff_decode_symbol:
 
   ; 11 Add it to the bit accumulator and compare to available codes
   ; of this length
-  ldh a, [hBitAccum]
+  ldh a, [.hBitAccum]
   adc a
   sub d
-  ldh [hBitAccum], a
+  ldh [.hBitAccum], a
   jr nc, .loop  ; If beyond available codes, keep getting more bits
 
   ; We have read a whole symbol.
@@ -74,15 +73,18 @@ canohuff_decode_symbol:
   ret
 
 ;;
-; Fills hCodeLengths and symboldefs with compressed data header
+; Fills canohuff.hCodeLengths and symboldefs with compressed data header
+; @param HL pointer to a canohuff block header
+; @return HL updated to end of header; DE unchanged
 canohuff_read_lengths:
+  calls canohuff_decode_symbol  ; for its local variables
 
   ; So we have 3 to 16 distinct codes, with up to 13 of any given
   ; length, and the longest length shorter than the total number of
   ; codes.  Thus we can use code length $F as a terminator.
   ; Read (codes of this length, symbol) pairs until the terminator.
   push de  ; Save destination address
-  ld bc, $8000 | low(hCodeLengths)  ; initialize state for getbit
+  lb bc, $80, low(canohuff_decode_symbol.hCodeLengths)  ; initialize state for getbit
   ld de, huffnib_symboldefs
 .headerloop:
   ; Write symbols in order to huffnib_symboldefs
@@ -116,10 +118,10 @@ ensure_vwfInit::
   call huffnib_decode_compressed_block
   if WIDTHS_4BIT
 
-    ; This is not ideal either, as the code to decode 1 symbol per
-    ; byte is about as big as the code to unpack nibbles of
-    ; uncompressed data.  If we need 1 symbol per nibble or plain
-    ; nibble unpacking, look here for optimizatoin.
+    ; This is not ideal either, as the code to decode 1 symbol
+    ; per byte is about as big as the code to unpack nibbles of
+    ; uncompressed data.  If we need to unpack a stream of numbers
+    ; 0-15 elsewhere in the Suite, look here for optimization.
     call canohuff_read_lengths
     ld a, [hl+]  ; should equal NUM_GLYPHS/2
     add a
@@ -141,8 +143,7 @@ ensure_vwfInit::
     ; hl and de are already in position after the last block
 ;    ld hl, vwfChrWidths_huf
 ;    ld de, vwfChrWidths
-
-    ; fall through to huffnib_decode_block
+;    fallthrough huffnib_decode_block
   endc
 
 ;;

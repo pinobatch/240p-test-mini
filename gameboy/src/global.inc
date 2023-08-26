@@ -37,6 +37,9 @@ endm
 macro jumptable
 endm
 
+macro local
+endm
+
 ; This program contains one use of EQU to allocate local variables
 ; in RAM.  Other more experienced devs want to abolish allocation
 ; of variables using EQU.  Without EQU, I can't see how to make
@@ -86,8 +89,6 @@ endm
 ;
 ; This should be revisited after the introduction of SECTION UNION
 ; in RGBDS 0.4.0.
-def hLocals EQU $FF80
-def locals_size EQU 16
 def hTestState EQU $FF90
 def test_state_size EQU 16
 
@@ -99,17 +100,6 @@ def test_state_size EQU 16
 ; (up to 20x18 cells) fits here, and it's below the visible area
 ; in activities that don't scroll vertically.
 def SCRN_TMP EQU $9800+640
-
-; Arguments for draw_spriterect
-  rsset hLocals
-def Lspriterect_y          rb 1
-def Lspriterect_x          rb 1
-def Lspriterect_tile       rb 1
-def Lspriterect_attr       rb 1
-def Lspriterect_height     rb 1
-def Lspriterect_width      rb 1
-def Lspriterect_rowht      rb 1
-def Lspriterect_tilestride rb 1
 
 ; People keep calling the Sharp SM83 in the LR35902 SoC a "GBZ80".
 ; It's closer to "8080 plus prefix CB from Z80".

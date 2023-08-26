@@ -23,7 +23,7 @@ objlist := linkthisfirst \
   sgbtests gbctests \
   ppuclear pads vwfdraw vwflabels vwf7 rand unpb16 undte bcd \
   uniur huffnib gfxincbins allhuffdata pitchtable \
-  linkthislast
+  localvars linkthislast
 
 huffdata := \
   obj/gb/stopwatchhand.2bpp.pb16 \
@@ -147,7 +147,6 @@ obj/gb/gfxincbins.o: \
   obj/gb/greenhillzone.u.2bpp.pb16 obj/gb/greenhillzone.nam.pb16 \
   obj/gb/smptetiles.2bpp.pb16 obj/gb/megatontiles.2bpp16.pb16 \
   obj/gb/sgbborder.border
-  
 
 # Graphics conversion
 
@@ -208,6 +207,10 @@ obj/gb/%.hlp.z80: src/%.txt tools/paginate_help.py \
 # So, pitch!
 obj/gb/pitchtable.z80: tools/pitchtable.py
 	$(PY) $< > $@
+
+# Local variable allocation
+obj/gb/localvars.z80: tools/savescan.py $(wildcard src/*.z80)
+	$(PY) $^ -o $@
 
 # Print the commit tag
 obj/gb/last-commit-now:

@@ -498,29 +498,32 @@ sw_draw_ruler:
   jp lcd_clear_oam
 
 sw_draw_clock_hand:
+  local hYpos
+  local hXpos
+  local hTile
   ldh a,[frames_bcd]
   and $0F
   ld b,a
   add a
   add a
   add 3
-  ldh [Lspriterect_tile],a
+  ldh [.hTile],a
 
   ; Look up XY coord
   ld a,b
   ld de,sw_hand_xy
   call de_index_a
   ld a,l
-  ldh [Lspriterect_x],a
+  ldh [.hXpos],a
   ld a,h
-  ldh [Lspriterect_y],a
+  ldh [.hYpos],a
 
   ; Draw the small dot halfway out
   ld hl,SOAM
   add 116  ; Y center position
   rra
   ld [hl+],a
-  ldh a,[Lspriterect_x]
+  ldh a,[.hXpos]
   add 96  ; X center position
   rra
   ld [hl+],a
@@ -543,18 +546,18 @@ sw_draw_clock_hand:
   ld c,a
   and %00111000  ; Isolate X offset
   ld b,a
-  ldh a,[Lspriterect_y]
+  ldh a,[.hYpos]
   ld [hl+],a     ; Copy Y coordinate unchanged
-  ldh a,[Lspriterect_x]
+  ldh a,[.hXpos]
   add b
   ld [hl+],a     ; Copy X coordinate
 ;+11
   ld a,c
   and %00000111  ; Tile number 0 means next tile
   jr nz,.not_utile
-    ldh a,[Lspriterect_tile]
+    ldh a,[.hTile]
     inc a
-    ldh [Lspriterect_tile],a
+    ldh [.hTile],a
   .not_utile:
   ld [hl+],a     ; $00: unused; $01: h edge; $02: v edge; $03: dot; $04-$2B: digits
 ;+11
@@ -566,7 +569,7 @@ sw_draw_clock_hand:
 ;7
 .isctrl:
   ret nz                 ; $FF: exit
-  ldh a,[Lspriterect_y]  ; $FE: next row
+  ldh a,[.hYpos]  ; $FE: next row
   add 8
-  ldh [Lspriterect_y],a
+  ldh [.hYpos],a
   jr .striploop

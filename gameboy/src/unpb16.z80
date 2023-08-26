@@ -22,10 +22,6 @@ include "src/global.inc"
 def CHRRAM0 equ $8000
 def CHRRAM2 equ $9000
 
-
-  rsset hLocals
-def pb16_byte0 rb 1
-
 section "pb16", ROM0
 
 ; The PB16 format is a starting point toward efficient RLE image
@@ -35,6 +31,8 @@ section "pb16", ROM0
 ; 1: Repeat from 2 bytes ago
 
 pb16_unpack_packet:
+  local hByte0
+
   ; Read first bit of control byte.  Treat B as a ring counter with
   ; a 1 bit as the sentinel.  Once the 1 bit reaches carry, B will
   ; become 0, meaning the 8-byte packet is complete.
@@ -48,10 +46,10 @@ pb16_unpack_packet:
   jr c,.p0_is_run
   ld a,[de]
   inc de
-  ldh [pb16_byte0],a
+  ldh [.hByte0],a
   db $DA  ; was jr nc, .have_p0; now jp c, dont_care
 .p0_is_run:
-  ldh a,[pb16_byte0]
+  ldh a,[.hByte0]
 .have_p0:
   ld [hl+],a
 
@@ -120,7 +118,7 @@ pb16_unpack_to_CHRRAM0::
 pb16_unpack_block::
   ; Prefill with zeroes
   xor a
-  ldh [pb16_byte0],a
+  ldh [pb16_unpack_packet.hByte0],a
 .packetloop:
   ld c,a
   push bc

@@ -19,10 +19,6 @@
 include "src/gb.inc"
 include "src/global.inc"
 
-  rsset hLocals
-def Ltopbyte rb 1
-def Lbottombyte rb 1
-
   rsset hTestState
 def xpos rb 1
 def ypos rb 1
@@ -325,6 +321,9 @@ frame_type_msg4:
 ;;
 ; Produces the shadow sprite variations
 make_shadow_chr:
+  local hTopByte
+  local hBottomByte
+
   ; Produce a shadow for Hepsie, ORing both bitplanes into plane 0.
   ld hl,CHRRAM0
   ld de,CHRRAM0+12*16
@@ -355,13 +354,13 @@ make_shadow_chr:
 .someshadow:
 
   ld a,b
-  ldh [Ltopbyte],a
+  ldh [.hTopByte],a
   ld a,c
-  ldh [Lbottombyte],a
+  ldh [.hBottomByte],a
   ld b,(sizeof_hepsie_chr+sizeof_shadow_reticle_chr)/4
   ld hl,CHRRAM0+12*16
 .shadowcalcloop:
-  ldh a,[Ltopbyte]
+  ldh a,[.hTopByte]
   ld c,a
   ld a,[hl+]
   inc hl
@@ -371,7 +370,7 @@ make_shadow_chr:
   xor a
   ld [de],a
   inc de
-  ldh a,[Lbottombyte]
+  ldh a,[.hBottomByte]
   ld c,a
   ld a,[hl+]
   inc hl
@@ -387,73 +386,73 @@ make_shadow_chr:
 
 draw_shadow_sprite:
   ldh a,[ypos]
-  ldh [Lspriterect_y],a
+  ldh [draw_spriterect.ypos],a
   ldh a,[xpos]
-  ldh [Lspriterect_x],a
+  ldh [draw_spriterect.xpos],a
   ld a,8
-  ldh [Lspriterect_rowht],a
+  ldh [draw_spriterect.rowht],a
 
   ; Begin setting up 8-point star sprite
   rrca
-  ldh [Lspriterect_tilestride],a
-  ldh [Lspriterect_height],a
-  ldh [Lspriterect_width],a
+  ldh [draw_spriterect.tilestride],a
+  ldh [draw_spriterect.height],a
+  ldh [draw_spriterect.width],a
 
   ldh a,[cur_shape]
   or a
   jr nz,.shape_is_hepsie
 
   ; 8-point star
-  ldh [Lspriterect_attr],a
+  ldh [draw_spriterect.attr],a
 
   ; Choose a starting tile
   call get_shadow_frame_number
   ret c
   add 24
-  ldh [Lspriterect_tile],a
+  ldh [draw_spriterect.tile],a
   jp draw_spriterect
 
 .shape_is_hepsie:
   ld a,3
-  ldh [Lspriterect_width],a
-  ldh [Lspriterect_tilestride],a
+  ldh [draw_spriterect.width],a
+  ldh [draw_spriterect.tilestride],a
   xor a
-  ldh [Lspriterect_tile],a
+  ldh [draw_spriterect.tile],a
 
   ; Top half: cape
   ld a,2
-  ldh [Lspriterect_height],a
+  ldh [draw_spriterect.height],a
   ldh a,[cur_facing]
   or 1|OAMF_PAL1
-  ldh [Lspriterect_attr],a
+  ldh [draw_spriterect.attr],a
   call draw_spriterect
 
   ; Bottom half: skirt
   ldh a,[xpos]
-  ldh [Lspriterect_x],a
+  ldh [draw_spriterect.xpos],a
   ld a,2
-  ldh [Lspriterect_height],a
+  ldh [draw_spriterect.height],a
   ldh a,[cur_facing]
-  ldh [Lspriterect_attr],a
+  ldh [draw_spriterect.attr],a
   call draw_spriterect
 
   ; Shadow: black or nothing
   ldh a,[ypos]
   add 8
-  ldh [Lspriterect_y],a
+  ldh [draw_spriterect.ypos],a
   ldh a,[xpos]
   add 8
-  ldh [Lspriterect_x],a
+  ldh [draw_spriterect.xpos],a
   ld a,4
-  ldh [Lspriterect_height],a
+  ldh [draw_spriterect.height],a
   ldh a,[cur_facing]
-  ldh [Lspriterect_attr],a
+  ldh [draw_spriterect.attr],a
 
   ; Choose a starting tile
   call get_shadow_frame_number
   ret c
   add 12
-  ldh [Lspriterect_tile],a
+  ldh [draw_spriterect.tile],a
   jp draw_spriterect
 
 ;;

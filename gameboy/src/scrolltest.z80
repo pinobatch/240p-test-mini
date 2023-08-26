@@ -585,12 +585,11 @@ load_hillzone_bg::
 
 ; Kiki's tilemap is compressed. Hard.
 
-  rsset hLocals
-def Lwallbits rb 3
-def Lpathbits rb 2
-def Ltiletotopleft rb 1
-
 load_kiki_bg:
+  local hWallBits, 3
+  local hPathBits, 2
+  local hTileToTopLeft, 1
+
   call clear_gbc_attr
 
   ; Load tiles
@@ -627,26 +626,26 @@ load_kiki_bg:
   .bitunpack_rowloop:
     ; Load map bits for this row
     ld a,[hl]
-    ldh [Lwallbits+0],a
+    ldh [.hWallBits+0],a
     ld a,l
     add 32
     ld l,a
     ld a,[hl]
-    ldh [Lwallbits+1],a
+    ldh [.hWallBits+1],a
     ld a,l
     add 32
     ld l,a
     ld a,[hl]
     and $F0
-    ldh [Lwallbits+2],a
+    ldh [.hWallBits+2],a
     ld a,[hl]
     and $0F
-    ldh [Lpathbits+0],a
+    ldh [.hPathBits+0],a
     ld a,l
     add 32
     ld l,a
     ld a,[hl]
-    ldh [Lpathbits+1],a
+    ldh [.hPathBits+1],a
     ld a,l
     add -95
     ld l,a
@@ -709,26 +708,26 @@ load_kiki_bg:
     ld hl,help_line_buffer
     pop de
     .wallbits_loop:
-      ldh a,[Lwallbits+2]
+      ldh a,[.hWallBits+2]
       add a
-      ldh [Lwallbits+2],a
-      ldh a,[Lwallbits+1]
+      ldh [.hWallBits+2],a
+      ldh a,[.hWallBits+1]
       adc a
-      ldh [Lwallbits+1],a
-      ldh a,[Lwallbits+0]
+      ldh [.hWallBits+1],a
+      ldh a,[.hWallBits+0]
       adc a
-      ldh [Lwallbits+0],a
+      ldh [.hWallBits+0],a
       jr nc,.no_wall_replace
         ld a,KT_WALLTOP
         ld [hl],a
       .no_wall_replace:
 
-      ldh a,[Lpathbits+1]
+      ldh a,[.hPathBits+1]
       add a
-      ldh [Lpathbits+1],a
-      ldh a,[Lpathbits+0]
+      ldh [.hPathBits+1],a
+      ldh a,[.hPathBits+0]
       adc a
-      ldh [Lpathbits+0],a
+      ldh [.hPathBits+0],a
       jr nc,.no_path_replace
         ld a,KT_FLOORTILE
         ld [hl],a

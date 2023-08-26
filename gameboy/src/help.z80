@@ -432,9 +432,10 @@ helpscreen::
 ;;
 ; Loads the background used by the help page.
 help_load_bg:
-  call lcd_off
+  local hAttr
 
   ; Load tiles used by menu
+  call lcd_off
   ld de,helptiles
   ld b,sizeof_helptiles/16
   ldh a,[hw_capability]
@@ -575,7 +576,7 @@ help_load_bg:
 
     ; Load static sprites
     ld a,OAMF_XFLIP
-    ldh [Lspriterect_attr],a
+    ldh [.hAttr],a
     ld hl,SOAM
     ld bc,($86*256) + 12/2
     ld de,(CHARACTER_Y*8+16)*256+16+8
@@ -655,7 +656,7 @@ help_load_bg:
   
   ; Vest left half
   ld a,OAMF_XFLIP|OAMF_PRI|0
-  ldh [Lspriterect_attr],a
+  ldh [.hAttr],a
   ld bc,($AA*256) + 6/2
   ld de,(CHARACTER_Y*8+40)*256+16+8
   call .objcol
@@ -665,7 +666,7 @@ help_load_bg:
 
   ; Vest right half
   ld a,OAMF_PRI|0
-  ldh [Lspriterect_attr],a
+  ldh [.hAttr],a
   ld bc,($AA*256) + 6/2
   ld de,(CHARACTER_Y*8+40)*256+24+8
   call .objcol
@@ -729,7 +730,7 @@ help_load_bg:
   ld [hl+],a
   add 6
   ld b,a
-  ldh a,[Lspriterect_attr]
+  ldh a,[.hAttr]
   ld [hl+],a
   dec c
   jr nz,.objcol

@@ -38,8 +38,6 @@ section "hram_init", HRAM[$FFF4]
 run_dma:: ds 11
 
 ; For the purpose of hLocals, see a fairly long rant in global.inc
-section "hram_locals", HRAM[hLocals]
-  ds locals_size
 section "hram_teststate", HRAM[hTestState]
   ds test_state_size
 

@@ -23,12 +23,6 @@ include "src/global.inc"
 def hProgress rb 1
 def hRunning rb 1
 
-  rsset hLocals
-def hCeilingTile0 rb 1
-def hCeilingTile1 rb 1
-def hCeilingTile2 rb 1
-def hCeilingTile3 rb 1
-
 section "audiosync",ROM0
 
 def CEILING_Y equ 32
@@ -71,7 +65,7 @@ macro audiosync_draw_row
   sbc a
   cpl
   add 4
-  ld hl, hCeilingTile0
+  ld hl, .hCeilingTiles
   ld [hl+], a
   ld a,b
   cp 60
@@ -96,32 +90,32 @@ macro audiosync_draw_row
   ldxy hl, 0, CEILING_Y / 8
   ld de,12
 .rowloop:
-  ldh a,[hCeilingTile0]
+  ldh a,[.hCeilingTiles+0]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[hCeilingTile1]
+  ldh a,[.hCeilingTiles+1]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[hCeilingTile2]
+  ldh a,[.hCeilingTiles+2]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[hCeilingTile3]
+  ldh a,[.hCeilingTiles+3]
   ld [hl+],a
   ld [hl+],a
   inc l
   inc l
   inc l
   inc l
-;  ldh a,[hCeilingTile3]
+;  ldh a,[.hCeilingTiles+3]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[hCeilingTile2]
+  ldh a,[.hCeilingTiles+2]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[hCeilingTile1]
+  ldh a,[.hCeilingTiles+1]
   ld [hl+],a
   ld [hl+],a
-  ldh a,[hCeilingTile0]
+  ldh a,[.hCeilingTiles+0]
   ld [hl+],a
   ld [hl+],a
   add hl,de
@@ -130,6 +124,8 @@ macro audiosync_draw_row
 endm
 
 activity_audiosync::
+  local hCeilingTiles, 4
+
 .restart:
   call clear_gbc_attr
   ldh [hRunning],a
