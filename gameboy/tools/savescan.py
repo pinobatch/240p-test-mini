@@ -92,10 +92,30 @@ For each function, SAVE calculates a start and end offset.
   local variables, but no less than the largest end offset of its
   tail callees.
 
+SAVE writes a UNION containing each function's offsets to an assembly
+language file.  Assemble it with RGBASM and link it into your 
+
 One limit is that SAVE cannot see macros defined in an include file.
 SAVE does not follow `INCLUDE` directives because RGBDS searches for
 them relative to the current working directory, not the directory
 containing the including source file.
+
+Implementation notes
+--------------------
+
+In ca65, an exported constant can be the value of an arbitrary
+expression.  An assembly file can import callees' end offsets and
+use those to calculate start and end offsets of the caller.  This
+produces a complex relocation expression for the linker to resolve.
+
+In RGBASM, by contrast, an exported constant's value must be known
+at assembly time, defined through an expression ultimately made of
+literal values.  An expression depending on an imported value can be
+defined (as a text macro) but not exported.  So instead, this program
+(savescan.py) scans all source code files, builds a call graph, and
+calculates all functions' start and end offsets.  Though it needs
+to be re-run whenever any source file changes, this still completes
+faster than (say) link-time optimization (LTO) of a C++ program.
 """
 
 import os, sys, argparse
