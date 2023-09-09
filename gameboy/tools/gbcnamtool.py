@@ -33,30 +33,16 @@ from pilbmp2nes import pilbmp2chr, formatTilePlanar
 
 # Image processing ##################################################
 
-def quantizetopalette(silf, palette, dither=False):
+def quantizetopalette(src, palette, dither=False):
     """Convert an RGB or L mode image to use a given P image's palette.
 
-This is a fork of PIL.Image.Image.quantize() with more
-control over whether Floyd-Steinberg dithering is used.
+Requires Pillow 6 or later.
+Reference: https://stackoverflow.com/a/29438149/2738262
 """
-
-    silf.load()
-
-    # use palette from reference image
-    palette.load()
-    if palette.mode != "P":
-        raise ValueError("bad mode for palette image")
-    if silf.mode != "RGB" and silf.mode != "L":
-        raise ValueError(
-            "only RGB or L mode images can be quantized to a palette"
-            )
-
-    # 0 means turn off dithering
-    im = silf.im.convert("P", 1 if dither else 0, palette.im)
-    return silf._new(im)
+    return src.quantize(palette=palette, dither=1 if dither else 0)
 
 def colorround(im, palettes, tilesize, subpalsize):
-    """Find the best palette
+    """Find the best palette for each tile.
 
 im -- a Pillow image (will be converted to RGB)
 palettes -- list of subpalettes [[(r, g, b), ...], ...]
@@ -78,15 +64,12 @@ Return a 2-tuple (final image, attribute map)
         p.extend([p[0]] * (subpalsize - len(p)))
         all_colors.extend(p)
 
-        # New images default to the full grayscale palette. Unless
-        # all 256 colors are overwritten, quantizetopalette() will
-        # use the grays.
+        # New images default to a 256-gray palette, and
+        # quantizetopalette() uses all of it unless overwritten.
         p.extend([p[0]] * (256 - len(p)))
 
-        # putpalette() requires the palette to be flattened:
+        # putpalette() requires a flattened palette:
         # [r,g,b,r,g,b,...] not [(r,g,b),(r,g,b),...]
-        # otherwise putpalette() raises TypeError:
-        # 'tuple' object cannot be interpreted as an integer
         seq = [component for color in p for component in color]
         onetile.putpalette(seq)
         imp = quantizetopalette(im, onetile)
