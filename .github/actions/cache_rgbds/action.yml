@@ -4,7 +4,7 @@ inputs:
   rgbdsRef:
     description: "RGBDS Git Ref (used to checkout a fixed version)"
     required: false
-    default: "0105779789909e2daad5aa09450dd3101aa5e723"
+    default: "7b3a05eea8a11f68ae62b8298b3d987d356fb4f4"
   rgbdsPath:
     description: "RGBDS path to cache"
     required: false
