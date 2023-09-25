@@ -43,6 +43,8 @@ def disassemble_inst(opcode, operand, syms):
         return "jp %s, %s" % (opcodetocond(opcode), addrtosym(operand, syms))
     if opcode == 0xCD:
         return "call %s" % addrtosym(operand, syms)
+    if opcode == 0x01:
+        return "ld bc, %s" % addrtosym(operand, syms)
     if opcode == 0x18:
         return "jr %s" % addrtosym(operand, syms)
     if opcode in (0x20, 0x28, 0x30, 0x38):
@@ -55,14 +57,15 @@ def relative_ea(addr, offset):
 def jr_target(addr, operand):
     return relative_ea(addr + 2, operand)
 
-# Start and end of especially false-alarmy parts of the ROM
+# Start and end of (non-code) data in the ROM that has proven
+# prone to false alarms
 datarange_starts = {
     'soundtest_handlers', 'helppage_000', 'grayramp_bottomhalfmap',
-    'allhuffdata', 'helptiles', 'waveram_sinx',
+    'allhuffdata', 'helptiles', 'waveram_sinx', 'sgbborder',
 }
 datarange_ends = {
     'soundtest_8k', 'help_cumul_pages', 'grayramp_chr_gbc',
-    'allhuffdata_end', 'helptiles_end', 'waveram_end',
+    'allhuffdata_end', 'helptiles_end', 'waveram_end', 'sgbborder.end',
 }
 
 def load_syms(filename):
@@ -91,6 +94,9 @@ romfolder = os.path.join(os.path.dirname(sys.argv[0]), "..")
 with open(os.path.join(romfolder, "gb240p.gb"), "rb") as infp:
     data = infp.read()
 syms, dataranges = load_syms(os.path.join(romfolder, "gb240p.sym"))
+
+# Long runs of bytes with the same value ############################
+# (the first and primary use of unused.py)
 
 runthreshold = 32
 runbyte, runlength, runs = 0xC9, 0, []
@@ -166,16 +172,9 @@ jr_instructions = [
         and not any(l <= i <= h for l, h in dataranges))
 ]
 
-# Forward 0
-jp_forward_0 = [
-    (i, disassemble_inst(data[i], target, syms))
-    for i, target in jp_instructions
-    if target == i + 3
-]
-
 # This attempt to detect no-op JRs was all false alarms.  First off,
 # an ASCII space followed by a NUL terminator is JR NZ, @+2.
-# And even that proved too prone to false alarms.
+# Even without those, it proved too prone to false alarms.
 if False:
     jr_forward_0 = [
         (i, disassemble_inst(data[i], target, syms))
@@ -202,25 +201,29 @@ jr_to_ret = [
     if target in syms and target < 0x8000 and data[target] == 0xC9
 ]
 
-# JR over a 1-byte instruction is $18 $01.  It can often be replaced
-# with an instruction that just ignores that byte, such as CP imm or
-# LD reg, imm.  But there is one false alarm: CALL $18xx followed by
-# by LD BC, aaaa is $CD xx $18 $01 xx xx.  Reject the CALL if $18xx
-# is a known symbol; mark it with a comment otherwise.
+# Unconditional JR over a 1-byte instruction is $18 $01.  It can
+# often be replaced with an instruction that ignores that byte being
+# jumped over, such as CP imm or LD reg, imm.
+def handle_jr_forward_1(addr, target, syms):
+    suffix = ""
+    # $CD xx $18 $01 xx xx is CALL $18xx followed by LD BC.
+    # Comment this as a likely false alarm, or reject it entirely
+    # if the CALL is to a known label and the JR is not.
+    if addr >= 2 and addr <= 0x7FFC and data[addr - 2] == 0xCD:
+        call_target = (data[addr] << 8) | (data[addr - 1])
+        if call_target in syms and target not in syms: return None
+        call_disasm = disassemble_inst(0xCD, call_target, syms)
+        ld_bc_target = (data[addr + 3] << 8) | (data[addr + 2])
+        ld_bc_disasm = disassemble_inst(data[addr + 1], ld_bc_target, syms)
+        suffix = "  ; false alarm? (%s then %s)" % (call_disasm, ld_bc_disasm)
+    return (addr, disassemble_inst(data[addr], target, syms) + suffix)
+
 jr_forward_1 = [
-    (i, disassemble_inst(data[i], target, syms))
+    handle_jr_forward_1(i, target, syms)
     for i, target in jr_instructions
     if data[i] == 0x18 and target == i + 3
-    and not (
-        addr >= 2 and data[i - 2] == 0xCD
-        and (0x1800 | data[i - 1]) in syms
-    )
 ]
-for i, (addr, inst) in enumerate(jr_forward_1):
-    if addr >= 2 and data[addr - 2] == 0xCD:
-        callarg = (data[addr] << 8) | (data[addr - 1])
-        inst = inst + "  ; false alarm? (CALL $%04x then LD BC)" % callarg
-        jr_forward_1[i] = (addr, inst)
+jr_forward_1 = [x for x in jr_forward_1 if x is not None]
 
 jp_in_jr_range = [
     (i, disassemble_inst(data[i], target, syms))
@@ -236,16 +239,15 @@ optimizable.extend(tailcalls)
 optimizable.extend(jr_forward_1)
 optimizable.extend(jp_to_ret)
 optimizable.extend(jr_to_ret)
-optimizable.extend(jp_forward_0)
 optimizable.extend(jp_in_jr_range)
-optimizable.sort()
-optimizable = [
-    (addr, inst,
-     sortedsyms[max(0, bisect.bisect_left(sortedsyms, (addr, "")) - 1)])
-    for addr, inst in optimizable
-]
 
 if optimizable:
+    optimizable.sort()
+    optimizable = [
+        (addr, inst,
+         sortedsyms[max(0, bisect.bisect_left(sortedsyms, (addr, "")) - 1)])
+        for addr, inst in optimizable
+    ]
     print("These instructions can be optimized:")
     print("\n".join(
         "$%04x (%s+%d): %s"

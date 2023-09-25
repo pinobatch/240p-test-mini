@@ -39,6 +39,7 @@ helpblink_chr::
 section "sgbborder_gfx0", ROM0
 sgbborder::
   incbin "obj/gb/sgbborder.border"
+.end:
 
 ; Stills ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
