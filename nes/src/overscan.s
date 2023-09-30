@@ -22,6 +22,7 @@
 .include "rectfill.inc"
 .importzp helpsect_overscan, helpsect_safe_areas
 .importzp RF_overscan, RF_safearea_1, RF_safearea_2, RF_safearea_3
+.importzp RF_safearea_lite
 
 .segment "RODATA"
 
@@ -555,7 +556,6 @@ sideprocs:
 .endproc
 
 .proc do_safearea
-whichpage = test_state+0
 restart:
   jsr rf_load_tiles
   jsr rf_load_tiles_1000
@@ -674,9 +674,10 @@ loop:
     sta PPUCTRL
   s0nope:
 
-  lda new_keys+0
-  and #KEY_B
-  beq loop
+  lda #KEY_SELECT
+  bit new_keys+0
+  bne do_safearea_lite
+  bvc loop
   rts
 .endproc
 
@@ -685,9 +686,55 @@ waitminusxy:
   bne waitminusxy
   inx
   bne waitminusxy
+  .assert >* = >waitminusxy, error, "waitminusxy crosses page boundary"
   rts
+
+.proc do_safearea_lite
+restart:
+  jsr rf_load_tiles
+  ldx #$0F
+  ldy #$00
+  lda #16
+  jsr unpb53_file
+  lda #RF_safearea_lite
+  jsr rf_load_layout
+
+  jsr ppu_wait_vblank
+  lda #$3F
+  sta PPUADDR
+  ldy #$00
+  sty PPUADDR
+  :
+    lda safe_areas_lite_palette,y
+    sta PPUDATA
+    iny
+    cpy #8
+    bcc :-
+loop:
+  jsr ppu_wait_vblank
+  ldx #0
+  ldy #8
+  lda #VBLANK_NMI|BG_0000
+  clc
+  jsr ppu_screen_on
+
+  lda #helpsect_safe_areas
+  jsr read_pads_helpcheck
+  bcc :+
+    jmp restart
+  :
+  lda #KEY_SELECT
+  bit new_keys
+  beq not_select
+    jmp do_safearea
+  not_select:
+  bvc loop
+  rts
+.endproc
 
 .rodata
 safe_areas_palette:
   ; the duplicate $0F is for sprite 0
   .byte $0F,$00,$10,$0F, $0F,$16,$26,$36, $0F,$28,$38,$30, $0F,$12,$22,$32
+safe_areas_lite_palette:
+  .byte $0F,$26,$22,$38,$0F,$0F,$0F,$10

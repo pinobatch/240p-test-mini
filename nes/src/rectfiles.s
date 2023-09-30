@@ -54,6 +54,7 @@ rectfill_layouts:
   rectfile RF_input_vaus, input_vaus_rects, $20, $10
 
   rectfile RF_input_mouse, input_mouse_rects, $20, $18
+  rectfile RF_safearea_lite, safearea_lite_rects, $20
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
@@ -519,6 +520,31 @@ safearea_nt2_rects:
   .byte 0
   rf_attr   0,  0,256,240, 2  ; action safe (most of screen)
   rf_attr   0,224,256,240, 1  ; danger zone
+  .byte 0
+  .byte 0
+
+safearea_lite_rects:
+  rf_rect   0, 16,256,240,$00, 0   ; background
+  rf_rect   0,  0,256, 16,$01, 0   ; danger zone
+  rf_rect   0, 16,256, 40,$F0, RF_ROWXOR|RF_COLXOR   ; top corners
+  rf_rect   8, 16,248, 24,$F2, 0   ; action safe top
+  rf_rect  16, 24,240, 32,$FA, 0   ; action safe top
+  rf_rect  24, 32,232, 40,$F2, 0   ; action safe top
+  rf_rect  16,216,240,224,$F5, RF_COLXOR   ; title safe bottom corners
+  rf_rect   0,232, 16,240,$F5, RF_INCR     ; action/pnes bottom left
+  rf_rect 240,232,256,240,$F3, RF_INCR     ; action/pnes bottom right
+  rf_rect  16,232,240,240,$F7, 0   ; bottom
+  rf_rect  24,216,232,224,$FB, 0   ; title safe bottom
+  rf_rect   0, 24,  8,232,$FC, 0   ; action safe left side
+  rf_rect   8, 32, 16,232,$FD, 0   ; pnes safe left side
+  rf_rect  16, 40, 24,216,$FC, 0   ; title safe left side
+  rf_rect 248, 24,256,232,$FF, 0   ; action safe right side
+  rf_rect 240, 32,248,232,$FE, 0   ; pnes safe right side
+  rf_rect 232, 40,240,216,$FF, 0   ; title safe right side
+
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  rf_attr  16, 32,240,224, 1  ; title safe area
   .byte 0
   .byte 0
 

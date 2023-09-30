@@ -453,6 +453,9 @@ center 80% of the screen's
 width and height, called the
 title safe area.
 
+Select: Show or hide
+  descriptions
+
 == Shadow sprite ==
 
 This test draws a shadow

@@ -59,6 +59,8 @@ unpb53_files:
   .byte <.BANK(powerpad_pb53), 64
   .addr arkanoidchr_pb53
   .byte <.BANK(arkanoidchr_pb53), 8
+  .addr safeareas_lite_pb53
+  .byte <.BANK(safeareas_lite_pb53), 16
 
 ;
 ; 7654 3210
@@ -109,6 +111,7 @@ serialanalyzer_pb53: .incbin "obj/nes/serialanalyzer.chr.pb53",2
 controllerimages_pb53:.incbin "obj/nes/controllerimages.chr.pb53",2
 powerpad_pb53:       .incbin "obj/nes/powerpad.chr.pb53",2
 arkanoidchr_pb53:    .incbin "obj/nes/arkanoidchr.chr.pb53",2
+safeareas_lite_pb53: .incbin "obj/nes/safeareas_lite.chr.pb53",2
 
 help_cursor_pb53:
   .byte $87  ; blank tile
