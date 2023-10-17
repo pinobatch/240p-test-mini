@@ -37,55 +37,7 @@ cur_semitone = test_state + 14
 
 
 .code
-; Menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-.proc do_input_unfinished
-  ldx #helpsect_under_construction
-  lda #KEY_A|KEY_B|KEY_START
-  jsr helpscreen
-  ; fall through to input unfinished
-.endproc
-
-.proc do_input_test
-  jsr read_pads  ; read them once because B to exit may double trigger
-  ldy #$FF
-  jsr pads_play_semitone_y
-  ldx #helpsect_input_test_menu
-  lda #KEY_A|KEY_B|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
-  jsr helpscreen
-
-  lda new_keys+0
-  and #KEY_A
-  beq not_input_test
-    tya
-    asl a
-    tay
-    lda input_tests+1,y
-    pha
-    lda input_tests+0,y
-    pha
-    rts
-  not_input_test:
-
-  lda #helpsect_input_test
-  jsr helpcheck
-  bcs do_input_test
-  lda new_keys+0
-  and #KEY_B
-  beq do_input_test
-  rts
-.endproc
-
-input_tests:
-  .addr do_serial_analyzer-1
-  .addr do_fcpads_test-1
-  .addr do_fourscore_test-1
-  .addr do_zapper_test-1
-  .addr do_power_pad_test-1
-  .addr do_vaus_test-1
-  .addr do_snes_pad_test-1
-  .addr do_mouse_test-1
-
+.align 32
 ; Serial analyzer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 NUM_READS = 32
@@ -233,6 +185,7 @@ shift1byte:
   jmp do_input_test
 .endproc
 
+.rodata
 SERIAL_LEFT = 10
 SERIAL_TOP = 10
 SERIAL_ROWS_BETWEEN_PORTS = 1
@@ -251,7 +204,7 @@ serial_dst_lo:
 .endrepeat
 
 ; Famicom and NES controllers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+.code
 .proc load_std_controller_images
   lda #13
 .endproc
@@ -482,6 +435,7 @@ next_group:
   jmp ppu_screen_on
 .endproc
 
+.rodata
 controller_test_palette:
   .byte $0F,$20,$28,$16  ; Text and FC
   .byte $0F,$00,$10,$16  ; NES
@@ -767,6 +721,7 @@ put_sign:
   rts
 .endproc
 
+.rodata
 mouse_oam_data:
   .byte $FF,           $02, $00, $FF  ; OAM+0: top half of arrow
   .byte $FF,           $03, $00, $FF  ; OAM+4: bottom half of arrow
@@ -778,6 +733,7 @@ mouse_xy_max:
 
 ; Arkanoid controller test ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.code
 VAUS_Y = 96
 VAUS_BUTTON_Y = 128
 VAUS_GRID_TL = $2000 + (VAUS_Y / 8) * 32
@@ -1028,6 +984,7 @@ xposition = $0F
   jmp vwfPutTile
 .endproc
 
+.rodata
 vaus_grid_strip_data:
   .byte 3,1,2,1,2,1,2,1,3,1,2,1,2,1,2,5
 vaus_oam_data:
@@ -1036,3 +993,56 @@ vaus_oam_data:
   .byte VAUS_Y + 4 - 1, $06, $00, $FF  ; OAM+8: left side of range
   .byte VAUS_Y + 4 - 1, $06, $40, $FF  ; OAM+12: right side of range
 vaus_oam_data_end:
+
+; Menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.code
+.if 0
+.proc do_input_unfinished
+  ldx #helpsect_under_construction
+  lda #KEY_A|KEY_B|KEY_START
+  jsr helpscreen
+  ; fall through to input unfinished
+.endproc
+.endif
+
+.proc do_input_test
+  jsr read_pads  ; read them once because B to exit may double trigger
+  ldy #$FF
+  jsr pads_play_semitone_y
+  ldx #helpsect_input_test_menu
+  lda #KEY_A|KEY_B|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT
+  jsr helpscreen
+
+  lda new_keys+0
+  and #KEY_A
+  beq not_input_test
+    tya
+    asl a
+    tay
+    lda input_tests+1,y
+    pha
+    lda input_tests+0,y
+    pha
+    rts
+  not_input_test:
+
+  lda #helpsect_input_test
+  jsr helpcheck
+  bcs do_input_test
+  lda new_keys+0
+  and #KEY_B
+  beq do_input_test
+  rts
+.endproc
+
+.rodata
+input_tests:
+  .addr do_serial_analyzer-1
+  .addr do_fcpads_test-1
+  .addr do_fourscore_test-1
+  .addr do_zapper_test-1
+  .addr do_power_pad_test-1
+  .addr do_vaus_test-1
+  .addr do_snes_pad_test-1
+  .addr do_mouse_test-1

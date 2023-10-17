@@ -641,7 +641,7 @@ loop:
   lda #VBLANK_NMI|BG_0000
   clc
   jsr ppu_screen_on_xy0
-  
+
   ; Update sound
   lda smpte_level
   and #$01
