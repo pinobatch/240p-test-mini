@@ -11,6 +11,10 @@ MDF_PA13_HIGH = 1
 
 test_good_phase := test_state+6
 
+; FDS code and mapper configuration by Persune 2023
+; with code from Brad Smith 2021
+; https://github.com/bbbradsmith/NES-ca65-example/tree/fds
+
 .ifdef FDSHEADER
 
   .segment "ZEROPAGE"

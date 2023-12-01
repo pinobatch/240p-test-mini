@@ -33,6 +33,10 @@ DAS_DELAY = 15
 ; time between autorepeat keypresses
 DAS_SPEED = 3
 
+; FDS code and mapper configuration by Persune 2023
+; with code from Brad Smith 2021
+; https://github.com/bbbradsmith/NES-ca65-example/tree/fds
+
 .ifdef FDSHEADER
 .segment "FILE0_DAT"
 .else
