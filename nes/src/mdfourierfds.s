@@ -8,16 +8,10 @@ test_subtype     = test_state+4
 test_lastpulsehi = test_state+5
 test_good_phase  = test_state+6
 
-apu_addressbuf = $0104
+apu_addressbuf = $0100
 apu_databuf    = $0120
 
-
-.ifdef FDSHEADER
-.segment "FILE0_DAT"
-.else
 .code
-.endif
-
 .align 32
 .proc mdfourier_push_apu
   ; There are 18 cycles from one APU write to the next
@@ -555,11 +549,7 @@ PHASE_SLIDE_START_PERIOD = 268
 .endproc
 
 
-.ifdef FDSHEADER
-.segment "FILE0_DAT"
-.else
 .rodata
-.endif
 pattern_y_data:
 silence_data:
   ; Silence pulses, reset their phase, and disable sweep
@@ -634,11 +624,7 @@ dmc_fading_step4_data:
 
 .out .sprintf("%d of 256 pattern_y_data bytes used", * - pattern_y_data)
 
-.ifdef FDSHEADER
-.segment "FILE0_DAT"
-.else
 .segment "DMC"
-.endif
 .align 64
 instsamp1_dmc:    .incbin "audio/instsamp1.dmc"
 instsamp1_dmc_end:

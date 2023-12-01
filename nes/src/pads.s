@@ -33,7 +33,11 @@ DAS_DELAY = 15
 ; time between autorepeat keypresses
 DAS_SPEED = 3
 
+.ifdef FDSHEADER
+.segment "FILE0_DAT"
+.else
 .segment "LIBCODE"
+.endif
 .proc read_pads
 thisRead = $00
 firstRead = $02
