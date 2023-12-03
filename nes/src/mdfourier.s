@@ -8,8 +8,14 @@ test_subtype     = test_state+4
 test_lastpulsehi = test_state+5
 test_good_phase  = test_state+6
 
-apu_addressbuf = $0104
-apu_databuf    = $0120
+.ifdef FDSHEADER
+FDS_OFFSET = 4
+.else
+FDS_OFFSET = 0
+.endif
+
+apu_addressbuf = $0100 + FDS_OFFSET
+apu_databuf    = $0120 + FDS_OFFSET
 
 ; FDS code and mapper configuration by Persune 2023
 ; with code from Brad Smith 2021

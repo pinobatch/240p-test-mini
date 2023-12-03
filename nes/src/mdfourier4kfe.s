@@ -161,6 +161,7 @@ test_good_phase := test_state+6
     sta $0102
     lda #$AC
     sta $0103
+    ; we can't use $0103 for cold boot check because this routine clobbers it
     lda #1
     sta coldboot_check
     ; reset the FDS to begin our program properly
@@ -235,10 +236,14 @@ irq_handler:
   bit $4015  ; ack some IRQs
   lda #$40
   sta $4017  ; disable frame counter IRQ
+
+.ifndef FDSHEADER
   bit PPUSTATUS  ; ack vblank NMI
   vwait1:
     bit PPUSTATUS  ; wait for first warmup vblank
     bpl vwait1
+.endif
+
   txa
   :
     sta $00,x  ; clear zero page
@@ -283,9 +288,11 @@ irq_handler:
     bne :-
 .endif
 
+.ifndef FDSHEADER
   vwait2:
     bit PPUSTATUS  ; wait for second warmup vblank
     bpl vwait2
+.endif
 
   ; due to FDS BIOS using the triangle, the phase is trash on cold boot
 .ifdef FDSHEADER
