@@ -492,6 +492,8 @@ pagenum_template_done:
   jmp have_line_buffer
 
 not_pagenum_line:
+  cmp #22        ; to improve Zapper responsiveness
+  bcs page_done  ; do nothing if the page is finished
 
   ; 0: End of page
   ; 1: End of page if not multicart

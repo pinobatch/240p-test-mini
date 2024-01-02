@@ -149,7 +149,7 @@ loop:
   notDecSpeed:
 
   dir_speed_change_done:
-  
+
   lda new_keys+0
   and #KEY_B
   bne done
@@ -269,7 +269,7 @@ nomove:
   sta PPUDATA
   inx
   bne :-
-  
+
   ldx #4
   jsr ppu_clear_oam
   stx OAM+0
@@ -301,7 +301,6 @@ nomove:
   bcc :+
     ldy #splittable_pal-splittable_ntsc
   :
-  sty $FF
 splitloop:
   ldx splittable_ntsc,y
   iny

@@ -61,8 +61,8 @@ the A and Select Buttons.
 Start: Show relevant help
 B: Close activity
 
-CRT users can navigate menus
-with a Zapper in port 2.
+CRT users can navigate
+menus with a Zapper in port 2.
 Shoot item: Choose
 Shoot bottom: Change page
 Shoot top/offscreen: Back

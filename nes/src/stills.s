@@ -433,7 +433,6 @@ restart:
 loop:
   lda need_reload
   beq not_reloading
-    sty $FF
     lda #0
     sta need_reload
     lda #120
@@ -462,7 +461,7 @@ loop:
     ldx #40
     jsr vwfPuts
 
-    ; Prepare for blitting    
+    ; Prepare for blitting
     lda #%0111
     jsr rf_color_lineImgBuf
     lda #$0F
@@ -501,7 +500,7 @@ loop:
     lda #$80
     sta vram_copydsthi
   :
-    
+
   ; And turn the display on
   ldx #0
   stx PPUSCROLL
@@ -700,7 +699,7 @@ pluge_shark_palettes:
   .byte $0F,$10,$02,$1C
   .byte $0F,$00,$0F,$0C
   .byte $10,$20,$32,$3C
-  
+
 .segment "CODE"
 .proc do_pluge
 palettechoice = test_state+0
@@ -910,7 +909,7 @@ sprite_x = $03
     cmp #160
     bcc sprboxloop
 
-  ; And hide the rest of sprites      
+  ; And hide the rest of sprites
   jsr ppu_clear_oam
 
 loop:
@@ -1052,7 +1051,7 @@ tvSystemFPS:  .byte 60, 50, 50
   sta vram_copydstlo
   lda #$00
   sta vram_copydsthi
-  rts 
+  rts
 .endproc
 
 .proc do_full_stripes
@@ -1108,7 +1107,7 @@ restart:
   tax
   lda bleed_types,x
   jsr rf_load_layout
-  
+
   ; Set up the frame counter sprites
   ldx #0
   ldy #3
@@ -1132,8 +1131,8 @@ restart:
   lda #3
   sta OAM+$19
   jsr ppu_clear_oam
-  
-  ; Set up the 
+
+  ; Set up the
 
 loop:
   ldx tile_shape
@@ -1276,7 +1275,7 @@ loop:
   sta vram_copydsthi
   lda #$00
   sta vram_copydstlo
-  
+
   ; Choose palette display
   ; 0-2: RGB, no box
   ; 3: white, optional box
@@ -1528,7 +1527,7 @@ loop:
   bcc not_help
     jmp restart
   not_help:
-  
+
   lda new_keys+0
   and #KEY_SELECT
   beq not_invert_grays
@@ -1563,9 +1562,9 @@ loop:
     :
     sta gridlinestype
   is_down:
-  
-  
-  not_updown:  
+
+
+  not_updown:
 
   jsr ppu_wait_vblank
   lda #$3F
