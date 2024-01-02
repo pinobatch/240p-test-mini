@@ -113,7 +113,7 @@ def render_help(docs, defines=None, verbose=False, inputlog=None):
 
 section "helppages",ROMX
 """]
-    lines.extend('helpsect_%s equ %d' % (doc[1], i)
+    lines.extend('def helpsect_%s equ %d' % (doc[1], i)
                  for i, doc in enumerate(docs))
     lines.extend('export helpsect_%s' % (doc[1])
                  for i, doc in enumerate(docs))
@@ -224,8 +224,8 @@ section "helppages",ROMX
                  for i, dtetitle in enumerate(helptitledata))
     lines.append('help_cumul_pages::')
     lines.append(rgbasm_bytearray(cumul_pages))
-    lines.append('HELP_NUM_PAGES equ %d' % cumul_pages[-1])
-    lines.append('HELP_NUM_SECTS equ %d' % len(docs))
+    lines.append('def HELP_NUM_PAGES equ %d' % cumul_pages[-1])
+    lines.append('def HELP_NUM_SECTS equ %d' % len(docs))
     lines.append('export HELP_NUM_PAGES, HELP_NUM_SECTS')
     lines.append('helppages::')
     lines.extend('  dw helppage_%03d' % i for i in range(cumul_pages[-1]))

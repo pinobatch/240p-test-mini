@@ -130,28 +130,16 @@ Limits
 Building
 --------
 
-Building the Suite requires [RGBDS] 0.6.2 or later, [Python] 3,
-[Pillow], [GNU Make], and either a C compiler or an executable of
-JRoatch's DTE text compressor.  Once you have these installed,
-run this command:
+Building the Suite requires [RGBDS] 0.7 or later, [Python] 3,
+[Pillow], [GNU Make], GNU Coreutils, and either a C compiler or an
+executable of JRoatch's DTE text compressor.  Once you have these
+installed, run this command:
 
     make
 
-Until RGBDS 0.6.2 is released, use the development version (`master`)
-instead.  To install the development version on Windows without WSL:
-
-1. Open "Installing [RGBDS]".
-2. Follow "using a development version".
-3. Scroll down to "Using our CI" and follow "made available on
-   GitHub".
-4. Under "workflow run results", follow the name of the most recent
-   pull request with a green checkmark next to `master`.
-5. Scroll down to "Artifacts" and follow `rgbds-canary-win64`, which
-   is a link to a zip archive.
-6. Install the programs in the archive per the instructions in
-   "Installing RGBDS".
-
-To add GNU Make to an installation of [Git for Windows], follow
+On Windows without WSL, it may be convenient to obtain Coreutils
+through [Git for Windows], which contains a distribution of MSYS2.
+To add GNU Make to Git for Windows, follow
 [evanwill's instructions] to download the latest Make without Guile
 from [ezwinports].
 
