@@ -88,13 +88,15 @@ came to be called "240p" video.
 Some handhelds drive their internal LCD with System M-like timings.
 For example, the Game Gear's display has 144 active lines, which
 are centered in the 240p output of EvilTim's [Game Gear RGB] mod.
-The GBA, on the other hand, uses an incompatibly slower 13.6 kHz
-horizontal sync.  Game Boy Player has to use a frame buffer to
-convert the timing to 240p or 480i, which adds lag.  This is why
-the GBA port is renamed.
+The Nintendo DS likewise drives 192 out of 263 lines at 15.7 kHz
+according to [timings in GBATEK].  The GBA, on the other hand, uses
+an incompatibly slower 13.6 kHz horizontal sync.  Game Boy Player
+has to use a frame buffer to convert the timing to 240p or 480i,
+which adds lag.  This is why the GBA port is renamed.
 
 [System M and System J]: https://en.wikipedia.org/wiki/CCIR_System_M
 [Game Gear RGB]: http://members.optusnet.com.au/eviltim/ggrgb/ggrgb.html
+[timings in GBATEK]: https://problemkaputt.de/gbatek.htm#dsvideostuff
 
 Limits
 ------
