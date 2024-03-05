@@ -8,10 +8,28 @@ test_subtype     = test_state+4
 test_lastpulsehi = test_state+5
 test_good_phase  = test_state+6
 
-apu_addressbuf = $0100
-apu_databuf    = $0120
+.ifdef FDSHEADER
+FDS_OFFSET = 4
+.else
+FDS_OFFSET = 0
+.endif
 
+apu_addressbuf = $0100 + FDS_OFFSET
+apu_databuf    = $0120 + FDS_OFFSET
+
+fds_addressbuf = $0100 + FDS_OFFSET
+fds_databuf    = $0120 + FDS_OFFSET
+
+; FDS code and mapper configuration by Persune 2023
+; with code from Brad Smith 2021
+; https://github.com/bbbradsmith/NES-ca65-example/tree/fds
+
+.ifdef FDSHEADER
+.segment "FILE0_DAT"
+.else
 .code
+.endif
+
 .align 32
 .proc mdfourier_push_apu
   ; There are 18 cycles from one APU write to the next
@@ -26,6 +44,23 @@ apu_databuf    = $0120
       bpl apu_loop          ; 3
     sty apu_addressbuf+0
   no_apu_tasks:
+  rts
+.endproc
+
+.align 32
+.proc mdfourier_push_apu
+  ; There are 18 cycles from one APU write to the next
+  ldx #0
+  ldy fds_addressbuf,x
+  bmi no_fds_tasks
+    fds_loop:
+      lda fds_databuf,x     ; 4
+      sta $4000,y           ; 5
+      inx                   ; 2
+      ldy fds_addressbuf,x  ; 4
+      bpl fds_loop          ; 3
+    sty fds_addressbuf+0
+  no_fds_tasks:
   rts
 .endproc
 
@@ -549,7 +584,11 @@ PHASE_SLIDE_START_PERIOD = 268
 .endproc
 
 
+.ifdef FDSHEADER
+.segment "FILE0_DAT"
+.else
 .rodata
+.endif
 pattern_y_data:
 silence_data:
   ; Silence pulses, reset their phase, and disable sweep
@@ -624,7 +663,11 @@ dmc_fading_step4_data:
 
 .out .sprintf("%d of 256 pattern_y_data bytes used", * - pattern_y_data)
 
+.ifdef FDSHEADER
+.segment "FILE0_DAT"
+.else
 .segment "DMC"
+.endif
 .align 64
 instsamp1_dmc:    .incbin "audio/instsamp1.dmc"
 instsamp1_dmc_end:
