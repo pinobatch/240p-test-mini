@@ -92,7 +92,7 @@ CFILES		:=	\
 CPPFILES	:=
 SFILES		:=	\
   posprintf.s \
-  bggfx_chr.s spritegfx_chr.s linearity_chr.s sharpness_chr.s \
+  bggfx_chr.s spritegfx_chr.s monoscope_chr.s sharpness_chr.s \
   stopwatchface_chr.s stopwatchhand_chr.s stopwatchdigits_chr.s \
   kikimap_chr.s kikitiles_chr.s greenhillzone_chr.s hepsie_chr.s \
   Gus_portrait_chr.s convergence_chr.s pluge_shark_6color_chr.s \

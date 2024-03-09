@@ -5,8 +5,7 @@ Gradient color bars
 SMPTE color bars
 Color bars on gray
 Color bleed
-Grid
-Linearity
+Monoscope
 Convergence
 Gray ramp
 Solid color screen
@@ -69,33 +68,48 @@ other consoles.
 For more info, visit
 http://junkerhq.net/240p
 
-== Grid ==
+== Monoscope ==
 
-This grid uses the screen's
-full 240x160 pixel resolution.
-Use it to verify that the
-entire picture is visible,
-including the red border,
-with no distortion.
+Contains elements to
+calibrate multiple aspects
+of a CRT. Read your TV's
+service manual to learn how.
 
-Select: Invert grays
+Convergence:
+Use the center crosshair
+to check static (center
+of screen) convergence.
+Use the patterns at the
+sides to check dynamic
+(edge) convergence.
 
-== Linearity ==
+↑↓: Change brightness
+----
+Adjust convergence at low
+brightness. An overly bright
+pattern causes bloom that
+masks convergence issues.
 
-This pattern shows five
-circles at the square pixel
-aspect ratio of the GBA
-screen. The circles should
-have the same diameter in
-all directions.
+Corners:
+After setting center and
+edge convergence, use
+magnets to adjust corner
+purity and geometry.
+----
+Size and aspect ratio:
+After setting horizontal
+size, use a tape measure to
+adjust vertical size until
+the red squares are square.
 
-Use it to verify the horizontal
-to vertical size ratio setting
-of a display or scaler or to
-measure distortion on a CRT.
+Linearity:
+The squares in each corner
+should get you started.
+Confirm your adjustment
+using the scroll tests.
 
-A: Hide or show grid
-Select: Invert grays
+Pattern by khmr33; adapted
+to GBA by Lorenzoone
 
 == Convergence ==
 

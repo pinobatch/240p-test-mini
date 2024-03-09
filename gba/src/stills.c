@@ -33,8 +33,7 @@ extern const unsigned char helpsect_gradient_color_bars[];
 extern const unsigned char helpsect_smpte_color_bars[];
 extern const unsigned char helpsect_color_bars_on_gray[];
 extern const unsigned char helpsect_color_bleed[];
-extern const unsigned char helpsect_grid[];
-extern const unsigned char helpsect_linearity[];
+extern const unsigned char helpsect_monoscope[];
 extern const unsigned char helpsect_convergence[];
 extern const unsigned char helpsect_gray_ramp[];
 extern const unsigned char helpsect_sharpness[];
@@ -45,8 +44,8 @@ extern const unsigned char helpsect_full_screen_stripes[];
 #define PFMAP 23
 #define PFOVERLAY 22
 
-extern const VBTILE linearity_chrTiles[27];
-extern const unsigned int linearity_chrMap[];
+extern const VBTILE monoscope_chrTiles[32];
+extern const unsigned int monoscope_chrMap[];
 extern const VBTILE sharpness_chrTiles[48];
 extern const unsigned int sharpness_chrMap[];
 extern const VBTILE convergence_chrTiles[5];
@@ -134,37 +133,32 @@ static const uint32_t brickstile[8] = {
   0x11111122,
 };
 
-void activity_linearity(void) {
-  unsigned int inverted = 0;
-  unsigned int lcdc_value = MODE_0 | BG1_ON;
+static const uint16_t monoscope_whites[] = {
+  RGB5( 0, 0, 0),RGB5(13,13,13),RGB5(22,22,22),RGB5(31,31,31),RGB5(31,31,31)
+};
 
-  bitunpack2(PATRAM4(0, 0), linearity_chrTiles, sizeof(linearity_chrTiles));
-  RLUnCompVram(linearity_chrMap, MAP[PFMAP]);
-  dma_memset16(MAP[PFOVERLAY], 0x01, 32*20*2);
+void activity_monoscope(void) {
+  unsigned int brightness = 1;
+
+  bitunpack2(PATRAM4(0, 0), monoscope_chrTiles, sizeof(monoscope_chrTiles));
+  RLUnCompVram(monoscope_chrMap, MAP[PFMAP]);
+  BG_COLORS[1] = RGB5(31, 0, 0);
 
   while (1) {
-    read_pad_help_check(helpsect_linearity);
-    if (new_keys & KEY_SELECT) {
-      inverted = !inverted;
+    read_pad_help_check(helpsect_monoscope);
+    if (new_keys & KEY_UP) {
+      if (++brightness >= 5) brightness = 0;
     }
-    if (new_keys & KEY_A) {
-      lcdc_value ^= BG0_ON;
-    }
-    if (new_keys & KEY_B) {
-      REG_BLDCNT = 0;
-      return;
+    if (new_keys & KEY_DOWN) {
+      if (!brightness--) brightness = 4;
     }
 
-    // This uses blending.
     VBlankIntrWait();
-    BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFOVERLAY);
-    BG_OFFSET[1].x = BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_OFFSET[1].y = 8;
-    dmaCopy(inverted ? invgray4pal : gray4pal, BG_COLORS+0x00, sizeof(gray4pal));
-    REG_DISPCNT = lcdc_value;
-    REG_BLDCNT = 0x2241;  // sub is bg1 and backdrop; main is bg0; function is alpha blend
-    REG_BLDALPHA = 0x040C;  // alpha levels: 4/16*sub + 12/16*main
+    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    BG_COLORS[0] = (brightness >= 4) ? RGB5(13,13,13) : 0;
+    BG_COLORS[2] = monoscope_whites[brightness];
+    REG_DISPCNT = MODE_0 | BG0_ON;
   }
 }
 
@@ -514,46 +508,6 @@ void activity_gray_ramp(void) {
       c += RGB5(1, 1, 1);
       if ((p & 0x0F) == 8) p += 8;
     }
-    REG_DISPCNT = MODE_0 | BG0_ON;
-  }
-}
-
-void activity_cps_grid(void) {
-  unsigned int bright = 0;
-
-  load_common_bg_tiles();
-
-  // Draw grid map
-  for (unsigned int y = 0; y < 20; ++y) {
-    unsigned short *row = MAP[PFMAP][y];
-    unsigned int basetile = (y & 1) ? 0x0821 : 0x0021;  // Xflip
-    if (y < 2 || y >= 18) basetile |= 0x1000;
-    
-    row[0] = basetile | 0x1000;
-    row[1] = basetile | 0x1400;
-    for (unsigned int x = 2; x < 28; ++x) {
-      row[x] = basetile;
-      basetile ^= 0x0400;
-    }
-    row[28] = basetile | 0x1000;
-    row[29] = basetile | 0x1400;
-  }
-
-  while (1) {
-    read_pad_help_check(helpsect_grid);
-    if (new_keys & KEY_SELECT) {
-      bright = !bright;
-    }
-    if (new_keys & KEY_B) {
-      return;
-    }
-
-    VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_COLORS[0] = bright ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
-    BG_COLORS[1] = bright ? RGB5(0, 0, 0) : RGB5(31, 31, 31);
-    BG_COLORS[17] = RGB5(31, 0, 0);
     REG_DISPCNT = MODE_0 | BG0_ON;
   }
 }
