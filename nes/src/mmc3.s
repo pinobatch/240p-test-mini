@@ -8,6 +8,15 @@
 ; code copies.  This file is offered as-is, without any warranty.
 ;
 
+.include "nes2header.inc"
+nes2prg 65536
+nes2chr 0
+nes2chrram 8192
+nes2mirror 'V'
+nes2mapper 4
+nes2tv 'N','P'
+nes2end
+
 .import reset_handler
 .importzp nmis
 .import unpb53_some, unpb53_file_cb, load_sb53_file_cb, load_iu53_file_cb
@@ -16,15 +25,7 @@
 .export rf_vwfClearPuts, rf_load_layout
 .export rtl, mmc_bank_a
 
-.segment "INESHDR"
-  .byt "NES",$1A  ; magic signature
-  .byt 4          ; size of PRG ROM in 16384 byte units (two MMC3 banks per unit)
-  .byt 0          ; size of CHR ROM in 8192 byte units
-  .byt $40        ; lower mapper nibble
-  .byt $00        ; upper mapper nibble
-
 ; Fixed code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 MAIN_CODE_BANK = $04
 GATE_DATA_BANK = $02

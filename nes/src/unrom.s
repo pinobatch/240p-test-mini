@@ -14,6 +14,7 @@ nes2chr 0
 nes2chrram 8192
 nes2mirror 'V'
 nes2mapper 2
+nes2tv 'N','P'
 nes2end
 
 .import reset_handler
