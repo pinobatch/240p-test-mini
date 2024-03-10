@@ -55,6 +55,7 @@ rectfill_layouts:
 
   rectfile RF_input_mouse, input_mouse_rects, $20, $18
   rectfile RF_safearea_lite, safearea_lite_rects, $20
+  rectfile RF_hanover, hanover_rects, $20, $20
 
 ire_rects:
   rf_rect   0,  0,256,240,$00, 0  ; Clear screen to black
@@ -694,4 +695,85 @@ input_mouse_rects:
   .byte "Buttons", 0
   rf_label  32,128, 1, 0
   .byte "Select: Acceleration", 0
+  .byte 0
+
+hanover_rects:
+  rf_rect   0,  0,256,240,$00, 0  ; Clear screen
+  rf_rect  80, 80,112,104,$02, 0  ; 12-16 top
+  rf_rect 112, 80,144,104,$03, 0
+  rf_rect 144, 80,176,104,$01, 0
+  rf_rect 176, 80,208,104,$02, 0
+  rf_rect 208, 80,240,104,$03, 0
+  rf_rect  80,104,112,128,$05, 0  ; 12-16 bottom
+  rf_rect 112,104,144,128,$06, 0
+  rf_rect 144,104,176,128,$04, 0
+  rf_rect 176,104,208,128,$05, 0
+  rf_rect 208,104,240,128,$06, 0
+  rf_rect  48,144, 80,168,$01, 0  ; 17-1C top
+  rf_rect  80,144,112,168,$02, 0
+  rf_rect 112,144,144,168,$03, 0
+  rf_rect 144,144,176,168,$01, 0
+  rf_rect 176,144,208,168,$02, 0
+  rf_rect 208,144,240,168,$03, 0
+  rf_rect  48,168, 80,192,$04, 0  ; 17-1C bottom
+  rf_rect  80,168,112,192,$05, 0
+  rf_rect 112,168,144,192,$06, 0
+  rf_rect 144,168,176,192,$04, 0
+  rf_rect 176,168,208,192,$05, 0
+  rf_rect 208,168,240,192,$06, 0
+
+  ; reuse tiles
+  rf_rect  88, 72, 96, 80,$22, 0  ; digit 1
+  rf_rect 120, 72,128, 80,$22, 0  ; digit 1
+  rf_rect 152, 72,160, 80,$22, 0  ; digit 1
+  rf_rect 184, 72,192, 80,$22, 0  ; digit 1
+  rf_rect 216, 72,224, 80,$22, 0  ; digit 1
+  rf_rect  56,136, 64,144,$22, 0  ; digit 1
+  rf_rect  88,136, 96,144,$22, 0  ; digit 1
+  rf_rect 120,136,128,144,$22, 0  ; digit 1
+  rf_rect 152,136,160,144,$22, 0  ; digit 1
+  rf_rect 184,136,192,144,$22, 0  ; digit 1
+  rf_rect 216,136,224,144,$22, 0  ; digit 1
+  rf_rect  16,152, 40,160,$2F, RF_INCR  ; Even 17-1C
+  rf_rect  24,176, 40,184,$32, RF_INCR  ; Odd  17-1C
+  .byte 0
+  rf_attr   0,  0,256,240, 0  ; clear attributes
+  rf_attr 144, 80,240,128, 1  ; 14-16
+  rf_attr  48,144,144,192, 2  ; 14-16
+  rf_attr 144,144,240,192, 3  ; 1a-1c
+  .byte 0
+  rf_label 107, 48, 1, 0
+  .byte "00", 0
+  rf_label  59, 72, 1, 0
+  .byte "11", 0
+  rf_label  96, 72, 1, 0
+  .byte "2", 0
+  rf_label 128, 72, 1, 0
+  .byte "3", 0
+  rf_label 160, 72, 1, 0
+  .byte "4", 0
+  rf_label 192, 72, 1, 0
+  .byte "5", 0
+  rf_label 224, 72, 1, 0
+  .byte "6", 0
+
+  rf_label  64,136, 1, 0
+  .byte "7", 0
+  rf_label  96,136, 1, 0
+  .byte "8", 0
+  rf_label 128,136, 1, 0
+  .byte "9", 0
+  rf_label 160,136, 1, 0
+  .byte "a", 0
+  rf_label 192,136, 1, 0
+  .byte "b", 0
+  rf_label 224,136, 1, 0
+  .byte "c", 0
+
+  rf_label  19, 88, 1, 0
+  .byte "Even", 0
+  rf_label  24,112, 1, 0
+  .byte "Odd", 0
+  rf_label  48, 48, 1, 0
+  .byte "Background:", 0
   .byte 0

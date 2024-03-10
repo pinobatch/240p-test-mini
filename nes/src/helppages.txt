@@ -5,6 +5,7 @@ Gradient color bars
 SMPTE color bars
 Color bars on gray
 Color bleed
+Hanover bars
 Monoscope
 Convergence
 Gray ramp
@@ -190,6 +191,26 @@ Select: Show or hide
   frame counter
 
 Concept by Konsolkongen
+
+== Hanover bars ==
+
+Test mixing of colors
+on consecutive lines.
+Many TVs' composite video
+decoders use "comb filtering"
+or "delay line decoding" to
+consider two lines at once,
+which improves luma detail
+and hue in some sources.
+
+The pattern alternates lines
+of dark gray (or a medium
+color) and each medium color.
+If rectangles are solid or
+dots, the TV is applying
+chroma averaging.
+
+←→: Change background color
 
 == Monoscope ==
 

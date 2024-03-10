@@ -19,7 +19,7 @@ version:=0.23
 objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
   main help helppages.hlp stills stopwatch backlight \
   scrolltest kiki audiosync soundtest crowd mdfourierfe mdfourier \
-  overscan megaton shadowsprite padstest \
+  overscan megaton shadowsprite padstest hanover \
   pads ppuclear unpb53 uniu undte bcd rand rectfill muldiv \
   pb53files rectfiles ntscPeriods
 objlistnsf := mdfouriernsf mdfourier ntscPeriods

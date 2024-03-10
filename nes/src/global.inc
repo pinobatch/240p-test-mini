@@ -86,6 +86,9 @@ GATEDATA_BANK = 1
 SIZEOF_TEST_STATE = 24
 .globalzp test_state
 
+; hanover.s
+.global do_hanover_bars
+
 ; linearity.s
 .global do_new_linearity
 

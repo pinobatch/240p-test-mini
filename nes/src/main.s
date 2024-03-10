@@ -185,6 +185,7 @@ routines:
   .addr do_smpte-1
   .addr do_601bars-1
   .addr do_color_bleed-1
+  .addr do_hanover_bars-1
   .addr do_monoscope-1
   .addr do_convergence-1
   .addr do_gray_ramp-1
