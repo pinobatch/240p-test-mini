@@ -52,6 +52,13 @@ static void wait24() {
   BG_COLORS[6] = RGB5(31, 31, 31);
 }
 
+static void reinitAudio(void) {
+  REG_SOUNDCNT_X = 0x0000;  // 00: reset
+  REG_SOUNDCNT_X = 0x0080;  // 80: run
+  REG_SOUNDBIAS = 0xC200;  // 4200: 65.5 kHz PWM (for PCM); C200: 262 kHz PWM (for PSG)
+  REG_SOUNDCNT_H = 0x0B06;  // xBxx: PCM A centered from timer 0; PSG/PCM full mix
+}
+
 static void beepTri(const unsigned char *wave, unsigned int period) {
   REG_SOUND3CNT_L = 0;  // unlock waveram
   dmaCopy(wave, (void *)WAVE_RAM, 16);
@@ -111,6 +118,21 @@ static void beepPulse(void) {
   wait24();
   REG_SOUND1CNT_H = 0;
   REG_SOUND1CNT_X = 0x8000;  // note cut
+}
+
+static void beepSurround(void) {
+  reinitAudio();
+  REG_SOUNDCNT_L = 0xD277;
+  REG_SOUND1CNT_L = 0x08;    // no sweep
+  REG_SOUND1CNT_H = 0xA040;  // 2/3 volume, 25% duty
+  REG_SOUND2CNT_L = 0xA0C0;  // 2/3 volume, 75% duty
+  REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // pitch
+  REG_SOUND2CNT_H = (2048 - 131) + 0x8000;  // pitch
+  wait24();
+  REG_SOUND1CNT_H = 0;
+  REG_SOUND1CNT_X = 0x8000;  // note cut
+  REG_SOUND2CNT_L = 0;
+  REG_SOUND2CNT_H = 0x8000;  // note cut
 }
 
 static void beepHiss(void) {
@@ -228,15 +250,13 @@ static const activity_func sound_test_handlers[] = {
   beep1kL,
   beep1kR,
   beepPulse,
+  beepSurround,
   beepHiss,
   beepBuzz,
   beepPCM,
 };
 void activity_sound_test() {
-  REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
-  REG_SOUNDBIAS = 0xC200;  // 4200: 65.5 kHz PWM (for PCM); C200: 262 kHz PWM (for PSG)
-  REG_SOUNDCNT_H = 0x0B06;  // xBxx: PCM A centered from timer 0; PSG/PCM full mix
-
+  reinitAudio();
   while (1) {
     REG_SOUNDCNT_L = 0xFF77;  // reset PSG vol/pan
     helpscreen(DOC_MENU, KEY_A|KEY_START|KEY_B|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);

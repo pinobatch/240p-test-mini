@@ -484,6 +484,7 @@ moving in high speed.
 1000 Hz left
 1000 Hz right
 1000 Hz (pulse)
+1000 Hz (surround)
 Hiss noise
 Buzz noise
 G major (PCM)
@@ -521,6 +522,14 @@ or buzz (127 steps).
 The G chord is synthesized
 in real-time using the
 Karplus/Strong algorithm.
+----
+Surround is played 180
+degrees out of phase and
+should be silent on the
+mono internal speaker.
+Matrix surround decoders
+such as Dolby Pro Logic
+send it to the rear.
 
 == Audio sync ==
 
