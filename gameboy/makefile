@@ -114,7 +114,8 @@ objlisto := $(foreach o,$(objlist),obj/gb/$(o).o)
 
 $(title).gb: $(objlisto)
 	$(RGBLINK) -w -p 0xFF -m$(title).map -n$(title).sym -o$@ $^
-	$(RGBFIX) -p0 -v $@
+	cp $(title).gb $(title).beforefix
+	$(RGBFIX) -p 0xFF -m 'ROM' -vjcst '144P TEST' -kP8 -l0x33 $@
 
 #obj/gb/%.o: obj/gb/%-dedent.z80 src/gb.inc src/hardware.inc src/global.inc
 #	$(RGBASM) -o $@ $<
