@@ -1,7 +1,13 @@
 0.24 (future)
-* Monoscope: update pattern (thanks khmr33)
+* SMPTE color bars: describe which bars' hues are accurate
+* Adapt palphase pattern from little things as "Hanover bars"
+* Monoscope: update patterns (thanks khmr33)
 * Safe areas: don't flicker on PAL NES
+* Safe areas: Select to hide descriptions for PVM double exposure
 * Menus and help pages can be navigated with a Zapper in port 2
+* Reflect rebranding of Twitter to X
+* CPU clock speed: restore alignment checks; don't right-pad numbers
+* Apply NES 2.0 ROM header with dual NTSC/PAL
 
 0.23 (2023-03-03)
 * Help: Compress duplicate lines of text (GB parity)

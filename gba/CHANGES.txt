@@ -1,3 +1,8 @@
+0.24 (future)
+* Replace Grid and Linearity with Monoscope (thanks Lorenzoone)
+* Sound test: add surround option
+* Reflect rebranding of Twitter to X
+
 0.23 (2023-03-03)
 * Help: fix blink sprite alignment
 * Credits: Display version from Git commit tag and ID

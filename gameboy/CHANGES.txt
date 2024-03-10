@@ -1,3 +1,11 @@
+0.24 (future)
+* Hide flickering line below SGB border
+* Sound test: clarify that Surround on mono should be silent
+* Reflect rebranding of Twitter to X
+* Build with RGBDS 0.7.0
+* Allocate local variables using stack flattening
+* romusage: work around Pillow version not show()ing indexed image
+
 0.23 (2023-03-03)
 * Credits: Display version from Git commit tag and ID
 * Credits: Pino has moved to the Fediverse
