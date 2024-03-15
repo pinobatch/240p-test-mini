@@ -1,0 +1,789 @@
+== 192p Test Suite: Menu ==
+
+PLUGE
+Gradient color bars
+SMPTE color bars
+Color bars on gray
+Color bleed
+Monoscope
+Convergence
+Gray ramp
+Solid color screen
+Motion blur
+Sharpness
+Overscan
+----
+Shadow sprite
+Stopwatch
+Timing and reflex test
+Hill zone scroll test
+Vertical scroll test
+Grid scroll test
+Full screen stripes
+Backlight zones
+Sound test
+Audio sync
+Lame boy
+About
+Credits
+
+== About ==
+
+The 240p Test Suite
+has two goals:
+
+1. Evaluate TV sets and
+   video processors for
+   ability to handle retro
+   console video signals.
+2. Turn a game console into
+   a test signal generator
+   to help in calibrating the
+   black, white, and color
+   levels and geometry of
+   a display.
+----
+The Nintendo DS
+system outputs 192 lines of
+progressive video per screen.
+All models compatible with
+this software are.
+
+Development hardware can
+either output 480p or
+480i, depending on the
+settings.
+----
+Press Start in any test
+to show relevant help.
+
+The test suite is also
+available for several
+other consoles.
+For more info, visit
+http://junkerhq.net/240p
+
+== Grid ==
+
+This grid uses the screen's
+full 256x192 pixel resolution.
+Use it to verify that the
+entire picture is visible,
+including the red border,
+with no distortion.
+
+Select: Invert grays
+
+== Monoscope ==
+
+Contains elements to
+calibrate multiple aspects
+of a CRT. Read your TV's
+service manual to learn how.
+
+Convergence:
+Use the center crosshair
+to check static (center
+of screen) convergence.
+Use the patterns at the
+sides to check dynamic
+(edge) convergence.
+
+↑↓: Change brightness
+----
+Adjust convergence at low
+brightness. An overly bright
+pattern causes bloom that
+masks convergence issues.
+
+Corners:
+After setting center and
+edge convergence, use
+magnets to adjust corner
+purity and geometry.
+----
+Size and aspect ratio:
+After setting horizontal
+size, use a tape measure to
+adjust vertical size until
+the red squares are square.
+
+Linearity:
+The squares in each corner
+should get you started.
+Confirm your adjustment
+using the scroll tests.
+
+Pattern by khmr33; adapted
+to NDS by Lorenzoone
+
+== Convergence ==
+
+Use these patterns to adjust
+a CRT's color convergence.
+
+Fine grid
+↑↓: Change grid pattern
+  (lines, dots, crosses)
+Select: Invert grays
+A: Go to colors
+
+Color transition boundaries
+↑↓: Hide or show
+  black borders
+A: Go to fine grid
+
+== Gray ramp ==
+
+Use this pattern to
+check color balance.
+This gray ramp should
+not have a colored tint.
+
+Cheap color LCDs may
+have different gamma
+curves per component.
+
+== Solid color screen ==
+
+Some displays and scalers
+have problems with sudden
+changes between deep black
+and white. Others may have
+stuck or damaged pixels.
+
+←→: Change color among
+  white, black, red,
+  green, or blue
+A on white: Hide or show
+  RGB input
+↑↓←→: Change RGB value
+----
+Poor high-voltage regulation
+in a CRT causes image size
+to depend on brightness.
+
+== HEALTH WARNING ==
+
+This pattern flashes.
+Do not use it if you
+have a seizure disorder.
+
+Prolonged use may also cause
+temporary screen issues
+to DSi XL and 3DS consoles
+with IPS screens.
+TN screens are safe.
+
+A: Continue anyway
+B: Cancel
+
+== Motion blur ==
+
+This tests how quickly an
+LCD reacts to changes in
+gray level by toggling a
+square between two shades.
+Use it with a high-speed
+camcorder, or set the
+shades the same to
+check gray levels.
+
+↑↓: Choose a setting
+←→: Change its value
+A: Start or stop the test
+X/R: 60 hz/80 hz
+----
+Regular DS consoles
+should show an image
+which very slightly
+flickers in 60 hz mode.
+When using 80 hz mode,
+the flicker should
+disappear almost entirely.
+
+Due to the way DS software
+is rendered on 3DS consoles,
+80 hz mode doesn't work on
+them.
+----
+DSi XL and 3DS consoles
+with IPS screens have may
+experience temporary
+ghosting effects when using
+this pattern for a prolonged
+period of time.
+The issue should disappear
+by using the console with
+regular software.
+
+On such consoles, when
+this pattern is viewed
+from an angle, a white
+flickering image should
+appear on IPS screens.
+On TN screens, a gray one
+should show instead.
+
+== Sharpness ==
+
+Set the sharpness of your
+TV to a value that shows
+clean black and gray
+transitions without white
+ghost lines on the side.
+
+Select: Invert grays
+A: Toggle brick wall
+----
+Modern TVs' "sharpness"
+control performs edge
+enhancement, intended
+for live action SDTV or
+VHS sources.
+Most TVs have zero as
+no change and high as
+enhancement. A few have
+middle as no change,
+high as enhancement,
+and low as blurring.
+
+== Overscan ==
+
+Use this pattern to check
+how much of the picture
+edge your NDS' lenses hide.
+
+The LCD is recessed
+in the chassis. This can
+cast shadows on the
+screen's edges depending
+on the lighting angle.
+
+↑↓←→: Choose an edge
+A + ↑↓←→: Move edge
+Select: Invert grays
+----
+Move each edge inward
+until you see the border,
+then go back one pixel. Or
+leave one border pixel visible
+and subtract 1. The result
+is the amount of overscan
+in pixels in each direction.
+
+== Shadow sprite ==
+
+This test draws a shadow
+sprite on every other
+frame, flickering at 30 Hz.
+Many games use such flicker
+to show transparency.
+
+Some deinterlacers display
+drop shadows correctly but
+still interpret 240p as 480i.
+The striped sprite should
+make this easy to spot.
+----
+↑↓←→: Move sprite
+A: Skip flicker frame
+   or rotate stripes
+A+↑: Change shadow type
+   (flicker or stripes)
+A+←→: Change background
+Select: Change sprite shape
+  (Star of Lakshmi or
+  Hepsie the fairy godmother)
+
+These shouldn't happen:
+- Background loses detail
+- Shadow disappears
+----
+DSi XL and 3DS consoles
+with IPS screens have may
+experience temporary
+ghosting effects when using
+this pattern for a prolonged
+period of time.
+The issue should disappear
+by using the console with
+regular software.
+
+While in flicker mode:
+Nintendo DS screens should
+show horizontal stripes.
+TN screens will show a
+pixelated texture.
+IPS screens will show no
+texture.
+----
+
+Portrait of Gus by
+  darryl.revok
+Portrait of Donna by
+  pepe_salot
+Hill zone by mikejmoffitt
+  & Damian Yerrick
+
+== Stopwatch ==
+
+This stopwatch helps
+you measure a TV's lag,
+detect dropped frames,
+time a workout, etc.
+
+A: Start or stop
+Select stopped: Reset
+Select running: Lap
+↑: Change ruler at left
+   (show, hide, or blink)
+↓: Hide or show
+   inactive circles
+----
+The clock face below helps
+determine the frame even
+when the numbers above are
+blurry.
+
+The stopwatch assumes
+60 Hz display, while the NDS
+actually runs at 59.83 Hz.
+This means it runs slightly
+slow (1 part in 345).
+----
+To measure lag, get a
+camera and connect two
+displays to one NDS'
+screen's output.
+One is being tested, and
+the other (the reference)
+should be a CRT SDTV or
+a display with known lag.
+For example, connect
+a CRT and your scaler
+using a cable with both
+composite and S-Video out.
+----
+Then photograph both
+screens at once.
+The picture will show
+the latency difference
+between them. Some LCD
+TVs exceed five frames.
+
+The ruler helps count
+scanlines of lag. Use a
+short exposure on your
+camera and divide lines by
+15.7 to get milliseconds.
+To avoid errors caused
+by rolling shutter, put
+the TVs side by side.
+
+== Timing and reflex test ==
+
+This helps quantify a
+display's processing lag
+by showing a changing
+pattern on the screen,
+optionally with audio.
+
+Press A when the moving
+and still reticles align
+to display the offset in
+frames from the actual
+intersection. After ten
+non-early presses,
+their average is shown.
+----
+↑↓: Choose a setting
+←→: Change its value
+
+Settings include the direction
+of the moving reticle, whether
+to randomize timing of
+movement, and whether to
+beep when A is pressed
+or beep and flash when
+the reticles align.
+
+== Hill zone scroll test ==
+
+This shows a scrolling
+background with several
+parallax strips. It can
+be used to notice any
+drops in frame rate.
+
+↑↓: Change speed
+←→: Change direction
+A: Start or stop
+X/R: 60 hz/80 hz
+Y/L: FPS - 100%/50%/BFI
+----
+Due to the way DS software
+is rendered on 3DS consoles,
+80 hz mode doesn't work on
+them.
+
+By switching the framerate,
+one may observe how BFI can
+significantly reduce
+motion blur, at the expense
+of brightness.
+60 hz is not enough for BFI,
+so the screen should flicker.
+BFI in 80 hz mode should
+result in almost no
+flicker, with reduced
+motion blur.
+----
+DSi XL and 3DS consoles
+with IPS screens have may
+experience temporary
+ghosting effects when using
+BFI for a prolonged
+period of time.
+The issue should disappear
+by using the console with
+regular software.
+
+Hill zone by mikejmoffitt
+  & Damian Yerrick
+
+== Vertical scroll test ==
+
+This test shows a
+scrolling background.
+Use it to measure
+cadence detection in a
+deinterlacer or row
+inversion artifacts
+in a handheld LCD.
+
+↑↓: Change speed
+←→: Change direction
+A: Start or stop
+X/R: 60 hz/80 hz
+Y/L: FPS - 100%/50%/BFI
+----
+Due to the way DS software
+is rendered on 3DS consoles,
+80 hz mode doesn't work on
+them.
+
+By switching the framerate,
+one may observe how BFI can
+significantly reduce
+motion blur, at the expense
+of brightness.
+60 hz is not enough for BFI,
+so the screen should flicker.
+BFI in 80 hz mode should
+result in almost no
+flicker, with reduced
+motion blur.
+----
+DSi XL and 3DS consoles
+with IPS screens have may
+experience temporary
+ghosting effects when using
+BFI for a prolonged
+period of time.
+The issue should disappear
+by using the console with
+regular software.
+
+Map by Artemio Urbina
+Tiles by Damian Yerrick
+
+== Grid scroll test ==
+
+A grid scrolls vertically or
+horizontally. Use it to test
+linearity and how well the
+display copes with scrolling
+and frame rate. Some scalers
+may produce a still image
+at maximum speed.
+
+↑↓: Change speed
+A: Start or stop
+A + ↑↓←→: Change direction
+Select: Invert grays
+
+== Full screen stripes ==
+
+You should see a pattern of
+lines, each one pixel wide.
+
+↑↓←→: Move the pattern
+  by one pixel
+Hold ↑↓←→: Move every frame
+A: Rotate stripes
+Select: Show or hide
+  frame counter
+----
+While you hold Up, the lines
+should flicker. If holding
+Up makes a still image, your
+scaler is treating the signal
+as interlaced and either
+dropping or weaving frames.
+A solid gray image indicates
+slow LCD response time.
+
+== Backlight zones ==
+
+This test displays a small
+moving square, letting
+you check how a display
+handles small bright areas.
+Some LED-lit LCDs dim
+dark areas to make blacks
+deeper, which causes
+problems with scenes such
+as starfields and credits.
+Some CRTs' phosphors cause
+bright moving objects to
+leave a trail.
+----
+↑↓←→: Move the square
+A: Hide or show the square
+A+↑↓: Change width
+  (1, 2, 4, or 8 pixels)
+A+←→: Change speed
+  low: 1 pixel per frame
+  high: 1 width per frame
+Select: Invert grays
+
+To measure image decay time,
+use a high-speed camera to
+record the screen while
+closing this help page or
+moving in high speed.
+
+== Sound test: Frequency ==
+
+8000 Hz
+4000 Hz
+2000 Hz
+1000 Hz
+500 Hz
+250 Hz
+125 Hz
+62 Hz
+1000 Hz left
+1000 Hz right
+1000 Hz (pulse)
+1000 Hz (surround)
+Hiss noise
+Buzz noise
+
+== Sound test ==
+
+Use this test to ensure
+that the audio output
+works and that audio and
+video are synchronized.
+
+A: Play a sound and
+  flash the screen
+
+All NDS systems output
+stereo audio. Each voice can
+be panned center,
+left or right.
+All audio channels
+can execute PCM8, PCM16
+or IMA-ADPCM sounds.
+Specific ones may use PSG
+and Noise to generate audio.
+----
+Most choices use PCM8
+with an approximate sine
+wave. It has a prominent
+overtone 5 octaves up.
+
+Hiss is generated by Noise.
+Buzz is generated by PSG.
+----
+Surround is played 180
+degrees out of phase and
+should be silent on the
+mono internal speaker.
+Matrix surround decoders
+such as Dolby Pro Logic
+send it to the rear.
+
+== Audio sync ==
+
+This test flashes the
+screen for two frames
+and plays a tone when
+the dot hits the floor.
+
+You can verify sync
+between audio and video
+with recording equipment
+or an oscilloscope.
+
+A: Start or stop the test
+
+== Lame boy ==
+
+This test served as a
+placeholder in early versions
+of the Suite for tests not yet
+ported to Game Boy Advance.
+It's still cute.
+
+←→: Move
+
+== PLUGE ==
+
+The PLUGE (picture line-up
+generation equipment) pattern
+is used to adjust the TV's
+"brightness" or black level.
+For most sources, lower the
+brightness until the outer
+bar is not visible, and slowly
+raise it until it shows.
+
+A: Toggle setup
+  (NTSC or NTSC-J/PAL)
+Select: Open PLUGE Contrast
+----
+NDS' 32 shades should
+correspond to signal level
+steps of about 3.2 IRE.
+(This needs further testing.)
+This would put shade 0 at
+NTSC-J black (0 IRE) and
+shade 2 near NTSC's 7.5 IRE
+setup. PAL TV and US game
+consoles also use 0 IRE.
+
+NTSC: shades 3 and 0
+  on background 2
+NTSC-J: shades 1 and 0.5
+  on background 0
+----
+The PLUGE Contrast
+pattern fills the screen
+with a shark pictogram.
+Use it with various
+palettes to check
+contrast and brightness.
+
+A: Switch palette among color,
+  dark, darker, light, or lighter
+Select: Return to PLUGE
+
+== Gradient color bars ==
+
+Use this pattern to
+calibrate colors on a TV.
+Increase the contrast
+(white level) until C and
+E in the white ramp look
+the same, then decrease
+it slowly until you can
+tell them apart.
+
+A: Hide or show grid
+
+== SMPTE color bars ==
+
+Use this pattern to
+calibrate for NTSC levels
+regarding contrast,
+brightness, and colors.
+Use some displays'
+blue-only mode to
+confirm color balance.
+
+Based on SMPTE EG 1-1990
+
+↑: Toggle brightness
+  (75% or 100%)
+A: Toggle setup
+  (NTSC or NTSC-J/PAL)
+Select: Play 1 kHz tone
+
+== Color bars on gray ==
+
+This pattern shows color
+bars on a gray background.
+Use it with color filters
+to adjust color balance.
+
+Based on Digital Video
+Essentials: HD Basics
+
+↑: Toggle brightness
+  (75% or 100%)
+A: Toggle setup
+  (NTSC or NTSC-J/PAL)
+Select: Play 1 kHz tone
+
+== Color bleed ==
+
+Use this pattern to
+diagnose color bleed
+caused by incorrect
+color resampling.
+
+Concept by Konsolkongen
+
+↑↓←→: Move the pattern
+  by one pixel
+Hold ↑↓←→: Move every frame
+A: Rotate stripes
+Select: Show or hide
+  frame counter
+
+== 192p Test Suite ==
+
+$COMMIT
+HDMA is right for you
+
+© 2011-2016 Artemio Urbina
+© 2015-2023 Damian Yerrick
+This is free software; see
+the source for copying
+conditions. The program
+is provided AS IS with NO
+warranty whatsoever.
+----
+Concept: Artemio Urbina
+   𝕏 @Artemio
+Program: Damian Yerrick
+   🦣 @pinobatch@
+       peoplemaking.games
+NDS port: Lorenzooone
+Special thanks:
+  Shmups Forum
+  gbadev.org
+  gbadev.net
+
+Thank you to my patrons:
+Artemio Urbina, Joe Parsell,
+Brad Smith, Rin Mari, Jeremy Z,
+zeta0134, Jason Richmond,
+Guto Maia, birdybro
+----
+You can help:
+- Run tests on authentic
+  Nintendo DS and 3DS
+  handhelds and clones
+- Run tests on hardware
+  connected straight to a TV
+  and with high-quality
+  external scalers
+- Spread the word about
+  the project
+- Support us:
+  patreon.com/pineight

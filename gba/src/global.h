@@ -21,11 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GLOBAL_H
 #include <stdint.h>
 #include <sys/types.h>
-#include <gba_sprites.h>
-#include <gba_systemcalls.h>
+#include "cross_compatibility.h"
+#include "helppages.h"
 
 // Size of a statically sized array
 #define count(array) (sizeof((array)) / sizeof((array)[0]))
+
+#define GET_SLICE_X(e, y, x) ((((e) * (x)) + (((y) + 1) / 2)) / (y))
 
 typedef void (*activity_func)(void);
 
@@ -34,13 +36,13 @@ typedef void (*activity_func)(void);
 extern char help_line_buffer[HELP_LINE_LEN];
 extern unsigned char help_bg_loaded, help_wanted_page, help_cursor_y;
 extern signed char help_wnd_progress;
-unsigned int helpscreen(unsigned int doc_num, unsigned int keymask);
-unsigned int read_pad_help_check(const void *doc_num_as_ptr);
+unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask);
+unsigned int read_pad_help_check(helpdoc_kind doc_num);
 
 // stills.c
 
 typedef struct BarsListEntry {
-  unsigned char l, t, r, b, color;
+  unsigned short l, t, r, b, color;
 } BarsListEntry;
 void draw_barslist(const BarsListEntry *rects);
 
@@ -89,7 +91,22 @@ void activity_shadow_sprite(void);
 void activity_megaton(void);
 
 // soundtest.c
+#ifdef __NDS__
+enum sound_id_e {
+    BEEP_1K_SOUND_ID = 0,
+    TICK_SOUND_ID = 1,
+    PRESS_A_SOUND_ID = 2
+};
+typedef enum sound_id_e sound_id;
+#define NUM_SOUND_IDS 3
+
+void initAllSounds(void);
+void killAllSounds(void);
+void startPlayingSound(sound_id wanted_id);
+void killPlayingSound(sound_id wanted_id);
+#else
 extern const unsigned char waveram_sin2x[16];
+#endif
 void activity_sound_test(void);
 
 // audiosync.c
@@ -127,6 +144,6 @@ const char *vwf8Puts(uint32_t *restrict dst, const char *restrict s,
 unsigned int vwf8StrWidth(const char *s);
 
 // vwflabels.c
-void vwfDrawLabels(const char *labelset, unsigned int sbb, unsigned int tilenum);
+void vwfDrawLabelsPositionBased(const char *labels, const char *positions, unsigned int sbb, unsigned int tilenum);
 
 #endif

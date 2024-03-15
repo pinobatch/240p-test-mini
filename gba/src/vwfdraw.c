@@ -24,6 +24,7 @@ it freely, subject to the following restrictions:
 */
 #include <stdint.h>
 #include "global.h"
+#include "vwf7.h"
 
 #if 0
 typedef struct VWFCanvas {
@@ -80,21 +81,6 @@ void loadMapRowMajor(unsigned short *dst, unsigned int tilenum,
   }
 }
 
-extern const unsigned char vwfChrData[][8];
-extern const unsigned char vwfChrWidths[];
-/*
- = {
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {0x00, 0x01, 0x01, 0x01, 0x01, 0x00, 0x01},
-  {0x00, 0x05, 0x05},
-  {0x00, 0x0A, 0x1F, 0x0A, 0x1F, 0x0A},
-};
-
-const unsigned char vwfGlyphWidths[] = {
-  3, 2, 4, 6
-};
-*/
-
 #define FIRST_PRINTABLE_CU 0x18
 
 void vwf8PutTile(uint32_t *dst, unsigned int glyphnum,
@@ -128,7 +114,7 @@ void vwf8PutTile(uint32_t *dst, unsigned int glyphnum,
  */
 const char *vwf8Puts(uint32_t *restrict dst, const char *restrict s,
                      unsigned int x, unsigned int color) {
-  while (x < 240) {
+  while (x < SCREEN_WIDTH) {
     unsigned char c = *s & 0xFF;
     if (c < FIRST_PRINTABLE_CU) return s;
     ++s;
@@ -141,7 +127,7 @@ const char *vwf8Puts(uint32_t *restrict dst, const char *restrict s,
 unsigned int vwf8StrWidth(const char *s) {
   unsigned int x = 0;
 
-  while (x < 240) {
+  while (x < SCREEN_WIDTH) {
     unsigned char c = *s & 0xFF;
     if (c < FIRST_PRINTABLE_CU) return x;
     ++s;

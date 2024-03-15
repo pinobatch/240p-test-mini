@@ -18,14 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_video.h>
-#include <gba_input.h>
-
-extern const unsigned char helpsect_backlight_zones[];
 
 void activity_backlight_zone(void) {
   unsigned inverted = 0, hidden = 0, high_gear = 0, held_keys = 0, sz = 1;
-  unsigned int x = 119, y = 79;
+  unsigned int x = (SCREEN_WIDTH / 2) - 1, y = (SCREEN_HEIGHT / 2) - 1;
 
   load_common_obj_tiles();
   while (1) {
@@ -70,16 +66,16 @@ void activity_backlight_zone(void) {
       }
     }
 
-    unsigned ymax = 160 - (1 << sz);
+    unsigned ymax = SCREEN_HEIGHT - (1 << sz);
     if (y > ymax) y = ymax;
-    unsigned xmax = 240 - (1 << sz);
+    unsigned xmax = SCREEN_WIDTH - (1 << sz);
     if (x > xmax) x = xmax;
 
     // Draw the sprite
     oam_used = 0;
     if (!hidden) {
       unsigned int i = oam_used;
-      SOAM[i].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
+      SOAM[i].attr0 = OBJ_Y(y) | ATTR0_COLOR_16 | ATTR0_SQUARE;
       SOAM[i].attr1 = OBJ_X(x) | ATTR1_SIZE_8;
       SOAM[i].attr2 = (sz < 3) ? sz + 0x22 : 1;
       oam_used = i + 1;
@@ -87,9 +83,16 @@ void activity_backlight_zone(void) {
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    BG_COLORS[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
-    OBJ_COLORS[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    BG_PALETTE[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    SPRITE_PALETTE[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    BG_PALETTE_SUB[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    SPRITE_PALETTE_SUB[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    #endif
     ppu_copy_oam();
-    REG_DISPCNT = MODE_0 | OBJ_ON;
+    REG_DISPCNT = MODE_0 | OBJ_ON | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = MODE_0 | OBJ_ON | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }

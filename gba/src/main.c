@@ -17,24 +17,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
-#include <gba_video.h>
-#include <gba_interrupt.h>
-#include <gba_systemcalls.h>
-#include <gba_input.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "global.h"
 
-// It's a bit tricky to import a document ID into C.
-extern const unsigned char helpsect_160p_test_suite_menu[];
-extern const unsigned char helpsect_160p_test_suite[];
-extern const unsigned char helpsect_about[];
-extern const unsigned char helpsect_to_do[];
-
-#define DOC_MENU ((unsigned int)helpsect_160p_test_suite_menu)
-#define DOC_CREDITS ((unsigned int)helpsect_160p_test_suite)
-#define DOC_ABOUT ((unsigned int)helpsect_about)
-#define DOC_TODO ((unsigned int)helpsect_to_do)
+#ifdef __NDS__
+#define HELP_MENU helpsect_192p_test_suite_menu
+#define HELP_SUITE helpsect_192p_test_suite
+#else
+#define HELP_MENU helpsect_160p_test_suite_menu
+#define HELP_SUITE helpsect_160p_test_suite
+#endif
 
 // Notes:
 // iprintf/siprintf is devkitARM-specific printf/sprintf without float
@@ -87,14 +80,22 @@ int main(void) {
   unsigned int last_page, last_y;
 
   // Enable vblank IRQ, without which VBlankIntrWait() won't work
+  #ifdef __GBA__
   irqInit();
+  #else
+  initAllSounds();
+  #endif
   irqEnable(IRQ_VBLANK);
+  REG_DISPCNT = 0 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_DISPCNT_SUB = 0 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+  #endif
   //activity_overscan();
-  //helpscreen(DOC_TODO, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  //helpscreen(helpsect_to_do, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   activity_credits();
 
   while (1) {
-    unsigned int chosenpg = helpscreen(DOC_MENU, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
+    unsigned int chosenpg = helpscreen(HELP_MENU, KEY_A|KEY_START|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
     last_page = help_wanted_page;
     last_y = help_cursor_y;
     
@@ -110,10 +111,10 @@ int main(void) {
 }
 
 void activity_about(void) {
-  helpscreen(DOC_ABOUT, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  helpscreen(helpsect_about, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
 }
 
 void activity_credits(void) {
-  helpscreen(DOC_CREDITS, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  helpscreen(HELP_SUITE, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
 }
 

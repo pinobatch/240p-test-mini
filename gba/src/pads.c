@@ -22,7 +22,6 @@ it freely, subject to the following restrictions:
 "Source" is the preferred form of a work for making changes to it.
 
 */
-#include <gba_input.h>
 #include "global.h"
 
 #define DAS_DELAY 12
@@ -34,7 +33,12 @@ it freely, subject to the following restrictions:
 unsigned short cur_keys, new_keys, das_keys, das_timer;
 
 unsigned int read_pad(void) {
+  #ifdef __NDS__
+  scanKeys();
+  unsigned int keys = keysHeld();
+  #else
   unsigned int keys = (~REG_KEYINPUT) & 0x03ff;
+  #endif
   new_keys = keys & ~cur_keys;
   cur_keys = keys;
   return keys;

@@ -1,5 +1,6 @@
 0.24 (future)
-* Replace Grid and Linearity with Monoscope (thanks Lorenzoone)
+* NDS port
+* Replace Grid and Linearity with Monoscope (thanks Lorenzooone)
 * Sound test: add surround option
 * Reflect rebranding of Twitter to X
 

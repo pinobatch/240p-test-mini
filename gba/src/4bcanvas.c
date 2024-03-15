@@ -28,17 +28,28 @@ it freely, subject to the following restrictions:
 // related project.
 
 #include "4bcanvas.h"
-#include <sys/types.h>
-#include <gba_video.h>
+#include "global.h"
 void dma_memset16(void *dst, unsigned int c16, size_t n);
 
 const TileCanvas screen = {
-  .left = 0, .top = 0, .width = 32, .height = 20,
+  .left = 0, .top = 0, .width = SCREEN_WIDTH >> 3, .height = SCREEN_HEIGHT >> 3,
   .chrBase = (uint32_t *)PATRAM4(0, 0),
   .map = 23,
   .core = 0,
-  .mapTileBase = 0
+  .mapTileBase = 0,
+  .mapBase = MAP
 };
+
+#ifdef __NDS__
+const TileCanvas screen_sub = {
+  .left = 0, .top = 0, .width = SCREEN_WIDTH >> 3, .height = SCREEN_HEIGHT >> 3,
+  .chrBase = (uint32_t *)PATRAM4_SUB(0, 0),
+  .map = 23,
+  .core = 0,
+  .mapTileBase = 0,
+  .mapBase = MAP_SUB
+};
+#endif
 
 static
 void fillcol(uint32_t *dst, unsigned int colStride,
@@ -175,11 +186,7 @@ void canvasBlitAligned(const TileCanvas *src, const TileCanvas *dst,
 #endif
 
 void canvasInit(const TileCanvas *w, unsigned int color) {
-#if ARM9
-  NAMETABLE *dst = w->core ? &(MAP_SUB[w->map]) : &(MAP[w->map]);
-#else
-  NAMETABLE *dst = &(MAP[w->map]);
-#endif
+  NAMETABLE *dst = &(w->mapBase[w->map]);
 
   int mapTile = w->mapTileBase;
   for (int x = w->left; x < w->left + w->width; ++x) {

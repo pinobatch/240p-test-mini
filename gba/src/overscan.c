@@ -18,11 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_input.h>
-#include <gba_video.h>
 #include <stdint.h>
 
-extern const unsigned char helpsect_overscan[];
 #define PFMAP 23
 
 static signed int keys_to_side(unsigned int keys) {
@@ -34,19 +31,19 @@ static signed int keys_to_side(unsigned int keys) {
 }
 
 static const unsigned char overscan_dist_x[4] = {
-  23, 5, 14, 14
+  (SCREEN_WIDTH >> 3) - 5 - 2, 5, ((SCREEN_WIDTH >> 3) - 1) / 2, ((SCREEN_WIDTH >> 3) - 1) / 2
 };
 static const unsigned char overscan_dist_y[4] = {
-  9, 9, 5, 13
+  ((SCREEN_HEIGHT >> 3) - 1) / 2, ((SCREEN_HEIGHT >> 3) - 1) / 2, 5, (SCREEN_HEIGHT >> 3) - 5 - 2
 };
 
 static void overscan_draw_arrow(unsigned int side, unsigned int dist) {
   unsigned int i = oam_used;
-  unsigned int x = 116, y = 76;
+  unsigned int x = ((SCREEN_WIDTH - 8) / 2), y = ((SCREEN_HEIGHT - 8) / 2);
   unsigned int tilenum = (side & 0x02) ? 0x0009 : 0x0008;
   switch (side) {
     case 0:  // R
-    x = 224 - dist;
+    x = (SCREEN_WIDTH - 16) - dist;
     break;
     case 1:  // L
     x = dist;
@@ -55,18 +52,20 @@ static void overscan_draw_arrow(unsigned int side, unsigned int dist) {
     y = dist;
     break;
     case 3:  // D
-    y = 144 - dist;
+    y = (SCREEN_HEIGHT - 16) - dist;
+    break;
+    default:
     break;
   }
-  SOAM[i].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
-  SOAM[i].attr1 = OBJ_X(x) | OBJ_HFLIP | OBJ_VFLIP;
+  SOAM[i].attr0 = OBJ_Y(y) | ATTR0_COLOR_16 | ATTR0_SQUARE;
+  SOAM[i].attr1 = OBJ_X(x) | ATTR1_FLIP_X | ATTR1_FLIP_Y;
   SOAM[i].attr2 = tilenum;
   if (side & 0x02) {
     y += 8;
   } else {
     x += 8;
   }
-  SOAM[i + 1].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
+  SOAM[i + 1].attr0 = OBJ_Y(y) | ATTR0_COLOR_16 | ATTR0_SQUARE;
   SOAM[i + 1].attr1 = OBJ_X(x);
   SOAM[i + 1].attr2 = tilenum;
   oam_used = i + 2;
@@ -75,6 +74,7 @@ static void overscan_draw_arrow(unsigned int side, unsigned int dist) {
 void activity_overscan() {
   unsigned char dist[4] = {2, 2, 2, 2};
   unsigned int side = 0, inverted = 0;
+  unsigned int y_win_value = 0;
 
   load_common_obj_tiles();
   load_common_bg_tiles();
@@ -82,7 +82,14 @@ void activity_overscan() {
   for (uint32_t *c = PATRAM4(0, 0); c < PATRAM4(0, 32); ++c) {
     *c |= 0x44444444;
   }
-  dma_memset16(MAP[PFMAP], 0x0004, 32*20*2);
+  dma_memset16(MAP[PFMAP], 0x0004, 32*(SCREEN_HEIGHT >> 3)*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  // Make all BG tiles opaque
+  for (uint32_t *c = PATRAM4_SUB(0, 0); c < PATRAM4_SUB(0, 32); ++c) {
+    *c |= 0x44444444;
+  }
+  dma_memset16(MAP_SUB[PFMAP], 0x0004, 32*(SCREEN_HEIGHT >> 3)*2);
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect_overscan);
@@ -92,6 +99,8 @@ void activity_overscan() {
       inverted = !inverted;
     }
     if (new_keys & KEY_B) {
+      REG_DMA0CNT = 0;
+      REG_DMA1CNT = 0;
       return;
     }
     if (cur_keys & KEY_A) {
@@ -113,22 +122,72 @@ void activity_overscan() {
     
     VBlankIntrWait();
     // Color 0: outside
-    BG_COLORS[0] = BG_COLORS[5] = inverted ? RGB5(0, 0, 0) : RGB5(31, 31, 31);
-    BG_COLORS[4] = inverted ? RGB5(23, 23, 23) : RGB5(15, 15, 15);
+    BG_PALETTE[0] = BG_PALETTE[5] = inverted ? RGB5(0, 0, 0) : RGB5(31, 31, 31);
+    BG_PALETTE[4] = inverted ? RGB5(23, 23, 23) : RGB5(15, 15, 15);
     if (cur_keys & KEY_A) {
-      OBJ_COLORS[2] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+      SPRITE_PALETTE[2] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     } else {
-      OBJ_COLORS[2] = inverted ? RGB5(15, 15, 15) : RGB5(23, 23, 23);
+      SPRITE_PALETTE[2] = inverted ? RGB5(15, 15, 15) : RGB5(23, 23, 23);
     }
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
     BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    // Color 0: outside
+    BG_PALETTE_SUB[0] = BG_PALETTE_SUB[5] = inverted ? RGB5(0, 0, 0) : RGB5(31, 31, 31);
+    BG_PALETTE_SUB[4] = inverted ? RGB5(23, 23, 23) : RGB5(15, 15, 15);
+    if (cur_keys & KEY_A) {
+      SPRITE_PALETTE_SUB[2] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    } else {
+      SPRITE_PALETTE_SUB[2] = inverted ? RGB5(15, 15, 15) : RGB5(23, 23, 23);
+    }
+    BGCTRL_SUB[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+    BG_OFFSET_SUB[0].x = BG_OFFSET_SUB[0].y = 0;
+    #endif
     ppu_copy_oam();
-    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON | WIN0_ON;
+    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON | WIN0_ON | WIN1_ON | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_WINOUT = 0x10;  // BG0 inside, BG1 outside
-    REG_WININ = 0x11;
+    REG_WININ = 0x1111;
+
     // start<<8 | end
-    REG_WIN0H = (dist[1] << 8) | ((240 - dist[0]) & 0xFF);
-    REG_WIN0V = (dist[2] << 8) | ((160 - dist[3]) & 0xFF);
+    // Do this with the y value to fix an NDS bug.
+    // This doesn't create issues on the GBA, while sharing the code
+    y_win_value = (dist[2] << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF) | (((dist[2] << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF)) << 16);
+    unsigned int y_set_value = (7 << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF);
+    if(dist[2] == 0)
+        y_set_value = ((SCREEN_HEIGHT - dist[3]) & 0xFF);
+    
+    REG_WIN0H = (dist[1] << 8) | (SCREEN_WIDTH / 2);
+    REG_WIN0V = y_set_value;
+    // NDS requires two windows to fill 256 pixels on the X axys
+    REG_WIN1H = ((SCREEN_WIDTH / 2) << 8) | ((SCREEN_WIDTH - dist[0]) & 0xFF);
+    REG_WIN1V = y_set_value;
+  
+    REG_DMA0CNT = 0;
+    #ifdef __NDS__
+    DMA_FILL(0) = y_win_value;
+    REG_DMA0SAD = (intptr_t)&(DMA_FILL(0));
+    #else
+    REG_DMA0SAD = (intptr_t)&(y_win_value);
+    #endif
+    REG_DMA0DAD = (intptr_t)&(REG_WIN0V);
+    REG_DMA0CNT = 1|DMA_DST_FIXED|DMA_SRC_FIXED|DMA32|DMA_HBLANK|DMA_ENABLE;
+
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON | WIN0_ON | WIN1_ON | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_WINOUT_SUB = 0x10;  // BG0 inside, BG1 outside
+    REG_WININ_SUB = 0x1111;
+    
+    REG_WIN0H_SUB = (dist[1] << 8) | (SCREEN_WIDTH / 2);
+    REG_WIN0V_SUB = y_set_value;
+    // NDS requires two windows to fill 256 pixels on the X axys
+    REG_WIN1H_SUB = ((SCREEN_WIDTH / 2) << 8) | ((SCREEN_WIDTH - dist[0]) & 0xFF);
+    REG_WIN1V_SUB = y_set_value;
+  
+    REG_DMA1CNT = 0;
+    REG_DMA1SAD = (intptr_t)&(DMA_FILL(0));
+    REG_DMA1DAD = (intptr_t)&(REG_WIN0V_SUB);
+    REG_DMA1CNT = 1|DMA_DST_FIXED|DMA_SRC_FIXED|DMA32|DMA_HBLANK|DMA_ENABLE;
+    #endif
     
     for (int i = 0; i < 4; ++i) {
       unsigned int x = overscan_dist_x[i];
@@ -139,6 +198,12 @@ void activity_overscan() {
       MAP[PFMAP][y][x + 1] = 0x0010 + (value - tens * 10);
       MAP[PFMAP][y + 1][x] = 0x0006;
       MAP[PFMAP][y + 1][x + 1] = 0x0007;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      MAP_SUB[PFMAP][y][x] = tens ? (0x0010 + tens) : 0x0004;
+      MAP_SUB[PFMAP][y][x + 1] = 0x0010 + (value - tens * 10);
+      MAP_SUB[PFMAP][y + 1][x] = 0x0006;
+      MAP_SUB[PFMAP][y + 1][x + 1] = 0x0007;
+      #endif
     }
   }
 
