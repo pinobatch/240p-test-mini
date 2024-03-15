@@ -53,7 +53,7 @@ ALWAYS_INLINE MAX_OPTIMIZE int __get_next_vcount_interrupt(void) {
     return (reg_val >> 8) | ((reg_val & 0x80) << 1);
 }
 ALWAYS_INLINE MAX_OPTIMIZE void __reset_vcount(void) {
-    REG_VCOUNT = (REG_VCOUNT & 0xFE00) | (SCANLINES - 2);
+    REG_VCOUNT = (REG_VCOUNT & 0xFE00) | (SCANLINES - 6);
 }
 #define __set_next_vcount_interrupt(x) SetYtrigger(x)
 #define SCANLINE_IRQ_BIT DISP_YTRIGGER_IRQ
