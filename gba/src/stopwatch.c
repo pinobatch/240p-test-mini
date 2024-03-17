@@ -22,12 +22,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_input.h>
 #include <gba_dma.h>
 
-extern const VBTILE stopwatchhand_chrTiles[48];
-extern const ONEBTILE stopwatchface_chrTiles[64];
-extern const VBTILE stopwatchdigits_chrTiles[64];
-extern const unsigned short stopwatchface_chrMap[];
+#include "stopwatchhand_chr.h"
+#include "stopwatchface_chr.h"
+#include "stopwatchdigits_chr.h"
 
-extern const unsigned char helpsect_stopwatch[];
 #define PFMAP 23
 #define NUM_DIGITS 8
 #define NUM_FACE_PHASES 10

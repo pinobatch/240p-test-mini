@@ -24,6 +24,7 @@ it freely, subject to the following restrictions:
 */
 #include <stdint.h>
 #include "global.h"
+#include "vwf7.h"
 
 #if 0
 typedef struct VWFCanvas {
@@ -79,21 +80,6 @@ void loadMapRowMajor(unsigned short *dst, unsigned int tilenum,
     dst += 32;
   }
 }
-
-extern const unsigned char vwfChrData[][8];
-extern const unsigned char vwfChrWidths[];
-/*
- = {
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {0x00, 0x01, 0x01, 0x01, 0x01, 0x00, 0x01},
-  {0x00, 0x05, 0x05},
-  {0x00, 0x0A, 0x1F, 0x0A, 0x1F, 0x0A},
-};
-
-const unsigned char vwfGlyphWidths[] = {
-  3, 2, 4, 6
-};
-*/
 
 #define FIRST_PRINTABLE_CU 0x18
 

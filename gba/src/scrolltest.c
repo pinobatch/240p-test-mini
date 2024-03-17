@@ -24,9 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_compression.h>
 #include <gba_interrupt.h>
 
-extern const unsigned char helpsect_grid_scroll_test[];
-extern const unsigned char helpsect_hill_zone_scroll_test[];
-extern const unsigned char helpsect_vertical_scroll_test[];
+#include "kikitiles_chr.h"
+#include "kikimap_chr.h"
+#include "greenhillzone_chr.h"
 
 #define PFSCROLLTEST 22
 
@@ -144,8 +144,6 @@ static const unsigned char mt_belowR[] = {
   8, 0, 3, 9, 0, 0, 0, 7, 7, 7
 };
 
-extern const unsigned int kikimap_chrTiles[32];
-extern const VBTILE kikitiles_chrTiles[24];
 static const unsigned short kikipalette0[] = {
   RGB5( 0, 0, 0),RGB5(15,11, 7),RGB5(23,18,13),RGB5(31,25,19)
 };
@@ -220,10 +218,6 @@ void activity_kiki_scroll(void) {
 }
 
 // Horizontal scroll (like Sonic the Hedgehog) //////////////////////
-
-extern const unsigned short greenhillzone_chrPal[8];
-extern const unsigned short greenhillzone_chrMap[];  // LZ77
-extern const unsigned short greenhillzone_chrTiles[];  // LZ77
 
 void hill_zone_load_bg(void) {
   LZ77UnCompVram(greenhillzone_chrTiles, PATRAM4(0, 0));

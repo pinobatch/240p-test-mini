@@ -28,30 +28,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "4bcanvas.h"
 #include "posprintf.h"
 
-extern const unsigned char helpsect_pluge[];
-extern const unsigned char helpsect_gradient_color_bars[];
-extern const unsigned char helpsect_smpte_color_bars[];
-extern const unsigned char helpsect_color_bars_on_gray[];
-extern const unsigned char helpsect_color_bleed[];
-extern const unsigned char helpsect_monoscope[];
-extern const unsigned char helpsect_convergence[];
-extern const unsigned char helpsect_gray_ramp[];
-extern const unsigned char helpsect_sharpness[];
-extern const unsigned char helpsect_solid_color_screen[];
-extern const unsigned char helpsect_sharpness[];
-extern const unsigned char helpsect_full_screen_stripes[];
+#include "monoscope_chr.h"
+#include "sharpness_chr.h"
+#include "convergence_chr.h"
+#include "pluge_shark_6color_chr.h"
 
 #define PFMAP 23
 #define PFOVERLAY 22
 
-extern const VBTILE monoscope_chrTiles[32];
-extern const unsigned int monoscope_chrMap[];
-extern const VBTILE sharpness_chrTiles[48];
-extern const unsigned int sharpness_chrMap[];
-extern const VBTILE convergence_chrTiles[5];
-
-extern const unsigned char pluge_shark_6color_chrTiles[];
-extern const unsigned short pluge_shark_6color_chrPal[6];
 static const unsigned short pluge_shark_dark[] = {
   RGB5( 0, 0, 0),RGB5( 0, 0, 0),RGB5( 0, 0, 0),RGB5( 2, 2, 2),
   RGB5( 2, 2, 2),RGB5( 4, 4, 4)
@@ -261,7 +245,7 @@ void draw_barslist(const BarsListEntry *rects) {
   }
 }
 
-static void do_bars(const BarsListEntry *rects, const unsigned char *helpsect) {
+static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
   unsigned int bright = 0, beep = 0;
 
   draw_barslist(rects);
@@ -532,7 +516,7 @@ static const unsigned short full_stripes_colors[10][2] = {
 };
 
 
-static void do_full_stripes(const unsigned char *helpsect) {
+static void do_full_stripes(helpdoc_kind helpsect) {
   unsigned int pattern = 0, inverted = 0, frame = 0;
   unsigned int lcdcvalue = MODE_1 | BG1_ON;
 

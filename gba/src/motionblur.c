@@ -21,10 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_video.h>
 #include <gba_input.h>
 
-extern const unsigned char helpsect_health_warning[];
-#define DOC_HEALTH_WARNING ((unsigned int)helpsect_health_warning)
-
-extern const unsigned char helpsect_motion_blur[];
 #define PFMAP 23
 #define NUM_PARAMS 6
 #define BLANK_TILE 0x0004
@@ -57,7 +53,7 @@ void activity_motion_blur() {
   unsigned int phase = 0, timeleft = 0, running = 0;
 
   if (!flashing_accepted) {
-    helpscreen(DOC_HEALTH_WARNING, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+    helpscreen(helpsect_health_warning, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
     if (!(new_keys & (KEY_A | KEY_START))) return;
     flashing_accepted = 1;
   }

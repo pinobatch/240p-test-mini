@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_sound.h>
 #include <gba_input.h>
 
-extern const unsigned char helpsect_audio_sync[];
 #define PFMAP 23
 
 static const BarsListEntry audiosync_rects[] = {

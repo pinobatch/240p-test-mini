@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_video.h>
 #include <stdint.h>
 
-extern const unsigned char helpsect_overscan[];
 #define PFMAP 23
 
 static signed int keys_to_side(unsigned int keys) {

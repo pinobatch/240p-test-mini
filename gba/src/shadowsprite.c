@@ -24,22 +24,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_compression.h>
 #include <stdint.h>
 
-extern const unsigned char helpsect_shadow_sprite[];
+#include "Donna_chr.h"
+#include "Gus_portrait_chr.h"
+#include "hepsie_chr.h"
+
 #define PFSCROLLTEST 22
 #define PFOVERLAY 21
-
-extern const unsigned int Gus_portrait_chrTiles[];
-extern const unsigned short Gus_portrait_chrMap[20][14];
-extern const unsigned short Gus_portrait_chrPal[16];
-
-extern const unsigned int Donna_chrTiles[];
-extern const unsigned short Donna_chrMap[20][14];
-extern const unsigned short Donna_chrPal[16];
 
 static void gus_bg_setup(void) {
   LZ77UnCompVram(Gus_portrait_chrTiles, PATRAM4(0, 0));
   dma_memset16(MAP[PFSCROLLTEST], 0x0000, 32*20*2);
-  load_flat_map(&(MAP[PFSCROLLTEST][0][8]), Gus_portrait_chrMap[0], 14, 20);
+  load_flat_map(&(MAP[PFSCROLLTEST][0][8]), Gus_portrait_chrMap, 14, 20);
 }
 
 static void gus_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
@@ -54,7 +49,7 @@ static void gus_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
 static void donna_bg_setup(void) {
   LZ77UnCompVram(Donna_chrTiles, PATRAM4(0, 0));
   dma_memset16(MAP[PFSCROLLTEST], 0x0000, 32*20*2);
-  load_flat_map(&(MAP[PFSCROLLTEST][0][0]), Donna_chrMap[0], 30, 20);
+  load_flat_map(&(MAP[PFSCROLLTEST][0][0]), Donna_chrMap, 30, 20);
 }
 
 static void donna_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
@@ -103,8 +98,6 @@ static const ShadowSpriteBG bgtypes[] = {
 };
 
 #define NUM_BGTYPES (sizeof bgtypes / sizeof bgtypes[0])
-
-extern const VBTILE hepsie_chrTiles[32];
 
 static const unsigned short shadow_sprite_palettes[3][3] = {
   {RGB5( 0, 0, 0),RGB5( 0,31, 0),RGB5(31,25,19)},  // Hepsie top half
