@@ -245,6 +245,7 @@ void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
   REG_DMA0SAD = (intptr_t)&(hdmaTable[1]);
   REG_DMA0DAD = (intptr_t)&(BG_OFFSET[1].x);
   REG_DMA0CNT = 1|DMA_DST_RELOAD|DMA_SRC_INC|DMA_REPEAT|DMA16|DMA_HBLANK|DMA_ENABLE;
+  BG_OFFSET[1].x = hdmaTable[0];
 }
 
 void activity_hill_zone_scroll(void) {
