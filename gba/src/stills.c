@@ -136,6 +136,9 @@ void activity_monoscope(void) {
     if (new_keys & KEY_DOWN) {
       if (!brightness--) brightness = 4;
     }
+    if (new_keys & KEY_B) {
+      return;
+    }
 
     VBlankIntrWait();
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
