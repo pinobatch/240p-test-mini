@@ -97,8 +97,7 @@ S_H_SFILES	:=	\
   kikimap_chr.s kikitiles_chr.s greenhillzone_chr.s hepsie_chr.s \
   Gus_portrait_chr.s convergence_chr.s pluge_shark_6color_chr.s \
   helpbgtiles_chr.s helpsprites_chr.s Donna_chr.s vwf7.s helppages.s
-SFILES := 
-CSFILES := posprintf.cS
+SFILES := posprintf.s
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -116,7 +115,7 @@ endif
 
 export OFILES_BIN := $(addsuffix .o,$(BINFILES))
 
-export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(CSFILES:.cS=.o) $(SFILES:.s=.o) $(S_H_SFILES:.s=.o)
+export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) $(S_H_SFILES:.s=.o)
 
 export OFILES := $(OFILES_BIN) $(OFILES_SOURCES)
 
@@ -187,10 +186,6 @@ last-commit: last-commit-now
 # Convert help files
 helppages.s helppages.h: helppages.txt last-commit ../tools/paginate_help.py 
 	$(PY) ../tools/paginate_help.py -DCOMMIT="$$(cat last-commit)" $< -o $(basename $@).s -oh $(basename $@).h
-
-# Compile cS file to o
-%.o: %.cS
-	$(CC) $(ASFLAGS) -c -o $@ $<
 
 -include $(DEPSDIR)/*.d
 #---------------------------------------------------------------------------------------
