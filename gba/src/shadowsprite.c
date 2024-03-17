@@ -163,13 +163,13 @@ void activity_shadow_sprite() {
     if (cur_keys & KEY_A) {
       if (new_keys & KEY_RIGHT) {
         if (++cur_bg >= NUM_BGTYPES) cur_bg = 0;
-        REG_DISPCNT = MODE_0 | BG0_ON | OBJ_ON;
+        REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
       }
       if (new_keys & KEY_LEFT) {
         cur_bg = cur_bg ? cur_bg - 1 : NUM_BGTYPES - 1;
-        REG_DISPCNT = MODE_0 | BG0_ON | OBJ_ON;
+        REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
       }
