@@ -396,6 +396,10 @@ unsigned int read_pad_help_check(helpdoc_kind pg) {
   REG_SOUND1CNT_X = 0x8000;
   REG_SOUND2CNT_L = 0;
   REG_SOUND2CNT_H = 0x8000;
+  REG_DMA0CNT = 0;
+  REG_DMA1CNT = 0;
+  REG_DMA2CNT = 0;
+  REG_DMA3CNT = 0;
   help_wnd_progress = 0;
   helpscreen(pg, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   new_keys = 0;
