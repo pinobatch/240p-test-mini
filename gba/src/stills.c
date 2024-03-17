@@ -126,7 +126,6 @@ void activity_monoscope(void) {
 
   bitunpack2(PATRAM4(0, 0), monoscope_chrTiles, sizeof(monoscope_chrTiles));
   RLUnCompVram(monoscope_chrMap, MAP[PFMAP]);
-  BG_COLORS[1] = RGB5(31, 0, 0);
 
   while (1) {
     read_pad_help_check(helpsect_monoscope);
@@ -143,8 +142,9 @@ void activity_monoscope(void) {
     VBlankIntrWait();
     BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
     BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_COLORS[0] = (brightness >= 4) ? RGB5(13,13,13) : 0;
-    BG_COLORS[2] = monoscope_whites[brightness];
+    BG_PALETTE[0] = (brightness >= 4) ? RGB5(13,13,13) : 0;
+    BG_PALETTE[1] = monoscope_whites[brightness];
+    BG_PALETTE[2] = RGB5(31, 0, 0);
     REG_DISPCNT = MODE_0 | BG0_ON;
   }
 }
