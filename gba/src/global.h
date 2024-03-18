@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/types.h>
 #include <gba_sprites.h>
 #include <gba_systemcalls.h>
+#include "helppages.h"
 
 // Size of a statically sized array
 #define count(array) (sizeof((array)) / sizeof((array)[0]))
@@ -34,8 +35,8 @@ typedef void (*activity_func)(void);
 extern char help_line_buffer[HELP_LINE_LEN];
 extern unsigned char help_bg_loaded, help_wanted_page, help_cursor_y;
 extern signed char help_wnd_progress;
-unsigned int helpscreen(unsigned int doc_num, unsigned int keymask);
-unsigned int read_pad_help_check(const void *doc_num_as_ptr);
+unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask);
+unsigned int read_pad_help_check(helpdoc_kind doc_num);
 
 // stills.c
 

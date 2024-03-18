@@ -32,17 +32,18 @@ GRAPHICS	:= tilesets ../common/tilesets
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
+DEFINES := -D__GBA__
 ARCH	:=	-mthumb -mthumb-interwork
 
 CFLAGS	:=	-g -Wall -O2 -fno-common\
 		-mcpu=arm7tdmi -mtune=arm7tdmi\
-		$(ARCH)
+		$(ARCH) $(DEFINES)
 
 CFLAGS	+=	$(INCLUDE)
 
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
+ASFLAGS	:=	-g $(ARCH) $(DEFINES) -x assembler-with-cpp
 LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 #---------------------------------------------------------------------------------
@@ -90,13 +91,13 @@ CFILES		:=	\
   shadowsprite.c stopwatch.c soundtest.c audiosync.c backlight.c megaton.c \
   pads.c ppuclear.c vwfdraw.c vwflabels.c undte.c rand.c 4bcanvas.c
 CPPFILES	:=
-SFILES		:=	\
-  posprintf.s \
+S_H_SFILES	:=	\
   bggfx_chr.s spritegfx_chr.s monoscope_chr.s sharpness_chr.s \
   stopwatchface_chr.s stopwatchhand_chr.s stopwatchdigits_chr.s \
   kikimap_chr.s kikitiles_chr.s greenhillzone_chr.s hepsie_chr.s \
   Gus_portrait_chr.s convergence_chr.s pluge_shark_6color_chr.s \
-  vwf7.s helppages.s helpbgtiles_chr.s helpsprites_chr.s Donna_chr.s
+  helpbgtiles_chr.s helpsprites_chr.s Donna_chr.s vwf7.s helppages.s
+SFILES := posprintf.s
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -114,11 +115,11 @@ endif
 
 export OFILES_BIN := $(addsuffix .o,$(BINFILES))
 
-export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) $(S_H_SFILES:.s=.o)
 
 export OFILES := $(OFILES_BIN) $(OFILES_SOURCES)
 
-export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
+export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES))) $(subst .s,.h,$(S_H_SFILES))
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
@@ -172,8 +173,8 @@ $(OFILES_SOURCES) : $(HFILES)
 	grit $< -ff$(word 2,$^) -fts -o$*_chr
 
 # Convert a proportional font
-vwf7.s: vwf7_cp144p.png ../tools/vwfbuild.py last-commit
-	$(PY) ../tools/vwfbuild.py $< $@
+vwf7.s vwf7.h: vwf7_cp144p.png ../tools/vwfbuild.py last-commit
+	$(PY) ../tools/vwfbuild.py $< $(basename $@).s $(basename $@).h
 
 # Update last-commit if it has changed
 last-commit-now:
@@ -183,8 +184,8 @@ last-commit: last-commit-now
 	cmp $< $@ || cp $< $@
 
 # Convert help files
-helppages.s: helppages.txt last-commit ../tools/paginate_help.py 
-	$(PY) ../tools/paginate_help.py -DCOMMIT="$$(cat last-commit)" $< -o $@
+helppages.s helppages.h: helppages.txt last-commit ../tools/paginate_help.py 
+	$(PY) ../tools/paginate_help.py -DCOMMIT="$$(cat last-commit)" $< -o $(basename $@).s -oh $(basename $@).h
 
 -include $(DEPSDIR)/*.d
 #---------------------------------------------------------------------------------------

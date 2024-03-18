@@ -29,10 +29,8 @@ it freely, subject to the following restrictions:
 #include <string.h>
 #include "global.h"
 
-extern const unsigned char spritegfx_chrTiles[];
-extern const unsigned short spritegfx_chrPal[16];
-
-extern const unsigned char helpsect_lame_boy[];
+#include "bggfx_chr.h"
+#include "spritegfx_chr.h"
 
 unsigned short player_x;
 signed short player_dx;
@@ -127,7 +125,6 @@ static void draw_player_sprite(void) {
 // Still trying to see whether GritHub will cause me to not need
 // pilbmp2nes.py. <https://github.com/devkitPro/grit>
 // It's in Virtual Boy format because that decompresses easily
-extern const VBTILE bggfx_chrTiles[48];
 
 static const unsigned short bgcolors00[16] = {
   RGB5(25,25,31), RGB5(20,20, 0), RGB5(27,27, 0), RGB5(31,31, 0)

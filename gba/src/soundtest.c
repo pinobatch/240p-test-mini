@@ -232,12 +232,6 @@ IWRAM_CODE static void beepPCM(void) {
 
 // Sound test menu //////////////////////////////////////////////////
 
-extern const unsigned char helpsect_sound_test_frequency[];
-extern const unsigned char helpsect_sound_test[];
-
-#define DOC_MENU ((unsigned int)helpsect_sound_test_frequency)
-#define DOC_HELP ((unsigned int)helpsect_sound_test)
-
 static const activity_func sound_test_handlers[] = {
   beep8k,
   beep4k,
@@ -259,7 +253,7 @@ void activity_sound_test() {
   reinitAudio();
   while (1) {
     REG_SOUNDCNT_L = 0xFF77;  // reset PSG vol/pan
-    helpscreen(DOC_MENU, KEY_A|KEY_START|KEY_B|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
+    helpscreen(helpsect_sound_test_frequency, KEY_A|KEY_START|KEY_B|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
 
     if (new_keys & KEY_B) {
       REG_SOUNDCNT_X = 0;  // reset audio
@@ -270,7 +264,7 @@ void activity_sound_test() {
       unsigned int last_y = help_cursor_y;
       help_wanted_page = last_page;
       help_cursor_y = last_y;
-      helpscreen(DOC_HELP, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+      helpscreen(helpsect_sound_test, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
     } else {
       sound_test_handlers[help_cursor_y]();
     }

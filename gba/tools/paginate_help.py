@@ -18,9 +18,15 @@ def render_help(docs, defines=None):
 
 .section .rodata
 """]
+    lines_header = ["""// File generated with paginate_help.py
+#ifndef HELPPAGES_H__
+#define HELPPAGES_H__
+enum helpdoc_kind_e {"""]
     lines.extend('.global helpsect_%s' % (doc[1])
                  for i, doc in enumerate(docs))
     lines.extend('helpsect_%s = %d' % (doc[1], i)
+                 for i, doc in enumerate(docs))
+    lines_header.extend('    helpsect_%s = %d,' % (doc[1], i)
                  for i, doc in enumerate(docs))
     lines.extend('helptitle_%s:\n%s\n  .byte 0'
                  % (doc[1], ca65_bytearray(doc[0].encode("cp144p")))
@@ -44,15 +50,23 @@ def render_help(docs, defines=None):
         cumul_pages.append(pagenum)
     lines.append('help_cumul_pages:')
     lines.append(ca65_bytearray(cumul_pages))
+    lines_header.append("};")
+    lines_header.append("typedef enum helpdoc_kind_e helpdoc_kind;")
     lines.append('HELP_NUM_PAGES = %d' % cumul_pages[-1])
     lines.append('HELP_NUM_SECTS = %d' % len(docs))
+    lines_header.append('#define HELP_NUM_PAGES %d' % cumul_pages[-1])
+    lines_header.append('#define HELP_NUM_SECTS %d' % len(docs))
+    lines_header.append('extern const char *const helppages[HELP_NUM_PAGES];')
+    lines_header.append('extern const char *const helptitles[HELP_NUM_SECTS];')
+    lines_header.append('extern const unsigned char help_cumul_pages[HELP_NUM_SECTS];')
+    lines_header.append('#endif')
     lines.append('.balign 4')  # set alignment
     lines.append('helppages:')
     lines.extend('  .word helppage_%03d' % i for i in range(cumul_pages[-1]))
     lines.append('helptitles:')
     lines.extend('  .word helptitle_%s' % doc[1] for doc in docs)
 
-    return "\n".join(lines)
+    return ["\n".join(lines), "\n".join(lines_header)]
 
 def parse_define(s):
     kv = s.split('=', 1)
@@ -66,6 +80,10 @@ def parse_argv(argv):
                    help="help file with pages introduced by ==title==")
     p.add_argument("-o", "--output", default="-",
                    help="assembly file to write (default: standard output)")
+    p.add_argument("-oh", "--output_header", default="-",
+                   help="header file to write")
+    p.add_argument("-m", "--maxpagelen", default="15", type=int,
+                   help="maximum length of a page in lines")
     p.add_argument("-D", metavar="WORD=value",
                    type=parse_define, dest="defines", nargs='*',
                    help="define a word for $WORD or ${WORD} substitution")
@@ -75,14 +93,16 @@ def main(argv=None):
     args = parse_argv(argv or sys.argv)
     with open(args.input, 'r', encoding="utf-8") as infp:
         lines = [line.rstrip() for line in infp]
-    docs = lines_to_docs(args.input, lines, maxpagelen=15)
+    docs = lines_to_docs(args.input, lines, maxpagelen=int(args.maxpagelen))
     out = render_help(docs, defines=args.defines)
     if args.output != '-':
         with open(args.output, "w", encoding="utf-8") as outfp:
-            outfp.write(out)
+            outfp.write(out[0])
     else:
-        sys.stdout.write(out)
-
+        sys.stdout.write(out[0])
+    if args.output_header != '-':
+        with open(args.output_header, "w", encoding="utf-8") as outfp:
+            outfp.write(out[1])
 if __name__=='__main__':
     is_IDLE = 'idlelib.run' in sys.modules or 'idlelib.__main__' in sys.modules
     if is_IDLE:

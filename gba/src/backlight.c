@@ -21,8 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_video.h>
 #include <gba_input.h>
 
-extern const unsigned char helpsect_backlight_zones[];
-
 void activity_backlight_zone(void) {
   unsigned inverted = 0, hidden = 0, high_gear = 0, held_keys = 0, sz = 1;
   unsigned int x = 119, y = 79;

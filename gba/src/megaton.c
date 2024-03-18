@@ -23,7 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_video.h>
 #include "posprintf.h"
 
-extern const unsigned char helpsect_timing_and_reflex_test[];
 #define PFMAP 23
 #define NUM_TRIALS 10
 #define BLANK_TILE 0x0004

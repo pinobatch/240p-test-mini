@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <gba_sound.h>
 #include "global.h"
 #include "posprintf.h"
+#include "helpsprites_chr.h"
+#include "helpbgtiles_chr.h"
 
 // Code units
 #define LF 0x0A
@@ -93,17 +95,6 @@ Sprite VRAM
 The window
 
 */
-
-extern const unsigned int helpbgtiles_chrTiles[];
-extern const unsigned short helpbgtiles_chrPal[16];
-extern const unsigned char helpsprites_chrTiles[];
-extern const unsigned short helpsprites_chrPal[16];
-
-extern const char *const helppages[];
-extern const char *const helptitles[];
-extern const unsigned char help_cumul_pages[];
-extern const void *HELP_NUM_PAGES;
-extern const void *HELP_NUM_SECTS;
 
 static void load_help_bg(void) {
 
@@ -198,7 +189,7 @@ static void help_draw_cursor(unsigned int objx) {
   oam_used = ou + 1;
 }
 
-static void help_draw_page(unsigned int doc_num, unsigned int left, unsigned int keymask) {
+static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int keymask) {
   // Draw document title
   dma_memset16(PATRAM4(3, 0), FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
   vwf8Puts(PATRAM4(3, 0), helptitles[doc_num], 0, FG_FGCOLOR);
@@ -294,7 +285,7 @@ static unsigned int help_move_window(void) {
   return x;
 }
 
-unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
+unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
 
   // If not within this document, move to the first page
   // and move the cursor (if any) to the top
@@ -395,7 +386,7 @@ unsigned int helpscreen(unsigned int doc_num, unsigned int keymask) {
  * @param pg an extern helpsect_ value
  * @return 1 if pressed, 0 if not
  */
-unsigned int read_pad_help_check(const void *pg) {
+unsigned int read_pad_help_check(helpdoc_kind pg) {
   read_pad();
   if (!(new_keys & KEY_START)) return 0;
 
@@ -405,8 +396,12 @@ unsigned int read_pad_help_check(const void *pg) {
   REG_SOUND1CNT_X = 0x8000;
   REG_SOUND2CNT_L = 0;
   REG_SOUND2CNT_H = 0x8000;
+  REG_DMA0CNT = 0;
+  REG_DMA1CNT = 0;
+  REG_DMA2CNT = 0;
+  REG_DMA3CNT = 0;
   help_wnd_progress = 0;
-  helpscreen((unsigned int)pg, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  helpscreen(pg, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   new_keys = 0;
   help_wnd_progress = 0;
   return 1;

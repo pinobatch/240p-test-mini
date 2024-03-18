@@ -25,16 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 #include "global.h"
 
-// It's a bit tricky to import a document ID into C.
-extern const unsigned char helpsect_160p_test_suite_menu[];
-extern const unsigned char helpsect_160p_test_suite[];
-extern const unsigned char helpsect_about[];
-extern const unsigned char helpsect_to_do[];
-
-#define DOC_MENU ((unsigned int)helpsect_160p_test_suite_menu)
-#define DOC_CREDITS ((unsigned int)helpsect_160p_test_suite)
-#define DOC_ABOUT ((unsigned int)helpsect_about)
-#define DOC_TODO ((unsigned int)helpsect_to_do)
+#define DOC_MENU helpsect_160p_test_suite_menu
+#define DOC_CREDITS helpsect_160p_test_suite
 
 // Notes:
 // iprintf/siprintf is devkitARM-specific printf/sprintf without float
@@ -90,7 +82,7 @@ int main(void) {
   irqInit();
   irqEnable(IRQ_VBLANK);
   //activity_overscan();
-  //helpscreen(DOC_TODO, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  //helpscreen(helpsect_to_do, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   activity_credits();
 
   while (1) {
@@ -110,7 +102,7 @@ int main(void) {
 }
 
 void activity_about(void) {
-  helpscreen(DOC_ABOUT, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+  helpscreen(helpsect_about, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
 }
 
 void activity_credits(void) {
