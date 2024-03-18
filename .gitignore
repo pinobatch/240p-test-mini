@@ -38,9 +38,12 @@ __pycache__/
 # these are unrelated to NES savtool's image format
 /gameboy/gb240p.sav
 /gba/build
+/gba/build_nds
 /gba/240pee_mb.elf
 /gba/240pee_mb.gba
 /gba/240pee_mb.sav
+/gba/240p_test_suite.nds
+/gba/240p_test_suite.sav
 /gba/.map
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
