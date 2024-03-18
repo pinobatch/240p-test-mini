@@ -1,0 +1,1 @@
+#ifndef _DCMPRSS_HEADER_#define _DCMPRSS_HEADER_extern int swi_LZ77UnCompWrite16bit(const void *source, void *destination);extern int swi_LZ77UnCompWrite8bit(const void *source, void *destination);#endif

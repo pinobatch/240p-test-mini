@@ -23,8 +23,6 @@ it freely, subject to the following restrictions:
 
 */
 #include "global.h"
-#include <gba_dma.h>
-#include <gba_compression.h>
 
 EWRAM_BSS OBJATTR SOAM[128];
 unsigned char oam_used;
@@ -34,17 +32,27 @@ unsigned char oam_used;
  */
 void ppu_clear_oam(size_t start) {
   for (; start < 128; ++start) {
-    SOAM[start].attr0 = OBJ_DISABLE;
+    SOAM[start].attr0 = ATTR0_DISABLED;
   }
 }
 
 void ppu_copy_oam() {
+  #ifdef __NDS__
+  CP15_CleanAndFlushDCache();
+  #endif
   dmaCopy(SOAM, OAM, sizeof(SOAM));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dmaCopy(SOAM, OAM_SUB, sizeof(SOAM));
+  #endif
 }
 
 void dma_memset16(void *dst, unsigned int c16, size_t n) {
+  #ifdef __NDS__
+  dmaFillHalfWords(c16, dst, n);
+  #else
   volatile unsigned short src = c16;
   DMA_Copy(3, &src, dst, DMA_SRC_FIXED | DMA16 | (n>>1));
+  #endif
 }
 
 void bitunpack2(void *restrict dst, const void *restrict src, size_t len) {
@@ -66,6 +74,9 @@ void bitunpack1(void *restrict dst, const void *restrict src, size_t len) {
 }
 
 void load_flat_map(unsigned short *dst, const unsigned short *src, unsigned int w, unsigned int h) {
+  #ifdef __NDS__
+  CP15_CleanAndFlushDCache();
+  #endif
   for (; h > 0; --h) {
     dmaCopy(src, dst, w * 2);
     src += w;

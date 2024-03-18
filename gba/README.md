@@ -63,6 +63,10 @@ the polarity by row.  Slight level differences between a pixel and
 its inverted counterpart can look like interlace.
 (See "[LCD monitor technology and tests]" by W. Andrew Steer.)
 
+The Nintendo DS system outputs progressive video with 192
+lines of picture.  Its TFT panel also has 32 levels per RGB channel,
+with varying degrees of brightness in newer models.
+
 NES and Game Boy ports are also available.
 
 Artemio Urbina maintains the upstream suite on five platforms:
@@ -106,7 +110,7 @@ Limits
 * The true IRE levels of the GameCube's output when running Game Boy
   Player have not yet been measured.
 
-Building
+Building GBA
 --------
 Build requirements: GNU Coreutils and Make (use devkitPro MSYS on
 Windows), devkitARM, libgba, Python 3, and Pillow.
@@ -116,6 +120,14 @@ or macOS, once you have installed `gba-dev` using pacman, type these:
 
     source /etc/profile.d/devkit-env.sh
     make
+
+Building NDS
+--------
+Build requirements: GNU Coreutils and Make (use devkitPro MSYS on
+Windows), BlocksDS, Python 3, and Pillow.
+
+Running make should suffice, provided the BLOCKSDS
+environment variable is properly set.
 
 Contributors
 ------------
