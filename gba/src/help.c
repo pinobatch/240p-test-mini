@@ -17,11 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
-#include <gba_video.h>
-#include <gba_compression.h>
-#include <gba_dma.h>
-#include <gba_input.h>
-#include <gba_sound.h>
 #include "global.h"
 #include "posprintf.h"
 #include "helpsprites_chr.h"
@@ -105,7 +100,7 @@ static void load_help_bg(void) {
   // Clear VWF canvas
   dma_memset16(PATRAM4(3, 0), 0x1111 * FG_BGCOLOR, 32*WINDOW_WIDTH*17);
 
-  // Load background nametable
+  // Load background SCREENMAT
   dma_memset16(MAP[BGMAP][0], TILE_BACK_WALL, 64*(BACK_WALL_HT - 1));
   dma_memset16(MAP[BGMAP][BACK_WALL_HT - 1], TILE_BACK_WALL_BOTTOM, 30*2);
   dma_memset16(MAP[BGMAP][BACK_WALL_HT], TILE_FLOOR_TOP, 30*2);
@@ -118,7 +113,7 @@ static void load_help_bg(void) {
     MAP[BGMAP][SHADOW_Y + 1][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0C03 - x;
   }
   
-  // Clear window nametable
+  // Clear window SCREENMAT
   dma_memset16(MAP[FGMAP], TILE_FG_BLANK, 32*21*2);
   dma_memset16(MAP[FGMAP + 1], TILE_FG_XPARENT, 32*21*2);
 
@@ -153,22 +148,22 @@ static void help_draw_character(void) {
   unsigned int ou = oam_used;
   
   if (++blink_time < 8) {
-    SOAM[ou].attr0 = 49 | OBJ_16_COLOR | ATTR0_SQUARE;
+    SOAM[ou].attr0 = 49 | ATTR0_4BPP | ATTR0_SQUARE;
     SOAM[ou].attr1 = 48 | ATTR1_SIZE_8;
-    SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALETTE(0);
+    SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALBANK(0);
     ++ou;
-    SOAM[ou].attr0 = 49 | OBJ_16_COLOR | ATTR0_SQUARE;
-    SOAM[ou].attr1 = 40 | ATTR1_SIZE_8 | OBJ_HFLIP;
-    SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALETTE(0);
+    SOAM[ou].attr0 = 49 | ATTR0_4BPP | ATTR0_SQUARE;
+    SOAM[ou].attr1 = 40 | ATTR1_SIZE_8 | ATTR1_HFLIP;
+    SOAM[ou].attr2 = BLINK_TILE | ATTR2_PALBANK(0);
     ++ou;
   }
   for (unsigned int i = 0; i < 2; ++i) {
-    unsigned int a0 = (18 + i * 64) | OBJ_16_COLOR | ATTR0_TALL;
+    unsigned int a0 = (18 + i * 64) | ATTR0_4BPP | ATTR0_TALL;
     unsigned int a1 = 16 | ATTR1_SIZE_64;
-    unsigned int a2 = (CHARACTER_VRAM_BASE + 32 * i) | ATTR2_PALETTE(0);
+    unsigned int a2 = (CHARACTER_VRAM_BASE + 32 * i) | ATTR2_PALBANK(0);
 
     SOAM[ou].attr0 = a0;
-    SOAM[ou].attr1 = a1 | OBJ_HFLIP;
+    SOAM[ou].attr1 = a1 | ATTR1_HFLIP;
     SOAM[ou].attr2 = a2;
     ++ou;
     SOAM[ou].attr0 = a0;
@@ -183,9 +178,9 @@ static void help_draw_cursor(unsigned int objx) {
   if (objx >= 240) return;
 
   unsigned int ou = oam_used;
-  SOAM[ou].attr0 = (20 + help_cursor_y * 8) | OBJ_16_COLOR | ATTR0_SQUARE;
+  SOAM[ou].attr0 = (20 + help_cursor_y * 8) | ATTR0_4BPP | ATTR0_SQUARE;
   SOAM[ou].attr1 = objx | ATTR1_SIZE_8;
-  SOAM[ou].attr2 = ARROW_TILE  | ATTR2_PALETTE(0);
+  SOAM[ou].attr2 = ARROW_TILE | ATTR2_PALBANK(0);
   oam_used = ou + 1;
 }
 
@@ -201,7 +196,7 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Draw lines of text to the screen
   while (y < PAGE_MAX_LINES) {
-    unsigned long *dst = PATRAM4(3, (y + 1)*WINDOW_WIDTH);
+    u32 *dst = PATRAM4(3, (y + 1)*WINDOW_WIDTH);
     ++y;
     dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
     src = vwf8Puts(dst, src, left, FG_FGCOLOR);
@@ -213,7 +208,7 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Clear unused lines that had been used
   for (unsigned int clear_y = y; clear_y < help_height; ++clear_y) {
-    unsigned long *dst = PATRAM4(3, (clear_y + 1)*WINDOW_WIDTH);
+    u32 *dst = PATRAM4(3, (clear_y + 1)*WINDOW_WIDTH);
     dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
   }
 
@@ -225,7 +220,7 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Draw status line depending on size of document and which
   // keys are enabled
-  unsigned long *dst = PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH);
+  u32 *dst = PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH);
   dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
 
   if (help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num] > 1) {
@@ -297,7 +292,7 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
 
   // If the help VRAM needs to be reloaded, reload its tiles and map
   if (!help_bg_loaded) {
-    REG_DISPCNT = LCDC_OFF;
+    REG_DISPCNT = DCNT_BLANK;
     load_help_bg();
     REG_DISPCNT = 0;
   } else {
@@ -313,15 +308,15 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
 
   // Load palette
   VBlankIntrWait();
-  dmaCopy(helpbgtiles_chrPal, BG_COLORS+0x00, sizeof(helpbgtiles_chrPal));
-  dmaCopy(helpsprites_chrPal, OBJ_COLORS+0x00, sizeof(helpsprites_chrPal));
+  tonccpy(pal_bg_mem+0x00, helpbgtiles_chrPal, sizeof(helpbgtiles_chrPal));
+  tonccpy(pal_obj_mem+0x00, helpsprites_chrPal, sizeof(helpsprites_chrPal));
 
   // Set up background regs (except DISPCNT)
-  BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(3)|SCREEN_BASE(BGMAP);
-  BGCTRL[0] = BG_16_COLOR|BG_WID_64|BG_HT_32|CHAR_BASE(3)|SCREEN_BASE(FGMAP);
-  BG_OFFSET[1].x = BG_OFFSET[1].y = 0;
-  BG_OFFSET[0].x = help_wnd_progress ? WXBASE : 256;
-  BG_OFFSET[0].y = 4;
+  REG_BGCNT[1] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(3)|BG_SBB(BGMAP);
+  REG_BGCNT[0] = BG_4BPP|BG_WID_64|BG_HT_32|BG_CBB(3)|BG_SBB(FGMAP);
+  REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
+  REG_BG_OFS[0].x = help_wnd_progress ? WXBASE : 256;
+  REG_BG_OFS[0].y = 4;
   
   // Freeze
   while (1) {
@@ -374,8 +369,8 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
     if (help_show_cursor) help_draw_cursor(512 - wx + 6);
     ppu_clear_oam(oam_used);
     VBlankIntrWait();
-    REG_DISPCNT = MODE_0 | BG1_ON | BG0_ON | OBJ_1D_MAP | OBJ_ON;
-    BG_OFFSET[0].x = wx;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_BG_OFS[0].x = wx;
     ppu_copy_oam();
   }
 }

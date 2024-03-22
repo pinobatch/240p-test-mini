@@ -18,9 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_video.h>
-#include <gba_input.h>
-#include <gba_dma.h>
+#include <tonc.h>
 
 #include "stopwatchhand_chr.h"
 #include "stopwatchface_chr.h"
@@ -63,8 +61,8 @@ static const char sw_labels[] =
 
 static void draw_stopwatch_hand(unsigned int phase) {
   unsigned int i = oam_used;
-  unsigned int a0 = OBJ_Y(sw_face_y[phase] - 12) | OBJ_16_COLOR | ATTR0_SQUARE;
-  unsigned int a1 = OBJ_X(sw_face_x[phase] + 28) | ATTR1_SIZE_16;
+  unsigned int a0 = ATTR0_Y(sw_face_y[phase] - 12) | ATTR0_4BPP | ATTR0_SQUARE;
+  unsigned int a1 = ATTR1_X(sw_face_x[phase] + 28) | ATTR1_SIZE_16;
 
   // draw digit
   SOAM[i].attr0 = a0 + 8;
@@ -74,18 +72,18 @@ static void draw_stopwatch_hand(unsigned int phase) {
   SOAM[i].attr1 = a1;
   SOAM[i++].attr2 = 40;
   SOAM[i].attr0 = a0;
-  SOAM[i].attr1 = a1 + 16 + OBJ_HFLIP;
+  SOAM[i].attr1 = a1 + 16 + ATTR1_HFLIP;
   SOAM[i++].attr2 = 40;
   SOAM[i].attr0 = a0 + 16;
-  SOAM[i].attr1 = a1 + OBJ_VFLIP;
+  SOAM[i].attr1 = a1 + ATTR1_VFLIP;
   SOAM[i++].attr2 = 40;
   SOAM[i].attr0 = a0 + 16;
-  SOAM[i].attr1 = a1 + 16 + OBJ_HFLIP + OBJ_VFLIP;
+  SOAM[i].attr1 = a1 + 16 + ATTR1_HFLIP + ATTR1_VFLIP;
   SOAM[i++].attr2 = 40;
 
   // draw hand
-  a0 = OBJ_Y(sw_face_y[phase] / 2 + 48) | OBJ_16_COLOR | ATTR0_SQUARE;
-  a1 = OBJ_X(sw_face_x[phase] / 2 + 78) | ATTR1_SIZE_8;
+  a0 = ATTR0_Y(sw_face_y[phase] / 2 + 48) | ATTR0_4BPP | ATTR0_SQUARE;
+  a1 = ATTR1_X(sw_face_x[phase] / 2 + 78) | ATTR1_SIZE_8;
   SOAM[i].attr0 = a0;
   SOAM[i].attr1 = a1;
   SOAM[i++].attr2 = 44;
@@ -157,18 +155,18 @@ void activity_stopwatch() {
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_COLORS[0] = RGB5(31, 31, 31);
-    BG_COLORS[1] = hide_face ? RGB5(31, 31, 31) : RGB5(23, 23, 23);
-    BG_COLORS[3] = (show_ruler & (1 << (face_phase & 1)))
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    pal_bg_mem[0] = RGB5(31, 31, 31);
+    pal_bg_mem[1] = hide_face ? RGB5(31, 31, 31) : RGB5(23, 23, 23);
+    pal_bg_mem[3] = (show_ruler & (1 << (face_phase & 1)))
                    ? RGB5(23, 0, 0) : RGB5(31, 31, 31);
-    BG_COLORS[65] = RGB5(0, 0, 0);
-    dmaCopy(invgray4pal, BG_COLORS+0x10, sizeof(invgray4pal));
-    dmaCopy(bluepalette, BG_COLORS+0x21, sizeof(invgray4pal));
-    dmaCopy(redpalette, BG_COLORS+0x31, sizeof(invgray4pal));
-    dmaCopy(invgray4pal, OBJ_COLORS+0x00, sizeof(invgray4pal));
+    pal_bg_mem[65] = RGB5(0, 0, 0);
+    tonccpy(pal_bg_mem+0x10, invgray4pal, sizeof(invgray4pal));
+    tonccpy(pal_bg_mem+0x21, bluepalette, sizeof(bluepalette));
+    tonccpy(pal_bg_mem+0x31, redpalette, sizeof(redpalette));
+    tonccpy(pal_obj_mem+0x00, invgray4pal, sizeof(invgray4pal));
     ppu_copy_oam();
 
     // Update digits

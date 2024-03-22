@@ -18,11 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_input.h>
-#include <gba_video.h>
-#include <gba_dma.h>
-#include <gba_compression.h>
-#include <gba_interrupt.h>
+#include <tonc.h>
+
 
 #include "kikitiles_chr.h"
 #include "kikimap_chr.h"
@@ -84,12 +81,12 @@ void activity_grid_scroll(void) {
       y += scrolltest_dy;
     }
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
-    BG_OFFSET[0].x = x;
-    BG_OFFSET[0].y = y;
-    BG_COLORS[0] = inverted ? RGB5(31,31,31) : RGB5(0, 0, 0);
-    BG_COLORS[1] = inverted ? RGB5(0, 0, 0) : RGB5(31,31,31);
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    REG_BG_OFS[0].x = x;
+    REG_BG_OFS[0].y = y;
+    pal_bg_mem[0] = inverted ? RGB5(31,31,31) : RGB5(0, 0, 0);
+    pal_bg_mem[1] = inverted ? RGB5(0, 0, 0) : RGB5(31,31,31);
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
   } while (!(new_keys & KEY_B));
 }
 
@@ -208,12 +205,12 @@ void activity_kiki_scroll(void) {
     move_1d_scroll();
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_64|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
-    BG_OFFSET[0].y = scrolltest_y >> 1;
-    BG_OFFSET[0].x = 8;
-    REG_DISPCNT = MODE_0 | BG0_ON;
-    dmaCopy(kikipalette0, BG_COLORS+0, sizeof(kikipalette0));
-    dmaCopy(kikipalette1, BG_COLORS+16, sizeof(kikipalette1));
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_64|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    REG_BG_OFS[0].y = scrolltest_y >> 1;
+    REG_BG_OFS[0].x = 8;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    tonccpy(pal_bg_mem+0, kikipalette0, sizeof(kikipalette0));
+    tonccpy(pal_bg_mem+16, kikipalette1, sizeof(kikipalette1));
   } while (!(new_keys & KEY_B));
 }
 
@@ -226,8 +223,8 @@ void hill_zone_load_bg(void) {
 
 // Parallax scrolling for hill zone
 void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
-  BGCTRL[1] = BG_16_COLOR|BG_WID_64|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFSCROLLTEST);
-  dmaCopy(greenhillzone_chrPal, BG_COLORS+0, sizeof(greenhillzone_chrPal));
+  REG_BGCNT[1] = BG_4BPP|BG_WID_64|BG_HT_32|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  tonccpy(pal_bg_mem+0, greenhillzone_chrPal, sizeof(greenhillzone_chrPal));
 
   // Because libgba's ISR takes so long, we're already out of hblank
   // before Halt() returns.
@@ -243,9 +240,9 @@ void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
   
   REG_DMA0CNT = 0;
   REG_DMA0SAD = (intptr_t)&(hdmaTable[1]);
-  REG_DMA0DAD = (intptr_t)&(BG_OFFSET[1].x);
-  REG_DMA0CNT = 1|DMA_DST_RELOAD|DMA_SRC_INC|DMA_REPEAT|DMA16|DMA_HBLANK|DMA_ENABLE;
-  BG_OFFSET[1].x = hdmaTable[0];
+  REG_DMA0DAD = (intptr_t)&(REG_BG_OFS[1].x);
+  REG_DMA0CNT = 1|DMA_DST_RELOAD|DMA_SRC_INC|DMA_REPEAT|DMA_16|DMA_AT_HBLANK|DMA_ENABLE;
+  REG_BG_OFS[1].x = hdmaTable[0];
 }
 
 void activity_hill_zone_scroll(void) {
@@ -259,7 +256,7 @@ void activity_hill_zone_scroll(void) {
     move_1d_scroll();
 
     VBlankIntrWait();
-    REG_DISPCNT = MODE_0 | BG1_ON;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG1;
     hill_zone_set_scroll(hdmaTable, scrolltest_y);
   } while (!(new_keys & KEY_B));
   REG_DMA0CNT = 0;

@@ -18,9 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_input.h>
-#include <gba_sound.h>
-#include <gba_video.h>
+#include <tonc.h>
 #include "posprintf.h"
 
 #define PFMAP 23
@@ -54,21 +52,21 @@ static void megaton_draw_boolean(unsigned int y, unsigned int value) {
 
 static void megaton_draw_reticle(unsigned int x, unsigned int y) {
   unsigned int i = oam_used;
-  y = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
-  x = OBJ_X(x) | ATTR1_SIZE_16;
+  y = ATTR0_Y(y) | ATTR0_4BPP | ATTR0_SQUARE;
+  x = ATTR1_X(x) | ATTR1_SIZE_16;
 
   SOAM[i].attr0 = y;
   SOAM[i].attr1 = x;
   SOAM[i++].attr2 = RETICLE_TILE;
   SOAM[i].attr0 = y;
-  SOAM[i].attr1 = x + 16 + OBJ_HFLIP;
+  SOAM[i].attr1 = x + 16 + ATTR1_HFLIP;
   SOAM[i++].attr2 = RETICLE_TILE;
   y += 16;
   SOAM[i].attr0 = y;
-  SOAM[i].attr1 = x + OBJ_VFLIP;
+  SOAM[i].attr1 = x + ATTR1_VFLIP;
   SOAM[i++].attr2 = RETICLE_TILE;
   SOAM[i].attr0 = y;
-  SOAM[i].attr1 = x + 16 + OBJ_HFLIP + OBJ_VFLIP;
+  SOAM[i].attr1 = x + 16 + ATTR1_HFLIP + ATTR1_VFLIP;
   SOAM[i++].attr2 = RETICLE_TILE;
   oam_used = i;
 }
@@ -115,7 +113,7 @@ void activity_megaton() {
       if (xtarget < 128) diff = -diff;
       unsigned int early = diff < 0;
       unsigned int value = early ? -diff : diff;
-      uint32_t *tileaddr = PATRAM4(0, 0x30 + progress * 2);
+      u32 *tileaddr = PATRAM4(0, 0x30 + progress * 2);
       dma_memset16(tileaddr, 0x0000, 32 * 2);
       if (early) {
         vwf8PutTile(tileaddr, 'E', 0, 1);
@@ -168,12 +166,12 @@ void activity_megaton() {
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_COLORS[0] = (x == 128 && with_audio) ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
-    BG_COLORS[1] = OBJ_COLORS[1] = RGB5(31, 31, 31);
-    BG_COLORS[2] = RGB5(20, 25, 31);
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    pal_bg_mem[0] = (x == 128 && with_audio) ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    pal_bg_mem[1] = pal_obj_mem[1] = RGB5(31, 31, 31);
+    pal_bg_mem[2] = RGB5(20, 25, 31);
     ppu_copy_oam();
 
     // Draw the cursor
@@ -191,7 +189,7 @@ void activity_megaton() {
     REG_SOUND1CNT_X = (2048 - 131) | 0x8000;
   } while (!(new_keys & KEY_B) && (progress < NUM_TRIALS));
 
-  BG_COLORS[0] = RGB5(0, 0, 0);
+  pal_bg_mem[0] = RGB5(0, 0, 0);
   REG_SOUNDCNT_X = 0;  // reset audio
   if (progress < 10) return;
 

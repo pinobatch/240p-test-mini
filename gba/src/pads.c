@@ -22,7 +22,7 @@ it freely, subject to the following restrictions:
 "Source" is the preferred form of a work for making changes to it.
 
 */
-#include <gba_input.h>
+#include <tonc.h>
 #include "global.h"
 
 #define DAS_DELAY 12

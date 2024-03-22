@@ -29,19 +29,19 @@ it freely, subject to the following restrictions:
 
 #include "4bcanvas.h"
 #include <sys/types.h>
-#include <gba_video.h>
+#include <tonc.h>
 void dma_memset16(void *dst, unsigned int c16, size_t n);
 
 const TileCanvas screen = {
   .left = 0, .top = 0, .width = 32, .height = 20,
-  .chrBase = (uint32_t *)PATRAM4(0, 0),
+  .chrBase = tile_mem[0][0].data,
   .map = 23,
   .core = 0,
   .mapTileBase = 0
 };
 
 static
-void fillcol(uint32_t *dst, unsigned int colStride,
+void fillcol(u32 *dst, unsigned int colStride,
              unsigned int l, unsigned int t,
              unsigned int r, unsigned int b,
              unsigned int c)
@@ -58,13 +58,13 @@ void fillcol(uint32_t *dst, unsigned int colStride,
 
 void canvasRectfill(const TileCanvas *v, int l, int t, int r, int b, int c)
 {
-  uint32_t *dst = v->chrBase;
+  u32 *dst = v->chrBase;
   c &= 0x0000000F;
   c *= 0x11111111;
 
   unsigned int x = l;
   unsigned int stride = v->height * 8;
-  uint32_t *tile = dst + stride * (l >> 3);
+  u32 *tile = dst + stride * (l >> 3);
 
   if (t < 0) {
     t = 0;
@@ -176,9 +176,9 @@ void canvasBlitAligned(const TileCanvas *src, const TileCanvas *dst,
 
 void canvasInit(const TileCanvas *w, unsigned int color) {
 #if ARM9
-  NAMETABLE *dst = w->core ? &(MAP_SUB[w->map]) : &(MAP[w->map]);
+  SCREENMAT *dst = w->core ? &(se_mat_sub[w->map]) : &(se_mat[w->map]);
 #else
-  NAMETABLE *dst = &(MAP[w->map]);
+  SCREENMAT *dst = &(se_mat[w->map]);
 #endif
 
   int mapTile = w->mapTileBase;

@@ -23,10 +23,10 @@ it freely, subject to the following restrictions:
 
 */
 #include "global.h"
-#include <gba_dma.h>
-#include <gba_compression.h>
+#include <tonc.h>
 
-EWRAM_BSS OBJATTR SOAM[128];
+
+EWRAM_BSS OBJ_ATTR SOAM[128];
 unsigned char oam_used;
 
 /**
@@ -34,24 +34,23 @@ unsigned char oam_used;
  */
 void ppu_clear_oam(size_t start) {
   for (; start < 128; ++start) {
-    SOAM[start].attr0 = OBJ_DISABLE;
+    SOAM[start].attr0 = ATTR0_HIDE;
   }
 }
 
 void ppu_copy_oam() {
-  dmaCopy(SOAM, OAM, sizeof(SOAM));
+  tonccpy(oam_mem, SOAM, sizeof(SOAM));
 }
 
-void dma_memset16(void *dst, unsigned int c16, size_t n) {
-  volatile unsigned short src = c16;
-  DMA_Copy(3, &src, dst, DMA_SRC_FIXED | DMA16 | (n>>1));
+void dma_memset16(void *dst, unsigned int c16, size_t length_bytes) {
+  dma_fill(dst, c16, length_bytes >> 1, 3, DMA_16|DMA_ENABLE);
 }
 
 void bitunpack2(void *restrict dst, const void *restrict src, size_t len) {
   // Load tiles
   BUP bgtilespec = {
-    .SrcNum=len, .SrcBitNum=2, .DestBitNum=4, 
-    .DestOffset=0, .DestOffset0_On=0
+    .src_len=len, .src_bpp=2, .dst_bpp=4, 
+    .dst_ofs=0
   };
   BitUnPack(src, dst, &bgtilespec);
 }
@@ -59,15 +58,15 @@ void bitunpack2(void *restrict dst, const void *restrict src, size_t len) {
 void bitunpack1(void *restrict dst, const void *restrict src, size_t len) {
   // Load tiles
   BUP bgtilespec = {
-    .SrcNum=len, .SrcBitNum=1, .DestBitNum=4, 
-    .DestOffset=0, .DestOffset0_On=0
+    .src_len=len, .src_bpp=1, .dst_bpp=4, 
+    .dst_ofs=0
   };
   BitUnPack(src, dst, &bgtilespec);
 }
 
 void load_flat_map(unsigned short *dst, const unsigned short *src, unsigned int w, unsigned int h) {
   for (; h > 0; --h) {
-    dmaCopy(src, dst, w * 2);
+    tonccpy(dst, src, w * 2);
     src += w;
     dst += 32;
   }

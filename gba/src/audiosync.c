@@ -18,9 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_video.h>
-#include <gba_sound.h>
-#include <gba_input.h>
+#include <tonc.h>
 
 #define PFMAP 23
 
@@ -70,19 +68,19 @@ void activity_audio_sync() {
     }
 
     unsigned int y = (progress < 60) ? 128 - progress : 8 + progress;
-    SOAM[0].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
+    SOAM[0].attr0 = ATTR0_Y(y) | ATTR0_4BPP | ATTR0_SQUARE;
     SOAM[0].attr1 = 119 | ATTR1_SIZE_8;
     SOAM[0].attr2 = 0x0023;
     ppu_clear_oam(1);
 
     VBlankIntrWait();
-    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     for (unsigned int i = 0; i < 6; ++i) {
-      BG_COLORS[i] = progress >= min_progress[i] ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+      pal_bg_mem[i] = progress >= min_progress[i] ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     }
-    OBJ_COLORS[1] = RGB5(31, 31, 31);
+    pal_obj_mem[1] = RGB5(31, 31, 31);
     ppu_copy_oam();
 
     if (progress == 120) {

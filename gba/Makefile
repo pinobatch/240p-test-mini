@@ -49,14 +49,15 @@ LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lgba
+LIBS	:= -ltonc
 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBGBA)
+LIBTONC := $(DEVKITPRO)/libtonc
+LIBDIRS	:=	$(LIBTONC)
 
 #---------------------------------------------------------------------------------
 # Python executable name depends on operating system.

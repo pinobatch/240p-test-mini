@@ -22,10 +22,7 @@ it freely, subject to the following restrictions:
 "Source" is the preferred form of a work for making changes to it.
 
 */
-#include <gba_video.h>
-#include <gba_input.h>
-#include <gba_compression.h>
-#include <gba_dma.h>
+#include <tonc.h>
 #include <string.h>
 #include "global.h"
 
@@ -57,7 +54,7 @@ static void move_player(void) {
     if (cur_keys & KEY_RIGHT) {
       player_dx += WALK_ACCEL;
       if (player_dx > WALK_SPD) player_dx = WALK_SPD;
-      player_facing &= ~OBJ_HFLIP;
+      player_facing &= ~ATTR1_HFLIP;
     } else {
       player_dx -= WALK_BRAKE;
       if (player_dx < 0) player_dx = 0;
@@ -69,7 +66,7 @@ static void move_player(void) {
     if (cur_keys & KEY_LEFT) {
       player_dx -= WALK_ACCEL;
       if (player_dx < -WALK_SPD) player_dx = -WALK_SPD;
-      player_facing |= OBJ_HFLIP;
+      player_facing |= ATTR1_HFLIP;
     } else {
       player_dx += WALK_BRAKE;
       if (player_dx > 0) player_dx = 0;
@@ -107,15 +104,15 @@ static void draw_player_sprite(void) {
   unsigned int player_hotspot_x = (player_x >> 8) - 8;
   if ((player_frame >> 8) == 7) {
     // Frame 1 needs to be drawn 1 pixel forward
-    player_hotspot_x += (player_facing & OBJ_HFLIP) ? -1 : 1;
+    player_hotspot_x += (player_facing & ATTR1_HFLIP) ? -1 : 1;
   }
-  unsigned int attr1 = OBJ_X(player_hotspot_x) | player_facing;
+  unsigned int attr1 = ATTR1_X(player_hotspot_x) | player_facing;
 
-  SOAM[i].attr0 = OBJ_Y(player_y - 24) | OBJ_16_COLOR | ATTR0_WIDE;
+  SOAM[i].attr0 = ATTR0_Y(player_y - 24) | ATTR0_4BPP | ATTR0_WIDE;
   SOAM[i].attr1 = attr1 | ATTR1_SIZE_8;
   SOAM[i].attr2 = tile;
   ++i;
-  SOAM[i].attr0 = OBJ_Y(player_y - 16) | OBJ_16_COLOR | ATTR0_SQUARE;
+  SOAM[i].attr0 = ATTR0_Y(player_y - 16) | ATTR0_4BPP | ATTR0_SQUARE;
   SOAM[i].attr1 = attr1 | ATTR1_SIZE_16;
   SOAM[i].attr2 = tile + 2;
   ++i;
@@ -170,7 +167,7 @@ static void draw_bg(void) {
 
 void lame_boy_demo() {
   // Forced blanking
-  REG_DISPCNT = LCDC_OFF;
+  REG_DISPCNT = DCNT_BLANK;
   draw_bg();
   load_player();
   REG_DISPCNT = 0;
@@ -185,12 +182,12 @@ void lame_boy_demo() {
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON;
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    dmaCopy(bgcolors00, BG_COLORS+0x00, sizeof(bgcolors00));
-    dmaCopy(bgcolors10, BG_COLORS+0x10, sizeof(bgcolors10));
-    dmaCopy(spritegfx_chrPal, OBJ_COLORS+0x00, sizeof(spritegfx_chrPal));
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    tonccpy(pal_bg_mem+0x00, bgcolors00, sizeof(bgcolors00));
+    tonccpy(pal_bg_mem+0x10, bgcolors10, sizeof(bgcolors10));
+    tonccpy(pal_obj_mem+0x00, spritegfx_chrPal, sizeof(spritegfx_chrPal));
     ppu_copy_oam();
   } while (!(new_keys & KEY_B));
 }

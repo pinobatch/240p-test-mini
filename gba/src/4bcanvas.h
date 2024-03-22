@@ -28,13 +28,14 @@ it freely, subject to the following restrictions:
 #define P8_CANVAS_H
 
 #include <stdint.h>
+#include <tonc.h>
 
 typedef struct TileCanvas {
   uint8_t left;    // in 8 pixel units on nametable
   uint8_t top;     // in 8 pixel units on nametable
   uint8_t width;   // in 8 pixel units on nametable
   uint8_t height;  // in 8 pixel units on nametable
-  uint32_t *chrBase;
+  u32 *chrBase;
   uint8_t map;  // in 2 KiB units on VRAM
   uint8_t core;    // 0: main; 1: sub
   uint16_t mapTileBase;

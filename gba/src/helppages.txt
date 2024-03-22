@@ -187,7 +187,6 @@ Like the Game Boy Color,
 the Game Boy Advance
 has a TFT display with
 a decent response time.
-
 All GB LCDs use row
 inversion that can look
 like interlace, drawing
@@ -195,9 +194,10 @@ even or odd lines darker
 in alternate frames.
 
 The Game Boy Player
-accessory has a "Screen
-Filter" effect that applies
-a form of motion blur.
+accessory's "Screen Filter"
+effect applies motion blur
+to pixel areas that match
+two frames ago.
 
 == Sharpness ==
 
@@ -665,10 +665,10 @@ Select: Show or hide
 == 160p Test Suite ==
 
 $COMMIT
-HDMA is right for you
+Welcome to Tonc
 
 © 2011-2016 Artemio Urbina
-© 2015-2023 Damian Yerrick
+© 2015-2024 Damian Yerrick
 This is free software; see
 the source for copying
 conditions. The program

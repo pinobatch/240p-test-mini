@@ -18,8 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_input.h>
-#include <gba_video.h>
+#include <tonc.h>
 #include <stdint.h>
 
 #define PFMAP 23
@@ -57,16 +56,16 @@ static void overscan_draw_arrow(unsigned int side, unsigned int dist) {
     y = 144 - dist;
     break;
   }
-  SOAM[i].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
-  SOAM[i].attr1 = OBJ_X(x) | OBJ_HFLIP | OBJ_VFLIP;
+  SOAM[i].attr0 = ATTR0_Y(y) | ATTR0_4BPP | ATTR0_SQUARE;
+  SOAM[i].attr1 = ATTR1_X(x) | ATTR1_HFLIP | ATTR1_VFLIP;
   SOAM[i].attr2 = tilenum;
   if (side & 0x02) {
     y += 8;
   } else {
     x += 8;
   }
-  SOAM[i + 1].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
-  SOAM[i + 1].attr1 = OBJ_X(x);
+  SOAM[i + 1].attr0 = ATTR0_Y(y) | ATTR0_4BPP | ATTR0_SQUARE;
+  SOAM[i + 1].attr1 = ATTR1_X(x);
   SOAM[i + 1].attr2 = tilenum;
   oam_used = i + 2;
 }
@@ -78,7 +77,7 @@ void activity_overscan() {
   load_common_obj_tiles();
   load_common_bg_tiles();
   // Make all BG tiles opaque
-  for (uint32_t *c = PATRAM4(0, 0); c < PATRAM4(0, 32); ++c) {
+  for (u32 *c = PATRAM4(0, 0); c < PATRAM4(0, 32); ++c) {
     *c |= 0x44444444;
   }
   dma_memset16(MAP[PFMAP], 0x0004, 32*20*2);
@@ -112,17 +111,17 @@ void activity_overscan() {
     
     VBlankIntrWait();
     // Color 0: outside
-    BG_COLORS[0] = BG_COLORS[5] = inverted ? RGB5(0, 0, 0) : RGB5(31, 31, 31);
-    BG_COLORS[4] = inverted ? RGB5(23, 23, 23) : RGB5(15, 15, 15);
+    pal_bg_mem[0] = pal_bg_mem[5] = inverted ? RGB5(0, 0, 0) : RGB5(31, 31, 31);
+    pal_bg_mem[4] = inverted ? RGB5(23, 23, 23) : RGB5(15, 15, 15);
     if (cur_keys & KEY_A) {
-      OBJ_COLORS[2] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+      pal_obj_mem[2] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     } else {
-      OBJ_COLORS[2] = inverted ? RGB5(15, 15, 15) : RGB5(23, 23, 23);
+      pal_obj_mem[2] = inverted ? RGB5(15, 15, 15) : RGB5(23, 23, 23);
     }
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     ppu_copy_oam();
-    REG_DISPCNT = MODE_0 | BG0_ON | OBJ_1D_MAP | OBJ_ON | WIN0_ON;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0;
     REG_WINOUT = 0x10;  // BG0 inside, BG1 outside
     REG_WININ = 0x11;
     // start<<8 | end

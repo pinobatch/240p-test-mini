@@ -17,10 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
-#include <gba_video.h>
-#include <gba_interrupt.h>
-#include <gba_systemcalls.h>
-#include <gba_input.h>
+#include <tonc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "global.h"
@@ -79,8 +76,8 @@ int main(void) {
   unsigned int last_page, last_y;
 
   // Enable vblank IRQ, without which VBlankIntrWait() won't work
-  irqInit();
-  irqEnable(IRQ_VBLANK);
+  irq_init(NULL);
+  irq_add(II_VBLANK, NULL);
   //activity_overscan();
   //helpscreen(helpsect_to_do, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   activity_credits();

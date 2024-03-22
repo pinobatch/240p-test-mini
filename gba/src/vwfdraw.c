@@ -28,7 +28,7 @@ it freely, subject to the following restrictions:
 
 #if 0
 typedef struct VWFCanvas {
-  uint32_t *data;
+  u32 *data;
   unsigned short width, height;
 } VWFCanvas;
 
@@ -83,7 +83,7 @@ void loadMapRowMajor(unsigned short *dst, unsigned int tilenum,
 
 #define FIRST_PRINTABLE_CU 0x18
 
-void vwf8PutTile(uint32_t *dst, unsigned int glyphnum,
+void vwf8PutTile(u32 *dst, unsigned int glyphnum,
                  unsigned int x, unsigned int color) {
   const unsigned char *glyph = vwfChrData[glyphnum - FIRST_PRINTABLE_CU];
   unsigned int startmask = 0x0F << ((x & 0x07) * 4);
@@ -91,13 +91,13 @@ void vwf8PutTile(uint32_t *dst, unsigned int glyphnum,
   color = (color & 0x0F) * 0x11111111;
   
   for (unsigned int htleft = 8; htleft > 0; --htleft) {
-    unsigned int mask = startmask;
-    unsigned int glyphdata = *glyph++;
-    uint32_t *sliver = dst++;
+    u32 mask = startmask;
+    u32 glyphdata = *glyph++;
+    u32 *sliver = dst++;
     
     for(; glyphdata; glyphdata >>= 1) {
       if (glyphdata & 0x01) {
-        uint32_t s = *sliver;
+        u32 s = *sliver;
         *sliver = ((s ^ color) & mask) ^ s;
       }
       mask <<= 4;
@@ -112,7 +112,7 @@ void vwf8PutTile(uint32_t *dst, unsigned int glyphnum,
 /**
  * @return the address of the terminating control character
  */
-const char *vwf8Puts(uint32_t *restrict dst, const char *restrict s,
+const char *vwf8Puts(u32 *restrict dst, const char *restrict s,
                      unsigned int x, unsigned int color) {
   while (x < 240) {
     unsigned char c = *s & 0xFF;

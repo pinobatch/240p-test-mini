@@ -18,8 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_video.h>
-#include <gba_input.h>
+#include <tonc.h>
 
 void activity_backlight_zone(void) {
   unsigned inverted = 0, hidden = 0, high_gear = 0, held_keys = 0, sz = 1;
@@ -77,17 +76,17 @@ void activity_backlight_zone(void) {
     oam_used = 0;
     if (!hidden) {
       unsigned int i = oam_used;
-      SOAM[i].attr0 = OBJ_Y(y) | OBJ_16_COLOR | ATTR0_SQUARE;
-      SOAM[i].attr1 = OBJ_X(x) | ATTR1_SIZE_8;
+      SOAM[i].attr0 = ATTR0_Y(y) | ATTR0_4BPP | ATTR0_SQUARE;
+      SOAM[i].attr1 = ATTR1_X(x) | ATTR1_SIZE_8;
       SOAM[i].attr2 = (sz < 3) ? sz + 0x22 : 1;
       oam_used = i + 1;
     }
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    BG_COLORS[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
-    OBJ_COLORS[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    pal_bg_mem[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    pal_obj_mem[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
     ppu_copy_oam();
-    REG_DISPCNT = MODE_0 | OBJ_ON;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ;
   }
 }

@@ -18,8 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_video.h>
-#include <gba_input.h>
+#include <tonc.h>
 
 #define PFMAP 23
 #define NUM_PARAMS 6
@@ -105,10 +104,10 @@ void activity_motion_blur() {
     if (!running) bgc1[1] = bgc1[1] >= 16 ? 0 : 31;
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     for (unsigned int i = 0; i < 4; ++i) {
-      BG_COLORS[i] = RGB5(1, 1, 1) * bgc1[i];
+      pal_bg_mem[i] = RGB5(1, 1, 1) * bgc1[i];
     }
     for (unsigned int i = 0; i < 6; ++i) {
       MAP[PFMAP][13 + i][10] = (i == y) ? ARROW_TILE : BLANK_TILE;
@@ -123,6 +122,6 @@ void activity_motion_blur() {
     unsigned int stripes_tile = params[5] ? 0x22 : 0x20;  // On and Off
     MAP[PFMAP][18][18] = stripes_tile;
     MAP[PFMAP][18][19] = stripes_tile + 1;
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
   } while (!(new_keys & KEY_B));
 }

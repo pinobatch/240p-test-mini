@@ -22,7 +22,7 @@ it freely, subject to the following restrictions:
 "Source" is the preferred form of a work for making changes to it.
 
 */
-#include <gba_video.h>
+#include <tonc.h>
 #include "global.h"
 
 // Single label:
@@ -33,7 +33,7 @@ it freely, subject to the following restrictions:
 /**
  * @param labelset a '\n'-separated, '\0'-terminated list of
  * (x, y, printables)
- * @param nt which nametable (tilemap, screenbaseblock) to draw into
+ * @param nt which SCREENMAT (tilemap, screenbaseblock) to draw into
  * @param tilenum bits 10-0: which tile number to start at;
  * bits 15-11: palette id
  */
@@ -53,7 +53,7 @@ void vwfDrawLabels(const char *labelset, unsigned int sbb, unsigned int tilenum)
     dma_memset16(chrdst, 0x0000, 32 * txtw);
     const char *strend = vwf8Puts(chrdst, labelset + 2, x & 0x07, 1);
     
-    // Fill the nametable
+    // Fill the SCREENMAT
     loadMapRowMajor(&(MAP[sbb][y >> 3][x >> 3]), tilenum & 0xF3FF, txtw, 1);
     tilenum += txtw;
 

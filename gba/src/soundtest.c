@@ -18,11 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <gba_input.h>
-#include <gba_sound.h>
-#include <gba_dma.h>
-#include <gba_timers.h>
-#include <gba_video.h>
+#include <tonc.h>
 
 // PSG //////////////////////////////////////////////////////////////
 
@@ -44,12 +40,12 @@ const unsigned char waveram_sin16x[16] __attribute__((aligned (2))) = {
 };
 
 static void wait24() {
-  ((volatile u16 *)BG_COLORS)[6] = RGB5(31, 0, 0);
+  ((volatile u16 *)pal_bg_mem)[6] = RGB5(31, 0, 0);
   for (unsigned int i = 24; i > 0; --i) {
     VBlankIntrWait();
-    dma_memset16(BG_COLORS + 6, RGB5(31, 0, 0), 2);
+    dma_memset16(pal_bg_mem + 6, RGB5(31, 0, 0), 2);
   }
-  BG_COLORS[6] = RGB5(31, 31, 31);
+  pal_bg_mem[6] = RGB5(31, 31, 31);
 }
 
 static void reinitAudio(void) {
@@ -61,7 +57,7 @@ static void reinitAudio(void) {
 
 static void beepTri(const unsigned char *wave, unsigned int period) {
   REG_SOUND3CNT_L = 0;  // unlock waveram
-  dmaCopy(wave, (void *)WAVE_RAM, 16);
+  tonccpy((void *)REG_WAVE_RAM, wave, 16);
   REG_SOUND3CNT_L = 0xC0;    // lock waveram
   REG_SOUND3CNT_H = 0x2000;  // full volume
   REG_SOUND3CNT_X = (2048 - period) + 0x8000;  // pitch
@@ -188,7 +184,7 @@ IWRAM_CODE static void beepPCM(void) {
                  (voices[ch].delaylineend - i) / 4);
   }
   
-  ((volatile u16 *)BG_COLORS)[6] = RGB5(31, 0, 0);
+  ((volatile u16 *)pal_bg_mem)[6] = RGB5(31, 0, 0);
   REG_TM0CNT_L = 65536 - PCM_PERIOD;  // 18157 Hz
   REG_TM0CNT_H = 0x0080;  // enable timer
   REG_SOUNDBIAS = 0x4200;  // 65.5 kHz PWM (for PCM)
@@ -226,7 +222,7 @@ IWRAM_CODE static void beepPCM(void) {
   } while (!new_keys && frames < 400);
   REG_TM0CNT_H = 0;  // stop timer
   REG_DMA1CNT = 0;   // stop DMA
-  BG_COLORS[6] = RGB5(31, 31, 31);
+  pal_bg_mem[6] = RGB5(31, 31, 31);
   REG_SOUNDBIAS = 0xC200;  // 65.5 kHz PWM (for PCM)
 }
 

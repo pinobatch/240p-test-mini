@@ -17,12 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
-#include <gba_input.h>
-#include <gba_video.h>
-#include <gba_sound.h>
-#include <gba_dma.h>
-#include <gba_compression.h>
-#include <gba_systemcalls.h>
+#include <tonc.h>
 #include <stdint.h>
 #include "global.h"
 #include "4bcanvas.h"
@@ -140,12 +135,12 @@ void activity_monoscope(void) {
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_PALETTE[0] = (brightness >= 4) ? RGB5(13,13,13) : 0;
-    BG_PALETTE[1] = monoscope_whites[brightness];
-    BG_PALETTE[2] = RGB5(31, 0, 0);
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    pal_bg_mem[0] = (brightness >= 4) ? RGB5(13,13,13) : 0;
+    pal_bg_mem[1] = monoscope_whites[brightness];
+    pal_bg_mem[2] = RGB5(31, 0, 0);
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
   }
 }
 
@@ -155,7 +150,7 @@ void activity_sharpness(void) {
 
   bitunpack2(PATRAM4(0, 0), sharpness_chrTiles, sizeof(sharpness_chrTiles));
   RLUnCompVram(sharpness_chrMap, MAP[PFMAP]);
-  dmaCopy(brickstile, PATRAM4(0, 63), sizeof(brickstile));
+  tonccpy(PATRAM4(0, 63), brickstile, sizeof(brickstile));
   dma_memset16(MAP[PFOVERLAY], 0x043F, 32*20*2);
 
   while (1) {
@@ -171,13 +166,13 @@ void activity_sharpness(void) {
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)
-                |SCREEN_BASE(is_bricks ? PFOVERLAY : PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)
+                |BG_SBB(is_bricks ? PFOVERLAY : PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     const unsigned short *palsrc = inverted ? invgray4pal : gray4pal;
     if (is_bricks) palsrc = brickspal;
-    dmaCopy(palsrc, BG_COLORS+0x00, sizeof(gray4pal));
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    tonccpy(pal_bg_mem+0x00, palsrc, sizeof(gray4pal));
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
   }
 }
 
@@ -259,7 +254,7 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
   REG_SOUNDCNT_H = 0x0002;  // PSG/PCM mixing
   REG_SOUNDCNT_L = 0xFF77;  // PSG vol/pan
   REG_SOUND3CNT_L = 0;  // unlock waveram
-  dmaCopy(waveram_sin2x, (void *)WAVE_RAM, 16);
+  tonccpy((void *)REG_WAVE_RAM, waveram_sin2x, 16);
   REG_SOUND3CNT_L = 0xC0;    // lock waveram
   REG_SOUND3CNT_H = 0;       // volume control
   REG_SOUND3CNT_X = (2048 - 131) + 0x8000;  // full volume
@@ -280,10 +275,10 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    dmaCopy(smptePalettes[bright], BG_COLORS+0x00, sizeof(smptePalettes[0]));
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    tonccpy(pal_bg_mem+0x00, smptePalettes[bright], sizeof(smptePalettes[0]));
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
     REG_SOUND3CNT_H = beep;
   }
 }
@@ -307,7 +302,7 @@ void activity_pluge(void) {
   for (unsigned int x = 6; x < 24; x += 1) {
     if (x == 8) x = 22;
     unsigned int stride = screen.height * 8;
-    uint32_t *tile = screen.chrBase + stride * x + 8;
+    u32 *tile = screen.chrBase + stride * x + 8;
     for (unsigned int yleft = 72; yleft > 0; --yleft) {
       *tile++ = 0x23232323;
       *tile++ = 0x32323232;
@@ -336,14 +331,16 @@ void activity_pluge(void) {
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(shark ? PFOVERLAY : PFMAP);
-    BG_OFFSET[0].y = BG_OFFSET[0].x = 0;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(shark ? PFOVERLAY : PFMAP);
+    REG_BG_OFS[0].y = REG_BG_OFS[0].x = 0;
     if (shark) {
-      dmaCopy(pluge_shark_palettes[bright], BG_COLORS+0x00, sizeof(pluge_shark_6color_chrPal));
+      tonccpy(pal_bg_mem+0x00, pluge_shark_palettes[bright],
+              sizeof(pluge_shark_6color_chrPal));
     } else {
-      dmaCopy(bright ? plugePaletteNTSCJ : plugePaletteNTSC, BG_COLORS+0x00, sizeof(plugePaletteNTSC));
+      tonccpy(pal_bg_mem+0x00, bright ? plugePaletteNTSCJ : plugePaletteNTSC,
+              sizeof(plugePaletteNTSC));
     }
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
   }
 }
 
@@ -369,7 +366,7 @@ static const char gcbars_labels[] =
   "\x10""\x78""White";
 
 void activity_gcbars(void) {
-  unsigned int bgctrl0 = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
+  unsigned int REG_BGCNT0 = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
 
   load_common_bg_tiles();
   // Draw 5-pixel-wide vertical bars
@@ -423,14 +420,14 @@ void activity_gcbars(void) {
       return;
     }
     if (new_keys & KEY_A) {
-      bgctrl0 ^= SCREEN_BASE(PFMAP) ^ SCREEN_BASE(PFOVERLAY);
+      REG_BGCNT0 ^= BG_SBB(PFMAP) ^ BG_SBB(PFOVERLAY);
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = bgctrl0;
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_COLORS[0] = RGB5(0, 0, 0);
-    BG_COLORS[1] = RGB5(31, 31, 31);
+    REG_BGCNT[0] = REG_BGCNT0;
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    pal_bg_mem[0] = RGB5(0, 0, 0);
+    pal_bg_mem[1] = RGB5(31, 31, 31);
 
     // Calculate the color gradient
     unsigned int c = 0;
@@ -443,10 +440,10 @@ void activity_gcbars(void) {
           c = 0;
         }
       }
-      BG_COLORS[p] = c;
+      pal_bg_mem[p] = c;
       c += *palramp;
     }
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
   }
 }
 
@@ -486,16 +483,16 @@ void activity_gray_ramp(void) {
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     
     unsigned int c = 0;
     for (unsigned int p = 1; p < 64; ++p) {
-      BG_COLORS[p] = c;
+      pal_bg_mem[p] = c;
       c += RGB5(1, 1, 1);
       if ((p & 0x0F) == 8) p += 8;
     }
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
   }
 }
 
@@ -521,7 +518,7 @@ static const unsigned short full_stripes_colors[10][2] = {
 
 static void do_full_stripes(helpdoc_kind helpsect) {
   unsigned int pattern = 0, inverted = 0, frame = 0;
-  unsigned int lcdcvalue = MODE_1 | BG1_ON;
+  unsigned int lcdcvalue = DCNT_MODE1 | DCNT_BG1;
 
   // tile 0: blank
   dma_memset16(PATRAM4(0, 0), 0x0000, 32);
@@ -538,7 +535,7 @@ static void do_full_stripes(helpdoc_kind helpsect) {
       if (++pattern >= 3) pattern = 0;
     }
     if (new_keys & KEY_SELECT) {
-      lcdcvalue ^= BG0_ON;
+      lcdcvalue ^= DCNT_BG0;
     }
     if (new_keys & (KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT)) {
       inverted ^= 0x33333333;
@@ -551,19 +548,19 @@ static void do_full_stripes(helpdoc_kind helpsect) {
     posprintf(help_line_buffer, "Frame %02d", frame);
 
     VBlankIntrWait();
-    BGCTRL[1] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFOVERLAY);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = BG_OFFSET[1].x = 0;
-    BG_OFFSET[1].y = 4;
-    BG_COLORS[0] = RGB5(0, 0, 0);
+    REG_BGCNT[1] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFOVERLAY);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = REG_BG_OFS[1].x = 0;
+    REG_BG_OFS[1].y = 4;
+    pal_bg_mem[0] = RGB5(0, 0, 0);
     for (int c = 0; c < 10; ++c) {
-      BG_COLORS[c * 16 + 1] = full_stripes_colors[c][0];
-      BG_COLORS[c * 16 + 2] = full_stripes_colors[c][1];
+      pal_bg_mem[c * 16 + 1] = full_stripes_colors[c][0];
+      pal_bg_mem[c * 16 + 2] = full_stripes_colors[c][1];
     }
     REG_DISPCNT = lcdcvalue;
 
     // Draw the pattern
-    uint32_t *dst = PATRAM4(0, 1);
+    u32 *dst = PATRAM4(0, 1);
     for (unsigned int i = 4; i > 0; --i) {
       *dst++ = full_stripes_patterns[pattern][0] ^ inverted;
       *dst++ = full_stripes_patterns[pattern][1] ^ inverted;
@@ -610,7 +607,7 @@ static const unsigned char rgbnames[3] = {'R', 'G', 'B'};
 static void solid_color_draw_edit_box(const unsigned char rgb[3], unsigned int y) {
   dma_memset16(PATRAM4(0, 1), 0x2222, 32*9);
   for (unsigned int i = 0; i < 3; ++i) {
-    uint32_t *dst = PATRAM4(0, 3 * i + 1);
+    u32 *dst = PATRAM4(0, 3 * i + 1);
 
     // Draw label
     if (i == y) vwf8PutTile(dst, '>', 1, 1);
@@ -669,12 +666,12 @@ void activity_solid_color(void) {
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)|SCREEN_BASE(PFMAP);
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    BG_COLORS[0] = x < 4 ? solid_colors[x] : RGB5(rgb[0], rgb[1], rgb[2]);
-    BG_COLORS[1] = RGB5(31, 31, 31);
-    BG_COLORS[2] = RGB5(0, 0, 0);
-    REG_DISPCNT = showeditbox ? (MODE_0 | BG0_ON) : 0;
+    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    pal_bg_mem[0] = x < 4 ? solid_colors[x] : RGB5(rgb[0], rgb[1], rgb[2]);
+    pal_bg_mem[1] = RGB5(31, 31, 31);
+    pal_bg_mem[2] = RGB5(0, 0, 0);
+    REG_DISPCNT = showeditbox ? (DCNT_MODE0 | DCNT_BG0) : 0;
   }
 }
 
@@ -712,24 +709,24 @@ void activity_convergence(void) {
     }
 
     VBlankIntrWait();
-    BGCTRL[0] = (BG_16_COLOR|BG_WID_32|BG_HT_32|CHAR_BASE(0)
-                 |SCREEN_BASE(PFMAP-cur_side));
-    BG_OFFSET[0].x = BG_OFFSET[0].y = 0;
-    REG_DISPCNT = MODE_0 | BG0_ON;
+    REG_BGCNT[0] = (BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)
+                 |BG_SBB(PFMAP-cur_side));
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
     if (cur_side != 0) {
-      BG_COLORS[0x03] = RGB5(31,31,31);
-      BG_COLORS[0x13] = RGB5( 0, 0,31);
-      BG_COLORS[0x23] = RGB5( 0,31, 0);
-      BG_COLORS[0x33] = RGB5(31, 0, 0);
-      BG_COLORS[0x02] = colors_border ? 0 : RGB5(31,31,31);
-      BG_COLORS[0x12] = colors_border ? 0 : RGB5( 0, 0,31);
-      BG_COLORS[0x22] = colors_border ? 0 : RGB5( 0,31, 0);
-      BG_COLORS[0x32] = colors_border ? 0 : RGB5(31, 0, 0);
+      pal_bg_mem[0x03] = RGB5(31,31,31);
+      pal_bg_mem[0x13] = RGB5( 0, 0,31);
+      pal_bg_mem[0x23] = RGB5( 0,31, 0);
+      pal_bg_mem[0x33] = RGB5(31, 0, 0);
+      pal_bg_mem[0x02] = colors_border ? 0 : RGB5(31,31,31);
+      pal_bg_mem[0x12] = colors_border ? 0 : RGB5( 0, 0,31);
+      pal_bg_mem[0x22] = colors_border ? 0 : RGB5( 0,31, 0);
+      pal_bg_mem[0x32] = colors_border ? 0 : RGB5(31, 0, 0);
     } else {
       // Set palette for grid
       unsigned int color = gridinvert ? 0x7FFF : 0;
       for (unsigned int i = 0; i < 4; ++i) {
-        BG_COLORS[i] = color;
+        pal_bg_mem[i] = color;
         if (i == griddepth) color = color ^ 0x7FFF;
       }
     }
