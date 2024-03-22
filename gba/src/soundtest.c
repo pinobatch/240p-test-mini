@@ -158,7 +158,6 @@ typedef struct ChordVoice {
 #define PCM_PERIOD 924   // 16777216 tstates/s / 18157 samples/s
 #define PCM_BUF_LEN 304  // 280896 tstates/frame / PCM_PERIOD
 
-EWRAM_BSS static signed short delayline[672];
 EWRAM_BSS static signed short mixbuf[PCM_BUF_LEN];
 EWRAM_BSS static signed char playbuf[2][PCM_BUF_LEN];
 
@@ -173,6 +172,7 @@ static const ChordVoice voices[PCM_NUM_VOICES] = {
 
 IWRAM_CODE static void beepPCM(void) {
   unsigned short phases[PCM_NUM_VOICES];
+  signed short delayline[672];
   unsigned int frames = 0;
   
   dma_memset16(delayline, 0, sizeof(delayline));
