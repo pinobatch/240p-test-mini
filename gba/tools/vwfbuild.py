@@ -64,7 +64,8 @@ def main(argv=None):
                "#define VWFCHR_H__",
                "extern const unsigned char vwfChrData[" + str(int(len(tiledata) / 8)) + "][8];\n"
                "extern const unsigned char vwfChrWidths[" + str(len(widths)) + "];\n"
-               "#endif"]
+               "#endif",
+               '']
         with open(argv[3], 'w') as outfp:
             outfp.write('\n'.join(out))
 

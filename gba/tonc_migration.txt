@@ -1,3 +1,0 @@
-libgba to libtonc migration
-https://github.com/devkitPro/libtonc/blob/master/include/tonc_libgba.h
-https://github.com/devkitPro/libtonc/blob/master/include/tonc_legacy.h

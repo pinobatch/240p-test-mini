@@ -22,10 +22,7 @@ it freely, subject to the following restrictions:
 "Source" is the preferred form of a work for making changes to it.
 
 */
-#include <tonc.h>
-#include <string.h>
 #include "global.h"
-
 #include "bggfx_chr.h"
 #include "spritegfx_chr.h"
 
@@ -43,7 +40,7 @@ unsigned short player_facing = 0;
 #define OBJ_VRAM_BASE 16
 
 static void load_player(void) {
-  LZ77UnCompVram(spritegfx_chrTiles, SPR_VRAM(16));
+  LZ77UnCompVram(spritegfx_chrTiles, &(tile_mem_obj[0][16].data));
   player_x = 56 << 8;
   player_dx = player_frame = player_facing = 0;
 }
@@ -131,41 +128,39 @@ static const unsigned short bgcolors10[16] = {
 };
 
 static void put1block(unsigned int x, unsigned int y) {
-  MAP[PFMAP][y][x]     = 12 | 0x0000;
-  MAP[PFMAP][y][x+1]   = 13 | 0x0000;
-  MAP[PFMAP][y+1][x]   = 14 | 0x0000;
-  MAP[PFMAP][y+1][x+1] = 15 | 0x0000;
+  se_mat[PFMAP][y][x]     = 12 | 0x0000;
+  se_mat[PFMAP][y][x+1]   = 13 | 0x0000;
+  se_mat[PFMAP][y+1][x]   = 14 | 0x0000;
+  se_mat[PFMAP][y+1][x+1] = 15 | 0x0000;
 }
 
 void load_common_bg_tiles(void) {
-  bitunpack2(PATRAM4(0, 0), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+  bitunpack2(&(tile_mem[0][0].data), bggfx_chrTiles, sizeof(bggfx_chrTiles));
 }
 
 void load_common_obj_tiles(void) {
-  bitunpack2(SPR_VRAM(0), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+  bitunpack2(&(tile_mem_obj[0][0].data), bggfx_chrTiles, sizeof(bggfx_chrTiles));
 }
 
 static void draw_bg(void) {
   load_common_bg_tiles();
 
   // Draw background map: sky, top row of floor, bottom row of floor
-  dma_memset16(MAP[PFMAP][0], 0x0004, 2*32*18);
-  dma_memset16(MAP[PFMAP][18], 11 | 0x1000, 2*30);
-  dma_memset16(MAP[PFMAP][19], 1 | 0x1000, 2*30);
+  memset16(se_mat[PFMAP][0], 0x0004, 32*18);
+  memset16(se_mat[PFMAP][18], 11 | 0x1000, 30);
+  memset16(se_mat[PFMAP][19], 1 | 0x1000, 30);
   put1block(2, 14);
   put1block(2, 16);
   put1block(26, 14);
   put1block(26, 16);
 
-  // sorry I was gone
   const char return_msg[] =
-    "\x08""\x08""In May 2018,\n"
-    "\x22""\x10""Pino returned to the GBA scene.";
-
+    "\x08""\x08""In March 2024,\n"
+    "\x22""\x10""Pino switched to Wonderful Toolchain.";
   vwfDrawLabels(return_msg, PFMAP, 0x1000 + 32);
 }
 
-void lame_boy_demo() {
+void lame_boy_demo(void) {
   // Forced blanking
   REG_DISPCNT = DCNT_BLANK;
   draw_bg();

@@ -1,0 +1,210 @@
+# SPDX-License-Identifier: CC0-1.0
+#
+# SPDX-FileContributor: Adrian "asie" Siekierka, 2023
+# SPDX-FileContributor: Damian Yerrick, 2023
+
+export WONDERFUL_TOOLCHAIN ?= /opt/wonderful
+TARGET = gba/multiboot
+include $(WONDERFUL_TOOLCHAIN)/target/$(TARGET)/makedefs.mk
+
+# Metadata
+# --------
+
+NAME		:= 240pwf
+
+# Source code paths
+# -----------------
+
+INCLUDEDIRS	:= include
+SOURCEDIRS	:= src
+ASSETDIRS	:= tilesets
+CBINDIRS	:= 
+
+# Preprocessing tools
+# -------------------
+
+# If BlocksDS was installed via wf-pacman, use its grit.
+# Otherwise use grit installed via dkp-pacman.
+GRIT := $(WONDERFUL_TOOLCHAIN)/thirdparty/blocksds/core/tools/grit/grit
+ifeq (,$(wildcard $(GRIT)))
+  export DEVKITPRO ?= /opt/devkitpro
+  GRIT := $(DEVKITPRO)/tools/bin/grit
+endif
+
+# Under Windows, COMSPEC variable specifies a shell.   If set,
+# launch Python via the PEP 397 launcher.  Otherwise, assume UNIX
+# and do not assume python-is-python3 or pythonpy is installed.
+ifdef COMSPEC
+  PY := py -3
+else
+  PY := python3
+endif
+
+# Defines passed to all files
+# ---------------------------
+
+DEFINES		:=
+
+# Libraries
+# ---------
+
+LIBS		:= -ltonc -lgba
+LIBDIRS		:= $(WF_EXTLIB_DIR)/libtonc
+
+# Build artifacts
+# ---------------
+
+BUILDDIR	:= build
+ELF		:= build/$(NAME).elf
+MAP		:= build/$(NAME).map
+ROM		:= $(NAME).gba
+
+# Verbose flag
+# ------------
+
+ifeq ($(V),1)
+_V		:=
+else
+_V		:= @
+endif
+
+# Source files
+# ------------
+
+ifneq ($(ASSETDIRS),)
+    SOURCES_WFPROCESS	:= $(shell find -L $(ASSETDIRS) -name "*.lua")
+    SOURCES_GRIT	:= $(shell find -L $(ASSETDIRS) -name "*.grit")
+    INCLUDEDIRS		+= $(addprefix $(BUILDDIR)/,$(ASSETDIRS))
+endif
+ifneq ($(CBINDIRS),)
+    SOURCES_CBIN	:= $(shell find -L $(CBINDIRS) -name "*.bin")
+    INCLUDEDIRS		+= $(addprefix $(BUILDDIR)/,$(CBINDIRS))
+endif
+SOURCES_S	:= $(shell find -L $(SOURCEDIRS) -name "*.s")
+SOURCES_C	:= $(shell find -L $(SOURCEDIRS) -name "*.c")
+SOURCES_PAGES	:= $(shell find -L $(SOURCEDIRS) -name "*pages.txt")
+INCLUDEDIRS     += $(addprefix $(BUILDDIR)/,$(SOURCEDIRS))
+    
+# Compiler and linker flags
+# -------------------------
+
+WARNFLAGS	:= -Wall
+
+INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
+		   $(foreach path,$(LIBDIRS),-isystem $(path)/include)
+
+LIBDIRSFLAGS	:= $(foreach path,$(LIBDIRS),-L$(path)/lib)
+
+ASFLAGS		+= -x assembler-with-cpp $(DEFINES) $(WF_ARCH_CFLAGS) \
+		   $(INCLUDEFLAGS) -ffunction-sections -fdata-sections
+
+CFLAGS		+= -std=gnu2x $(WARNFLAGS) $(DEFINES) $(WF_ARCH_CFLAGS) \
+		   $(INCLUDEFLAGS) -ffunction-sections -fdata-sections -O2
+
+LDFLAGS		:= $(LIBDIRSFLAGS) -Wl,-Map,$(MAP) -Wl,--gc-sections \
+		   $(WF_ARCH_LDFLAGS) $(LIBS)
+
+BUILDROMFLAGS	:=
+
+# Intermediate build files
+# ------------------------
+
+OBJS_ASSETS	:= $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_CBIN))) \
+		   $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_WFPROCESS))) \
+		   $(addprefix $(BUILDDIR)/,$(SOURCES_GRIT:.grit=_chr.o)) \
+		   $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_PAGES))) \
+		   $(BUILDDIR)/tilesets/vwf7_cp144p.o
+
+OBJS_SOURCES	:= $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_S))) \
+		   $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_C)))
+
+OBJS		:= $(OBJS_ASSETS) $(OBJS_SOURCES)
+
+DEPS		:= $(OBJS:.o=.d)
+
+# Targets
+# -------
+
+.PHONY: all clean
+
+all: $(ROM) compile_commands.json
+
+$(ROM) $(ELF): $(OBJS)
+	@echo "  ROM     $@"
+	$(_V)$(ROMLINK) -o $(ROM) --output-elf $(ELF) $(ROMLINKFLAGS) -- $(OBJS) $(LDFLAGS)
+
+clean:
+	@echo "  CLEAN"
+	$(_V)$(RM) $(ELF) $(ROM) $(BUILDDIR) compile_commands.json
+
+compile_commands.json: $(OBJS) | Makefile
+	@echo "  MERGE   compile_commands.json"
+	$(_V)$(WF)/bin/wf-compile-commands-merge $@ $(patsubst %.o,%.cc.json,$^)
+
+# Rules
+# -----
+
+$(BUILDDIR)/%.s.o : %.s | $(OBJS_ASSETS)
+	@echo "  AS      $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(CC) $(ASFLAGS) -MMD -MP -MJ $(patsubst %.o,%.cc.json,$@) -c -o $@ $<
+
+$(BUILDDIR)/%.c.o : %.c | $(OBJS_ASSETS)
+	@echo "  CC      $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(CC) $(CFLAGS) -MMD -MP -MJ $(patsubst %.o,%.cc.json,$@) -c -o $@ $<
+
+$(BUILDDIR)/%.bin.o $(BUILDDIR)/%_bin.h : %.bin
+	@echo "  BIN2C   $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(WF)/bin/wf-bin2c -a 4 $(@D) $<
+	$(_V)$(CC) $(CFLAGS) -MMD -MP -c -o $(BUILDDIR)/$*.bin.o $(BUILDDIR)/$*_bin.c
+
+$(BUILDDIR)/%.lua.o : %.lua
+	@echo "  PROCESS $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(WF)/bin/wf-process -o $(BUILDDIR)/$*.c -t $(TARGET) --depfile $(BUILDDIR)/$*.lua.d --depfile-target $(BUILDDIR)/$*.lua.o $<
+	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*.lua.o $(BUILDDIR)/$*.c
+
+# local gritfile, local image
+$(BUILDDIR)/%_chr.o $(BUILDDIR)/%_chr.h : %.png %.grit
+	@echo "  GRIT $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(GRIT) $< -ff$(word 2,$^) -fts -o$(BUILDDIR)/$*_chr
+	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*_chr.o $(BUILDDIR)/$*_chr.s
+
+# local gritfile, common image
+$(BUILDDIR)/%_chr.o $(BUILDDIR)/%_chr.h : ../common/%.png %.grit
+	@echo "  GRIT $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(GRIT) $< -ff$(word 2,$^) -fts -o$(BUILDDIR)/$*_chr
+	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*_chr.o $(BUILDDIR)/$*_chr.s
+
+$(BUILDDIR)/%pages.txt.o $(BUILDDIR)/%pages.h : %pages.txt $(BUILDDIR)/last-commit tools/paginate_help.py
+	@echo "  PAGES $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(PY) tools/paginate_help.py -DCOMMIT="$$(cat $(word 2,$^))" $< -o $(BUILDDIR)/$*pages.txt.s -oh $(BUILDDIR)/$*pages.h
+	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*pages.txt.o $(BUILDDIR)/$*pages.txt.s
+
+# One-off rules
+# -------------
+
+# The targets ending with `&:` are grouped targets, a feature
+# introduced in GNU Make 4.3.  This blocks running the rule multiple
+# times in separate processes, once for each output file.
+# If using old Make, change `&:` to `:` and use `make -j1`.
+
+$(BUILDDIR)/last-commit:
+	echo -n "non-Git" >> $@
+
+# Convert a proportional font
+$(BUILDDIR)/tilesets/vwf7_cp144p.o $(BUILDDIR)/tilesets/vwf7.h &: ../common/tilesets/vwf7_cp144p.png tools/vwfbuild.py
+	@echo "  FONT $<"
+	@$(MKDIR) -p $(@D)
+	$(_V)$(PY) tools/vwfbuild.py $< $(BUILDDIR)/tilesets/vwf7_cp144p.s $(BUILDDIR)/tilesets/vwf7.h
+	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/tilesets/vwf7_cp144p.o $(BUILDDIR)/tilesets/vwf7_cp144p.s
+
+# Include dependency files if they exist
+# --------------------------------------
+
+-include $(DEPS)

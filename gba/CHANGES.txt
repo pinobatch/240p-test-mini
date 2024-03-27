@@ -1,6 +1,10 @@
 0.24 (future)
 * Replace Grid and Linearity with Monoscope (thanks Lorenzoone)
 * Sound test: add surround option
+* Hill zone: scroll the top scanline too (thanks Lorenzoone)
+* Shadow sprite: fix sprite when changing background
+  (thanks Lorenzoone)
+* Port from libgba to libtonc
 * Reflect rebranding of Twitter to X
 
 0.23 (2023-03-03)

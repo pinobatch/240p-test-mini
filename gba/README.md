@@ -109,7 +109,7 @@ Limits
 Building
 --------
 Build requirements: GNU Coreutils and Make (use devkitPro MSYS on
-Windows), devkitARM, libgba, Python 3, and Pillow.
+Windows), devkitARM, libtonc, Python 3, and Pillow.
 
 Under Windows, open a devkitPro MSYS and type `make`.  Under Linux
 or macOS, once you have installed `gba-dev` using pacman, type these:

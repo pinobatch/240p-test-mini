@@ -94,48 +94,48 @@ The window
 static void load_help_bg(void) {
 
   // Load pattern table
-  LZ77UnCompVram(helpbgtiles_chrTiles, PATRAM4(3, 272));
-  LZ77UnCompVram(helpsprites_chrTiles, SPR_VRAM(CHARACTER_VRAM_BASE));
+  LZ77UnCompVram(helpbgtiles_chrTiles, tile_mem[3][272].data);
+  LZ77UnCompVram(helpsprites_chrTiles, tile_mem_obj[0][CHARACTER_VRAM_BASE].data);
 
   // Clear VWF canvas
-  dma_memset16(PATRAM4(3, 0), 0x1111 * FG_BGCOLOR, 32*WINDOW_WIDTH*17);
+  memset16(tile_mem[3][0].data, 0x1111 * FG_BGCOLOR, 16*WINDOW_WIDTH*17);
 
   // Load background SCREENMAT
-  dma_memset16(MAP[BGMAP][0], TILE_BACK_WALL, 64*(BACK_WALL_HT - 1));
-  dma_memset16(MAP[BGMAP][BACK_WALL_HT - 1], TILE_BACK_WALL_BOTTOM, 30*2);
-  dma_memset16(MAP[BGMAP][BACK_WALL_HT], TILE_FLOOR_TOP, 30*2);
-  dma_memset16(MAP[BGMAP][BACK_WALL_HT + 1], TILE_FLOOR, 64*(19 - BACK_WALL_HT));
+  memset16(se_mat[BGMAP][0], TILE_BACK_WALL, 32*(BACK_WALL_HT - 1));
+  memset16(se_mat[BGMAP][BACK_WALL_HT - 1], TILE_BACK_WALL_BOTTOM, 30);
+  memset16(se_mat[BGMAP][BACK_WALL_HT], TILE_FLOOR_TOP, 30);
+  memset16(se_mat[BGMAP][BACK_WALL_HT + 1], TILE_FLOOR, 32*(19 - BACK_WALL_HT));
   for (unsigned int x = 0; x < 4; ++x) {
     // ccccvhtt tttttttt
-    MAP[BGMAP][SHADOW_Y][SHADOW_X + x] = TILE_FLOOR_SHADOW + x;
-    MAP[BGMAP][SHADOW_Y][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0403 - x;
-    MAP[BGMAP][SHADOW_Y + 1][SHADOW_X + x] = TILE_FLOOR_SHADOW + 0x0800 + x;
-    MAP[BGMAP][SHADOW_Y + 1][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0C03 - x;
+    se_mat[BGMAP][SHADOW_Y][SHADOW_X + x] = TILE_FLOOR_SHADOW + x;
+    se_mat[BGMAP][SHADOW_Y][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0403 - x;
+    se_mat[BGMAP][SHADOW_Y + 1][SHADOW_X + x] = TILE_FLOOR_SHADOW + 0x0800 + x;
+    se_mat[BGMAP][SHADOW_Y + 1][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0C03 - x;
   }
   
   // Clear window SCREENMAT
-  dma_memset16(MAP[FGMAP], TILE_FG_BLANK, 32*21*2);
-  dma_memset16(MAP[FGMAP + 1], TILE_FG_XPARENT, 32*21*2);
+  memset16(se_mat[FGMAP], TILE_FG_BLANK, 32*21);
+  memset16(se_mat[FGMAP + 1], TILE_FG_XPARENT, 32*21);
 
   // Left border
-  MAP[FGMAP][0][0] = TILE_FG_CORNER1;
-  MAP[FGMAP][1][0] = TILE_FG_CORNER2;
+  se_mat[FGMAP][0][0] = TILE_FG_CORNER1;
+  se_mat[FGMAP][1][0] = TILE_FG_CORNER2;
   for (unsigned int i = 2; i < 19; ++i) {
-    MAP[FGMAP][i][0] = TILE_FG_LEFT;
+    se_mat[FGMAP][i][0] = TILE_FG_LEFT;
   }
-  MAP[FGMAP][19][0] = TILE_FG_CORNER2 + 0x0800;
-  MAP[FGMAP][20][0] = TILE_FG_CORNER1 + 0x0800;
+  se_mat[FGMAP][19][0] = TILE_FG_CORNER2 + 0x0800;
+  se_mat[FGMAP][20][0] = TILE_FG_CORNER1 + 0x0800;
 
   // Divider lines
-  dma_memset16(&(MAP[FGMAP][2][1]), TILE_FG_DIVIDER, 16*2);
-  dma_memset16(&(MAP[FGMAP][18][1]), TILE_FG_DIVIDER, 16*2);
+  memset16(&(se_mat[FGMAP][2][1]), TILE_FG_DIVIDER, 16);
+  memset16(&(se_mat[FGMAP][18][1]), TILE_FG_DIVIDER, 16);
   
   // Make the frame
-  loadMapRowMajor(&(MAP[FGMAP][1][1]), 0*WINDOW_WIDTH,
+  loadMapRowMajor(&(se_mat[FGMAP][1][1]), 0*WINDOW_WIDTH,
                   WINDOW_WIDTH, 1);
-  loadMapRowMajor(&(MAP[FGMAP][3][1]), 1*WINDOW_WIDTH,
+  loadMapRowMajor(&(se_mat[FGMAP][3][1]), 1*WINDOW_WIDTH,
                   WINDOW_WIDTH, PAGE_MAX_LINES);
-  loadMapRowMajor(&(MAP[FGMAP][4+PAGE_MAX_LINES][1]), (PAGE_MAX_LINES + 1)*WINDOW_WIDTH,
+  loadMapRowMajor(&(se_mat[FGMAP][4+PAGE_MAX_LINES][1]), (PAGE_MAX_LINES + 1)*WINDOW_WIDTH,
                   WINDOW_WIDTH, 1);
 
   help_bg_loaded = 1;
@@ -186,8 +186,8 @@ static void help_draw_cursor(unsigned int objx) {
 
 static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int keymask) {
   // Draw document title
-  dma_memset16(PATRAM4(3, 0), FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
-  vwf8Puts(PATRAM4(3, 0), helptitles[doc_num], 0, FG_FGCOLOR);
+  memset16(tile_mem[3][0].data, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
+  vwf8Puts(tile_mem[3][0].data, helptitles[doc_num], 0, FG_FGCOLOR);
 
   // Look up the address of the start of this page's text
   help_cur_page = help_wanted_page;
@@ -196,9 +196,9 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Draw lines of text to the screen
   while (y < PAGE_MAX_LINES) {
-    u32 *dst = PATRAM4(3, (y + 1)*WINDOW_WIDTH);
+    u32 *dst = tile_mem[3][(y + 1)*WINDOW_WIDTH].data;
     ++y;
-    dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+    memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
     src = vwf8Puts(dst, src, left, FG_FGCOLOR);
 
     // Break on NUL terminator or skip others
@@ -208,8 +208,8 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Clear unused lines that had been used
   for (unsigned int clear_y = y; clear_y < help_height; ++clear_y) {
-    u32 *dst = PATRAM4(3, (clear_y + 1)*WINDOW_WIDTH);
-    dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+    u32 *dst = tile_mem[3][(clear_y + 1)*WINDOW_WIDTH].data;
+    memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
   }
 
   // Save how many lines are used and move the cursor up if needed
@@ -220,22 +220,22 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Draw status line depending on size of document and which
   // keys are enabled
-  u32 *dst = PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH);
-  dma_memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 32);
+  u32 *dst = tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data;
+  memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
 
   if (help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num] > 1) {
     posprintf(help_line_buffer, "\x1D %d/%d \x1C",
               help_wanted_page - help_cumul_pages[doc_num] + 1, 
               help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num]);
-    vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+    vwf8Puts(tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data,
              help_line_buffer, 0, FG_FGCOLOR);
   }
   if (keymask & KEY_UP) {
-    vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+    vwf8Puts(tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data,
              "\x1E\x1F""A: Select", 40, FG_FGCOLOR);
   }
   if (keymask & KEY_B) {
-    vwf8Puts(PATRAM4(3, (PAGE_MAX_LINES + 1)*WINDOW_WIDTH),
+    vwf8Puts(tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data,
              "B: Exit", WINDOW_WIDTH * 8 - 28, FG_FGCOLOR);
   }
 }
