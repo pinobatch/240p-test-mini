@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Super Game Boy border converter for 144p Test Suite
+Super Game Boy border converter for 144p Test Suite and Libbet
 
-Copyright 2019, 2022 Damian Yerrick
+Copyright 2019, 2024 Damian Yerrick
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -25,14 +25,12 @@ import os
 import argparse
 from PIL import Image
 import pb16
-from incruniq import iur_encode_tilemap
-from uniq import uniq
 
 # Find common tools
 commontoolspath = os.path.normpath(os.path.join(
     os.path.dirname(sys.argv[0]), "..", "..", "common", "tools"
 ))
-sys.path.append(commontoolspath)
+if os.path.isdir(commontoolspath): sys.path.append(commontoolspath)
 from pilbmp2nes import pilbmp2chr, formatTilePlanar
 
 def snesformat(tile):
@@ -87,17 +85,50 @@ black between the fade out and fade in.
 def main(argv=None):
     argv = argv or sys.argv
     infilename, outfilename = argv[1:3]
+    # Additional compression options used in 144p Test Suite
+    # TODO: parse these with argparse
+    use_utmrows = True  #  repeated rows
+    use_iur = True  # tilemap bias toward increasing tile numbers
+
     im = Image.open(infilename)
+    if im.mode != 'P':
+        raise ValueError("%s: expected indexed color (mode P); got mode %s"
+                         % (infilename, im.mode))
+    palette_count = max(im.getdata()) + 1
+    if not 3 <= palette_count <= 16:
+        raise ValueError("%s: expected 3 to 16 colors; got %d"
+                         % (infilename, palette_count))
+    if im.size[0] != 256:
+        raise ValueError("%s: expected width 256 pixels; got %d"
+                         % (infilename, im.size[0]))
+
     tiles = pilbmp2chr(im, formatTile=snesformat)
     utiles, tilemap = flipuniq(tiles)
     assert len(utiles) <= 64
     pbtiles = b"".join(pb16.pb16(b"".join(utiles)))
     tmrows = [bytes(tilemap[i:i + 32]) for i in range(0, len(tilemap), 32)]
-    utmrows, tmrowmap = uniq(tmrows)
-    iutmrows = iur_encode_tilemap(b''.join(utmrows))
 
-    palette = im.getpalette()[:48]
+    # Encode the tilemap based on which compression options
+    # are in use for this project
+    if use_utmrows:
+        from uniq import uniq
+        utmrows, tmrowmap = uniq(tmrows)
+        if len(utmrows) >= 16:
+            raise ValueError("%s: too many unique rows: %d > 15"
+                             % (infilename, len(utmrows)))
+    else:
+        utmrows, tmrowmap = tmrows, list(range(len(tmrows)))
+    if use_iur:
+        from incruniq import iur_encode_tilemap
+        iutmrows = iur_encode_tilemap(b''.join(utmrows))
+    else:
+        iutmrows = b''.join(pb16.pb16(b''.join(utmrows)))
+
+    # For determinism, zero palette entries that the input image
+    # doesn't define
+    palette = im.getpalette()[:palette_count * 3]
     palette.extend(bytes(48 - len(palette)))
+
     snespalette = bytearray()
     for i in range(0, 48, 3):
         r = palette[i] >> 3
@@ -109,12 +140,13 @@ def main(argv=None):
 
     out = b"".join((
         bytes([len(utiles) * 2]), pbtiles,
-        bytes([16 * len(utmrows)]), iutmrows,
-        bytes(tmrowmap), snespalette
+        bytes([len(utmrows) * 16]) if use_utmrows else b"",
+        iutmrows,
+        bytes(tmrowmap) if use_utmrows else b"",
+        snespalette
     ))
     with open(outfilename, "wb") as outfp:
         outfp.write(out)
-    
 
 if __name__=='__main__':
     if 'idlelib' in sys.modules:

@@ -210,7 +210,7 @@ obj/gb/pitchtable.z80: tools/pitchtable.py
 	$(PY) $< > $@
 
 # Local variable allocation
-obj/gb/localvars.z80: tools/savescan.py $(wildcard src/*.z80)
+obj/gb/localvars.z80: tools/savescan.py $(sort $(wildcard src/*.z80))
 	$(PY) $^ -o $@
 
 # Print the commit tag
