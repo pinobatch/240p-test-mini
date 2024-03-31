@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: CC0-1.0
 #
 # SPDX-FileContributor: Adrian "asie" Siekierka, 2023
-# SPDX-FileContributor: Damian Yerrick, 2023
+# SPDX-FileContributor: Damian Yerrick, 2024
 
 export WONDERFUL_TOOLCHAIN ?= /opt/wonderful
 TARGET = gba/multiboot
@@ -125,7 +125,7 @@ DEPS		:= $(OBJS:.o=.d)
 # Targets
 # -------
 
-.PHONY: all clean
+.PHONY: all clean $(BUILDDIR)/last-commit-now
 
 all: $(ROM) compile_commands.json
 
@@ -194,8 +194,11 @@ $(BUILDDIR)/%pages.txt.o $(BUILDDIR)/%pages.h : %pages.txt $(BUILDDIR)/last-comm
 # times in separate processes, once for each output file.
 # If using old Make, change `&:` to `:` and use `make -j1`.
 
-$(BUILDDIR)/last-commit:
-	echo -n "non-Git" >> $@
+$(BUILDDIR)/last-commit-now:
+	(git describe --tags || echo non-Git) | tr -d '\r\n' > $@
+$(BUILDDIR)/last-commit: $(BUILDDIR)/last-commit-now
+	if test -f $@; then true; else touch $@; fi
+	cmp $< $@ || cp $< $@
 
 # Convert a proportional font
 $(BUILDDIR)/tilesets/vwf7_cp144p.o $(BUILDDIR)/tilesets/vwf7.h &: ../common/tilesets/vwf7_cp144p.png tools/vwfbuild.py

@@ -67,8 +67,8 @@ enum helpdoc_kind_e {"""]
     lines.extend('  .word helptitle_%s' % doc[1] for doc in docs)
 
     # ensure files end with newline
-    lines.extend("")
-    lines_header.extend("")
+    lines.append("")
+    lines_header.append("")
     return ["\n".join(lines), "\n".join(lines_header)]
 
 def parse_define(s):

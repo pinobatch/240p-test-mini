@@ -274,7 +274,7 @@ $(objdir)/%.hlp.s: $(srcdir)/%.txt tools/paginate_help.py \
 
 # Print the commit tag
 $(objdir)/last-commit-now:
-	git describe --tags | tr -d '\r\n' > $@
+	(git describe --tags || echo non-Git) | tr -d '\r\n' > $@
 # Update last-commit only if it has changed
 $(objdir)/last-commit: $(objdir)/last-commit-now
 	if test -f $@; then true; else touch $@; fi

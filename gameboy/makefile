@@ -215,7 +215,7 @@ obj/gb/localvars.z80: tools/savescan.py $(sort $(wildcard src/*.z80))
 
 # Print the commit tag
 obj/gb/last-commit-now:
-	git describe --tags | tr -d '\r\n' > $@
+	(git describe --tags || echo non-Git) | tr -d '\r\n' > $@
 # Update last-commit only if it has changed
 obj/gb/last-commit: obj/gb/last-commit-now
 	if test -f $@; then true; else touch $@; fi
