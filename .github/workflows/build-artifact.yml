@@ -73,10 +73,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install python3-pil -y
 
-      - name: Run makefile
+      - name: Run devkitARM makefile
         run: |
           cd gba
-          make
+          make -f dkaMakefile
 
       - name: Upload ROM binaries
         uses: actions/upload-artifact@master
