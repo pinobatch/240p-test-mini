@@ -90,6 +90,11 @@ void activity_motion_blur() {
   dma_memset16(se_mat[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT >> 3)*2);
   for (unsigned int y = MOTION_BLUR_START_Y; y < MOTION_BLUR_END_Y; ++y)
     dma_memset16(se_mat[PFMAP][y] + (SCREEN_WIDTH >> 4) - ((MOTION_BLUR_END_Y-MOTION_BLUR_START_Y)/2), 0x0A, (MOTION_BLUR_END_Y-MOTION_BLUR_START_Y)*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT >> 3)*2);
+  for (unsigned int y = MOTION_BLUR_START_Y; y < MOTION_BLUR_END_Y; ++y)
+    dma_memset16(se_mat_sub[PFMAP][y] + (SCREEN_WIDTH >> 4) - ((MOTION_BLUR_END_Y-MOTION_BLUR_START_Y)/2), 0x0A, (MOTION_BLUR_END_Y-MOTION_BLUR_START_Y)*2);
+  #endif
   vwfDrawLabelsPositionBased(motion_blur_labels, motion_blur_positions, PFMAP, 0x20);
   
   unsigned int y = 0;
@@ -139,5 +144,14 @@ void activity_motion_blur() {
     }
     draw_motion_blur_values(se_mat, y, params);
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    for (unsigned int i = 0; i < 4; ++i) {
+      pal_bg_mem_sub[i] = RGB5(1, 1, 1) * bgc1[i];
+    }
+    draw_motion_blur_values(se_mat_sub, y, params);
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   } while (!(new_keys & KEY_B));
 }

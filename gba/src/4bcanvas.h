@@ -43,6 +43,9 @@ typedef struct TileCanvas {
 } TileCanvas;
 
 extern const TileCanvas screen;
+#ifdef __NDS__
+extern const TileCanvas screen_sub;
+#endif
 
 void canvasClear(const TileCanvas *src, unsigned int color);
 void canvasInit(const TileCanvas *src, unsigned int color);

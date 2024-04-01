@@ -31,6 +31,11 @@ static void gus_bg_setup(void) {
   LZ77UnCompVram(Gus_portrait_chrTiles, tile_mem[0][0].data);
   dma_memset16(se_mat[PFSCROLLTEST], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
   load_flat_map(&(se_mat[PFSCROLLTEST][0][8]), Gus_portrait_chrMap, 14, SCREEN_HEIGHT >> 3);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  LZ77UnCompVram(Gus_portrait_chrTiles, tile_mem_sub[0][0].data);
+  dma_memset16(se_mat_sub[PFSCROLLTEST], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  load_flat_map(&(se_mat_sub[PFSCROLLTEST][0][8]), Gus_portrait_chrMap, 14, SCREEN_HEIGHT >> 3);
+  #endif
 }
 
 static void gus_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
@@ -40,12 +45,23 @@ static void gus_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   REG_BG_OFS[1].x = 0;
   REG_BG_OFS[1].y = 0;
   tonccpy(pal_bg_mem, Gus_portrait_chrPal, sizeof(Gus_portrait_chrPal));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_BGCNT_SUB[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  REG_BG_OFS_SUB[1].x = 0;
+  REG_BG_OFS_SUB[1].y = 0;
+  tonccpy(pal_bg_mem_sub, Gus_portrait_chrPal, sizeof(Gus_portrait_chrPal));
+  #endif
 }
 
 static void donna_bg_setup(void) {
   LZ77UnCompVram(Donna_chrTiles, tile_mem[0][0].data);
   dma_memset16(se_mat[PFSCROLLTEST], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
   load_flat_map(&(se_mat[PFSCROLLTEST][0][0]), Donna_chrMap, (SCREEN_WIDTH >> 3), (SCREEN_HEIGHT >> 3));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  tonccpy(tile_mem_sub[0][0].data, tile_mem[0][0].data, ((const int*)Donna_chrTiles)[0]>>8);
+  dma_memset16(se_mat_sub[PFSCROLLTEST], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  load_flat_map(&(se_mat_sub[PFSCROLLTEST][0][0]), Donna_chrMap, (SCREEN_WIDTH >> 3), (SCREEN_HEIGHT >> 3));
+  #endif
 }
 
 #ifdef __NDS__
@@ -61,11 +77,20 @@ static void donna_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   REG_BG_OFS[1].x = 0;
   REG_BG_OFS[1].y = 0;
   tonccpy(pal_bg_mem, Donna_chrPal, sizeof(Donna_chrPal));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_BGCNT_SUB[1] = DONNA_BG_COLORS|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  REG_BG_OFS_SUB[1].x = 0;
+  REG_BG_OFS_SUB[1].y = 0;
+  tonccpy(pal_bg_mem_sub, Donna_chrPal, sizeof(Donna_chrPal));
+  #endif
 }
 
 static void striped_bg_setup(unsigned int tilenum) {
   load_common_bg_tiles();
   dma_memset16(se_mat[PFSCROLLTEST], tilenum, 32*(SCREEN_HEIGHT >> 3)*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFSCROLLTEST], tilenum, 32*(SCREEN_HEIGHT >> 3)*2);
+  #endif
 }
 
 static void bg_2_setup() {
@@ -84,6 +109,13 @@ static void striped_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   REG_BG_OFS[1].y = 0;
   pal_bg_mem[0] = pal_bg_mem[2] = 0;
   pal_bg_mem[3] = RGB5(31, 31, 31);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_BGCNT_SUB[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  REG_BG_OFS_SUB[1].x = 0;
+  REG_BG_OFS_SUB[1].y = 0;
+  pal_bg_mem_sub[0] = pal_bg_mem_sub[2] = 0;
+  pal_bg_mem_sub[3] = RGB5(31, 31, 31);
+  #endif
 }
 
 typedef struct ShadowSpriteBG {
@@ -118,6 +150,10 @@ static const char *const shadow_sprite_types[] = {
 static void shadow_sprite_message(const char *s) {
   dma_memset16(tile_mem[2][1].data, 0x2222, 32*8);
   vwf8Puts(tile_mem[2][1].data, s, 3, 1);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(tile_mem_sub[2][1].data, 0x2222, 32*8);
+  vwf8Puts(tile_mem_sub[2][1].data, s, 3, 1);
+  #endif
 }
 
 static const unsigned char shadowmasks[3][2] = {
@@ -154,6 +190,14 @@ void activity_shadow_sprite() {
   dma_memset16(tile_mem[2][1].data, 0x2222, 32*8);
 
   load_shadow_sprite(&tile_mem_obj[0][0]);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFOVERLAY], 0xF000, 32*((SCREEN_HEIGHT >> 3)+1)*2);
+  loadMapRowMajor(&(se_mat_sub[PFOVERLAY][SCREEN_HEIGHT >> 3][(SCREEN_WIDTH >> 3) - 8]), 0xF001, 8, 1);
+  dma_memset16(tile_mem_sub[2][0].data, 0x0000, 32*1);
+  dma_memset16(tile_mem_sub[2][1].data, 0x2222, 32*8);
+
+  load_shadow_sprite(&tile_mem_obj_sub[0][0]);
+  #endif
   
   bgtypes[cur_bg].setup();
 
@@ -170,12 +214,18 @@ void activity_shadow_sprite() {
       if (new_keys & KEY_RIGHT) {
         if (++cur_bg >= NUM_BGTYPES) cur_bg = 0;
         REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+        #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+        REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+        #endif
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
       }
       if (new_keys & KEY_LEFT) {
         cur_bg = cur_bg ? cur_bg - 1 : NUM_BGTYPES - 1;
         REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+        #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+        REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+        #endif
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
       }
@@ -252,10 +302,27 @@ void activity_shadow_sprite() {
       }
     }
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DMA1CNT = 0;
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(2)|BG_SBB(PFOVERLAY);
+    REG_BG_OFS_SUB[0].x = 0;
+    REG_BG_OFS_SUB[0].y = (changetimeout > 8) ? 8 : changetimeout;
+    pal_bg_mem_sub[241] = RGB5(31, 31, 31);
+    pal_bg_mem_sub[242] = RGB5(0, 0, 0);
+    for (unsigned int y = 0; y < 3; ++y) {
+      for (unsigned int x = 0; x < 3; ++x) {
+        pal_obj_mem_sub[y * 16 + x + 1] = shadow_sprite_palettes[y][x];
+      }
+    }
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #endif
     ppu_copy_oam();
     bgtypes[cur_bg].set_scroll(hdmaTable, x * 4);
   } while (!(new_keys & KEY_B));
 
   // clean up after hill zone
   REG_DMA0CNT = 0;
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_DMA1CNT = 0;
+  #endif
 }

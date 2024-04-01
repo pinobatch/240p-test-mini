@@ -41,6 +41,9 @@ unsigned short player_facing = 0;
 
 static void load_player(void) {
   LZ77UnCompVram(spritegfx_chrTiles, &(tile_mem_obj[0][16].data));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  LZ77UnCompVram(spritegfx_chrTiles, &(tile_mem_obj_sub[0][16].data));
+  #endif
   player_x = 56 << 8;
   player_dx = player_frame = player_facing = 0;
 }
@@ -132,14 +135,26 @@ static void put1block(unsigned int x, unsigned int y) {
   se_mat[PFMAP][y][x+1]   = 13 | 0x0000;
   se_mat[PFMAP][y+1][x]   = 14 | 0x0000;
   se_mat[PFMAP][y+1][x+1] = 15 | 0x0000;
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  se_mat_sub[PFMAP][y][x]     = 12 | 0x0000;
+  se_mat_sub[PFMAP][y][x+1]   = 13 | 0x0000;
+  se_mat_sub[PFMAP][y+1][x]   = 14 | 0x0000;
+  se_mat_sub[PFMAP][y+1][x+1] = 15 | 0x0000;
+  #endif
 }
 
 void load_common_bg_tiles(void) {
   bitunpack2(&(tile_mem[0][0].data), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  bitunpack2(&(tile_mem_sub[0][0].data), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+  #endif
 }
 
 void load_common_obj_tiles(void) {
   bitunpack2(&(tile_mem_obj[0][0].data), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  bitunpack2(&(tile_mem_obj_sub[0][0].data), bggfx_chrTiles, sizeof(bggfx_chrTiles));
+  #endif
 }
 
 static void draw_bg(void) {
@@ -148,6 +163,11 @@ static void draw_bg(void) {
   memset16(se_mat[PFMAP][0], 0x0004, 32*((SCREEN_HEIGHT >> 3) - 2));
   memset16(se_mat[PFMAP][(SCREEN_HEIGHT >> 3) - 2], 11 | 0x1000, SCREEN_WIDTH >> 3);
   memset16(se_mat[PFMAP][(SCREEN_HEIGHT >> 3) - 1], 1 | 0x1000, SCREEN_WIDTH >> 3);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  memset16(se_mat_sub[PFMAP][0], 0x0004, 32*((SCREEN_HEIGHT >> 3) - 2));
+  memset16(se_mat_sub[PFMAP][(SCREEN_HEIGHT >> 3) - 2], 11 | 0x1000, SCREEN_WIDTH >> 3);
+  memset16(se_mat_sub[PFMAP][(SCREEN_HEIGHT >> 3) - 1], 1 | 0x1000, SCREEN_WIDTH >> 3);
+  #endif
   put1block(2, (SCREEN_HEIGHT >> 3) - 6);
   put1block(2, (SCREEN_HEIGHT >> 3) - 4);
   put1block((SCREEN_WIDTH >> 3) - 4, (SCREEN_HEIGHT >> 3) - 6);
@@ -167,9 +187,15 @@ static void draw_bg(void) {
 void lame_boy_demo(void) {
   // Forced blanking
   REG_DISPCNT = DCNT_BLANK | ACTIVATE_SCREEN_HW;
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_DISPCNT_SUB = DCNT_BLANK | ACTIVATE_SCREEN_HW;
+  #endif
   draw_bg();
   load_player();
   REG_DISPCNT = ACTIVATE_SCREEN_HW;
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_DISPCNT_SUB = ACTIVATE_SCREEN_HW;
+  #endif
 
   // Freeze
   do {
@@ -187,6 +213,14 @@ void lame_boy_demo(void) {
     tonccpy(pal_bg_mem+0x00, bgcolors00, sizeof(bgcolors00));
     tonccpy(pal_bg_mem+0x10, bgcolors10, sizeof(bgcolors10));
     tonccpy(pal_obj_mem+0x00, spritegfx_chrPal, sizeof(spritegfx_chrPal));
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    tonccpy(pal_bg_mem_sub+0x00, bgcolors00, sizeof(bgcolors00));
+    tonccpy(pal_bg_mem_sub+0x10, bgcolors10, sizeof(bgcolors10));
+    tonccpy(pal_obj_mem_sub+0x00, spritegfx_chrPal, sizeof(spritegfx_chrPal));
+    #endif
     ppu_copy_oam();
   } while (!(new_keys & KEY_B));
 }

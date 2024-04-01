@@ -71,6 +71,9 @@ void ppu_copy_oam() {
   CP15_CleanAndFlushDCache();
   #endif
   tonccpy(oam_mem, SOAM, sizeof(SOAM));
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  tonccpy(oam_mem_sub, SOAM, sizeof(SOAM));
+  #endif
 }
 
 void dma_memset16(void *dst, unsigned int c16, size_t length_bytes) {

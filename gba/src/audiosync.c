@@ -88,6 +88,15 @@ void activity_audio_sync() {
       pal_bg_mem[i] = progress >= min_progress[i] ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     }
     pal_obj_mem[1] = RGB5(31, 31, 31);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    for (unsigned int i = 0; i < 6; ++i) {
+      pal_bg_mem_sub[i] = progress >= min_progress[i] ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    }
+    pal_obj_mem_sub[1] = RGB5(31, 31, 31);
+    #endif
     ppu_copy_oam();
 
     if (progress == 120) {

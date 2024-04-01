@@ -140,13 +140,22 @@ void activity_megaton() {
   REG_SOUNDCNT_L = 0xFF77;  // PSG vol/pan
   REG_SOUND1CNT_L = 0x08;   // no sweep
   #endif
+
   dma_memset16(se_mat[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT>>3)*2);
-  vwfDrawLabelsPositionBased(megaton_labels, megaton_positions, PFMAP, 0x44);
 
   megaton_draw_static_reticle(se_mat);
   // Make space for results
   dma_memset16(tile_mem[0][0x30].data, 0x0000, 32 * 2 * NUM_TRIALS);
   loadMapRowMajor(&(se_mat[PFMAP][2][2]), 0x30, 2, NUM_TRIALS);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT>>3)*2);
+
+  megaton_draw_static_reticle(se_mat_sub);
+  // Make space for results
+  dma_memset16(tile_mem_sub[0][0x30].data, 0x0000, 32 * 2 * NUM_TRIALS);
+  loadMapRowMajor(&(se_mat_sub[PFMAP][2][2]), 0x30, 2, NUM_TRIALS);
+  #endif
+  vwfDrawLabelsPositionBased(megaton_labels, megaton_positions, PFMAP, 0x44);
 
   do {
     read_pad_help_check(helpsect_timing_and_reflex_test);
@@ -160,6 +169,9 @@ void activity_megaton() {
       unsigned int early = diff < 0;
       unsigned int value = early ? -diff : diff;
       megaton_print_values(tile_mem[0][0x30 + progress * 2].data, value, early);
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      megaton_print_values(tile_mem_sub[0][0x30 + progress * 2].data, value, early);
+      #endif
       if (!early && value <= 25) lag[progress++] = value;
     }
     #ifdef __NDS__
@@ -216,9 +228,20 @@ void activity_megaton() {
     pal_bg_mem[0] = (x == 128 && with_audio) ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     pal_bg_mem[1] = pal_obj_mem[1] = RGB5(31, 31, 31);
     pal_bg_mem[2] = RGB5(20, 25, 31);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    pal_bg_mem_sub[0] = (x == 128 && with_audio) ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    pal_bg_mem_sub[1] = pal_obj_mem_sub[1] = RGB5(31, 31, 31);
+    pal_bg_mem_sub[2] = RGB5(20, 25, 31);
+    #endif
     ppu_copy_oam();
 
     megaton_draw_variable_data(se_mat, y, dir, randomize, with_audio);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    megaton_draw_variable_data(se_mat_sub, y, dir, randomize, with_audio);
+    #endif
 
     // beep
     #ifdef __NDS__
@@ -244,6 +267,9 @@ void activity_megaton() {
 
   // Display average: First throw away all labels below Y=120
   dma_memset16(se_mat[PFMAP][(SCREEN_HEIGHT - 40)>> 3], BLANK_TILE, 32*4*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP][(SCREEN_HEIGHT - 40)>> 3], BLANK_TILE, 32*4*2);
+  #endif
 
   unsigned int sum = 0;
   for (unsigned int i = 0; i < NUM_TRIALS; ++i) {

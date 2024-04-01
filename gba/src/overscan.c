@@ -81,6 +81,13 @@ void activity_overscan() {
     *c |= 0x44444444;
   }
   dma_memset16(se_mat[PFMAP], 0x0004, 32*(SCREEN_HEIGHT >> 3)*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  // Make all BG tiles opaque
+  for (u32 *c = tile_mem_sub[0][0].data; c < tile_mem_sub[0][32].data; ++c) {
+    *c |= 0x44444444;
+  }
+  dma_memset16(se_mat_sub[PFMAP], 0x0004, 32*(SCREEN_HEIGHT >> 3)*2);
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect_overscan);
@@ -120,10 +127,19 @@ void activity_overscan() {
     }
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    // Color 0: outside
+    pal_bg_mem_sub[0] = pal_bg_mem_sub[5] = inverted ? RGB5(0, 0, 0) : RGB5(31, 31, 31);
+    pal_bg_mem_sub[4] = inverted ? RGB5(23, 23, 23) : RGB5(15, 15, 15);
+    if (cur_keys & KEY_A) {
+      pal_obj_mem_sub[2] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    } else {
+      pal_obj_mem_sub[2] = inverted ? RGB5(15, 15, 15) : RGB5(23, 23, 23);
+    }
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    #endif
     ppu_copy_oam();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0 | DCNT_WIN1 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
-    REG_WINOUT = 0x10;  // BG0 inside, BG1 outside
-    REG_WININ = 0x1111;
 
     // start<<8 | end
     // Do this with the y value to fix an NDS bug.
@@ -132,6 +148,10 @@ void activity_overscan() {
     unsigned int y_set_value = (7 << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF);
     if(dist[2] == 0)
         y_set_value = ((SCREEN_HEIGHT - dist[3]) & 0xFF);
+
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0 | DCNT_WIN1 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_WINOUT = 0x10;  // BG0 inside, BG1 outside
+    REG_WININ = 0x1111;
     
     REG_WIN0H = (dist[1] << 8) | (SCREEN_WIDTH / 2);
     REG_WIN0V = y_set_value;
@@ -148,6 +168,23 @@ void activity_overscan() {
     #endif
     REG_DMA0DAD = (intptr_t)&(REG_WIN0V);
     REG_DMA0CNT = 1|DMA_DST_FIXED|DMA_SRC_FIXED|DMA_32|DMA_AT_HBLANK|DMA_ENABLE;
+
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0 | DCNT_WIN1 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_WINOUT_SUB = 0x10;  // BG0 inside, BG1 outside
+    REG_WININ_SUB = 0x1111;
+    
+    REG_WIN0H_SUB = (dist[1] << 8) | (SCREEN_WIDTH / 2);
+    REG_WIN0V_SUB = y_set_value;
+    // NDS requires two windows to fill 256 pixels on the X axys
+    REG_WIN1H_SUB = ((SCREEN_WIDTH / 2) << 8) | ((SCREEN_WIDTH - dist[0]) & 0xFF);
+    REG_WIN1V_SUB = y_set_value;
+  
+    REG_DMA1CNT = 0;
+    REG_DMA1SAD = (intptr_t)&(DMA_FILL(0));
+    REG_DMA1DAD = (intptr_t)&(REG_WIN0V_SUB);
+    REG_DMA1CNT = 1|DMA_DST_FIXED|DMA_SRC_FIXED|DMA_32|DMA_AT_HBLANK|DMA_ENABLE;
+    #endif
     
     for (int i = 0; i < 4; ++i) {
       unsigned int x = overscan_dist_x[i];
@@ -158,6 +195,12 @@ void activity_overscan() {
       se_mat[PFMAP][y][x + 1] = 0x0010 + (value - tens * 10);
       se_mat[PFMAP][y + 1][x] = 0x0006;
       se_mat[PFMAP][y + 1][x + 1] = 0x0007;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      se_mat_sub[PFMAP][y][x] = tens ? (0x0010 + tens) : 0x0004;
+      se_mat_sub[PFMAP][y][x + 1] = 0x0010 + (value - tens * 10);
+      se_mat_sub[PFMAP][y + 1][x] = 0x0006;
+      se_mat_sub[PFMAP][y + 1][x + 1] = 0x0007;
+      #endif
     }
   }
 

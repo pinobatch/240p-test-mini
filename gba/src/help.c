@@ -145,6 +145,16 @@ static void load_help_bg(void) {
   memset16(tile_mem[3][0].data, 0x1111 * FG_BGCOLOR, 16*WINDOW_WIDTH*(PAGE_MAX_USABLE_LINES + 2));
 
   load_bg_to_map(se_mat);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  // Load pattern table
+  LZ77UnCompVram(helpbgtiles_chrTiles, tile_mem_sub[3][TILE_DECOMPRESSED_BASE].data);
+  LZ77UnCompVram(helpsprites_chrTiles, tile_mem_obj_sub[0][CHARACTER_VRAM_BASE].data);
+
+  // Clear VWF canvas
+  memset16(tile_mem_sub[3][0].data, 0x1111 * FG_BGCOLOR, 16*WINDOW_WIDTH*(PAGE_MAX_USABLE_LINES + 2));
+
+  load_bg_to_map(se_mat_sub);
+  #endif
 
   help_bg_loaded = 1;
   help_height = 0;
@@ -192,10 +202,10 @@ static void help_draw_cursor(unsigned int objx) {
   oam_used = ou + 1;
 }
 
-static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int keymask) {
+static int help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int keymask, TILE* target_tile_mem) {
   // Draw document title
-  memset16(tile_mem[3][0].data, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
-  vwf8Puts(tile_mem[3][0].data, helptitles[doc_num], 0, FG_FGCOLOR);
+  memset16(target_tile_mem[0].data, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
+  vwf8Puts(target_tile_mem[0].data, helptitles[doc_num], 0, FG_FGCOLOR);
 
   // Look up the address of the start of this page's text
   help_cur_page = help_wanted_page;
@@ -204,7 +214,7 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Draw lines of text to the screen
   while (y < PAGE_FINAL_MAX_LINES) {
-    u32 *dst = tile_mem[3][(y + 1)*WINDOW_WIDTH].data;
+    u32 *dst = target_tile_mem[(y + 1)*WINDOW_WIDTH].data;
     ++y;
     memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
     src = vwf8Puts(dst, src, left, FG_FGCOLOR);
@@ -216,19 +226,18 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Clear unused lines that had been used
   for (unsigned int clear_y = y; clear_y < help_height; ++clear_y) {
-    u32 *dst = tile_mem[3][(clear_y + 1)*WINDOW_WIDTH].data;
+    u32 *dst = target_tile_mem[(clear_y + 1)*WINDOW_WIDTH].data;
     memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
   }
 
   // Save how many lines are used and move the cursor up if needed
-  help_height = y;
   if (help_cursor_y >= y) {
     help_cursor_y = y - 1;
   }
 
   // Draw status line depending on size of document and which
   // keys are enabled
-  u32 *dst = tile_mem[3][(PAGE_MAX_USABLE_LINES + 1)*WINDOW_WIDTH].data;
+  u32 *dst = target_tile_mem[(PAGE_MAX_USABLE_LINES + 1)*WINDOW_WIDTH].data;
   memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
 
   if (help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num] > 1) {
@@ -243,6 +252,8 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
   if (keymask & KEY_B) {
     vwf8Puts(dst, "B: Exit", WINDOW_WIDTH * 8 - 28, FG_FGCOLOR);
   }
+
+  return y;
 }
 
 static const unsigned short bg0_x_sequence[] = {
@@ -298,8 +309,14 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
   // If the help VRAM needs to be reloaded, reload its tiles and map
   if (!help_bg_loaded) {
     REG_DISPCNT = DCNT_BLANK | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_BLANK | ACTIVATE_SCREEN_HW;
+    #endif
     load_help_bg();
     REG_DISPCNT = ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = ACTIVATE_SCREEN_HW;
+    #endif
   } else {
     // If changing pages while BG CHR and map are loaded,
     // schedule an out-load-in sequence and hide the cursor
@@ -322,6 +339,17 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
   REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
   REG_BG_OFS[0].x = help_wnd_progress ? WXBASE : 256;
   REG_BG_OFS[0].y = 4;
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  tonccpy(pal_bg_mem_sub+0x00, helpbgtiles_chrPal, sizeof(helpbgtiles_chrPal));
+  tonccpy(pal_obj_mem_sub+0x00, helpsprites_chrPal, sizeof(helpsprites_chrPal));
+
+  // Set up background regs (except DISPCNT)
+  REG_BGCNT_SUB[1] = BG_4BPP|BG_SIZE0|BG_CBB(3)|BG_SBB(BGMAP);
+  REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE1|BG_CBB(3)|BG_SBB(FGMAP);
+  REG_BG_OFS_SUB[1].x = REG_BG_OFS_SUB[1].y = 0;
+  REG_BG_OFS_SUB[0].x = help_wnd_progress ? WXBASE : 256;
+  REG_BG_OFS_SUB[0].y = 4;
+  #endif
   
   // Freeze
   while (1) {
@@ -363,7 +391,11 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
 
     if (help_wnd_progress == 0) {
       help_show_cursor = (keymask & KEY_UP) ? 6 : 0;
-      help_draw_page(doc_num, help_show_cursor, keymask);
+      int final_y = help_draw_page(doc_num, help_show_cursor, keymask, &tile_mem[3][0]);
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      help_draw_page(doc_num, help_show_cursor, keymask, &tile_mem_sub[3][0]);
+      #endif
+      help_height = final_y;
     }
 
     unsigned int wx = help_move_window();
@@ -376,6 +408,10 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
     VBlankIntrWait();
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_BG_OFS[0].x = wx;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG1 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_BG_OFS_SUB[0].x = wx;
+    #endif
     ppu_copy_oam();
   }
 }

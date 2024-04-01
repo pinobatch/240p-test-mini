@@ -40,6 +40,17 @@ const TileCanvas screen = {
   .mapBase = se_mat
 };
 
+#ifdef __NDS__
+const TileCanvas screen_sub = {
+  .left = 0, .top = 0, .width = SCREEN_WIDTH >> 3, .height = SCREEN_HEIGHT >> 3,
+  .chrBase = tile_mem_sub[0][0].data,
+  .map = 23,
+  .core = 0,
+  .mapTileBase = 0,
+  .mapBase = se_mat_sub
+};
+#endif
+
 static
 void fillcol(u32 *dst, unsigned int colStride,
              unsigned int l, unsigned int t,

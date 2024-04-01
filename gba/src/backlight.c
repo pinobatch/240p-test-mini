@@ -85,7 +85,14 @@ void activity_backlight_zone(void) {
     VBlankIntrWait();
     pal_bg_mem[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     pal_obj_mem[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    pal_bg_mem_sub[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    pal_obj_mem_sub[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    #endif
     ppu_copy_oam();
     REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }

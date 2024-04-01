@@ -104,7 +104,7 @@ static void draw_stopwatch_hand(unsigned int phase) {
 
 void activity_stopwatch() {
   unsigned char digits[NUM_DIGITS] = {0};
-  unsigned int running = 0, is_lap = 0, hide_face = 0, show_ruler = 0, face_phase = 0;
+  unsigned int running = 0, is_lap = 0, hide_face = 0, show_ruler = 0, face_phase = 0, printed_frames = 0;
 
   dma_memset16(se_mat[PFMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
   dma_memset16(se_mat[TIMEMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
@@ -112,19 +112,39 @@ void activity_stopwatch() {
   bitunpack2(tile_mem[0][64].data, stopwatchdigits_chrTiles, sizeof(stopwatchdigits_chrTiles));
   bitunpack2(tile_mem_obj[0][0].data, stopwatchhand_chrTiles, sizeof(stopwatchhand_chrTiles));
   load_flat_map(&(se_mat[PFMAP][6][(SCREEN_WIDTH>>4)-6]), stopwatchface_chrMap, 12, 13);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  dma_memset16(se_mat_sub[TIMEMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  bitunpack1(tile_mem_sub[0][0].data, stopwatchface_chrTiles, sizeof(stopwatchface_chrTiles));
+  bitunpack2(tile_mem_sub[0][64].data, stopwatchdigits_chrTiles, sizeof(stopwatchdigits_chrTiles));
+  bitunpack2(tile_mem_obj_sub[0][0].data, stopwatchhand_chrTiles, sizeof(stopwatchhand_chrTiles));
+  load_flat_map(&(se_mat_sub[PFMAP][6][(SCREEN_WIDTH>>4)-6]), stopwatchface_chrMap, 12, 13);
+  #endif
 
   vwfDrawLabelsPositionBased(sw_labels, sw_positions, TIMEMAP, 0x4080);
-  
+
   // Draw colons
   for (int i = 2; i < 8; i += 2) {
     unsigned int x = sw_digitx[i] + 2;
     se_mat[TIMEMAP][4][x] = se_mat[TIMEMAP][3][x] = 0x107C;
   };
-  
+
   // Draw ruler
   for (int i = 0; i < (SCREEN_HEIGHT >> 3); ++i) {
     se_mat[PFMAP][i][1 + (i & 0x01)] = 0x7D;
   }
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  // Draw colons
+  for (int i = 2; i < 8; i += 2) {
+    unsigned int x = sw_digitx[i] + 2;
+    se_mat_sub[TIMEMAP][4][x] = se_mat_sub[TIMEMAP][3][x] = 0x107C;
+  };
+
+  // Draw ruler
+  for (int i = 0; i < (SCREEN_HEIGHT >> 3); ++i) {
+    se_mat_sub[PFMAP][i][1 + (i & 0x01)] = 0x7D;
+  }
+  #endif
 
   do {
     read_pad_help_check(helpsect_stopwatch);
@@ -162,12 +182,21 @@ void activity_stopwatch() {
       }
     }
 
-    if (!is_lap) face_phase = digits[0];
+    if (!is_lap) {
+      face_phase = digits[0];
+      printed_frames = digits[0] + (digits[1] * 10);
+    }
+
     oam_used = 0;
     draw_stopwatch_hand(face_phase);
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
+    #ifdef __NDS__
+    bool final_show_ruler = (show_ruler & (1 << ((printed_frames >> 1) & 1)));
+    #else
+    bool final_show_ruler = (show_ruler & (1 << (printed_frames & 1)));
+    #endif
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(TIMEMAP);
@@ -175,13 +204,27 @@ void activity_stopwatch() {
     REG_BG_OFS[1].x = DIGITS_OFFSET_X;
     pal_bg_mem[0] = RGB5(31, 31, 31);
     pal_bg_mem[1] = hide_face ? RGB5(31, 31, 31) : RGB5(23, 23, 23);
-    bool final_show_ruler = (show_ruler & (1 << (face_phase & 1)));
     pal_bg_mem[3] = final_show_ruler ? RGB5(23, 0, 0) : RGB5(31, 31, 31);
     pal_bg_mem[65] = RGB5(0, 0, 0);
     tonccpy(pal_bg_mem+0x10, invgray4pal, sizeof(invgray4pal));
     tonccpy(pal_bg_mem+0x21, bluepalette, sizeof(bluepalette));
     tonccpy(pal_bg_mem+0x31, redpalette, sizeof(redpalette));
     tonccpy(pal_obj_mem+0x00, invgray4pal, sizeof(invgray4pal));
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BGCNT_SUB[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(TIMEMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = REG_BG_OFS_SUB[1].y = 0;
+    REG_BG_OFS_SUB[1].x = DIGITS_OFFSET_X;
+    pal_bg_mem_sub[0] = RGB5(31, 31, 31);
+    pal_bg_mem_sub[1] = hide_face ? RGB5(31, 31, 31) : RGB5(23, 23, 23);
+    pal_bg_mem_sub[3] = final_show_ruler ? RGB5(23, 0, 0) : RGB5(31, 31, 31);
+    pal_bg_mem_sub[65] = RGB5(0, 0, 0);
+    tonccpy(pal_bg_mem_sub+0x10, invgray4pal, sizeof(invgray4pal));
+    tonccpy(pal_bg_mem_sub+0x21, bluepalette, sizeof(bluepalette));
+    tonccpy(pal_bg_mem_sub+0x31, redpalette, sizeof(redpalette));
+    tonccpy(pal_obj_mem_sub+0x00, invgray4pal, sizeof(invgray4pal));
+    #endif
     ppu_copy_oam();
 
     // Update digits
@@ -195,14 +238,26 @@ void activity_stopwatch() {
           tilenum += (digits[0] & 1) ? 0x3000 : 0x2000;  // colored digits
         }
         for (unsigned int row = 2; row < 5; ++row) {
-          se_mat[TIMEMAP][row][x] = tilenum++;
-          se_mat[TIMEMAP][row][x + 1] = tilenum++;
+          se_mat[TIMEMAP][row][x] = tilenum;
+          se_mat[TIMEMAP][row][x + 1] = tilenum + 1;
+          #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+          se_mat_sub[TIMEMAP][row][x] = tilenum;
+          se_mat_sub[TIMEMAP][row][x + 1] = tilenum + 1;
+          #endif
+          tilenum += 2;
         }
       }
       se_mat[TIMEMAP][5][START_TILE_SW_X+16] = se_mat[TIMEMAP][5][START_TILE_SW_X+17] = 0;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      se_mat_sub[TIMEMAP][5][START_TILE_SW_X+16] = se_mat_sub[TIMEMAP][5][START_TILE_SW_X+17] = 0;
+      #endif
     } else {
       se_mat[TIMEMAP][5][START_TILE_SW_X+16] = 0x107E;  // LA
       se_mat[TIMEMAP][5][START_TILE_SW_X+17] = 0x107F;  // P
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      se_mat_sub[TIMEMAP][5][START_TILE_SW_X+16] = 0x107E;  // LA
+      se_mat_sub[TIMEMAP][5][START_TILE_SW_X+17] = 0x107F;  // P
+      #endif
     }
   } while (!(new_keys & KEY_B));
 }

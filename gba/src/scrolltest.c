@@ -41,6 +41,10 @@ void activity_grid_scroll(void) {
 
   load_common_bg_tiles();
   dma_memset16(se_mat[PFSCROLLTEST], 0x0020, 32*32*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFSCROLLTEST], 0x0020, 32*32*2);
+  #endif
+
   do {
     read_pad_help_check(helpsect_grid_scroll_test);
     held_keys |= new_keys;
@@ -85,6 +89,14 @@ void activity_grid_scroll(void) {
     pal_bg_mem[0] = inverted ? RGB5(31,31,31) : RGB5(0, 0, 0);
     pal_bg_mem[1] = inverted ? RGB5(0, 0, 0) : RGB5(31,31,31);
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    REG_BG_OFS_SUB[0].x = x;
+    REG_BG_OFS_SUB[0].y = y;
+    pal_bg_mem_sub[0] = inverted ? RGB5(31,31,31) : RGB5(0, 0, 0);
+    pal_bg_mem_sub[1] = inverted ? RGB5(0, 0, 0) : RGB5(31,31,31);
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   } while (!(new_keys & KEY_B));
 }
 
@@ -149,8 +161,15 @@ static const unsigned short kikipalette1[] = {
 static void load_kiki_bg(void) {
   bitunpack2(tile_mem[0][0].data, kikitiles_chrTiles, sizeof(kikitiles_chrTiles));
   dma_memset16(se_mat[PFSCROLLTEST], 0x0000, 32*64*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  bitunpack2(tile_mem_sub[0][0].data, kikitiles_chrTiles, sizeof(kikitiles_chrTiles));
+  dma_memset16(se_mat_sub[PFSCROLLTEST], 0x0000, 32*64*2);
+  #endif
 
-  dma_memset16(help_line_buffer, 0x0000, 16);  // Clear metatile buffer
+  char metatile_buffer[16];
+  for(int i = 0; i < 16; i++)
+    metatile_buffer[i] = 0; // Clear metatile buffer
+
   for (unsigned int y = 0; y < 32; ++y) {
     // Decode one row
     unsigned int tiletotopleft = 0;
@@ -158,7 +177,7 @@ static void load_kiki_bg(void) {
 
     // Run Markov chain: guess the most common tile below each
     for (unsigned int x = 0; x < 16; x++) {
-      unsigned int tilethere = help_line_buffer[x];
+      unsigned int tilethere = metatile_buffer[x];
       if (tiletoleft == 3) {
         // To the right of a wall, different rules apply
         tiletoleft = mt_belowR[tilethere];
@@ -169,25 +188,31 @@ static void load_kiki_bg(void) {
         }
       }
       tiletotopleft = tilethere;
-      help_line_buffer[x] = tiletoleft;
+      metatile_buffer[x] = tiletoleft;
     }
     
     // Replace with path from replaceloop
     unsigned int wallbits = kikimap_chrTiles[y];
     for (unsigned int x = 0; x < 16 && wallbits; ++x) {
       unsigned int replacement = wallbits & 0x03;
-      if (replacement) help_line_buffer[x] = replacement;
+      if (replacement) metatile_buffer[x] = replacement;
       wallbits >>= 2;
     }
 
     // Render metatile row
     for (unsigned int x = 0; x < 16; ++x) {
-      unsigned int mtid = help_line_buffer[x];
+      unsigned int mtid = metatile_buffer[x];
       unsigned int attr = (mtid >= 1 && mtid <= 3) ? 0x1000 : 0x0000;
       se_mat[PFSCROLLTEST][y * 2    ][x * 2    ] = metatiles[mtid][0] | attr;
       se_mat[PFSCROLLTEST][y * 2    ][x * 2 + 1] = metatiles[mtid][1] | attr;
       se_mat[PFSCROLLTEST][y * 2 + 1][x * 2    ] = metatiles[mtid][2] | attr;
       se_mat[PFSCROLLTEST][y * 2 + 1][x * 2 + 1] = metatiles[mtid][3] | attr;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      se_mat_sub[PFSCROLLTEST][y * 2    ][x * 2    ] = metatiles[mtid][0] | attr;
+      se_mat_sub[PFSCROLLTEST][y * 2    ][x * 2 + 1] = metatiles[mtid][1] | attr;
+      se_mat_sub[PFSCROLLTEST][y * 2 + 1][x * 2    ] = metatiles[mtid][2] | attr;
+      se_mat_sub[PFSCROLLTEST][y * 2 + 1][x * 2 + 1] = metatiles[mtid][3] | attr;
+      #endif
     }
   }
   // This map is a PITA to load because of the compression implied
@@ -207,9 +232,20 @@ void activity_kiki_scroll(void) {
     REG_BG_OFS[0].y = scrolltest_y >> 1;
     REG_BG_OFS[0].x = (256 - SCREEN_WIDTH) / 2;
     REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
     tonccpy(pal_bg_mem+0, kikipalette0, sizeof(kikipalette0));
     tonccpy(pal_bg_mem+16, kikipalette1, sizeof(kikipalette1));
+    pal_bg_mem[241] = 0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE2|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    REG_BG_OFS_SUB[0].y = scrolltest_y >> 1;
+    REG_BG_OFS_SUB[0].x = (256 - SCREEN_WIDTH) / 2;
+    REG_BG_OFS_SUB[1].x = REG_BG_OFS_SUB[1].y = 0;
+    tonccpy(pal_bg_mem_sub+0, kikipalette0, sizeof(kikipalette0));
+    tonccpy(pal_bg_mem_sub+16, kikipalette1, sizeof(kikipalette1));
+    pal_bg_mem_sub[241] = 0;
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   } while (!(new_keys & KEY_B));
 }
 
@@ -218,6 +254,10 @@ void activity_kiki_scroll(void) {
 void hill_zone_load_bg(void) {
   LZ77UnCompVram(greenhillzone_chrTiles, tile_mem[0][0].data);
   LZ77UnCompVram(greenhillzone_chrMap, se_mat[PFSCROLLTEST]);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  LZ77UnCompVram(greenhillzone_chrTiles, tile_mem_sub[0][0].data);
+  LZ77UnCompVram(greenhillzone_chrMap, se_mat_sub[PFSCROLLTEST]);
+  #endif
 }
 
 #ifdef __NDS__
@@ -233,6 +273,11 @@ static void __hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x, bool rel
     REG_BGCNT[1] = BG_4BPP|BG_SIZE1|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
     tonccpy(pal_bg_mem+0, greenhillzone_chrPal, sizeof(greenhillzone_chrPal));
     pal_bg_mem[241] = 0;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[1] = BG_4BPP|BG_SIZE1|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    tonccpy(pal_bg_mem_sub+0, greenhillzone_chrPal, sizeof(greenhillzone_chrPal));
+    pal_bg_mem_sub[241] = 0;
+    #endif
   }
 
   // Because libgba's ISR takes so long, we're already out of hblank
@@ -249,6 +294,13 @@ static void __hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x, bool rel
   REG_DMA0DAD = (intptr_t)&(REG_BG_OFS[1].x);
   REG_DMA0CNT = 1|DMA_DST_RELOAD|DMA_SRC_INC|DMA_REPEAT|DMA_16|DMA_AT_HBLANK|DMA_ENABLE;
   REG_BG_OFS[1].x = hdmaTable[0];
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_DMA1CNT = 0;
+  REG_DMA1SAD = (intptr_t)&(hdmaTable[1]);
+  REG_DMA1DAD = (intptr_t)&(REG_BG_OFS_SUB[1].x);
+  REG_DMA1CNT = 1|DMA_DST_RELOAD|DMA_SRC_INC|DMA_REPEAT|DMA_16|DMA_AT_HBLANK|DMA_ENABLE;
+  REG_BG_OFS_SUB[1].x = hdmaTable[0];
+  #endif
 }
 
 // Parallax scrolling for hill zone
@@ -278,8 +330,14 @@ void activity_hill_zone_scroll(void) {
 
     VBlankIntrWait();
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG1 | ACTIVATE_SCREEN_HW;
+    #endif
     __hill_zone_set_scroll(hdmaTable, selected_scrolltest_y, reload);
   } while (!(new_keys & KEY_B));
   REG_DMA0CNT = 0;
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  REG_DMA1CNT = 0;
+  #endif
 }
 

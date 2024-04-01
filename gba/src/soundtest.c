@@ -56,13 +56,18 @@ const unsigned char waveram_sin16x[16] __attribute__((aligned (2))) = {
 };
 #endif
 
-static void wait24() {
-  ((volatile u16 *)pal_bg_mem)[6] = RGB5(31, 0, 0);
+static void wait24(void) {
+  pal_bg_mem[6] = RGB5(31, 0, 0);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  pal_bg_mem_sub[6] = RGB5(31, 0, 0);
+  #endif
   for (unsigned int i = 24; i > 0; --i) {
     VBlankIntrWait();
-    dma_memset16(pal_bg_mem + 6, RGB5(31, 0, 0), 2);
   }
   pal_bg_mem[6] = RGB5(31, 31, 31);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  pal_bg_mem_sub[6] = RGB5(31, 31, 31);
+  #endif
 }
 
 #ifndef __NDS__

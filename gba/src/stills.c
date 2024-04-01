@@ -120,6 +120,10 @@ void activity_monoscope(void) {
 
   bitunpack2(tile_mem[0][0].data, monoscope_chrTiles, sizeof(monoscope_chrTiles));
   RLUnCompVram(monoscope_chrMap, se_mat[PFMAP]);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  bitunpack2(tile_mem_sub[0][0].data, monoscope_chrTiles, sizeof(monoscope_chrTiles));
+  RLUnCompVram(monoscope_chrMap, se_mat_sub[PFMAP]);
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect_monoscope);
@@ -140,6 +144,14 @@ void activity_monoscope(void) {
     pal_bg_mem[1] = monoscope_whites[brightness];
     pal_bg_mem[2] = RGB5(31, 0, 0);
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    pal_bg_mem_sub[0] = (brightness >= 4) ? RGB5(13,13,13) : 0;
+    pal_bg_mem_sub[1] = monoscope_whites[brightness];
+    pal_bg_mem_sub[2] = RGB5(31, 0, 0);
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }
 
@@ -153,6 +165,12 @@ void activity_sharpness(void) {
   RLUnCompVram(sharpness_chrMap, se_mat[PFMAP]);
   tonccpy(tile_mem[0][TILE_SHARPNESS_BRICK_POSITION].data, brickstile, sizeof(brickstile));
   dma_memset16(se_mat[PFOVERLAY], 0x0400 | TILE_SHARPNESS_BRICK_POSITION, 32*(SCREEN_HEIGHT>>3)*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  bitunpack2(tile_mem_sub[0][0].data, sharpness_chrTiles, sizeof(sharpness_chrTiles));
+  RLUnCompVram(sharpness_chrMap, se_mat_sub[PFMAP]);
+  tonccpy(tile_mem_sub[0][TILE_SHARPNESS_BRICK_POSITION].data, brickstile, sizeof(brickstile));
+  dma_memset16(se_mat_sub[PFOVERLAY], 0x0400 | TILE_SHARPNESS_BRICK_POSITION, 32*(SCREEN_HEIGHT>>3)*2);
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect_sharpness);
@@ -167,13 +185,20 @@ void activity_sharpness(void) {
     }
 
     VBlankIntrWait();
+    const unsigned short *palsrc = inverted ? invgray4pal : gray4pal;
+    if (is_bricks) palsrc = brickspal;
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)
                 |BG_SBB(is_bricks ? PFOVERLAY : PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
-    const unsigned short *palsrc = inverted ? invgray4pal : gray4pal;
-    if (is_bricks) palsrc = brickspal;
     tonccpy(pal_bg_mem+0x00, palsrc, sizeof(gray4pal));
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)
+                |BG_SBB(is_bricks ? PFOVERLAY : PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    tonccpy(pal_bg_mem_sub+0x00, palsrc, sizeof(gray4pal));
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }
 
@@ -237,10 +262,18 @@ static const BarsListEntry plugerects[] = {
 
 void draw_barslist(const BarsListEntry *rects) {
   canvasInit(&screen, 0);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  canvasInit(&screen_sub, 0);
+  #endif
   for(; rects->l < SCREEN_WIDTH; ++rects) {
     canvasRectfill(&screen,
                    rects->l, rects->t, rects->r, rects->b,
                    rects->color);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    canvasRectfill(&screen_sub,
+                   rects->l, rects->t, rects->r, rects->b,
+                   rects->color);
+    #endif
   }
 }
 
@@ -298,6 +331,12 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     tonccpy(pal_bg_mem+0x00, smptePalettes[bright], sizeof(smptePalettes[0]));
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    tonccpy(pal_bg_mem_sub+0x00, smptePalettes[bright], sizeof(smptePalettes[0]));
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
     #ifdef __NDS__
     if(beep != last_beep) {
       if(beep)
@@ -332,9 +371,16 @@ void activity_pluge(void) {
     if (x == 8) x = ((SCREEN_WIDTH >> 3) - 8);
     unsigned int stride = screen.height * 8;
     uint32_t *tile = screen.chrBase + stride * x + 8;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    uint32_t *tile_sub = screen_sub.chrBase + stride * x + 8;
+    #endif
     for (unsigned int yleft = ((SCREEN_HEIGHT - 16) / 2); yleft > 0; --yleft) {
       *tile++ = 0x23232323;
       *tile++ = 0x32323232;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      *tile_sub++ = 0x23232323;
+      *tile_sub++ = 0x32323232;
+      #endif
     }
   }
   
@@ -344,6 +390,14 @@ void activity_pluge(void) {
       se_mat[PFOVERLAY][y][x] = ((SCREEN_HEIGHT >> 3) * 32) + ((y & 0x03) << 2) + ((x + (((SCREEN_WIDTH % 32) >> 3) / 2)) & 0x03);
     }
   }
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  LZ77UnCompVram(pluge_shark_6color_chrTiles, tile_mem_sub[0][(SCREEN_HEIGHT >> 3) * 32].data);
+  for (unsigned int y = 0; y < (SCREEN_HEIGHT >> 3); ++y) {
+    for (unsigned int x = 0; x < (SCREEN_WIDTH >> 3); ++x) {
+      se_mat_sub[PFOVERLAY][y][x] = ((SCREEN_HEIGHT >> 3) * 32) + ((y & 0x03) << 2) + ((x + (((SCREEN_WIDTH % 32) >> 3) / 2)) & 0x03);
+    }
+  }
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect_pluge);
@@ -370,6 +424,18 @@ void activity_pluge(void) {
               sizeof(plugePaletteNTSC));
     }
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(shark ? PFOVERLAY : PFMAP);
+    REG_BG_OFS_SUB[0].y = REG_BG_OFS_SUB[0].x = 0;
+    if (shark) {
+      tonccpy(pal_bg_mem_sub+0x00, pluge_shark_palettes[bright],
+              sizeof(pluge_shark_6color_chrPal));
+    } else {
+      tonccpy(pal_bg_mem_sub+0x00, bright ? plugePaletteNTSCJ : plugePaletteNTSC,
+              sizeof(plugePaletteNTSC));
+    }
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }
 
@@ -457,7 +523,7 @@ static void draw_gcbars(const TileCanvas* graiety) {
 }
 
 void activity_gcbars(void) {
-  unsigned int REG_BGCNT0 = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+  unsigned int bgctrl0 = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
 
   load_common_bg_tiles();
   // Draw 5-pixel-wide vertical bars
@@ -465,6 +531,12 @@ void activity_gcbars(void) {
     8, 1, NUM_PIXELS_PER_GCBAR_PIECE, 1, tile_mem[0][0x40 - NUM_PIXELS_PER_GCBAR_PIECE].data, PFMAP, 0, 0x40 - NUM_PIXELS_PER_GCBAR_PIECE, se_mat
   };
   draw_gcbars(&graiety);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  static const TileCanvas graiety_sub = {
+    8, 1, NUM_PIXELS_PER_GCBAR_PIECE, 1, tile_mem_sub[0][0x40 - NUM_PIXELS_PER_GCBAR_PIECE].data, PFMAP, 0, 0x40 - NUM_PIXELS_PER_GCBAR_PIECE, se_mat_sub
+  };
+  draw_gcbars(&graiety_sub);
+  #endif
   
   // Draw labels on primary map
   vwfDrawLabelsPositionBased(gcbars_labels, gcbars_positions, PFMAP, 0x40);
@@ -475,15 +547,10 @@ void activity_gcbars(void) {
       return;
     }
     if (new_keys & KEY_A) {
-      REG_BGCNT0 ^= BG_SBB(PFMAP) ^ BG_SBB(PFOVERLAY);
+      bgctrl0 ^= BG_SBB(PFMAP) ^ BG_SBB(PFOVERLAY);
     }
 
     VBlankIntrWait();
-    REG_BGCNT[0] = REG_BGCNT0;
-    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
-    pal_bg_mem[0] = RGB5(0, 0, 0);
-    pal_bg_mem[1] = RGB5(31, 31, 31);
-
     // Calculate the color gradient
     unsigned int c = 0;
     const unsigned short *palramp = gcbars_palramps;
@@ -496,9 +563,24 @@ void activity_gcbars(void) {
         }
       }
       pal_bg_mem[p] = c;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      pal_bg_mem_sub[p] = c;
+      #endif
       c += *palramp;
     }
+
+    REG_BGCNT[0] = bgctrl0;
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    pal_bg_mem[0] = RGB5(0, 0, 0);
+    pal_bg_mem[1] = RGB5(31, 31, 31);
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = bgctrl0;
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    pal_bg_mem_sub[0] = RGB5(0, 0, 0);
+    pal_bg_mem_sub[1] = RGB5(31, 31, 31);
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }
 
@@ -536,6 +618,12 @@ void activity_gray_ramp(void) {
     0, 1, GRAY_RAMP_TILES, 1, tile_mem[0][0].data, PFMAP, 0, 0, se_mat
   };
   draw_gray_ramp(&graiety);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  static const TileCanvas graiety_sub = {
+    0, 1, GRAY_RAMP_TILES, 1, tile_mem_sub[0][0].data, PFMAP, 0, 0, se_mat_sub
+  };
+  draw_gray_ramp(&graiety_sub);
+  #endif
   
   // TODO: Make the tilemap with palette for the custom canvas
   while (1) {
@@ -545,17 +633,25 @@ void activity_gray_ramp(void) {
       return;
     }
 
-    VBlankIntrWait();
-    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
-    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
-    
+    VBlankIntrWait();    
     unsigned int c = 0;
     for (unsigned int p = 1; p < 64; ++p) {
       pal_bg_mem[p] = c;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      pal_bg_mem_sub[p] = c;
+      #endif
       c += RGB5(1, 1, 1);
       if ((p & 0x0F) == 8) p += 8;
     }
+
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }
 
@@ -578,6 +674,7 @@ static const unsigned short full_stripes_colors[10][2] = {
   { RGB5(31, 0, 0), RGB5( 0, 0,31) }
 };
 
+#define FULL_STRIPES_Y_OFFSET ((((SCREEN_HEIGHT >> 3) - 4) % 5) ? 4 : 8)
 
 static void do_full_stripes(helpdoc_kind helpsect) {
   unsigned int pattern = 0, inverted = 0, frame = 0;
@@ -589,6 +686,14 @@ static void do_full_stripes(helpdoc_kind helpsect) {
   // row 19: frame counter
   dma_memset16(se_mat[PFOVERLAY], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
   loadMapRowMajor(&(se_mat[PFOVERLAY][(SCREEN_HEIGHT >> 3) - 1][(SCREEN_WIDTH >> 3) - 6]), 0x6002, 6, 1);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  // tile 0: blank
+  dma_memset16(tile_mem_sub[0][0].data, 0x0000, 32);
+
+  // row 19: frame counter
+  dma_memset16(se_mat_sub[PFOVERLAY], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  loadMapRowMajor(&(se_mat_sub[PFOVERLAY][(SCREEN_HEIGHT >> 3) - 1][(SCREEN_WIDTH >> 3) - 6]), 0x6002, 6, 1);
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect);
@@ -614,10 +719,7 @@ static void do_full_stripes(helpdoc_kind helpsect) {
     REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFOVERLAY);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = REG_BG_OFS[1].x = 0;
-    if(((SCREEN_HEIGHT >> 3) - 4) % 5)
-        REG_BG_OFS[1].y = 4;
-    else
-        REG_BG_OFS[1].y = 8;
+    REG_BG_OFS[1].y = FULL_STRIPES_Y_OFFSET;
     pal_bg_mem[0] = RGB5(0, 0, 0);
     for (int c = 0; c < 10; ++c) {
       pal_bg_mem[c * 16 + 1] = full_stripes_colors[c][0];
@@ -635,12 +737,38 @@ static void do_full_stripes(helpdoc_kind helpsect) {
     // Draw the frame counter
     dma_memset16(tile_mem[0][2].data, 0x2222, 32*6);
     vwf8Puts(tile_mem[0][2].data, help_line_buffer, 4, 1);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFOVERLAY);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = REG_BG_OFS_SUB[1].x = 0;
+    REG_BG_OFS_SUB[1].y = FULL_STRIPES_Y_OFFSET;
+    pal_bg_mem_sub[0] = RGB5(0, 0, 0);
+    for (int c = 0; c < 10; ++c) {
+      pal_bg_mem_sub[c * 16 + 1] = full_stripes_colors[c][0];
+      pal_bg_mem_sub[c * 16 + 2] = full_stripes_colors[c][1];
+    }
+    REG_DISPCNT_SUB = lcdcvalue;
+
+    // Draw the pattern
+    dst = tile_mem_sub[0][1].data;
+    for (unsigned int i = 4; i > 0; --i) {
+      *dst++ = full_stripes_patterns[pattern][0] ^ inverted;
+      *dst++ = full_stripes_patterns[pattern][1] ^ inverted;
+    }
+
+    // Draw the frame counter
+    dma_memset16(tile_mem_sub[0][2].data, 0x2222, 32*6);
+    vwf8Puts(tile_mem_sub[0][2].data, help_line_buffer, 4, 1);
+    #endif
   }
 }
 
 void activity_full_stripes(void) {
   // Clear the screen
   dma_memset16(se_mat[PFMAP], 0x6001, 32*((SCREEN_HEIGHT >> 3) + 1)*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP], 0x6001, 32*((SCREEN_HEIGHT >> 3) + 1)*2);
+  #endif
   do_full_stripes(helpsect_full_screen_stripes);
 }
 
@@ -661,6 +789,10 @@ void activity_color_bleed(void) {
   // Clear the screen
   dma_memset16(se_mat[PFMAP], 0x0000, 32*((SCREEN_HEIGHT >> 3) + 1)*2);
   draw_stripe_regions(se_mat);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP], 0x0000, 32*((SCREEN_HEIGHT >> 3) + 1)*2);
+  draw_stripe_regions(se_mat_sub);
+  #endif
   do_full_stripes(helpsect_color_bleed);
 }
 
@@ -700,6 +832,14 @@ void activity_solid_color(void) {
 
   // Allocate canvas for the RGB editing box
   loadMapRowMajor(&(se_mat[PFMAP][1][26]), 0x0001, 3, 3);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  // Clear the screen
+  dma_memset16(se_mat_sub[PFMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  dma_memset16(tile_mem_sub[0][0].data, 0x0000, 32);
+
+  // Allocate canvas for the RGB editing box
+  loadMapRowMajor(&(se_mat_sub[PFMAP][1][26]), 0x0001, 3, 3);
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect_solid_color_screen);
@@ -724,6 +864,9 @@ void activity_solid_color(void) {
         ++rgb_vals[y];
       }
       solid_color_draw_edit_box(rgb_vals, y, &tile_mem[0][0]);
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      solid_color_draw_edit_box(rgb_vals, y, &tile_mem_sub[0][0]);
+      #endif
     } else {
       if (new_keys & KEY_RIGHT) {
         x += 1;
@@ -741,6 +884,34 @@ void activity_solid_color(void) {
     pal_bg_mem[1] = RGB5(31, 31, 31);
     pal_bg_mem[2] = RGB5(0, 0, 0);
     REG_DISPCNT = showeditbox ? (DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW) : ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    pal_bg_mem_sub[0] = x < 4 ? solid_colors[x] : RGB5(rgb_vals[0], rgb_vals[1], rgb_vals[2]);
+    pal_bg_mem_sub[1] = RGB5(31, 31, 31);
+    pal_bg_mem_sub[2] = RGB5(0, 0, 0);
+    REG_DISPCNT_SUB = showeditbox ? (DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW) : ACTIVATE_SCREEN_HW;
+    #endif
+  }
+}
+
+static void set_palette_convergence(u16* chosen_pal_bg_mem, u8 cur_side, u8 gridinvert, u8 griddepth, u8 colors_border) {
+  if (cur_side != 0) {
+    chosen_pal_bg_mem[0x03] = RGB5(31,31,31);
+    chosen_pal_bg_mem[0x13] = RGB5( 0, 0,31);
+    chosen_pal_bg_mem[0x23] = RGB5( 0,31, 0);
+    chosen_pal_bg_mem[0x33] = RGB5(31, 0, 0);
+    chosen_pal_bg_mem[0x02] = colors_border ? 0 : RGB5(31,31,31);
+    chosen_pal_bg_mem[0x12] = colors_border ? 0 : RGB5( 0, 0,31);
+    chosen_pal_bg_mem[0x22] = colors_border ? 0 : RGB5( 0,31, 0);
+    chosen_pal_bg_mem[0x32] = colors_border ? 0 : RGB5(31, 0, 0);
+  } else {
+    // Set palette for grid
+    unsigned int color = gridinvert ? 0x7FFF : 0;
+    for (unsigned int i = 0; i < 4; ++i) {
+      chosen_pal_bg_mem[i] = color;
+      if (i == griddepth) color = color ^ 0x7FFF;
+    }
   }
 }
 
@@ -759,6 +930,17 @@ void activity_convergence(void) {
       se_mat[PFOVERLAY][y][x] = tile;
     }
   }
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  bitunpack2(tile_mem_sub[0][0].data, convergence_chrTiles, sizeof(convergence_chrTiles));
+  dma_memset16(se_mat_sub[PFMAP], 0x04, 32*(SCREEN_HEIGHT >> 3)*2); 
+  for (unsigned int y = 0; y < (SCREEN_HEIGHT >> 3); ++y) {
+    unsigned int rowtilebase = (((y & 3) == 3) << 1) | ((y & 4) ? 0x2000 : 0);
+    for (unsigned int x = 0; x < (SCREEN_WIDTH >> 3); ++x) {
+      unsigned int tile = ((x & 3) == 3) | ((x & 4) ? 0x1000 : 0) | rowtilebase;
+      se_mat_sub[PFOVERLAY][y][x] = tile;
+    }
+  }
+  #endif
 
   while (1) {
     read_pad_help_check(helpsect_convergence);
@@ -782,23 +964,14 @@ void activity_convergence(void) {
                  |BG_SBB(PFMAP-cur_side));
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
-    if (cur_side != 0) {
-      pal_bg_mem[0x03] = RGB5(31,31,31);
-      pal_bg_mem[0x13] = RGB5( 0, 0,31);
-      pal_bg_mem[0x23] = RGB5( 0,31, 0);
-      pal_bg_mem[0x33] = RGB5(31, 0, 0);
-      pal_bg_mem[0x02] = colors_border ? 0 : RGB5(31,31,31);
-      pal_bg_mem[0x12] = colors_border ? 0 : RGB5( 0, 0,31);
-      pal_bg_mem[0x22] = colors_border ? 0 : RGB5( 0,31, 0);
-      pal_bg_mem[0x32] = colors_border ? 0 : RGB5(31, 0, 0);
-    } else {
-      // Set palette for grid
-      unsigned int color = gridinvert ? 0x7FFF : 0;
-      for (unsigned int i = 0; i < 4; ++i) {
-        pal_bg_mem[i] = color;
-        if (i == griddepth) color = color ^ 0x7FFF;
-      }
-    }
+    set_palette_convergence(pal_bg_mem, cur_side, gridinvert, griddepth, colors_border);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_BGCNT_SUB[0] = (BG_4BPP|BG_SIZE0|BG_CBB(0)
+                 |BG_SBB(PFMAP-cur_side));
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    set_palette_convergence(pal_bg_mem_sub, cur_side, gridinvert, griddepth, colors_border);
+    #endif
   }
 
 }

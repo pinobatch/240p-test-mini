@@ -50,6 +50,14 @@ void vwfDrawLabelsPositionBased(const char *labels, const char *positions, unsig
     
     // Fill the nametable
     loadMapRowMajor(&(se_mat[sbb][y >> 3][x >> 3]), tilenum & 0xF3FF, txtw, 1);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    chrdst = tile_mem_sub[0][tilenum & 0x07FF].data;
+    dma_memset16(chrdst, 0x0000, 32 * txtw);
+    strend = vwf8Puts(chrdst, labels, x & 0x07, 1);
+    
+    // Fill the nametable
+    loadMapRowMajor(&(se_mat_sub[sbb][y >> 3][x >> 3]), tilenum & 0xF3FF, txtw, 1);
+    #endif
     tilenum += txtw;
 
     if (*strend == 0) break;
