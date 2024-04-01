@@ -48,20 +48,29 @@ static void wait24() {
 }
 
 static void reinitAudio(void) {
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_X = 0x0000;  // 00: reset
   REG_SOUNDCNT_X = 0x0080;  // 80: run
   REG_SOUNDBIAS = 0xC200;  // 4200: 65.5 kHz PWM (for PCM); C200: 262 kHz PWM (for PSG)
   REG_SOUNDCNT_H = 0x0B06;  // xBxx: PCM A centered from timer 0; PSG/PCM full mix
+  #endif
 }
 
 static void beepTri(const unsigned char *wave, unsigned int period) {
+  #ifdef __NDS__
+  #else
   REG_SOUND3CNT_L = 0;  // unlock waveram
   tonccpy((void *)REG_WAVE_RAM, wave, 16);
   REG_SOUND3CNT_L = 0xC0;    // lock waveram
   REG_SOUND3CNT_H = 0x2000;  // full volume
   REG_SOUND3CNT_X = (2048 - period) + 0x8000;  // pitch
+  #endif
   wait24();
+  #ifdef __NDS__
+  #else
   REG_SOUND3CNT_H = 0;
+  #endif
 }
 
 static void beep8k(void) {
@@ -97,57 +106,88 @@ static void beep62(void) {
 }
 
 static void beep1kL(void) {
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_L = 0xF077;
+  #endif
   beep1k();
 }
 
 static void beep1kR(void) {
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_L = 0x0F77;
+  #endif
   beep1k();
 }
 
 static void beepPulse(void) {
+  #ifdef __NDS__
+  #else
   REG_SOUND1CNT_L = 0x08;    // no sweep
   REG_SOUND1CNT_H = 0xA080;  // 2/3 volume, 50% duty
   REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // pitch
+  #endif
   wait24();
+  #ifdef __NDS__
+  #else
   REG_SOUND1CNT_H = 0;
   REG_SOUND1CNT_X = 0x8000;  // note cut
+  #endif
 }
 
 static void beepSurround(void) {
   reinitAudio();
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_L = 0xD277;
   REG_SOUND1CNT_L = 0x08;    // no sweep
   REG_SOUND1CNT_H = 0xA040;  // 2/3 volume, 25% duty
   REG_SOUND2CNT_L = 0xA0C0;  // 2/3 volume, 75% duty
   REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // pitch
   REG_SOUND2CNT_H = (2048 - 131) + 0x8000;  // pitch
+  #endif
   wait24();
+  #ifdef __NDS__
+  #else
   REG_SOUND1CNT_H = 0;
   REG_SOUND1CNT_X = 0x8000;  // note cut
   REG_SOUND2CNT_L = 0;
   REG_SOUND2CNT_H = 0x8000;  // note cut
+  #endif
 }
 
 static void beepHiss(void) {
+  #ifdef __NDS__
+  #else
   REG_SOUND4CNT_L = 0xA000;  // 2/3 volume
   REG_SOUND4CNT_H = 0x8024;  // divider
+  #endif
   wait24();
+  #ifdef __NDS__
+  #else
   REG_SOUND4CNT_L = 0;
   REG_SOUND4CNT_H = 0x8000;  // note cut
+  #endif
 }
 
 static void beepBuzz(void) {
+  #ifdef __NDS__
+  #else
   REG_SOUND4CNT_L = 0xA000;  // 2/3 volume
   REG_SOUND4CNT_H = 0x802C;  // divider
+  #endif
   wait24();
+  #ifdef __NDS__
+  #else
   REG_SOUND4CNT_L = 0;
   REG_SOUND4CNT_H = 0x8000;  // note cut
+  #endif
 }
 
 // PCM demo /////////////////////////////////////////////////////////
 
+#ifndef __NDS__
 typedef struct ChordVoice {
   unsigned short delaylinestart, delaylineend;
   unsigned char fac1, fac2;
@@ -224,6 +264,7 @@ IWRAM_CODE static void beepPCM(void) {
   pal_bg_mem[6] = RGB5(31, 31, 31);
   REG_SOUNDBIAS = 0xC200;  // 65.5 kHz PWM (for PCM)
 }
+#endif
 
 // Sound test menu //////////////////////////////////////////////////
 
@@ -242,16 +283,24 @@ static const activity_func sound_test_handlers[] = {
   beepSurround,
   beepHiss,
   beepBuzz,
+  #ifndef __NDS__
   beepPCM,
+  #endif
 };
 void activity_sound_test() {
   reinitAudio();
   while (1) {
+    #ifdef __NDS__
+    #else
     REG_SOUNDCNT_L = 0xFF77;  // reset PSG vol/pan
+    #endif
     helpscreen(helpsect_sound_test_frequency, KEY_A|KEY_START|KEY_B|KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
 
     if (new_keys & KEY_B) {
+      #ifdef __NDS__
+      #else
       REG_SOUNDCNT_X = 0;  // reset audio
+      #endif
       return;
     }
     if (new_keys & KEY_START) {

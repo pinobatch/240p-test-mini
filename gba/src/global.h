@@ -42,7 +42,7 @@ unsigned int read_pad_help_check(helpdoc_kind doc_num);
 // stills.c
 
 typedef struct BarsListEntry {
-  unsigned char l, t, r, b, color;
+  unsigned short l, t, r, b, color;
 } BarsListEntry;
 void draw_barslist(const BarsListEntry *rects);
 

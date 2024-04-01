@@ -41,19 +41,25 @@ static const unsigned char min_progress[6] = {
 void activity_audio_sync() {
   unsigned int progress = 0, running = 0;
 
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
   REG_SOUNDBIAS = 0xC200;   // C200: 262 kHz PWM (for PSG)
   REG_SOUNDCNT_H = 0x0002;  // PSG/PCM mixing
   REG_SOUNDCNT_L = 0xFF77;  // PSG vol/pan
   REG_SOUND1CNT_L = 0x08;   // no sweep
+  #endif
 
   draw_barslist(audiosync_rects);
   load_common_obj_tiles();
 
   do {
     if (progress < 120) {
+      #ifdef __NDS__
+      #else
       REG_SOUND1CNT_H = 0;  // note cut
       REG_SOUND1CNT_X = 0x8000;
+      #endif
       read_pad_help_check(helpsect_audio_sync);
     
       if (new_keys & KEY_A) {
@@ -83,9 +89,15 @@ void activity_audio_sync() {
     ppu_copy_oam();
 
     if (progress == 120) {
+      #ifdef __NDS__
+      #else
       REG_SOUND1CNT_H = 0xA080;  // 2/3 volume, 50% duty
       REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // pitch
+      #endif
     }
   } while (!(new_keys & KEY_B));
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_X = 0;  // reset audio
+  #endif
 }

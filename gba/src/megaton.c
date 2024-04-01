@@ -131,11 +131,14 @@ void activity_megaton() {
 
   load_common_bg_tiles();
   load_common_obj_tiles();
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
   REG_SOUNDBIAS = 0xC200;   // C200: 262 kHz PWM (for PSG)
   REG_SOUNDCNT_H = 0x0002;  // PSG/PCM mixing
   REG_SOUNDCNT_L = 0xFF77;  // PSG vol/pan
   REG_SOUND1CNT_L = 0x08;   // no sweep
+  #endif
   dma_memset16(se_mat[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT>>3)*2);
   vwfDrawLabelsPositionBased(megaton_labels, megaton_positions, PFMAP, 0x44);
 
@@ -158,8 +161,11 @@ void activity_megaton() {
       megaton_print_values(tile_mem[0][0x30 + progress * 2].data, value, early);
       if (!early && value <= 25) lag[progress++] = value;
     }
+    #ifdef __NDS__
+    #else
     REG_SOUND2CNT_L = ((new_keys & KEY_A) && with_audio) ? 0xA080 : 0x0000;
     REG_SOUND2CNT_H = (2048 - 262) | 0x8000;
+    #endif
     if ((new_keys & KEY_UP) && y > 0) {
       --y;
     }
@@ -210,12 +216,18 @@ void activity_megaton() {
     megaton_draw_variable_data(se_mat, y, dir, randomize, with_audio);
 
     // beep
+    #ifdef __NDS__
+    #else
     REG_SOUND1CNT_H = (x == 128 && with_audio) ? 0xA080 : 0x0000;
     REG_SOUND1CNT_X = (2048 - 131) | 0x8000;
+    #endif
   } while (!(new_keys & KEY_B) && (progress < NUM_TRIALS));
 
   pal_bg_mem[0] = RGB5(0, 0, 0);
+  #ifdef __NDS__
+  #else
   REG_SOUNDCNT_X = 0;  // reset audio
+  #endif
   if (progress < 10) return;
 
   // Display average: First throw away all labels below Y=120

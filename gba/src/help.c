@@ -391,11 +391,14 @@ unsigned int read_pad_help_check(helpdoc_kind pg) {
   if (!(new_keys & KEY_START)) return 0;
 
   REG_BLDCNT = 0;
+  #ifdef __NDS__
+  #else
   REG_SOUND3CNT_H = 0;
   REG_SOUND1CNT_H = 0;
   REG_SOUND1CNT_X = 0x8000;
   REG_SOUND2CNT_L = 0;
   REG_SOUND2CNT_H = 0x8000;
+  #endif
   REG_DMA0CNT = 0;
   REG_DMA1CNT = 0;
   REG_DMA2CNT = 0;

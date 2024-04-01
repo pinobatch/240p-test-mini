@@ -21,8 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 #include "global.h"
 
+#ifdef __NDS__
+#define DOC_MENU helpsect_192p_test_suite_menu
+#define DOC_CREDITS helpsect_192p_test_suite
+#else
 #define DOC_MENU helpsect_160p_test_suite_menu
 #define DOC_CREDITS helpsect_160p_test_suite
+#endif
 
 // Notes:
 // iprintf/siprintf is devkitARM-specific printf/sprintf without float
@@ -75,8 +80,12 @@ int main(void) {
   unsigned int last_page, last_y;
 
   // Enable vblank IRQ, without which VBlankIntrWait() won't work
+  #ifdef __GBA__
   irq_init(NULL);
   irq_add(II_VBLANK, NULL);
+  #else
+  irqEnable(IRQ_VBLANK);
+  #endif
   //activity_overscan();
   //helpscreen(helpsect_to_do, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
   activity_credits();

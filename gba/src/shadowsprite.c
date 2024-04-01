@@ -48,7 +48,11 @@ static void donna_bg_setup(void) {
   load_flat_map(&(se_mat[PFSCROLLTEST][0][0]), Donna_chrMap, (SCREEN_WIDTH >> 3), (SCREEN_HEIGHT >> 3));
 }
 
+#ifdef __NDS__
+#define DONNA_BG_COLORS BG_8BPP
+#else
 #define DONNA_BG_COLORS BG_4BPP
+#endif
 
 static void donna_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   (void)hdmaTable;

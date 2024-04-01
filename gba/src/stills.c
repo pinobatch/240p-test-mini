@@ -249,6 +249,8 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
 
   draw_barslist(rects);
 
+  #ifdef __NDS__
+  #else
   // Init sound to play 1 kHz tone
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
   REG_SOUNDBIAS = 0xC200;  // 4200: 65.5 kHz PWM (for PCM); C200: 262 kHz PWM (for PSG)
@@ -259,6 +261,7 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
   REG_SOUND3CNT_L = 0xC0;    // lock waveram
   REG_SOUND3CNT_H = 0;       // volume control
   REG_SOUND3CNT_X = (2048 - 131) + 0x8000;  // full volume
+  #endif
   while (1) {
     read_pad_help_check(helpsect);
     if (new_keys & KEY_UP) {
@@ -271,7 +274,10 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
       beep = beep ^ 0x2000;
     }
     if (new_keys & KEY_B) {
+      #ifdef __NDS__
+      #else
       REG_SOUNDCNT_X = 0;  // turn sound off
+      #endif
       return;
     }
 
@@ -280,7 +286,10 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     tonccpy(pal_bg_mem+0x00, smptePalettes[bright], sizeof(smptePalettes[0]));
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #ifdef __NDS__
+    #else
     REG_SOUND3CNT_H = beep;
+    #endif
   }
 }
 
@@ -645,7 +654,7 @@ static const unsigned short solid_colors[4] = {
 
 static const unsigned char rgbnames[3] = {'R', 'G', 'B'};
 
-static void solid_color_draw_edit_box(const unsigned char rgb[3], unsigned int y, TILE* target_tile_mem) {
+static void solid_color_draw_edit_box(const unsigned char rgb_vals[3], unsigned int y, TILE* target_tile_mem) {
   dma_memset16(target_tile_mem[1].data, 0x2222, 32*9);
   for (unsigned int i = 0; i < 3; ++i) {
     uint32_t *dst = (uint32_t*)(target_tile_mem[3 * i + 1].data);
@@ -655,7 +664,7 @@ static void solid_color_draw_edit_box(const unsigned char rgb[3], unsigned int y
     vwf8PutTile(dst, rgbnames[i], 6, 1);
 
     // Draw component value
-    unsigned int value = rgb[i];
+    unsigned int value = rgb_vals[i];
     uint32_t tens = value / 10;
     if (tens > 0) vwf8PutTile(dst, tens + '0', 14, 1);
     vwf8PutTile(dst, (value - tens * 10) + '0', 19, 1);
@@ -664,7 +673,7 @@ static void solid_color_draw_edit_box(const unsigned char rgb[3], unsigned int y
 
 void activity_solid_color(void) {
   unsigned int showeditbox = 0, x = 4, y = 0;
-  unsigned char rgb[3] = {31, 31, 31};
+  unsigned char rgb_vals[3] = {31, 31, 31};
 
   // Clear the screen
   dma_memset16(se_mat[PFMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
@@ -689,13 +698,13 @@ void activity_solid_color(void) {
       if ((new_keys & KEY_DOWN) && y < 2) {
         ++y;
       }
-      if ((new_keys & KEY_LEFT) && rgb[y] > 0) {
-        --rgb[y];
+      if ((new_keys & KEY_LEFT) && rgb_vals[y] > 0) {
+        --rgb_vals[y];
       }
-      if ((new_keys & KEY_RIGHT) && rgb[y] < 31) {
-        ++rgb[y];
+      if ((new_keys & KEY_RIGHT) && rgb_vals[y] < 31) {
+        ++rgb_vals[y];
       }
-      solid_color_draw_edit_box(rgb, y, &tile_mem[0][0]);
+      solid_color_draw_edit_box(rgb_vals, y, &tile_mem[0][0]);
     } else {
       if (new_keys & KEY_RIGHT) {
         x += 1;
@@ -709,7 +718,7 @@ void activity_solid_color(void) {
     VBlankIntrWait();
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
-    pal_bg_mem[0] = x < 4 ? solid_colors[x] : RGB5(rgb[0], rgb[1], rgb[2]);
+    pal_bg_mem[0] = x < 4 ? solid_colors[x] : RGB5(rgb_vals[0], rgb_vals[1], rgb_vals[2]);
     pal_bg_mem[1] = RGB5(31, 31, 31);
     pal_bg_mem[2] = RGB5(0, 0, 0);
     REG_DISPCNT = showeditbox ? (DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW) : ACTIVATE_SCREEN_HW;

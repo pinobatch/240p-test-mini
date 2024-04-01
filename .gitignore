@@ -40,6 +40,8 @@ __pycache__/
 /gba/build
 /gba/240p*.elf
 /gba/240p*.gba
+/gba/build_nds
+/gba/240p*.nds
 /gba/*.sav
 /gba/.map
 /gba/compile_commands.json
