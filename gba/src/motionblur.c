@@ -74,7 +74,7 @@ static void draw_motion_blur_values(SCREENMAT *map_address, unsigned int y, unsi
 }
 
 // Health and safety
-static bool flashing_accepted = false;
+bool flashing_accepted = false;
   
 void activity_motion_blur() {
   unsigned char params[NUM_PARAMS] = {15, 1, 31, 1, 0, 0};
@@ -85,6 +85,9 @@ void activity_motion_blur() {
     if (!(new_keys & (KEY_A | KEY_START))) return;
     flashing_accepted = true;
   }
+  #ifdef __NDS__
+  bool fast_fps = false;
+  #endif
 
   load_common_bg_tiles();
   dma_memset16(se_mat[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT >> 3)*2);
@@ -107,6 +110,10 @@ void activity_motion_blur() {
       timeleft = 1;
       running = !running;
     }
+    #ifdef __NDS__
+    if ((new_keys & KEY_X) || (new_keys & KEY_R))
+      fast_fps = !fast_fps;
+    #endif
 
     if (running) {
       timeleft -= 1;
@@ -152,6 +159,10 @@ void activity_motion_blur() {
     }
     draw_motion_blur_values(se_mat_sub, y, params);
     REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    #endif
+    #ifdef __NDS__
+    if(fast_fps)
+      __reset_vcount();
     #endif
   } while (!(new_keys & KEY_B));
 }

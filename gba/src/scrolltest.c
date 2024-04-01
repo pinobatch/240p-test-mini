@@ -24,6 +24,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "greenhillzone_chr.h"
 
 #define PFSCROLLTEST 22
+#define BFISCROLLTEST 21
+
+enum scrolleffect_e {
+    SCROLLEFFECT_NONE = 0,
+    SCROLLEFFECT_HALF = 1,
+    SCROLLEFFECT_BFI = 2
+};
+
+typedef enum scrolleffect_e scrolleffect;
+
+extern bool flashing_accepted;
 
 static unsigned short scrolltest_y;
 static unsigned char scrolltest_dy;
@@ -158,6 +169,15 @@ static const unsigned short kikipalette1[] = {
   RGB5( 0, 0, 0),RGB5(18,18,18),RGB5(0, 25, 0),RGB5(25,25,25)
 };
 
+static void load_bfi_bg(void) {
+  dma_memset16(tile_mem[0][0xC0].data, 0x1111, 32);
+  dma_memset16(se_mat[BFISCROLLTEST], 0xF0C0, 32*32*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(tile_mem_sub[0][0xC0].data, 0x1111, 32);
+  dma_memset16(se_mat_sub[BFISCROLLTEST], 0xF0C0, 32*32*2);
+  #endif
+}
+
 static void load_kiki_bg(void) {
   bitunpack2(tile_mem[0][0].data, kikitiles_chrTiles, sizeof(kikitiles_chrTiles));
   dma_memset16(se_mat[PFSCROLLTEST], 0x0000, 32*64*2);
@@ -165,6 +185,7 @@ static void load_kiki_bg(void) {
   bitunpack2(tile_mem_sub[0][0].data, kikitiles_chrTiles, sizeof(kikitiles_chrTiles));
   dma_memset16(se_mat_sub[PFSCROLLTEST], 0x0000, 32*64*2);
   #endif
+  load_bfi_bg();
 
   char metatile_buffer[16];
   for(int i = 0; i < 16; i++)
@@ -219,33 +240,93 @@ static void load_kiki_bg(void) {
   // by the autotiler.
 }
 
+static void handle_scrolltest_effect_dispcnt(scrolleffect curr_effect, bool is_even_frame, u32 dcnt_bfi_bg, u32 dcnt_normal_bg) {
+  if((curr_effect == SCROLLEFFECT_BFI) && is_even_frame) {
+    REG_DISPCNT = DCNT_MODE0 | dcnt_bfi_bg | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | dcnt_bfi_bg | ACTIVATE_SCREEN_HW;
+    #endif
+  }
+  else {
+    REG_DISPCNT = DCNT_MODE0 | dcnt_normal_bg | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | dcnt_normal_bg | ACTIVATE_SCREEN_HW;
+    #endif
+  }
+}
+
 void activity_kiki_scroll(void) {
+  #ifdef __NDS__
+  if (!flashing_accepted) {
+    helpscreen(helpsect_health_warning, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+    if (!(new_keys & (KEY_A | KEY_START))) return;
+    flashing_accepted = true;
+  }
+
+  bool fast_fps = false;
+  #endif
+
+  scrolleffect curr_effect = SCROLLEFFECT_NONE;
+  bool start = true;
+  int reload = 1;
+  bool is_even_frame = false;
+
   scrolltest_y = scrolltest_dir = scrolltest_pause = 0;
   scrolltest_dy = 1;
   load_kiki_bg();
   do {
-    read_pad_help_check(helpsect_vertical_scroll_test);
+    reload = read_pad_help_check(helpsect_vertical_scroll_test);
+    if(start) {
+      reload = 1;
+      start = false;
+    }
     move_1d_scroll();
+    #ifdef __NDS__
+    if ((new_keys & KEY_X) || (new_keys & KEY_R))
+      fast_fps = !fast_fps;
+    if ((new_keys & KEY_Y) || (new_keys & KEY_L)) {
+      if(curr_effect == SCROLLEFFECT_BFI)
+        curr_effect = SCROLLEFFECT_NONE;
+      else
+        curr_effect++;
+    }
+    #endif
 
     VBlankIntrWait();
-    REG_BGCNT[0] = BG_4BPP|BG_SIZE2|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
-    REG_BG_OFS[0].y = scrolltest_y >> 1;
-    REG_BG_OFS[0].x = (256 - SCREEN_WIDTH) / 2;
-    REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
-    tonccpy(pal_bg_mem+0, kikipalette0, sizeof(kikipalette0));
-    tonccpy(pal_bg_mem+16, kikipalette1, sizeof(kikipalette1));
-    pal_bg_mem[241] = 0;
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
-    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
-    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE2|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
-    REG_BG_OFS_SUB[0].y = scrolltest_y >> 1;
-    REG_BG_OFS_SUB[0].x = (256 - SCREEN_WIDTH) / 2;
-    REG_BG_OFS_SUB[1].x = REG_BG_OFS_SUB[1].y = 0;
-    tonccpy(pal_bg_mem_sub+0, kikipalette0, sizeof(kikipalette0));
-    tonccpy(pal_bg_mem_sub+16, kikipalette1, sizeof(kikipalette1));
-    pal_bg_mem_sub[241] = 0;
-    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+    if(reload) {
+      scrolltest_y = 0;
+      is_even_frame = false;
+      REG_BGCNT[0] = BG_4BPP|BG_SIZE2|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+      REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(BFISCROLLTEST);
+      REG_BG_OFS[0].x = (256 - SCREEN_WIDTH) / 2;
+      REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
+      tonccpy(pal_bg_mem+0, kikipalette0, sizeof(kikipalette0));
+      tonccpy(pal_bg_mem+16, kikipalette1, sizeof(kikipalette1));
+      pal_bg_mem[241] = 0;
+      REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE2|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+      REG_BGCNT_SUB[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(BFISCROLLTEST);
+      REG_BG_OFS_SUB[0].x = (256 - SCREEN_WIDTH) / 2;
+      REG_BG_OFS_SUB[1].x = REG_BG_OFS_SUB[1].y = 0;
+      tonccpy(pal_bg_mem_sub+0, kikipalette0, sizeof(kikipalette0));
+      tonccpy(pal_bg_mem_sub+16, kikipalette1, sizeof(kikipalette1));
+      pal_bg_mem_sub[241] = 0;
+      REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
+      #endif
+    }
+    handle_scrolltest_effect_dispcnt(curr_effect, is_even_frame, DCNT_BG1, DCNT_BG0);
+    if((!is_even_frame) || (curr_effect != SCROLLEFFECT_HALF)) {
+      REG_BG_OFS[0].y = scrolltest_y >> 1;
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      REG_BG_OFS_SUB[0].y = scrolltest_y >> 1;
+      #endif
+    }
+    #ifdef __NDS__
+    if(fast_fps)
+      __reset_vcount();
     #endif
+    is_even_frame = !is_even_frame;
   } while (!(new_keys & KEY_B));
 }
 
@@ -309,14 +390,26 @@ void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
 }
 
 void activity_hill_zone_scroll(void) {
+  #ifdef __NDS__
+  if (!flashing_accepted) {
+    helpscreen(helpsect_health_warning, KEY_A|KEY_START|KEY_B|KEY_LEFT|KEY_RIGHT);
+    if (!(new_keys & (KEY_A | KEY_START))) return;
+    flashing_accepted = true;
+  }
+
+  bool fast_fps = false;
+  #endif
+  scrolleffect curr_effect = SCROLLEFFECT_NONE;
   bool start = true;
   int reload = 1;
   int selected_scrolltest_y = scrolltest_y;
+  bool is_even_frame = false;
   uint16_t *hdmaTable = (uint16_t*)tile_mem[0][160].data;
 
   scrolltest_y = scrolltest_dir = scrolltest_pause = 0;
   scrolltest_dy = 1;
   hill_zone_load_bg();
+  load_bfi_bg();
   do {
     reload = read_pad_help_check(helpsect_hill_zone_scroll_test);
     if(start) {
@@ -326,14 +419,34 @@ void activity_hill_zone_scroll(void) {
     move_1d_scroll();
     if(reload)
         selected_scrolltest_y = scrolltest_y = 0;
-    selected_scrolltest_y = scrolltest_y;
+    #ifdef __NDS__
+    if ((new_keys & KEY_X) || (new_keys & KEY_R))
+      fast_fps = !fast_fps;
+    if ((new_keys & KEY_Y) || (new_keys & KEY_L)) {
+      if(curr_effect == SCROLLEFFECT_BFI)
+        curr_effect = SCROLLEFFECT_NONE;
+      else
+        curr_effect++;
+    }
+    #endif
 
     VBlankIntrWait();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | ACTIVATE_SCREEN_HW;
-    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
-    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG1 | ACTIVATE_SCREEN_HW;
-    #endif
+    if(reload) {
+      REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(BFISCROLLTEST);
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(BFISCROLLTEST);
+      #endif
+    }
+    handle_scrolltest_effect_dispcnt(curr_effect, is_even_frame, DCNT_BG0, DCNT_BG1);
+    if((!is_even_frame) || ((curr_effect != SCROLLEFFECT_HALF)))
+      selected_scrolltest_y = scrolltest_y;
+
     __hill_zone_set_scroll(hdmaTable, selected_scrolltest_y, reload);
+    #ifdef __NDS__
+    if(fast_fps)
+      __reset_vcount();
+    #endif
+    is_even_frame = !is_even_frame;
   } while (!(new_keys & KEY_B));
   REG_DMA0CNT = 0;
   #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
