@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 
 #include "kikitiles_chr.h"
 #include "kikimap_chr.h"
@@ -85,7 +84,7 @@ void activity_grid_scroll(void) {
     REG_BG_OFS[0].y = y;
     pal_bg_mem[0] = inverted ? RGB5(31,31,31) : RGB5(0, 0, 0);
     pal_bg_mem[1] = inverted ? RGB5(0, 0, 0) : RGB5(31,31,31);
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
   } while (!(new_keys & KEY_B));
 }
 
@@ -208,7 +207,7 @@ void activity_kiki_scroll(void) {
     REG_BG_OFS[0].y = scrolltest_y >> 1;
     REG_BG_OFS[0].x = (256 - SCREEN_WIDTH) / 2;
     REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
     tonccpy(pal_bg_mem+0, kikipalette0, sizeof(kikipalette0));
     tonccpy(pal_bg_mem+16, kikipalette1, sizeof(kikipalette1));
   } while (!(new_keys & KEY_B));
@@ -256,7 +255,7 @@ void activity_hill_zone_scroll(void) {
     move_1d_scroll();
 
     VBlankIntrWait();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG1;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | ACTIVATE_SCREEN_HW;
     hill_zone_set_scroll(hdmaTable, scrolltest_y);
   } while (!(new_keys & KEY_B));
   REG_DMA0CNT = 0;

@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 #include <stdint.h>
 
 #include "Donna_chr.h"
@@ -166,13 +165,13 @@ void activity_shadow_sprite() {
     if (cur_keys & KEY_A) {
       if (new_keys & KEY_RIGHT) {
         if (++cur_bg >= NUM_BGTYPES) cur_bg = 0;
-        REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+        REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
       }
       if (new_keys & KEY_LEFT) {
         cur_bg = cur_bg ? cur_bg - 1 : NUM_BGTYPES - 1;
-        REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+        REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
         bgtypes[cur_bg].setup();
         held_keys &= ~KEY_A;
       }
@@ -248,7 +247,7 @@ void activity_shadow_sprite() {
         pal_obj_mem[y * 16 + x + 1] = shadow_sprite_palettes[y][x];
       }
     }
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     ppu_copy_oam();
     bgtypes[cur_bg].set_scroll(hdmaTable, x * 4);
   } while (!(new_keys & KEY_B));

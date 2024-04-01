@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
-#include <tonc.h>
 #include <stdint.h>
 #include "global.h"
 #include "4bcanvas.h"
@@ -140,7 +139,7 @@ void activity_monoscope(void) {
     pal_bg_mem[0] = (brightness >= 4) ? RGB5(13,13,13) : 0;
     pal_bg_mem[1] = monoscope_whites[brightness];
     pal_bg_mem[2] = RGB5(31, 0, 0);
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
   }
 }
 
@@ -174,7 +173,7 @@ void activity_sharpness(void) {
     const unsigned short *palsrc = inverted ? invgray4pal : gray4pal;
     if (is_bricks) palsrc = brickspal;
     tonccpy(pal_bg_mem+0x00, palsrc, sizeof(gray4pal));
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
   }
 }
 
@@ -280,7 +279,7 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     tonccpy(pal_bg_mem+0x00, smptePalettes[bright], sizeof(smptePalettes[0]));
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
     REG_SOUND3CNT_H = beep;
   }
 }
@@ -342,7 +341,7 @@ void activity_pluge(void) {
       tonccpy(pal_bg_mem+0x00, bright ? plugePaletteNTSCJ : plugePaletteNTSC,
               sizeof(plugePaletteNTSC));
     }
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
   }
 }
 
@@ -471,7 +470,7 @@ void activity_gcbars(void) {
       pal_bg_mem[p] = c;
       c += *palramp;
     }
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
   }
 }
 
@@ -528,7 +527,7 @@ void activity_gray_ramp(void) {
       c += RGB5(1, 1, 1);
       if ((p & 0x0F) == 8) p += 8;
     }
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
   }
 }
 
@@ -554,7 +553,7 @@ static const unsigned short full_stripes_colors[10][2] = {
 
 static void do_full_stripes(helpdoc_kind helpsect) {
   unsigned int pattern = 0, inverted = 0, frame = 0;
-  unsigned int lcdcvalue = DCNT_MODE1 | DCNT_BG1;
+  unsigned int lcdcvalue = DCNT_MODE1 | DCNT_BG1 | ACTIVATE_SCREEN_HW;
 
   // tile 0: blank
   dma_memset16(tile_mem[0][0].data, 0x0000, 32);
@@ -713,7 +712,7 @@ void activity_solid_color(void) {
     pal_bg_mem[0] = x < 4 ? solid_colors[x] : RGB5(rgb[0], rgb[1], rgb[2]);
     pal_bg_mem[1] = RGB5(31, 31, 31);
     pal_bg_mem[2] = RGB5(0, 0, 0);
-    REG_DISPCNT = showeditbox ? (DCNT_MODE0 | DCNT_BG0) : 0;
+    REG_DISPCNT = showeditbox ? (DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW) : ACTIVATE_SCREEN_HW;
   }
 }
 
@@ -754,7 +753,7 @@ void activity_convergence(void) {
     REG_BGCNT[0] = (BG_4BPP|BG_SIZE0|BG_CBB(0)
                  |BG_SBB(PFMAP-cur_side));
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
     if (cur_side != 0) {
       pal_bg_mem[0x03] = RGB5(31,31,31);
       pal_bg_mem[0x13] = RGB5( 0, 0,31);

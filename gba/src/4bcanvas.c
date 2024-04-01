@@ -29,7 +29,6 @@ it freely, subject to the following restrictions:
 
 #include "4bcanvas.h"
 #include <sys/types.h>
-#include <tonc.h>
 void dma_memset16(void *dst, unsigned int c16, size_t n);
 
 const TileCanvas screen = {

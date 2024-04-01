@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GLOBAL_H
 #include <stdint.h>
 #include <sys/types.h>
-#include <tonc.h>
+#include "cross_compatibility.h"
 #include "helppages.h"
 
 // Size of a statically sized array
@@ -130,10 +130,5 @@ unsigned int vwf8StrWidth(const char *s);
 
 // vwflabels.c
 void vwfDrawLabelsPositionBased(const char *labels, const char *positions, unsigned int sbb, unsigned int tilenum);
-
-#define GBA_SCREEN_WIDTH 240
-
-// write these as macros instead of static inline to make them constexpr
-#define RGB5(r, g, b) (((r)<<0) | ((g)<<5) | ((b)<<10))
 
 #endif

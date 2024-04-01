@@ -23,7 +23,6 @@ it freely, subject to the following restrictions:
 
 */
 #include "global.h"
-#include <tonc.h>
 
 
 EWRAM_BSS OBJ_ATTR SOAM[128];

@@ -297,9 +297,9 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
 
   // If the help VRAM needs to be reloaded, reload its tiles and map
   if (!help_bg_loaded) {
-    REG_DISPCNT = DCNT_BLANK;
+    REG_DISPCNT = DCNT_BLANK | ACTIVATE_SCREEN_HW;
     load_help_bg();
-    REG_DISPCNT = 0;
+    REG_DISPCNT = ACTIVATE_SCREEN_HW;
   } else {
     // If changing pages while BG CHR and map are loaded,
     // schedule an out-load-in sequence and hide the cursor
@@ -374,7 +374,7 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
     if (help_show_cursor) help_draw_cursor(512 - wx + 6);
     ppu_clear_oam(oam_used);
     VBlankIntrWait();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_BG_OFS[0].x = wx;
     ppu_copy_oam();
   }

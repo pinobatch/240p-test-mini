@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 
 #define PFMAP 23
 #define NUM_PARAMS 6
@@ -139,6 +138,6 @@ void activity_motion_blur() {
       pal_bg_mem[i] = RGB5(1, 1, 1) * bgc1[i];
     }
     draw_motion_blur_values(se_mat, y, params);
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
   } while (!(new_keys & KEY_B));
 }

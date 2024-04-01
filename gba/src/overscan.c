@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 #include <stdint.h>
 
 #define PFMAP 23
@@ -121,7 +120,7 @@ void activity_overscan() {
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     ppu_copy_oam();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_WINOUT = 0x10;  // BG0 inside, BG1 outside
     REG_WININ = 0x11;
     // start<<8 | end

@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 
 #include "stopwatchhand_chr.h"
 #include "stopwatchface_chr.h"
@@ -169,7 +168,7 @@ void activity_stopwatch() {
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(TIMEMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = REG_BG_OFS[1].y = 0;

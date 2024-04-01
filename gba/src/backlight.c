@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 
 void activity_backlight_zone(void) {
   unsigned inverted = 0, hidden = 0, high_gear = 0, held_keys = 0, sz = 1;
@@ -87,6 +86,6 @@ void activity_backlight_zone(void) {
     pal_bg_mem[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     pal_obj_mem[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
     ppu_copy_oam();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
   }
 }

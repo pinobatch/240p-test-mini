@@ -166,10 +166,10 @@ static void draw_bg(void) {
 
 void lame_boy_demo(void) {
   // Forced blanking
-  REG_DISPCNT = DCNT_BLANK;
+  REG_DISPCNT = DCNT_BLANK | ACTIVATE_SCREEN_HW;
   draw_bg();
   load_player();
-  REG_DISPCNT = 0;
+  REG_DISPCNT = ACTIVATE_SCREEN_HW;
 
   // Freeze
   do {
@@ -181,7 +181,7 @@ void lame_boy_demo(void) {
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     tonccpy(pal_bg_mem+0x00, bgcolors00, sizeof(bgcolors00));

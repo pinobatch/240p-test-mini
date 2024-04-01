@@ -28,7 +28,7 @@ it freely, subject to the following restrictions:
 #define P8_CANVAS_H
 
 #include <stdint.h>
-#include <tonc.h>
+#include "cross_compatibility.h"
 
 typedef struct TileCanvas {
   uint8_t left;    // in 8 pixel units on nametable
