@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void activity_backlight_zone(void) {
   unsigned inverted = 0, hidden = 0, high_gear = 0, held_keys = 0, sz = 1;
-  unsigned int x = 119, y = 79;
+  unsigned int x = (SCREEN_WIDTH / 2) - 1, y = (SCREEN_HEIGHT / 2) - 1;
 
   load_common_obj_tiles();
   while (1) {
@@ -67,9 +67,9 @@ void activity_backlight_zone(void) {
       }
     }
 
-    unsigned ymax = 160 - (1 << sz);
+    unsigned ymax = SCREEN_HEIGHT - (1 << sz);
     if (y > ymax) y = ymax;
-    unsigned xmax = 240 - (1 << sz);
+    unsigned xmax = SCREEN_WIDTH - (1 << sz);
     if (x > xmax) x = xmax;
 
     // Draw the sprite

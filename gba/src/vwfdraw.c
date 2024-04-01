@@ -114,7 +114,7 @@ void vwf8PutTile(u32 *dst, unsigned int glyphnum,
  */
 const char *vwf8Puts(u32 *restrict dst, const char *restrict s,
                      unsigned int x, unsigned int color) {
-  while (x < 240) {
+  while (x < SCREEN_WIDTH) {
     unsigned char c = *s & 0xFF;
     if (c < FIRST_PRINTABLE_CU) return s;
     ++s;
@@ -127,7 +127,7 @@ const char *vwf8Puts(u32 *restrict dst, const char *restrict s,
 unsigned int vwf8StrWidth(const char *s) {
   unsigned int x = 0;
 
-  while (x < 240) {
+  while (x < SCREEN_WIDTH) {
     unsigned char c = *s & 0xFF;
     if (c < FIRST_PRINTABLE_CU) return x;
     ++s;

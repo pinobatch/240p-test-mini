@@ -30,26 +30,30 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GL_DOWN 0x87
 
 #define WINDOW_WIDTH 16  // Width of window in tiles not including left border
-#define PAGE_MAX_LINES 15  // max lines of text in one page
+#define PAGE_MAX_USABLE_LINES 17  // max usable lines of text in one page
+#define PAGE_MAX_LINES ((SCREEN_HEIGHT >> 3) - 5)  // max lines of text in one page
+#define PAGE_FINAL_MAX_LINES ((PAGE_MAX_USABLE_LINES > PAGE_MAX_LINES) ? PAGE_MAX_LINES : PAGE_MAX_USABLE_LINES)
 #define BACK_WALL_HT 14  // Height of back wall in tiles
 #define BGMAP 29
 #define FGMAP 30
 #define BLANKMAP 31  // This map is kept blank to suppress text background wrapping
 #define SHADOW_X 2
 #define SHADOW_Y 17
-#define WXBASE ((512 - 240) + (16 + 8 * WINDOW_WIDTH))
+#define WXBASE ((512 - SCREEN_WIDTH) + (16 + 8 * WINDOW_WIDTH))
 
-#define TILE_BACK_WALL 272
-#define TILE_FG_XPARENT 272
-#define TILE_FG_BLANK 273
-#define TILE_BACK_WALL_BOTTOM 274
-#define TILE_FG_CORNER1 275
-#define TILE_FLOOR 276
-#define TILE_FG_DIVIDER 277
-#define TILE_FLOOR_TOP 278
-#define TILE_FG_CORNER2 279
-#define TILE_FG_LEFT 283
-#define TILE_FLOOR_SHADOW 284
+#define TILE_DECOMPRESSED_BASE 304
+
+#define TILE_BACK_WALL TILE_DECOMPRESSED_BASE
+#define TILE_FG_XPARENT TILE_DECOMPRESSED_BASE
+#define TILE_FG_BLANK (TILE_DECOMPRESSED_BASE + 1)
+#define TILE_BACK_WALL_BOTTOM (TILE_DECOMPRESSED_BASE + 2)
+#define TILE_FG_CORNER1 (TILE_DECOMPRESSED_BASE + 3)
+#define TILE_FLOOR (TILE_DECOMPRESSED_BASE + 4)
+#define TILE_FG_DIVIDER (TILE_DECOMPRESSED_BASE + 5)
+#define TILE_FLOOR_TOP (TILE_DECOMPRESSED_BASE + 6)
+#define TILE_FG_CORNER2 (TILE_DECOMPRESSED_BASE + 7)
+#define TILE_FG_LEFT (TILE_DECOMPRESSED_BASE + 11)
+#define TILE_FLOOR_SHADOW (TILE_DECOMPRESSED_BASE + 12)
 
 #define CHARACTER_VRAM_BASE 956
 #define ARROW_TILE 1020
@@ -91,52 +95,56 @@ The window
 
 */
 
+static void load_bg_to_map(SCREENMAT *map_addr) {
+  // Load background nametable
+  memset16(map_addr[BGMAP][0], TILE_BACK_WALL, 32*(BACK_WALL_HT - 1));
+  memset16(map_addr[BGMAP][BACK_WALL_HT - 1], TILE_BACK_WALL_BOTTOM, SCREEN_WIDTH >> 3);
+  memset16(map_addr[BGMAP][BACK_WALL_HT], TILE_FLOOR_TOP, SCREEN_WIDTH >> 3);
+  memset16(map_addr[BGMAP][BACK_WALL_HT + 1], TILE_FLOOR, 32*((SCREEN_HEIGHT >> 3) - 1 - BACK_WALL_HT));
+  for (unsigned int x = 0; x < 4; ++x) {
+    // ccccvhtt tttttttt
+    map_addr[BGMAP][SHADOW_Y][SHADOW_X + x] = TILE_FLOOR_SHADOW + x;
+    map_addr[BGMAP][SHADOW_Y][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0403 - x;
+    map_addr[BGMAP][SHADOW_Y + 1][SHADOW_X + x] = TILE_FLOOR_SHADOW + 0x0800 + x;
+    map_addr[BGMAP][SHADOW_Y + 1][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0C03 - x;
+  }
+  
+  // Clear window nametable
+  memset16(map_addr[FGMAP], TILE_FG_BLANK, 32*((SCREEN_HEIGHT >> 3) + 1));
+  memset16(map_addr[FGMAP + 1], TILE_FG_XPARENT, 32*((SCREEN_HEIGHT >> 3) + 1));
+
+  // Left border
+  map_addr[FGMAP][0][0] = TILE_FG_CORNER1;
+  map_addr[FGMAP][1][0] = TILE_FG_CORNER2;
+  for (unsigned int i = 2; i < (SCREEN_HEIGHT >> 3) - 1; ++i) {
+    map_addr[FGMAP][i][0] = TILE_FG_LEFT;
+  }
+  map_addr[FGMAP][(SCREEN_HEIGHT >> 3) - 1][0] = TILE_FG_CORNER2 + 0x0800;
+  map_addr[FGMAP][SCREEN_HEIGHT >> 3][0] = TILE_FG_CORNER1 + 0x0800;
+
+  // Divider lines
+  memset16(&(map_addr[FGMAP][2][1]), TILE_FG_DIVIDER, WINDOW_WIDTH);
+  memset16(&(map_addr[FGMAP][(SCREEN_HEIGHT >> 3) - 2][1]), TILE_FG_DIVIDER, WINDOW_WIDTH);
+  
+  // Make the frame
+  loadMapRowMajor(&(map_addr[FGMAP][1][1]), 0*WINDOW_WIDTH,
+                  WINDOW_WIDTH, 1);
+  loadMapRowMajor(&(map_addr[FGMAP][3][1]), 1*WINDOW_WIDTH,
+                  WINDOW_WIDTH, PAGE_FINAL_MAX_LINES);
+  loadMapRowMajor(&(map_addr[FGMAP][4+PAGE_MAX_LINES][1]), (PAGE_MAX_USABLE_LINES + 1)*WINDOW_WIDTH,
+                  WINDOW_WIDTH, 1);
+}
+
 static void load_help_bg(void) {
 
   // Load pattern table
-  LZ77UnCompVram(helpbgtiles_chrTiles, tile_mem[3][272].data);
+  LZ77UnCompVram(helpbgtiles_chrTiles, tile_mem[3][TILE_DECOMPRESSED_BASE].data);
   LZ77UnCompVram(helpsprites_chrTiles, tile_mem_obj[0][CHARACTER_VRAM_BASE].data);
 
   // Clear VWF canvas
-  memset16(tile_mem[3][0].data, 0x1111 * FG_BGCOLOR, 16*WINDOW_WIDTH*17);
+  memset16(tile_mem[3][0].data, 0x1111 * FG_BGCOLOR, 16*WINDOW_WIDTH*(PAGE_MAX_USABLE_LINES + 2));
 
-  // Load background SCREENMAT
-  memset16(se_mat[BGMAP][0], TILE_BACK_WALL, 32*(BACK_WALL_HT - 1));
-  memset16(se_mat[BGMAP][BACK_WALL_HT - 1], TILE_BACK_WALL_BOTTOM, 30);
-  memset16(se_mat[BGMAP][BACK_WALL_HT], TILE_FLOOR_TOP, 30);
-  memset16(se_mat[BGMAP][BACK_WALL_HT + 1], TILE_FLOOR, 32*(19 - BACK_WALL_HT));
-  for (unsigned int x = 0; x < 4; ++x) {
-    // ccccvhtt tttttttt
-    se_mat[BGMAP][SHADOW_Y][SHADOW_X + x] = TILE_FLOOR_SHADOW + x;
-    se_mat[BGMAP][SHADOW_Y][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0403 - x;
-    se_mat[BGMAP][SHADOW_Y + 1][SHADOW_X + x] = TILE_FLOOR_SHADOW + 0x0800 + x;
-    se_mat[BGMAP][SHADOW_Y + 1][SHADOW_X + 4 + x] = TILE_FLOOR_SHADOW + 0x0C03 - x;
-  }
-  
-  // Clear window SCREENMAT
-  memset16(se_mat[FGMAP], TILE_FG_BLANK, 32*21);
-  memset16(se_mat[FGMAP + 1], TILE_FG_XPARENT, 32*21);
-
-  // Left border
-  se_mat[FGMAP][0][0] = TILE_FG_CORNER1;
-  se_mat[FGMAP][1][0] = TILE_FG_CORNER2;
-  for (unsigned int i = 2; i < 19; ++i) {
-    se_mat[FGMAP][i][0] = TILE_FG_LEFT;
-  }
-  se_mat[FGMAP][19][0] = TILE_FG_CORNER2 + 0x0800;
-  se_mat[FGMAP][20][0] = TILE_FG_CORNER1 + 0x0800;
-
-  // Divider lines
-  memset16(&(se_mat[FGMAP][2][1]), TILE_FG_DIVIDER, 16);
-  memset16(&(se_mat[FGMAP][18][1]), TILE_FG_DIVIDER, 16);
-  
-  // Make the frame
-  loadMapRowMajor(&(se_mat[FGMAP][1][1]), 0*WINDOW_WIDTH,
-                  WINDOW_WIDTH, 1);
-  loadMapRowMajor(&(se_mat[FGMAP][3][1]), 1*WINDOW_WIDTH,
-                  WINDOW_WIDTH, PAGE_MAX_LINES);
-  loadMapRowMajor(&(se_mat[FGMAP][4+PAGE_MAX_LINES][1]), (PAGE_MAX_LINES + 1)*WINDOW_WIDTH,
-                  WINDOW_WIDTH, 1);
+  load_bg_to_map(se_mat);
 
   help_bg_loaded = 1;
   help_height = 0;
@@ -175,7 +183,7 @@ static void help_draw_character(void) {
 }
 
 static void help_draw_cursor(unsigned int objx) {
-  if (objx >= 240) return;
+  if (objx >= SCREEN_WIDTH) return;
 
   unsigned int ou = oam_used;
   SOAM[ou].attr0 = (20 + help_cursor_y * 8) | ATTR0_4BPP | ATTR0_SQUARE;
@@ -195,7 +203,7 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
   unsigned int y = 0;
 
   // Draw lines of text to the screen
-  while (y < PAGE_MAX_LINES) {
+  while (y < PAGE_FINAL_MAX_LINES) {
     u32 *dst = tile_mem[3][(y + 1)*WINDOW_WIDTH].data;
     ++y;
     memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
@@ -220,23 +228,20 @@ static void help_draw_page(helpdoc_kind doc_num, unsigned int left, unsigned int
 
   // Draw status line depending on size of document and which
   // keys are enabled
-  u32 *dst = tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data;
+  u32 *dst = tile_mem[3][(PAGE_MAX_USABLE_LINES + 1)*WINDOW_WIDTH].data;
   memset16(dst, FG_BGCOLOR*0x1111, WINDOW_WIDTH * 16);
 
   if (help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num] > 1) {
     posprintf(help_line_buffer, "\x1D %d/%d \x1C",
               help_wanted_page - help_cumul_pages[doc_num] + 1, 
               help_cumul_pages[doc_num + 1] - help_cumul_pages[doc_num]);
-    vwf8Puts(tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data,
-             help_line_buffer, 0, FG_FGCOLOR);
+    vwf8Puts(dst, help_line_buffer, 0, FG_FGCOLOR);
   }
   if (keymask & KEY_UP) {
-    vwf8Puts(tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data,
-             "\x1E\x1F""A: Select", 40, FG_FGCOLOR);
+    vwf8Puts(dst, "\x1E\x1F""A: Select", 40, FG_FGCOLOR);
   }
   if (keymask & KEY_B) {
-    vwf8Puts(tile_mem[3][(PAGE_MAX_LINES + 1)*WINDOW_WIDTH].data,
-             "B: Exit", WINDOW_WIDTH * 8 - 28, FG_FGCOLOR);
+    vwf8Puts(dst, "B: Exit", WINDOW_WIDTH * 8 - 28, FG_FGCOLOR);
   }
 }
 
@@ -312,8 +317,8 @@ unsigned int helpscreen(helpdoc_kind doc_num, unsigned int keymask) {
   tonccpy(pal_obj_mem+0x00, helpsprites_chrPal, sizeof(helpsprites_chrPal));
 
   // Set up background regs (except DISPCNT)
-  REG_BGCNT[1] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(3)|BG_SBB(BGMAP);
-  REG_BGCNT[0] = BG_4BPP|BG_WID_64|BG_HT_32|BG_CBB(3)|BG_SBB(FGMAP);
+  REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(3)|BG_SBB(BGMAP);
+  REG_BGCNT[0] = BG_4BPP|BG_SIZE1|BG_CBB(3)|BG_SBB(FGMAP);
   REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
   REG_BG_OFS[0].x = help_wnd_progress ? WXBASE : 256;
   REG_BG_OFS[0].y = 4;

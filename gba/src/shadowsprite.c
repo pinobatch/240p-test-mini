@@ -29,30 +29,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PFOVERLAY 21
 
 static void gus_bg_setup(void) {
-  LZ77UnCompVram(Gus_portrait_chrTiles, PATRAM4(0, 0));
-  dma_memset16(MAP[PFSCROLLTEST], 0x0000, 32*20*2);
-  load_flat_map(&(MAP[PFSCROLLTEST][0][8]), Gus_portrait_chrMap, 14, 20);
+  LZ77UnCompVram(Gus_portrait_chrTiles, tile_mem[0][0].data);
+  dma_memset16(se_mat[PFSCROLLTEST], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  load_flat_map(&(se_mat[PFSCROLLTEST][0][8]), Gus_portrait_chrMap, 14, SCREEN_HEIGHT >> 3);
 }
 
 static void gus_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   (void)hdmaTable;
   (void)unused;
-  REG_BGCNT[1] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
   REG_BG_OFS[1].x = 0;
   REG_BG_OFS[1].y = 0;
   tonccpy(pal_bg_mem, Gus_portrait_chrPal, sizeof(Gus_portrait_chrPal));
 }
 
 static void donna_bg_setup(void) {
-  LZ77UnCompVram(Donna_chrTiles, PATRAM4(0, 0));
-  dma_memset16(MAP[PFSCROLLTEST], 0x0000, 32*20*2);
-  load_flat_map(&(MAP[PFSCROLLTEST][0][0]), Donna_chrMap, 30, 20);
+  LZ77UnCompVram(Donna_chrTiles, tile_mem[0][0].data);
+  dma_memset16(se_mat[PFSCROLLTEST], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  load_flat_map(&(se_mat[PFSCROLLTEST][0][0]), Donna_chrMap, (SCREEN_WIDTH >> 3), (SCREEN_HEIGHT >> 3));
 }
+
+#define DONNA_BG_COLORS BG_4BPP
 
 static void donna_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   (void)hdmaTable;
   (void)unused;
-  REG_BGCNT[1] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  REG_BGCNT[1] = DONNA_BG_COLORS|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
   REG_BG_OFS[1].x = 0;
   REG_BG_OFS[1].y = 0;
   tonccpy(pal_bg_mem, Donna_chrPal, sizeof(Donna_chrPal));
@@ -60,7 +62,7 @@ static void donna_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
 
 static void striped_bg_setup(unsigned int tilenum) {
   load_common_bg_tiles();
-  dma_memset16(MAP[PFSCROLLTEST], tilenum, 32*20*2);
+  dma_memset16(se_mat[PFSCROLLTEST], tilenum, 32*(SCREEN_HEIGHT >> 3)*2);
 }
 
 static void bg_2_setup() {
@@ -74,7 +76,7 @@ static void bg_3_setup() {
 static void striped_bg_set_scroll(uint16_t *hdmaTable, unsigned int unused) {
   (void)hdmaTable;
   (void)unused;
-  REG_BGCNT[1] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
   REG_BG_OFS[1].x = 0;
   REG_BG_OFS[1].y = 0;
   pal_bg_mem[0] = pal_bg_mem[2] = 0;
@@ -111,40 +113,44 @@ static const char *const shadow_sprite_types[] = {
 };
 
 static void shadow_sprite_message(const char *s) {
-  dma_memset16(PATRAM4(2, 1), 0x2222, 32*8);
-  vwf8Puts(PATRAM4(2, 1), s, 3, 1);
+  dma_memset16(tile_mem[2][1].data, 0x2222, 32*8);
+  vwf8Puts(tile_mem[2][1].data, s, 3, 1);
 }
 
 static const unsigned char shadowmasks[3][2] = {
   {0x00,0xFF},  // horizontal lines
   {0xF0,0xF0},  // vertical lines
   {0xF0,0x0F},  // checkerboard
-};  
+};
 
-void activity_shadow_sprite() {
-  unsigned int held_keys = 0, x = 112, y = 64, facing = 0;
-  unsigned int cur_bg = 0, changetimeout = 0;
-  unsigned int cur_shape = 0, shadow_type = 0, frame = 0;
-  uint16_t hdmaTable[160];
-  
-  dma_memset16(MAP[PFOVERLAY], 0xF000, 32*21*2);
-  loadMapRowMajor(&(MAP[PFOVERLAY][20][22]), 0xF001, 8, 1);
-  dma_memset16(PATRAM4(2, 0), 0x0000, 32*1);
-  dma_memset16(PATRAM4(2, 1), 0x2222, 32*8);
-
-  bitunpack2(SPR_VRAM(0), hepsie_chrTiles, sizeof(hepsie_chrTiles));
+static void load_shadow_sprite(TILE *sprite_vram) {
+  bitunpack2(sprite_vram, hepsie_chrTiles, sizeof(hepsie_chrTiles));
   // Generate stippled masks at 32, 64, and 96
   for (unsigned int maskid = 0; maskid < 3; ++maskid) {
-    const u32 *src = SPR_VRAM(0);
-    u32 *dst = SPR_VRAM(32 + 32 * maskid);
+    const u32 *src = (u32*)sprite_vram;
+    u32 *dst = (u32*)(sprite_vram + 32 * (maskid + 1));
     u32 maskA = 0x01010101 * shadowmasks[maskid][0];
     u32 maskB = 0x01010101 * shadowmasks[maskid][1];
     
-    for(; src < SPR_VRAM(32); src += 2, dst += 2) {
-      dst[0] = src[0] & maskA;
-      dst[1] = src[1] & maskB;
+    for(int i = 0; i < 32 * 16; i++) {
+      dst[2*i] = src[2*i] & maskA;
+      dst[(2*i)+1] = src[(2*i)+1] & maskB;
     }
   }
+}
+
+void activity_shadow_sprite() {
+  unsigned int held_keys = 0, x = (SCREEN_WIDTH - 32) >> 1, y = (SCREEN_HEIGHT - 32) >> 1, facing = 0;
+  unsigned int cur_bg = 0, changetimeout = 0;
+  unsigned int cur_shape = 0, shadow_type = 0, frame = 0;
+  uint16_t hdmaTable[SCREEN_HEIGHT];
+
+  dma_memset16(se_mat[PFOVERLAY], 0xF000, 32*((SCREEN_HEIGHT >> 3)+1)*2);
+  loadMapRowMajor(&(se_mat[PFOVERLAY][SCREEN_HEIGHT >> 3][(SCREEN_WIDTH >> 3) - 8]), 0xF001, 8, 1);
+  dma_memset16(tile_mem[2][0].data, 0x0000, 32*1);
+  dma_memset16(tile_mem[2][1].data, 0x2222, 32*8);
+
+  load_shadow_sprite(&tile_mem_obj[0][0]);
   
   bgtypes[cur_bg].setup();
 
@@ -188,7 +194,7 @@ void activity_shadow_sprite() {
         shadow_sprite_message(shadow_sprite_types[shadow_type]);
         held_keys &= ~KEY_A;
       }
-      if ((cur_keys & KEY_RIGHT) && x < 240 - 32) {
+      if ((cur_keys & KEY_RIGHT) && x < SCREEN_WIDTH - 32) {
         x += 1;
         facing = 0;
       }
@@ -196,7 +202,7 @@ void activity_shadow_sprite() {
         x -= 1;
         facing = ATTR1_HFLIP;
       }
-      if ((cur_keys & KEY_DOWN) && y < 160 - 32) {
+      if ((cur_keys & KEY_DOWN) && y < SCREEN_HEIGHT - 32) {
         y += 1;
       }
       if ((cur_keys & KEY_UP) && y > 0) {
@@ -232,7 +238,7 @@ void activity_shadow_sprite() {
 
     VBlankIntrWait();
     REG_DMA0CNT = 0;
-    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(2)|BG_SBB(PFOVERLAY);
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(2)|BG_SBB(PFOVERLAY);
     REG_BG_OFS[0].x = 0;
     REG_BG_OFS[0].y = (changetimeout > 8) ? 8 : changetimeout;
     pal_bg_mem[241] = RGB5(31, 31, 31);

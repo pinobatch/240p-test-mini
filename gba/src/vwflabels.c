@@ -25,23 +25,19 @@ it freely, subject to the following restrictions:
 #include <tonc.h>
 #include "global.h"
 
-// Single label:
-//     X (1 byte), Y (1 byte, multiple of 8), printable text code units
-// Label set:
-//     (Single label, '\n')*, Single label, '\0'
-
 /**
- * @param labelset a '\n'-separated, '\0'-terminated list of
- * (x, y, printables)
- * @param nt which SCREENMAT (tilemap, screenbaseblock) to draw into
+ * @param labels a '\n'-separated list of strings, '\0'-terminated
+ * @param positions a list of (x, y) coordinates
+ * @param nt which nametable (tilemap, screenbaseblock) to draw into
  * @param tilenum bits 10-0: which tile number to start at;
  * bits 15-11: palette id
  */
-void vwfDrawLabels(const char *labelset, unsigned int sbb, unsigned int tilenum) {
+
+void vwfDrawLabelsPositionBased(const char *labels, const char *positions, unsigned int sbb, unsigned int tilenum) {
   while (1) {
-    unsigned int x = labelset[0];
-    unsigned int y = labelset[1] & 0xF8;
-    unsigned int txtw = vwf8StrWidth(labelset + 2);
+    unsigned int x = positions[0];
+    unsigned int y = positions[1] & 0xF8;
+    unsigned int txtw = vwf8StrWidth(labels);
     
     // Calculate the width in pixels of tiles occupied by this string,
     // including left and right partial tiles
@@ -49,15 +45,16 @@ void vwfDrawLabels(const char *labelset, unsigned int sbb, unsigned int tilenum)
     txtw = (((txtw - 1) | 0x07) + 1) >> 3;  // Round up to whole tile
 
     // Clear this many tiles to color 0 and draw into them using color 1
-    void *chrdst = &(tile_mem[0][tilenum & 0x07FF].data);
-    memset16(chrdst, 0x0000, 16 * txtw);
-    const char *strend = vwf8Puts(chrdst, labelset + 2, x & 0x07, 1);
+    void *chrdst = tile_mem[0][tilenum & 0x07FF].data;
+    dma_memset16(chrdst, 0x0000, 32 * txtw);
+    const char *strend = vwf8Puts(chrdst, labels, x & 0x07, 1);
     
-    // Fill the SCREENMAT
+    // Fill the nametable
     loadMapRowMajor(&(se_mat[sbb][y >> 3][x >> 3]), tilenum & 0xF3FF, txtw, 1);
     tilenum += txtw;
 
     if (*strend == 0) break;
-    labelset = strend + 1;
+    labels = strend + 1;
+    positions += 2;
   }
 }

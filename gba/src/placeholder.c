@@ -35,7 +35,7 @@ unsigned short player_facing = 0;
 #define WALK_ACCEL 4
 #define WALK_BRAKE 8
 #define LEFT_WALL 32
-#define RIGHT_WALL 208
+#define RIGHT_WALL (SCREEN_WIDTH - 32)
 #define PFMAP 23  // maps 24-31 are reserved for help
 #define OBJ_VRAM_BASE 16
 
@@ -96,7 +96,7 @@ static void move_player(void) {
 
 static void draw_player_sprite(void) {
   unsigned int i = oam_used;
-  unsigned int player_y = 144;
+  unsigned int player_y = SCREEN_HEIGHT - 16;
   unsigned int tile = (player_frame >> 8) * 6 + 16;
   unsigned int player_hotspot_x = (player_x >> 8) - 8;
   if ((player_frame >> 8) == 7) {
@@ -145,19 +145,23 @@ void load_common_obj_tiles(void) {
 static void draw_bg(void) {
   load_common_bg_tiles();
 
-  // Draw background map: sky, top row of floor, bottom row of floor
-  memset16(se_mat[PFMAP][0], 0x0004, 32*18);
-  memset16(se_mat[PFMAP][18], 11 | 0x1000, 30);
-  memset16(se_mat[PFMAP][19], 1 | 0x1000, 30);
-  put1block(2, 14);
-  put1block(2, 16);
-  put1block(26, 14);
-  put1block(26, 16);
+  memset16(se_mat[PFMAP][0], 0x0004, 32*((SCREEN_HEIGHT >> 3) - 2));
+  memset16(se_mat[PFMAP][(SCREEN_HEIGHT >> 3) - 2], 11 | 0x1000, SCREEN_WIDTH >> 3);
+  memset16(se_mat[PFMAP][(SCREEN_HEIGHT >> 3) - 1], 1 | 0x1000, SCREEN_WIDTH >> 3);
+  put1block(2, (SCREEN_HEIGHT >> 3) - 6);
+  put1block(2, (SCREEN_HEIGHT >> 3) - 4);
+  put1block((SCREEN_WIDTH >> 3) - 4, (SCREEN_HEIGHT >> 3) - 6);
+  put1block((SCREEN_WIDTH >> 3) - 4, (SCREEN_HEIGHT >> 3) - 4);
 
-  const char return_msg[] =
-    "\x08""\x08""In March 2024,\n"
-    "\x22""\x10""Pino switched to Wonderful Toolchain.";
-  vwfDrawLabels(return_msg, PFMAP, 0x1000 + 32);
+  const char return_msg_positions[] = {
+    0x08, 0x08,
+    0x22, 0x10
+  };
+  const char return_msg_labels[] =
+    "In March 2024,\n"
+    "Pino switched to Wonderful Toolchain.";
+
+  vwfDrawLabelsPositionBased(return_msg_labels, return_msg_positions, PFMAP, 0x1000 + 32);
 }
 
 void lame_boy_demo(void) {
@@ -178,7 +182,7 @@ void lame_boy_demo(void) {
 
     VBlankIntrWait();
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
-    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     tonccpy(pal_bg_mem+0x00, bgcolors00, sizeof(bgcolors00));
     tonccpy(pal_bg_mem+0x10, bgcolors10, sizeof(bgcolors10));

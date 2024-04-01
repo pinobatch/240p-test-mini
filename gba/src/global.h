@@ -27,6 +27,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Size of a statically sized array
 #define count(array) (sizeof((array)) / sizeof((array)[0]))
 
+#define GET_SLICE_X(e, y, x) ((((e) * (x)) + (((y) + 1) / 2)) / (y))
+
 typedef void (*activity_func)(void);
 
 // help.c
@@ -127,19 +129,11 @@ const char *vwf8Puts(u32 *restrict dst, const char *restrict s,
 unsigned int vwf8StrWidth(const char *s);
 
 // vwflabels.c
-void vwfDrawLabels(const char *labelset, unsigned int sbb, unsigned int tilenum);
+void vwfDrawLabelsPositionBased(const char *labels, const char *positions, unsigned int sbb, unsigned int tilenum);
 
-// Shims for the libgba to libtonc port
-// Note: tonc.h uses u32 (unsigned) instead of standard uint32_t
-// (unsigned long) for pointers into video memory
-#define MAP se_mat
-#define BG_WID_32			BG_SIZE0
-#define BG_WID_64			BG_SIZE1
-#define BG_HT_32			BG_SIZE0
-#define BG_HT_64			BG_SIZE2
+#define GBA_SCREEN_WIDTH 240
+
 // write these as macros instead of static inline to make them constexpr
 #define RGB5(r, g, b) (((r)<<0) | ((g)<<5) | ((b)<<10))
-#define PATRAM4(cbb, tile) (tile_mem[(cbb)][(tile)].data)
-#define SPR_VRAM(tile) (tile_mem_obj[0][(tile)].data)
 
 #endif

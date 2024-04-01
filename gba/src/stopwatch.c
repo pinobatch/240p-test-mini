@@ -25,19 +25,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "stopwatchdigits_chr.h"
 
 #define PFMAP 23
+#define TIMEMAP 22
 #define NUM_DIGITS 8
 #define NUM_FACE_PHASES 10
+
+#define START_TILE_SW_X ((SCREEN_WIDTH >> 4) - 9)
+#define NUM_SW_X_TILES 19
+#define DIGITS_OFFSET_X ((START_TILE_SW_X - ((SCREEN_WIDTH >> 3) - (START_TILE_SW_X + NUM_SW_X_TILES))) * 4)
 
 static const unsigned char sw_digitmax[NUM_DIGITS] = {
   NUM_FACE_PHASES, 6, 10, 6, 10, 6, 10, 10
 };
 
 static const unsigned char sw_digitx[NUM_DIGITS] = {
-  23, 21, 18, 16, 13, 11, 8, 6
+  START_TILE_SW_X+17, START_TILE_SW_X+15, START_TILE_SW_X+12, START_TILE_SW_X+10, START_TILE_SW_X+7, START_TILE_SW_X+5, START_TILE_SW_X+2, START_TILE_SW_X
 };
 
 static const unsigned char sw_face_x[NUM_FACE_PHASES] = {
-  76, 98, 112, 112, 98, 76, 54, 40, 40, 54
+  (SCREEN_WIDTH / 2)-16, (SCREEN_WIDTH / 2)+6, (SCREEN_WIDTH / 2)+20, (SCREEN_WIDTH / 2)+20, (SCREEN_WIDTH / 2)+6, (SCREEN_WIDTH / 2)-16, (SCREEN_WIDTH / 2)-38, (SCREEN_WIDTH / 2)-52, (SCREEN_WIDTH / 2)-52, (SCREEN_WIDTH / 2)-38
 };
 
 // A small dot is drawn halfway between the center and the number on
@@ -53,16 +58,23 @@ static const unsigned short redpalette[3] = {
   RGB5(31,23,23),RGB5(31,15,15),RGB5(31, 0, 0)
 };
 
+static const char sw_positions[] = {
+    (START_TILE_SW_X*8) + 7, 0x08,
+    ((START_TILE_SW_X+5)*8) + 3, 0x08,
+    ((START_TILE_SW_X+10)*8) + 2, 0x08,
+    ((START_TILE_SW_X+15)*8) + 5, 0x08
+};
+
 static const char sw_labels[] =
-  "\x30\x08""hour\n"
-  "\x58\x08""minute\n"
-  "\x80\x08""second\n"
-  "\xA8\x08""frame";
+  "hour\n"
+  "minute\n"
+  "second\n"
+  "frame";
 
 static void draw_stopwatch_hand(unsigned int phase) {
   unsigned int i = oam_used;
   unsigned int a0 = ATTR0_Y(sw_face_y[phase] - 12) | ATTR0_4BPP | ATTR0_SQUARE;
-  unsigned int a1 = ATTR1_X(sw_face_x[phase] + 28) | ATTR1_SIZE_16;
+  unsigned int a1 = ATTR1_X(sw_face_x[phase]) | ATTR1_SIZE_16;
 
   // draw digit
   SOAM[i].attr0 = a0 + 8;
@@ -83,7 +95,7 @@ static void draw_stopwatch_hand(unsigned int phase) {
 
   // draw hand
   a0 = ATTR0_Y(sw_face_y[phase] / 2 + 48) | ATTR0_4BPP | ATTR0_SQUARE;
-  a1 = ATTR1_X(sw_face_x[phase] / 2 + 78) | ATTR1_SIZE_8;
+  a1 = ATTR1_X(sw_face_x[phase] / 2 + (SCREEN_WIDTH >> 2) + 4) | ATTR1_SIZE_8;
   SOAM[i].attr0 = a0;
   SOAM[i].attr1 = a1;
   SOAM[i++].attr2 = 44;
@@ -95,22 +107,24 @@ void activity_stopwatch() {
   unsigned char digits[NUM_DIGITS] = {0};
   unsigned int running = 0, is_lap = 0, hide_face = 0, show_ruler = 0, face_phase = 0;
 
-  dma_memset16(MAP[PFMAP], 0x0000, 32*20*2);
-  bitunpack1(PATRAM4(0, 0), stopwatchface_chrTiles, sizeof(stopwatchface_chrTiles));
-  bitunpack2(PATRAM4(0, 64), stopwatchdigits_chrTiles, sizeof(stopwatchdigits_chrTiles));
-  bitunpack2(SPR_VRAM(0), stopwatchhand_chrTiles, sizeof(stopwatchhand_chrTiles));
-  load_flat_map(&(MAP[PFMAP][6][9]), stopwatchface_chrMap, 12, 13);
-  vwfDrawLabels(sw_labels, 23, 0x4080);
+  dma_memset16(se_mat[PFMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  dma_memset16(se_mat[TIMEMAP], 0x0000, 32*(SCREEN_HEIGHT >> 3)*2);
+  bitunpack1(tile_mem[0][0].data, stopwatchface_chrTiles, sizeof(stopwatchface_chrTiles));
+  bitunpack2(tile_mem[0][64].data, stopwatchdigits_chrTiles, sizeof(stopwatchdigits_chrTiles));
+  bitunpack2(tile_mem_obj[0][0].data, stopwatchhand_chrTiles, sizeof(stopwatchhand_chrTiles));
+  load_flat_map(&(se_mat[PFMAP][6][(SCREEN_WIDTH>>4)-6]), stopwatchface_chrMap, 12, 13);
+
+  vwfDrawLabelsPositionBased(sw_labels, sw_positions, TIMEMAP, 0x4080);
   
   // Draw colons
   for (int i = 2; i < 8; i += 2) {
     unsigned int x = sw_digitx[i] + 2;
-    MAP[PFMAP][4][x] = MAP[PFMAP][3][x] = 0x107C;
+    se_mat[TIMEMAP][4][x] = se_mat[TIMEMAP][3][x] = 0x107C;
   };
   
   // Draw ruler
-  for (int i = 0; i < 20; ++i) {
-    MAP[PFMAP][i][1 + (i & 0x01)] = 0x7D;
+  for (int i = 0; i < (SCREEN_HEIGHT >> 3); ++i) {
+    se_mat[PFMAP][i][1 + (i & 0x01)] = 0x7D;
   }
 
   do {
@@ -155,13 +169,15 @@ void activity_stopwatch() {
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
-    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
-    REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ;
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BGCNT[1] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(TIMEMAP);
+    REG_BG_OFS[0].x = REG_BG_OFS[0].y = REG_BG_OFS[1].y = 0;
+    REG_BG_OFS[1].x = DIGITS_OFFSET_X;
     pal_bg_mem[0] = RGB5(31, 31, 31);
     pal_bg_mem[1] = hide_face ? RGB5(31, 31, 31) : RGB5(23, 23, 23);
-    pal_bg_mem[3] = (show_ruler & (1 << (face_phase & 1)))
-                   ? RGB5(23, 0, 0) : RGB5(31, 31, 31);
+    bool final_show_ruler = (show_ruler & (1 << (face_phase & 1)));
+    pal_bg_mem[3] = final_show_ruler ? RGB5(23, 0, 0) : RGB5(31, 31, 31);
     pal_bg_mem[65] = RGB5(0, 0, 0);
     tonccpy(pal_bg_mem+0x10, invgray4pal, sizeof(invgray4pal));
     tonccpy(pal_bg_mem+0x21, bluepalette, sizeof(bluepalette));
@@ -180,14 +196,14 @@ void activity_stopwatch() {
           tilenum += (digits[0] & 1) ? 0x3000 : 0x2000;  // colored digits
         }
         for (unsigned int row = 2; row < 5; ++row) {
-          MAP[PFMAP][row][x] = tilenum++;
-          MAP[PFMAP][row][x + 1] = tilenum++;
+          se_mat[TIMEMAP][row][x] = tilenum++;
+          se_mat[TIMEMAP][row][x + 1] = tilenum++;
         }
       }
-      MAP[PFMAP][5][22] = MAP[PFMAP][5][23] = 0;
+      se_mat[TIMEMAP][5][START_TILE_SW_X+16] = se_mat[TIMEMAP][5][START_TILE_SW_X+17] = 0;
     } else {
-      MAP[PFMAP][5][22] = 0x107E;  // LA
-      MAP[PFMAP][5][23] = 0x107F;  // P
+      se_mat[TIMEMAP][5][START_TILE_SW_X+16] = 0x107E;  // LA
+      se_mat[TIMEMAP][5][START_TILE_SW_X+17] = 0x107F;  // P
     }
   } while (!(new_keys & KEY_B));
 }

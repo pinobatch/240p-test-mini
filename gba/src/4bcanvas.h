@@ -39,6 +39,7 @@ typedef struct TileCanvas {
   uint8_t map;  // in 2 KiB units on VRAM
   uint8_t core;    // 0: main; 1: sub
   uint16_t mapTileBase;
+  SCREENMAT *mapBase;
 } TileCanvas;
 
 extern const TileCanvas screen;

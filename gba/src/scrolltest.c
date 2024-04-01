@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "global.h"
 #include <tonc.h>
 
-
 #include "kikitiles_chr.h"
 #include "kikimap_chr.h"
 #include "greenhillzone_chr.h"
@@ -42,7 +41,7 @@ void activity_grid_scroll(void) {
   scrolltest_dy = 1;
 
   load_common_bg_tiles();
-  dma_memset16(MAP[PFSCROLLTEST], 0x0020, 32*32*2);
+  dma_memset16(se_mat[PFSCROLLTEST], 0x0020, 32*32*2);
   do {
     read_pad_help_check(helpsect_grid_scroll_test);
     held_keys |= new_keys;
@@ -81,7 +80,7 @@ void activity_grid_scroll(void) {
       y += scrolltest_dy;
     }
     VBlankIntrWait();
-    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
     REG_BG_OFS[0].x = x;
     REG_BG_OFS[0].y = y;
     pal_bg_mem[0] = inverted ? RGB5(31,31,31) : RGB5(0, 0, 0);
@@ -149,8 +148,8 @@ static const unsigned short kikipalette1[] = {
 };
 
 static void load_kiki_bg(void) {
-  bitunpack2(PATRAM4(0, 0), kikitiles_chrTiles, sizeof(kikitiles_chrTiles));
-  dma_memset16(MAP[PFSCROLLTEST], 0x0000, 32*64*2);
+  bitunpack2(tile_mem[0][0].data, kikitiles_chrTiles, sizeof(kikitiles_chrTiles));
+  dma_memset16(se_mat[PFSCROLLTEST], 0x0000, 32*64*2);
 
   dma_memset16(help_line_buffer, 0x0000, 16);  // Clear metatile buffer
   for (unsigned int y = 0; y < 32; ++y) {
@@ -186,10 +185,10 @@ static void load_kiki_bg(void) {
     for (unsigned int x = 0; x < 16; ++x) {
       unsigned int mtid = help_line_buffer[x];
       unsigned int attr = (mtid >= 1 && mtid <= 3) ? 0x1000 : 0x0000;
-      MAP[PFSCROLLTEST][y * 2    ][x * 2    ] = metatiles[mtid][0] | attr;
-      MAP[PFSCROLLTEST][y * 2    ][x * 2 + 1] = metatiles[mtid][1] | attr;
-      MAP[PFSCROLLTEST][y * 2 + 1][x * 2    ] = metatiles[mtid][2] | attr;
-      MAP[PFSCROLLTEST][y * 2 + 1][x * 2 + 1] = metatiles[mtid][3] | attr;
+      se_mat[PFSCROLLTEST][y * 2    ][x * 2    ] = metatiles[mtid][0] | attr;
+      se_mat[PFSCROLLTEST][y * 2    ][x * 2 + 1] = metatiles[mtid][1] | attr;
+      se_mat[PFSCROLLTEST][y * 2 + 1][x * 2    ] = metatiles[mtid][2] | attr;
+      se_mat[PFSCROLLTEST][y * 2 + 1][x * 2 + 1] = metatiles[mtid][3] | attr;
     }
   }
   // This map is a PITA to load because of the compression implied
@@ -205,9 +204,10 @@ void activity_kiki_scroll(void) {
     move_1d_scroll();
 
     VBlankIntrWait();
-    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_64|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE2|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
     REG_BG_OFS[0].y = scrolltest_y >> 1;
-    REG_BG_OFS[0].x = 8;
+    REG_BG_OFS[0].x = (256 - SCREEN_WIDTH) / 2;
+    REG_BG_OFS[1].x = REG_BG_OFS[1].y = 0;
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
     tonccpy(pal_bg_mem+0, kikipalette0, sizeof(kikipalette0));
     tonccpy(pal_bg_mem+16, kikipalette1, sizeof(kikipalette1));
@@ -217,26 +217,26 @@ void activity_kiki_scroll(void) {
 // Horizontal scroll (like Sonic the Hedgehog) //////////////////////
 
 void hill_zone_load_bg(void) {
-  LZ77UnCompVram(greenhillzone_chrTiles, PATRAM4(0, 0));
-  LZ77UnCompVram(greenhillzone_chrMap, MAP[PFSCROLLTEST]);
+  LZ77UnCompVram(greenhillzone_chrTiles, tile_mem[0][0].data);
+  LZ77UnCompVram(greenhillzone_chrMap, se_mat[PFSCROLLTEST]);
 }
+
+#define HILL_ZONE_TOP_END_Y 24
+#define HILL_ZONE_MIDDLE_END_Y 128
 
 // Parallax scrolling for hill zone
 void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
-  REG_BGCNT[1] = BG_4BPP|BG_WID_64|BG_HT_32|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+  REG_BGCNT[1] = BG_4BPP|BG_SIZE1|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
   tonccpy(pal_bg_mem+0, greenhillzone_chrPal, sizeof(greenhillzone_chrPal));
 
   // Because libgba's ISR takes so long, we're already out of hblank
   // before Halt() returns.
-  for (int i = 0; i < 24; ++i) {
+  for (int i = 0; i < HILL_ZONE_TOP_END_Y; ++i)
     hdmaTable[i] = x >> 3;
-  }
-  for (int i = 24; i < 128; ++i) {
+  for (int i = HILL_ZONE_TOP_END_Y; i < HILL_ZONE_MIDDLE_END_Y; ++i)
     hdmaTable[i] = x >> 2;
-  }
-  for (int i = 128; i < 160; ++i) {
+  for (int i = HILL_ZONE_MIDDLE_END_Y; i < SCREEN_HEIGHT; ++i)
     hdmaTable[i] = x;
-  }
   
   REG_DMA0CNT = 0;
   REG_DMA0SAD = (intptr_t)&(hdmaTable[1]);
@@ -246,7 +246,7 @@ void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
 }
 
 void activity_hill_zone_scroll(void) {
-  uint16_t hdmaTable[160];
+  uint16_t hdmaTable[SCREEN_HEIGHT];
 
   scrolltest_y = scrolltest_dir = scrolltest_pause = 0;
   scrolltest_dy = 1;

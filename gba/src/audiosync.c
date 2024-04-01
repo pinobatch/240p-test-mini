@@ -23,15 +23,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PFMAP 23
 
 static const BarsListEntry audiosync_rects[] = {
-  {  0,128,240,136, 1},
-  {  0, 24, 24, 40, 2},
-  { 24, 24, 48, 40, 3},
-  { 48, 24, 72, 40, 4},
-  { 72, 24, 96, 40, 5},
-  {144, 24,168, 40, 5},
-  {168, 24,192, 40, 4},
-  {192, 24,216, 40, 3},
-  {216, 24,240, 40, 2},
+  { 0,GET_SLICE_X(SCREEN_HEIGHT, 4, 3)+8,SCREEN_WIDTH,GET_SLICE_X(SCREEN_HEIGHT, 4, 3)+16, 1},
+  { 0,GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,GET_SLICE_X(SCREEN_WIDTH, 10, 1),GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 2},
+  {GET_SLICE_X(SCREEN_WIDTH, 10, 1),GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,GET_SLICE_X(SCREEN_WIDTH, 10, 2),GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 3},
+  {GET_SLICE_X(SCREEN_WIDTH, 10, 2),GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,GET_SLICE_X(SCREEN_WIDTH, 10, 3),GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 4},
+  {GET_SLICE_X(SCREEN_WIDTH, 10, 3),GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,GET_SLICE_X(SCREEN_WIDTH, 10, 4),GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 5},
+  {GET_SLICE_X(SCREEN_WIDTH, 10, 6),GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,GET_SLICE_X(SCREEN_WIDTH, 10, 7),GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 5},
+  {GET_SLICE_X(SCREEN_WIDTH, 10, 7),GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,GET_SLICE_X(SCREEN_WIDTH, 10, 8),GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 4},
+  {GET_SLICE_X(SCREEN_WIDTH, 10, 8),GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,GET_SLICE_X(SCREEN_WIDTH, 10, 9),GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 3},
+  {GET_SLICE_X(SCREEN_WIDTH, 10, 9),GET_SLICE_X(SCREEN_HEIGHT, 4, 1)-16,SCREEN_WIDTH,GET_SLICE_X(SCREEN_HEIGHT, 4, 1), 2},
   {0xFF}
 };
 
@@ -67,15 +67,15 @@ void activity_audio_sync() {
       if (progress >= 122) progress = 0;
     }
 
-    unsigned int y = (progress < 60) ? 128 - progress : 8 + progress;
+    unsigned int y = (progress < 60) ? GET_SLICE_X(SCREEN_HEIGHT, 4, 3) + 8 - progress : GET_SLICE_X(SCREEN_HEIGHT, 4, 3) + 8 - 120 + progress;
     SOAM[0].attr0 = ATTR0_Y(y) | ATTR0_4BPP | ATTR0_SQUARE;
-    SOAM[0].attr1 = 119 | ATTR1_SIZE_8;
+    SOAM[0].attr1 = ((SCREEN_WIDTH - 1) / 2) | ATTR1_SIZE_8;
     SOAM[0].attr2 = 0x0023;
     ppu_clear_oam(1);
 
     VBlankIntrWait();
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
-    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     for (unsigned int i = 0; i < 6; ++i) {
       pal_bg_mem[i] = progress >= min_progress[i] ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
