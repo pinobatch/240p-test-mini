@@ -91,7 +91,22 @@ void activity_shadow_sprite(void);
 void activity_megaton(void);
 
 // soundtest.c
+#ifdef __NDS__
+enum sound_id_e {
+    BEEP_1K_SOUND_ID = 0,
+    TICK_SOUND_ID = 1,
+    PRESS_A_SOUND_ID = 2
+};
+typedef enum sound_id_e sound_id;
+#define NUM_SOUND_IDS 3
+
+void initAllSounds(void);
+void killAllSounds(void);
+void startPlayingSound(sound_id wanted_id);
+void killPlayingSound(sound_id wanted_id);
+#else
 extern const unsigned char waveram_sin2x[16];
+#endif
 void activity_sound_test(void);
 
 // audiosync.c

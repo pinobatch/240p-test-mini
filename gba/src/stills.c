@@ -246,10 +246,14 @@ void draw_barslist(const BarsListEntry *rects) {
 
 static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
   unsigned int bright = 0, beep = 0;
+  #ifdef __NDS__
+  unsigned int last_beep = 0;
+  #endif
 
   draw_barslist(rects);
 
   #ifdef __NDS__
+  soundEnable();
   #else
   // Init sound to play 1 kHz tone
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
@@ -263,7 +267,13 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
   REG_SOUND3CNT_X = (2048 - 131) + 0x8000;  // full volume
   #endif
   while (1) {
-    read_pad_help_check(helpsect);
+    int reload = read_pad_help_check(helpsect);
+    #ifdef __NDS__
+    if(reload)
+      last_beep = 0;
+    #else
+    (void)reload;
+    #endif
     if (new_keys & KEY_UP) {
       bright ^= 2;
     }
@@ -275,6 +285,8 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
     }
     if (new_keys & KEY_B) {
       #ifdef __NDS__
+      killPlayingSound(BEEP_1K_SOUND_ID);
+      soundDisable();
       #else
       REG_SOUNDCNT_X = 0;  // turn sound off
       #endif
@@ -287,6 +299,13 @@ static void do_bars(const BarsListEntry *rects, helpdoc_kind helpsect) {
     tonccpy(pal_bg_mem+0x00, smptePalettes[bright], sizeof(smptePalettes[0]));
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | ACTIVATE_SCREEN_HW;
     #ifdef __NDS__
+    if(beep != last_beep) {
+      if(beep)
+        startPlayingSound(BEEP_1K_SOUND_ID);
+      else
+        killPlayingSound(BEEP_1K_SOUND_ID);
+      last_beep = beep;
+    }
     #else
     REG_SOUND3CNT_H = beep;
     #endif

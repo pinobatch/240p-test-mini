@@ -132,6 +132,7 @@ void activity_megaton() {
   load_common_bg_tiles();
   load_common_obj_tiles();
   #ifdef __NDS__
+  soundEnable();
   #else
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
   REG_SOUNDBIAS = 0xC200;   // C200: 262 kHz PWM (for PSG)
@@ -162,6 +163,10 @@ void activity_megaton() {
       if (!early && value <= 25) lag[progress++] = value;
     }
     #ifdef __NDS__
+    if((new_keys & KEY_A) && with_audio)
+      startPlayingSound(PRESS_A_SOUND_ID);
+    else
+      killPlayingSound(PRESS_A_SOUND_ID);
     #else
     REG_SOUND2CNT_L = ((new_keys & KEY_A) && with_audio) ? 0xA080 : 0x0000;
     REG_SOUND2CNT_H = (2048 - 262) | 0x8000;
@@ -217,6 +222,10 @@ void activity_megaton() {
 
     // beep
     #ifdef __NDS__
+    if(x == 128 && with_audio)
+      startPlayingSound(TICK_SOUND_ID);
+    else
+      killPlayingSound(TICK_SOUND_ID);
     #else
     REG_SOUND1CNT_H = (x == 128 && with_audio) ? 0xA080 : 0x0000;
     REG_SOUND1CNT_X = (2048 - 131) | 0x8000;
@@ -225,6 +234,9 @@ void activity_megaton() {
 
   pal_bg_mem[0] = RGB5(0, 0, 0);
   #ifdef __NDS__
+  killPlayingSound(TICK_SOUND_ID);
+  killPlayingSound(PRESS_A_SOUND_ID);
+  soundDisable();
   #else
   REG_SOUNDCNT_X = 0;  // reset audio
   #endif
@@ -251,6 +263,4 @@ void activity_megaton() {
     VBlankIntrWait();
     read_pad();
   } while (!new_keys);
-
-  // TODO: Display average lag
 }

@@ -42,6 +42,7 @@ void activity_audio_sync() {
   unsigned int progress = 0, running = 0;
 
   #ifdef __NDS__
+  soundEnable();
   #else
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
   REG_SOUNDBIAS = 0xC200;   // C200: 262 kHz PWM (for PSG)
@@ -56,6 +57,7 @@ void activity_audio_sync() {
   do {
     if (progress < 120) {
       #ifdef __NDS__
+      killPlayingSound(TICK_SOUND_ID);
       #else
       REG_SOUND1CNT_H = 0;  // note cut
       REG_SOUND1CNT_X = 0x8000;
@@ -90,6 +92,7 @@ void activity_audio_sync() {
 
     if (progress == 120) {
       #ifdef __NDS__
+      startPlayingSound(TICK_SOUND_ID);
       #else
       REG_SOUND1CNT_H = 0xA080;  // 2/3 volume, 50% duty
       REG_SOUND1CNT_X = (2048 - 131) + 0x8000;  // pitch
@@ -97,6 +100,8 @@ void activity_audio_sync() {
     }
   } while (!(new_keys & KEY_B));
   #ifdef __NDS__
+  killPlayingSound(TICK_SOUND_ID);
+  soundDisable();
   #else
   REG_SOUNDCNT_X = 0;  // reset audio
   #endif

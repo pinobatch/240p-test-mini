@@ -392,6 +392,7 @@ unsigned int read_pad_help_check(helpdoc_kind pg) {
 
   REG_BLDCNT = 0;
   #ifdef __NDS__
+  killAllSounds();
   #else
   REG_SOUND3CNT_H = 0;
   REG_SOUND1CNT_H = 0;
