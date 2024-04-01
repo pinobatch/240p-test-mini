@@ -72,6 +72,7 @@ static void overscan_draw_arrow(unsigned int side, unsigned int dist) {
 void activity_overscan() {
   unsigned char dist[4] = {2, 2, 2, 2};
   unsigned int side = 0, inverted = 0;
+  unsigned int y_win_value = 0;
 
   load_common_obj_tiles();
   load_common_bg_tiles();
@@ -120,12 +121,33 @@ void activity_overscan() {
     REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     ppu_copy_oam();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | DCNT_WIN0 | DCNT_WIN1 | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
     REG_WINOUT = 0x10;  // BG0 inside, BG1 outside
-    REG_WININ = 0x11;
+    REG_WININ = 0x1111;
+
     // start<<8 | end
-    REG_WIN0H = (dist[1] << 8) | ((SCREEN_WIDTH - dist[0]) & 0xFF);
-    REG_WIN0V = (dist[2] << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF);
+    // Do this with the y value to fix an NDS bug.
+    // This doesn't create issues on the GBA, while sharing the same code
+    y_win_value = (dist[2] << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF) | (((dist[2] << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF)) << 16);
+    unsigned int y_set_value = (7 << 8) | ((SCREEN_HEIGHT - dist[3]) & 0xFF);
+    if(dist[2] == 0)
+        y_set_value = ((SCREEN_HEIGHT - dist[3]) & 0xFF);
+    
+    REG_WIN0H = (dist[1] << 8) | (SCREEN_WIDTH / 2);
+    REG_WIN0V = y_set_value;
+    // NDS requires two windows to fill 256 pixels on the X axys
+    REG_WIN1H = ((SCREEN_WIDTH / 2) << 8) | ((SCREEN_WIDTH - dist[0]) & 0xFF);
+    REG_WIN1V = y_set_value;
+  
+    REG_DMA0CNT = 0;
+    #ifdef __NDS__
+    DMA_FILL(0) = y_win_value;
+    REG_DMA0SAD = (intptr_t)&(DMA_FILL(0));
+    #else
+    REG_DMA0SAD = (intptr_t)&(y_win_value);
+    #endif
+    REG_DMA0DAD = (intptr_t)&(REG_WIN0V);
+    REG_DMA0CNT = 1|DMA_DST_FIXED|DMA_SRC_FIXED|DMA_32|DMA_AT_HBLANK|DMA_ENABLE;
     
     for (int i = 0; i < 4; ++i) {
       unsigned int x = overscan_dist_x[i];

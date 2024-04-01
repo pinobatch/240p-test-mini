@@ -748,7 +748,7 @@ Select: Show or hide
 == 192p Test Suite ==
 
 $COMMIT
-HDMA is right for you
+Welcome to Tonc
 
 © 2011-2016 Artemio Urbina
 © 2015-2023 Damian Yerrick

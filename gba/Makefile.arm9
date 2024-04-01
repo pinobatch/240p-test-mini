@@ -335,8 +335,7 @@ $(BUILD)/vwf7.s $(BUILD)/vwf7.h: vwf7_cp144p.png tools/vwfbuild.py $(BUILD)/last
 
 # Update last-commit if it has changed
 $(BUILD)/last-commit-now:
-	@$(MKDIR) -p $(BUILD)
-	git describe --tags | tr -d '\r\n' > $@
+	(git describe --tags || echo non-Git) | tr -d '\r\n' > $@
 $(BUILD)/last-commit: $(BUILD)/last-commit-now
 	if test -f $@; then true; else touch $@; fi
 	cmp $< $@ || cp $< $@
@@ -344,7 +343,7 @@ $(BUILD)/last-commit: $(BUILD)/last-commit-now
 # Convert help files
 $(BUILD)/helppages.s $(BUILD)/helppages.h: helppages_ds.txt $(BUILD)/last-commit tools/paginate_help.py 
 	@$(MKDIR) -p $(BUILD)
-	$(PY) tools/paginate_help.py -m 17 -DCOMMIT="$$(cat $(BUILD)/last-commit)" $< -o $(basename $@).s -oh $(basename $@).h
+	$(PY) tools/paginate_help.py -m 17 -DCOMMIT="$$(cat $(word 2,$^))" $< -o $(basename $@).s -oh $(basename $@).h
 
 # All assets must be built before the source code
 # -----------------------------------------------

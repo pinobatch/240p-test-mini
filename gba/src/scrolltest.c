@@ -220,13 +220,20 @@ void hill_zone_load_bg(void) {
   LZ77UnCompVram(greenhillzone_chrMap, se_mat[PFSCROLLTEST]);
 }
 
+#ifdef __NDS__
+#define HILL_ZONE_TOP_END_Y 24
+#define HILL_ZONE_MIDDLE_END_Y 152
+#else
 #define HILL_ZONE_TOP_END_Y 24
 #define HILL_ZONE_MIDDLE_END_Y 128
+#endif
 
-// Parallax scrolling for hill zone
-void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
-  REG_BGCNT[1] = BG_4BPP|BG_SIZE1|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
-  tonccpy(pal_bg_mem+0, greenhillzone_chrPal, sizeof(greenhillzone_chrPal));
+static void __hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x, bool reload) {
+  if(reload) {
+    REG_BGCNT[1] = BG_4BPP|BG_SIZE1|BG_CBB(0)|BG_SBB(PFSCROLLTEST);
+    tonccpy(pal_bg_mem+0, greenhillzone_chrPal, sizeof(greenhillzone_chrPal));
+    pal_bg_mem[241] = 0;
+  }
 
   // Because libgba's ISR takes so long, we're already out of hblank
   // before Halt() returns.
@@ -244,19 +251,34 @@ void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
   REG_BG_OFS[1].x = hdmaTable[0];
 }
 
+// Parallax scrolling for hill zone
+void hill_zone_set_scroll(uint16_t *hdmaTable, unsigned int x) {
+    __hill_zone_set_scroll(hdmaTable, x, true);
+}
+
 void activity_hill_zone_scroll(void) {
-  uint16_t hdmaTable[SCREEN_HEIGHT];
+  bool start = true;
+  int reload = 1;
+  int selected_scrolltest_y = scrolltest_y;
+  uint16_t *hdmaTable = (uint16_t*)tile_mem[0][160].data;
 
   scrolltest_y = scrolltest_dir = scrolltest_pause = 0;
   scrolltest_dy = 1;
   hill_zone_load_bg();
   do {
-    read_pad_help_check(helpsect_hill_zone_scroll_test);
+    reload = read_pad_help_check(helpsect_hill_zone_scroll_test);
+    if(start) {
+      reload = 1;
+      start = false;
+    }
     move_1d_scroll();
+    if(reload)
+        selected_scrolltest_y = scrolltest_y = 0;
+    selected_scrolltest_y = scrolltest_y;
 
     VBlankIntrWait();
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | ACTIVATE_SCREEN_HW;
-    hill_zone_set_scroll(hdmaTable, scrolltest_y);
+    __hill_zone_set_scroll(hdmaTable, selected_scrolltest_y, reload);
   } while (!(new_keys & KEY_B));
   REG_DMA0CNT = 0;
 }

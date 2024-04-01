@@ -146,7 +146,7 @@ void activity_shadow_sprite() {
   unsigned int held_keys = 0, x = (SCREEN_WIDTH - 32) >> 1, y = (SCREEN_HEIGHT - 32) >> 1, facing = 0;
   unsigned int cur_bg = 0, changetimeout = 0;
   unsigned int cur_shape = 0, shadow_type = 0, frame = 0;
-  uint16_t hdmaTable[SCREEN_HEIGHT];
+  uint16_t *hdmaTable = (uint16_t*)tile_mem[0][160].data;
 
   dma_memset16(se_mat[PFOVERLAY], 0xF000, 32*((SCREEN_HEIGHT >> 3)+1)*2);
   loadMapRowMajor(&(se_mat[PFOVERLAY][SCREEN_HEIGHT >> 3][(SCREEN_WIDTH >> 3) - 8]), 0xF001, 8, 1);
