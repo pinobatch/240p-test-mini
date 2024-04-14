@@ -229,7 +229,7 @@ $(objdir)/ntscPeriods.s: tools/mktables.py
 	$(PY) $< period $@
 
 $(objdir)/ntscPeriods-fdsheader.s: tools/mktables.py
-	$(PY) $< fdsperiod $@
+	$(PY) $< periodfdsc $@
 
 # Generic rules for CHR
 
