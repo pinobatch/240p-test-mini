@@ -45,6 +45,7 @@ __pycache__/
 /gba/compile_commands.json
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
+/nes/obj/nes/mdfourier*
 /nes/obj/nes/last-commit*
 /nes/*.dbg
 /nes/*.fdb

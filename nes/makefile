@@ -30,6 +30,7 @@ objlistmdf4kfdsh := mdfourier4kfe-fdsheader mdfourier-fdsheader padsnodas-fdshea
 AS65:=ca65
 LD65:=ld65
 CFLAGS65:=-g
+LFLAGS65:=-v
 objdir:=obj/nes
 srcdir:=src
 imgdir:=tilesets
@@ -140,35 +141,36 @@ objlistmdf4kchro := $(foreach o,$(objlistmdf4kchr),$(objdir)/$(o).o)
 objlistmdf4kfdsho := $(foreach o,$(objlistmdf4kfdsh),$(objdir)/$(o).o)
 
 map.txt $(title).nes: unrom512kbit.cfg $(objlisto) $(objdir)/unrom.o
-	$(LD65) -o $(title).nes -m map.txt --dbgfile $(title).dbg -C $^
+	$(LD65) $(LFLAGS65) -o $(title).nes -m map.txt --dbgfile $(title).dbg -C $^
 	$(FIX) $(title).nes
 
 bnmap.txt $(title)-bnrom.nes: bnrom512kbit.cfg $(objlisto) $(objdir)/bnrom.o
-	$(LD65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
+	$(LD65) $(LFLAGS65) -o $(title)-bnrom.nes -m bnmap.txt --dbgfile $(title)-bnrom.dbg -C $^
 	$(FIX) $(title)-bnrom.nes
 
 sgmap.txt $(title)-sgrom.nes: sgrom512kbit.cfg $(objlistmmco) $(objdir)/mmc1.o
-	$(LD65) -o $(title)-sgrom.nes -m sgmap.txt --dbgfile $(title)-sgrom.dbg -C $^
+	$(LD65) $(LFLAGS65) -o $(title)-sgrom.nes -m sgmap.txt --dbgfile $(title)-sgrom.dbg -C $^
 	$(FIX) $(title)-sgrom.nes
 
 tgmap.txt $(title)-tgrom.nes: tgrom512kbit.cfg $(objlistmmco) $(objdir)/mmc3.o
-	$(LD65) -o $(title)-tgrom.nes -m tgmap.txt --dbgfile $(title)-tgrom.dbg -C $^
+	$(LD65) $(LFLAGS65) -o $(title)-tgrom.nes -m tgmap.txt --dbgfile $(title)-tgrom.dbg -C $^
 	$(FIX) $(title)-tgrom.nes
 
 mdfmap.txt mdfourier4k.nes: mdfourier4k.cfg $(objlistmdf4ko)
-	$(LD65) -o mdfourier4k.nes -m mdfmap.txt \
+	$(LD65) $(LFLAGS65) -o mdfourier4k.nes -m mdfmap.txt \
 	  --dbgfile mdfourier4k.dbg -C $^
 
 mdffdshmap.txt mdfourier4k-fdsheader.fds: mdfourier4k-fdsheader.cfg $(objlistmdf4kfdsho)
-	$(LD65) -o mdfourier4k-fdsheader.fds -m mdffdshmap.txt \
+	$(LD65) $(LFLAGS65) -o mdfourier4k-fdsheader.fds -m mdffdshmap.txt \
 	  --dbgfile mdfourier4k-fdsheader.dbg -C $^
 
 mdfchrmap.txt mdfourier4k-chrrom.nes: mdfourier4k-chrrom.cfg $(objlistmdf4kchro)
-	$(LD65) -o mdfourier4k-chrrom.nes -m mdfchrmap.txt \
+	$(LD65) $(LFLAGS65) -o mdfourier4k-chrrom.nes -m mdfchrmap.txt \
 	  --dbgfile mdfourier4k-chrrom.dbg -C $^
 
 nsfmap.txt mdfourier.nsf: nsf.cfg $(objlistnsfo)
-	$(LD65) -o mdfourier.nsf -m nsfmap.txt --dbgfile mdfourier.dbg -C $^
+	$(LD65) $(LFLAGS65) -o $(objdir)/mdfourier -m nsfmap.txt --dbgfile mdfourier.dbg -C $^
+	cat $(objdir)/mdfourier_header $(objdir)/mdfourier > mdfourier.nsf
 
 $(objdir)/%-mmc.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc $(objdir)/%.o
 	$(AS65) $(CFLAGS65) $< -DUSE_MMC=1 -o $@
