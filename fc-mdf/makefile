@@ -6,8 +6,11 @@ defaultmapper := mmc5
 allmappers := mmc5 vrc6 vrc6ed2 vrc7 fme7 n163
 objlist := init main bg
 objlistnsf := mdfouriernsf mdfourier ntscPeriods
-objlistnsffds := mdfourierfdsnsf mdfourierfds ntscPeriods ntscFDSPeriods
-objlistmdffds4kfdsh := mdfourier4kfe-fdsheader mdfourierfds-fdsheader padsnodas-fdsheader ntscPeriods-fdsheader ntscFDSPeriods-fdsheader
+objlistnsffds := mdfourier-common mdfouriernsf-fds mdfourier-fds \
+	ntscPeriods ntscFDSPeriods
+objlistmdffds4kfdsh := mdfourier4kfe-fds-fdsheader \
+	mdfourier-common-fdsheader mdfourier-fds-fdsheader \
+	padsnodas-fdsheader ntscPeriods-fdsheader ntscFDSPeriods-fdsheader
 
 AS65:=ca65
 LD65:=ld65
@@ -48,10 +51,11 @@ run: $(title)-$(defaultmapper).nes
 debug: $(title)-$(defaultmapper).nes
 	$(DEBUGEMU) $<
 
-all: $(foreach o,$(allmappers),$(title)-$(o).nes)
+all: $(foreach o,$(allmappers),$(title)-$(o).nes) \
+	mdfourier-fds.nsf mdfourier-fds.fds
 
 clean:
-	-rm $(objdir)/*.o $(objdir)/*.chr $(title).prg
+	-rm $(objdir)/*.o $(objdir)/*.s $(objdir)/*.chr $(title).prg
 
 dist: \
   $(foreach o,$(allmappers),$(title)-$(o).nes) $(objdir)/index.txt \
@@ -62,7 +66,7 @@ dist: \
 $(objdir)/%16.chr: $(imgdir)/%.png
 	$(PY) ../common/tools/pilbmp2nes.py $< --planes "0;1" -H16 -o $@
 
-$(objdir)/mdf4k_chr.chr: $(imgdir)/mdf4k_chr.png
+$(objdir)/mdf4k%_chr.chr: $(imgdir)/mdf4k%_chr.png
 	$(PY) ../common/tools/pilbmp2nes.py -H 16 --planes "0" $< $@
 
 # source files
@@ -83,14 +87,8 @@ $(objdir)/ntscFDSPeriods-fdsheader.s: $(extdir)/tools/mktables.py
 $(objdir)/mdfourier4k-fdsheader.cfg: $(extdir)/mdfourier4k-fdsheader.cfg
 	cp $^ $@
 
-$(objdir)/%-fdsheader.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
-	$(AS65) $(CFLAGS65) $< -DFDSHEADER=1 -o $@
-
 $(objdir)/padsnodas.s: $(extdir)/$(srcdir)/padsnodas.s
 	cp $^ $@
-
-$(objdir)/padsnodas-fdsheader.o: $(extdir)/$(srcdir)/pads.s $(srcdir)/nes.inc $(srcdir)/global.inc
-	$(AS65) $(CFLAGS65) $< -o $@ -DUSE_DAS=0 -DUSE_2P=0 -DFDSHEADER=1
 
 # Includes
 
@@ -100,8 +98,11 @@ $(objdir)/mdfourier.o: $(objdir)/instsamp1.dmc
 $(objdir)/instsamp1.dmc: $(extdir)/audio/instsamp1.dmc
 	cp $^ $@
 
-$(objdir)/mdfourier4kfe-chrrom.o $(objdir)/mdfourier4kfe.o $(objdir)/mdfourier4kfe-fdsheader.o: \
+$(objdir)/mdfourier4kfe-chrrom.o $(objdir)/mdfourier4kfe-common.o $(objdir)/mdfourier4kfe-common-fdsheader.o: \
   $(objdir)/mdf4k_chr.chr
+
+$(objdir)/mdfourier4kfe-fds.o $(objdir)/mdfourier4kfe-fds-fdsheader.o: \
+  $(objdir)/mdf4k-fds_chr.chr
 
 # Linking
 
@@ -115,13 +116,13 @@ mdf_nsf_map.txt mdfourier.nsf: $(extdir)/nsf.cfg $(objlistnsfo)
 	$(LD65) $(LFLAGS65) -o $(objdir)/mdfourier -m mdf_nsf_map.txt --dbgfile mdfourier.dbg -C $^
 	cat $(objdir)/mdfourier_header $(objdir)/mdfourier > mdfourier.nsf
 
-mdf_fds_nsf_map.txt mdfourier_fds.nsf: fds_nsf.cfg $(objlistnsffdso)
-	$(LD65) $(LFLAGS65) -o $(objdir)/mdfourier_fds -m mdf_fds_nsf_map.txt --dbgfile mdfourier_fds.dbg -C $^
-	cat $(objdir)/mdfourier_fds_header $(objdir)/mdfourier_fds > mdfourier_fds.nsf
+mdf_fds_nsf_map.txt mdfourier-fds.nsf: fds_nsf.cfg $(objlistnsffdso)
+	$(LD65) $(LFLAGS65) -o $(objdir)/mdfourier-fds -m mdf_fds_nsf_map.txt --dbgfile mdfourier-fds.dbg -C $^
+	cat $(objdir)/mdfourier-fds_header $(objdir)/mdfourier-fds > mdfourier-fds.nsf
 
-mdf_fds_fdsh_map.txt mdfourier4k_fds-fdsheader.fds: $(objdir)/mdfourier4k-fdsheader.cfg $(objlistmdffds4kfdsho)
-	$(LD65) $(LFLAGS65) -o mdfourier4k-fdsheader.fds -m mdffdshmap.txt \
-	  --dbgfile mdfourier4k-fdsheader.dbg -C $^
+mdf_fds_fdsh_map.txt mdfourier-fds.fds: fds.cfg $(objlistmdffds4kfdsho)
+	$(LD65) $(LFLAGS65) -o mdfourier-fds.fds -m mdffdshmap.txt \
+	  --dbgfile mdfourier-fds.dbg -C $^
 
 # Assembly
 
@@ -130,6 +131,12 @@ $(objdir)/%.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
 
 $(objdir)/%.o: $(objdir)/%.s
 	$(AS65) $(CFLAGS65) -o $@ $<
+
+$(objdir)/%-fdsheader.o: $(srcdir)/%.s $(srcdir)/nes.inc $(srcdir)/global.inc
+	$(AS65) $(CFLAGS65) $< -DFDSHEADER=1 -o $@
+
+$(objdir)/padsnodas-fdsheader.o: $(extdir)/$(srcdir)/pads.s $(srcdir)/nes.inc $(srcdir)/global.inc
+	$(AS65) $(CFLAGS65) $< -o $@ -DUSE_DAS=0 -DUSE_2P=0 -DFDSHEADER=1
 
 # Packaging
 

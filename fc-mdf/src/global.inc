@@ -29,10 +29,13 @@ IS_MULTICART = 0
 .global do_mdfourier, mdfourier_present
 .global mdfourier_init_apu, mdfourier_run, mdfourier_ready_tone
 .global mdfourier_push_apu
+.global mdfourier_push_regs
 .global mdfourier_good_phase
 .globalzp test_state
 SIZEOF_TEST_STATE = 24
-INITIAL_GOOD_PHASE = (IS_MULTICART = 0)
+FDS_OFFSET = (.defined(FDSHEADER) = 1) * 4
+; due to FDS BIOS using the triangle, the phase is trash on cold boot
+INITIAL_GOOD_PHASE = (IS_MULTICART = 0) && (.defined(FDSHEADER) = 0)
 
 ; ntscPeriods.s
 .global periodTableLo, periodTableHi

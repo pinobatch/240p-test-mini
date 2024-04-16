@@ -156,7 +156,9 @@ bcd_highdigits = $0000
 .global mdfourier_init_apu, mdfourier_run, mdfourier_ready_tone
 .global mdfourier_push_apu
 .global mdfourier_good_phase
-INITIAL_GOOD_PHASE = (IS_MULTICART = 0)
+
+; due to FDS BIOS using the triangle, the phase is trash on cold boot
+INITIAL_GOOD_PHASE = (IS_MULTICART = 0) && (.defined(FDSHEADER) = 0)
 
 ; ntscPeriods.s
 .global periodTableLo, periodTableHi

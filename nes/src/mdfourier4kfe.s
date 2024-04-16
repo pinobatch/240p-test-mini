@@ -195,6 +195,13 @@ test_good_phase := test_state+6
   .addr nmi_handler, stub15start, irq_handler
   .assert *-stub15start = 96, error, "mapper init area not 96 bytes!"
 
+  .ifdef CHRROM
+  .segment "CHR"
+  .else
+  .rodata
+  .endif
+  chrdata: .incbin "obj/nes/mdf4k_chr.chr"
+  chrdata_end:
 .endif
 
 .segment "ZEROPAGE"
@@ -203,8 +210,14 @@ cur_keys: .res 2
 new_keys: .res 2
 test_state: .res SIZEOF_TEST_STATE
 
+warmbootsig: .byte "MDF", 0
+WARMBOOTSIGLEN = * - warmbootsig
+
 .segment "BSS"
 mdfourier_good_phase: .res 1
+; Default crt0 clears ZP but not BSS
+; Currently used only by multicarts
+is_warm_boot:  .res WARMBOOTSIGLEN
 
 .ifdef FDSHEADER
 .segment "FILE0_DAT"
@@ -294,20 +307,29 @@ irq_handler:
     bpl vwait2
 .endif
 
-  ; due to FDS BIOS using the triangle, the phase is trash on cold boot
-.ifdef FDSHEADER
-  lda coldboot_check
-  beq :+
-  dec coldboot_check
-  lda #0
+
+  ; Check for a warm boot
+  lda #INITIAL_GOOD_PHASE
   sta mdfourier_good_phase
-  jmp :++
-: lda #1
-  sta mdfourier_good_phase
-:
-.else
-  lda #1
-  sta mdfourier_good_phase
+
+.if .defined(FDSHEADER) || ::IS_MULTICART
+    ldy #0
+    ldx #WARMBOOTSIGLEN - 1
+    warmbootcheckloop:
+      lda warmbootsig,x
+      cmp is_warm_boot,x
+      sta is_warm_boot,x
+      beq :+
+        iny
+      :
+      dex
+      bpl warmbootcheckloop
+    ; At this point, X=$FF, and Y=0 if warm boot.
+    tya
+    bne :+
+      ; On a warm boot, phase is also good
+      stx mdfourier_good_phase
+    :
 .endif
   lda #VBLANK_NMI
   sta PPUCTRL
@@ -475,16 +497,6 @@ have_phase_xy:
     beq :-
   rts
 .endproc
-
-.ifndef FDSHEADER
-.ifdef CHRROM
-.segment "CHR"
-.else
-.rodata
-.endif
-chrdata: .incbin "obj/nes/mdf4k_chr.chr"
-chrdata_end:
-.endif
 
 .ifdef FDSHEADER
 .segment "FILE0_DAT"
