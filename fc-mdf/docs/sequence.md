@@ -115,6 +115,7 @@ Disk System
    compare with reverse envelope and manual volume fade.
 10. Modulator test.
     NOTE: i don't know what i'm testing for exactly
+    TODO mod envelope tests
     4 notes of C (261.58 Hz) for 7 frames, each with varying
     modulator properties.
     a. sine wave, Dn-FT mod sine, mod depth of $01, mod period of $004

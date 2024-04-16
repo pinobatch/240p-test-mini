@@ -252,26 +252,24 @@ mdfourier_ready_tone = pattern_sync
     sta fds_wavebuf-1,y
     dey
     bne waveloop
+
+  ldy #fds_note_data - pattern_y_data
+  jsr load_pattern_y
+
   loop:
     ; Writes: volume, period lo, period hi, APU frame reset
     ldx test_row
     lda fdsPeriodTableLo,x
-    sta apu_databuf+0
-    lda fdsPeriodTableHi,x
     sta apu_databuf+1
-    lda #$A0
+    lda fdsPeriodTableHi,x
     sta apu_databuf+2
-    lda #$82
-    sta apu_addressbuf+0
-    lda #$83
-    sta apu_addressbuf+1
-    lda #$80
-    sta apu_addressbuf+2
-    lda #$FF
-    sta apu_addressbuf+3
     
     lda #10
     jsr wait_a_ticks
+
+    ; reset
+    lda #$80
+    sta apu_addressbuf+0
     inc test_row
     lda test_row
     cmp #94
@@ -300,14 +298,14 @@ mdfourier_ready_tone = pattern_sync
   jsr fill_wavebuf_y
   pla
   ; volume 32, waveform halted
-  ldy #$00
-  sty apu_databuf+0
-  ldy #$83
+  ldy #$80
   sty apu_addressbuf+0
   ldy #$A0
-  sty apu_databuf+1
-  ldy #$80
+  sty apu_databuf+0
+  ldy #$83
   sty apu_addressbuf+1
+  ldy #$00
+  sty apu_databuf+1
   ldy #$FF
   sty apu_addressbuf+2
   jmp wait_a_ticks
@@ -545,6 +543,7 @@ mdfourier_ready_tone = pattern_sync
   lda #8
   jmp silence_a_ticks
 
+  ; todo: add this to the test
   ldy #fds_env_decrease_master_data - pattern_y_data
   jsr load_pattern_y
   
@@ -562,6 +561,7 @@ mdfourier_ready_tone = pattern_sync
 .endproc
 
 .proc pattern_modulation_test
+  ; todo: mod envelope tests
   ; a. sine wave, Dn-FT mod sine, mod depth of $01, mod period of $004
   ; load waveform
   ldy #0
@@ -802,7 +802,7 @@ silence_data:
   ; Disable FDS volume envelope and silence volume
   .dbyt $8080
   ; Clear FDS frequency, reset phase
-  .dbyt $8200, $8380, $8380
+  .dbyt $8200, $8380, $8300
   ; Init FDS envelope speed
   .dbyt $8AFF
   ; Disable modulation
