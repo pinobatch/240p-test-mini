@@ -488,6 +488,11 @@ restart:
   bvc no_B_press
     lda mdfourier_good_phase
     sta test_good_phase
+    ; immediately return from jsr mdfourier_run
+    pla
+    pla
+    pla
+    pla
     rts
   no_B_press:
   jsr vsync

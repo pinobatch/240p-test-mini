@@ -118,7 +118,7 @@ mdf_nsf_map.txt mdfourier.nsf: $(extdir)/nsf.cfg $(objlistnsfo)
 
 mdf_fds_nsf_map.txt mdfourier-fds.nsf: fds_nsf.cfg $(objlistnsffdso)
 	$(LD65) $(LFLAGS65) -o $(objdir)/mdfourier-fds -m mdf_fds_nsf_map.txt --dbgfile mdfourier-fds.dbg -C $^
-	cat $(objdir)/mdfourier-fds_header $(objdir)/mdfourier-fds > mdfourier-fds.nsf
+	cat $(objdir)/mdfourier-fds_nsfhdr.bin $(objdir)/mdfourier-fds.bin > mdfourier-fds.nsf
 
 mdf_fds_fdsh_map.txt mdfourier-fds.fds: fds.cfg $(objlistmdffds4kfdsho)
 	$(LD65) $(LFLAGS65) -o mdfourier-fds.fds -m mdffdshmap.txt \

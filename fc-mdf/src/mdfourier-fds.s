@@ -1,6 +1,7 @@
 .include "nes.inc"
 .include "global.inc"
-.import silence_20_ticks, silence_a_ticks, wait_a_ticks
+.import silence_10_ticks, silence_20_ticks, silence_a_ticks, wait_a_ticks
+.import mdfourier_push_regs
 .import apu_addressbuf, apu_databuf
 .importzp test_section, test_row, test_ticksleft
 .importzp test_subtype
@@ -73,8 +74,7 @@ fds_wavebuf = $0140 + FDS_OFFSET
 .endproc
 
 .align 32
-; pushes mod table to the FDS
-; uses apu_databuf as a temporary buffer
+; inits mod table to 0
 .proc silence_modulator
     ; halt mod unit
     lda #$80
@@ -216,6 +216,7 @@ mdfourier_ready_tone = pattern_sync
 .proc mdfourier_init_apu
   lda #$FF
   sta fds_wavebuf+0
+  jsr silence_modulator
   ldy #silence_data - pattern_y_data
   ; fall through to load_pattern_y
 .endproc
@@ -274,11 +275,7 @@ mdfourier_ready_tone = pattern_sync
     lda test_row
     cmp #94
     bcc loop
-  ; fall through to silence_10_ticks
-.endproc
-.proc silence_10_ticks
-  lda #10
-  jmp silence_a_ticks
+  jmp silence_10_ticks
 .endproc
 
 .proc pattern_fds_pops
@@ -294,20 +291,37 @@ mdfourier_ready_tone = pattern_sync
   lda #20
 .endproc
 .proc fds_pop_y_wait_a
-  pha
-  jsr fill_wavebuf_y
-  pla
+  ; write single byte of waveform
+  sty apu_databuf+2
+  ; reset phase
+  ldy #$83
+  sty apu_addressbuf+0
+  ldy #$00
+  sty apu_databuf+0
+  ; write enable wavetable
+  ldy #$89
+  sty apu_addressbuf+1
+  ldy #$80
+  sty apu_databuf+1
+  ; write single byte of waveform
+  ldy #$40
+  sty apu_addressbuf+2
+  ; write protect wavetable
+  ldy #$89
+  sty apu_addressbuf+3
+  ldy #$00
+  sty apu_databuf+3
   ; volume 32, waveform halted
   ldy #$80
-  sty apu_addressbuf+0
+  sty apu_addressbuf+4
   ldy #$A0
-  sty apu_databuf+0
+  sty apu_databuf+4
   ldy #$83
-  sty apu_addressbuf+1
+  sty apu_addressbuf+5
   ldy #$00
-  sty apu_databuf+1
+  sty apu_databuf+5
   ldy #$FF
-  sty apu_addressbuf+2
+  sty apu_addressbuf+6
   jmp wait_a_ticks
 .endproc
 

@@ -29,7 +29,6 @@ IS_MULTICART = 0
 .global do_mdfourier, mdfourier_present
 .global mdfourier_init_apu, mdfourier_run, mdfourier_ready_tone
 .global mdfourier_push_apu
-.global mdfourier_push_regs
 .global mdfourier_good_phase
 .globalzp test_state
 SIZEOF_TEST_STATE = 24

@@ -1,6 +1,7 @@
 .include "nes.inc"
 .include "global.inc"
-.export silence_20_ticks, silence_a_ticks, wait_a_ticks
+.export silence_10_ticks, silence_20_ticks, silence_a_ticks, wait_a_ticks
+.export mdfourier_push_regs
 .export apu_addressbuf, apu_databuf
 .exportzp test_section, test_row, test_ticksleft, test_subtype
 
@@ -42,16 +43,23 @@ apu_databuf    = $0120 + FDS_OFFSET
   rts
 .endproc
 
+.proc silence_10_ticks
+  lda #10
+  jmp silence_a_ticks
+.endproc
+
 .proc silence_20_ticks
   lda #20
   ; fall through to silence_a_ticks
 .endproc
+
 .proc silence_a_ticks
   pha
   jsr mdfourier_init_apu
   pla
   ; fall through to wait_a_ticks
 .endproc
+
 .proc wait_a_ticks
   sta test_ticksleft
   waitloop:

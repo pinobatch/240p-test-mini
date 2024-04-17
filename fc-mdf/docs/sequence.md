@@ -81,8 +81,8 @@ Disk System
    (1747.40 Hz) at 10 frames per note, followed by 10 frames silence.
    Repeat for waveforms sine, square, and 32x square at volume 32.
    TODO: increase silence before next test
-3. Three DC offset pops for 20 frames, first with waveform filled by
-   $3F, then filled with $00, both at volume 32 and at period $FFF.
+3. Three DC offset pops for 20 frames, first with wave value $3F,
+   then $00, both at volume 32, phase resetted, and waveform halted.
    Third DC pop silences second DC pop, testing for DC offset.
    10 frames silence
    TODO: halt waveform instead of setting to highest period
@@ -112,14 +112,19 @@ Disk System
    (value $0A to $4080).
    Each note decreases master volume (00, 01, 10, 11).
    TODO: compare envelope with manual volume fade.
-   compare with reverse envelope and manual volume fade.
+   TODO: compare with reverse envelope and manual volume fade.
+   TODO: measure exact envelope length by writing to $4080 and
+   counting cycles
+xx. Mod envelope tests
 10. Modulator test.
     NOTE: i don't know what i'm testing for exactly
-    TODO mod envelope tests
+    TODO: mod envelope tests
+    TODO: mod overflow/underflow tests
     4 notes of C (261.58 Hz) for 7 frames, each with varying
     modulator properties.
     a. sine wave, Dn-FT mod sine, mod depth of $01, mod period of $004
-    b. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period of $265
+    b. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period
+       of $265
     c. sine wave, Dn-FT mod sine, mod depth of $3F, mod period of $265
     d. saw wave, Dn-FT mod sine, mod depth of $3F, mod period of $04C
 11. Repeat sync pulses

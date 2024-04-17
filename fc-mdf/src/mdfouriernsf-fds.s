@@ -13,7 +13,7 @@ SIZEOF_TEST_STATE = 24
   .addr mdfourier_nsf_init
   .addr mdfourier_nsf_play
 names_start:
-  .byte "MDFourier FDS V1.61"
+  .byte "MDFourier FDS V1.62"
   .res names_start+32-*, $00
   .byte "Persune (@Gumball2415)"
   .res names_start+64-*, $00
