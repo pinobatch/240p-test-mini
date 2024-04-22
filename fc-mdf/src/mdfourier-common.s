@@ -1,9 +1,10 @@
 .include "nes.inc"
 .include "global.inc"
 .export silence_10_ticks, silence_20_ticks, silence_a_ticks, wait_a_ticks
-.export mdfourier_push_regs
+.export mdfourier_push_regs, load_pattern_y
 .export apu_addressbuf, apu_databuf
 .exportzp test_section, test_row, test_ticksleft, test_subtype
+.import pattern_y_data
 
 test_section     = test_state+1
 test_row         = test_state+2
@@ -66,5 +67,23 @@ apu_databuf    = $0120 + FDS_OFFSET
     jsr mdfourier_present
     dec test_ticksleft
     bne waitloop
+  rts
+.endproc
+
+.proc load_pattern_y
+  ldx #0
+  beq current_x
+  loadloop:
+    iny
+    lda pattern_y_data,y
+    sta apu_databuf,x
+    iny
+    inx
+  current_x:
+    lda pattern_y_data,y
+    sta apu_addressbuf,x
+    cmp #$FF
+    bne loadloop
+  loaded:
   rts
 .endproc

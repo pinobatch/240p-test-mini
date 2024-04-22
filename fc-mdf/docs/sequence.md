@@ -106,25 +106,55 @@ Disk System
    10 frames silence.
 8. Nonlinear FDS DAC test. "Sorted" sawtooth wave note at C (65.29 hz)
    for 30 frames. 10 frames silence.
-9. Envelope / Master volume test.
-   4 sawtooth wave notes of C (523.15 hz) for 40 frames with volume
-   gain of A, envelope enabled with direction decreasing.
-   (value $0A to $4080).
-   Each note decreases master volume (00, 01, 10, 11).
-   TODO: compare envelope with manual volume fade.
-   TODO: compare with reverse envelope and manual volume fade.
-   TODO: measure exact envelope length by writing to $4080 and
-   counting cycles
-xx. Mod envelope tests
-10. Modulator test.
-    NOTE: i don't know what i'm testing for exactly
+9. Master volume test. 4 sawtooth wave notes of C (523.15 hz) for 40
+   frames with volume gain 32, decreasing every tick.
+   Each note decreasing in master volume (00, 01, 10, 11).
+10. Envelope test.
+    3 sawtooth wave notes of C (523.15 hz) and one DC offset envelope
+    for 40 frames with different methods of modifying volume.
+    1. manual volume gain write, decreasing volume gain every frame
+    2. hardware volume sweep decrease, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed)
+    3. hardware volume sweep increase, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed)
+    4. DC manual volume gain write, decreasing volume gain every frame.
+    TODO: measure exact envelope length by writing to $4080 and
+    counting cycles
+11. Modulator test.
     TODO: mod envelope tests
     TODO: mod overflow/underflow tests
-    4 notes of C (261.58 Hz) for 7 frames, each with varying
-    modulator properties.
-    a. sine wave, Dn-FT mod sine, mod depth of $01, mod period of $004
-    b. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period
-       of $265
-    c. sine wave, Dn-FT mod sine, mod depth of $3F, mod period of $265
-    d. saw wave, Dn-FT mod sine, mod depth of $3F, mod period of $04C
-11. Repeat sync pulses
+    6 notes of C (261.58 Hz) for 40 frames, each with varying
+    modulator and modulator table properties.
+    a. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period
+       of $265. This checks for mod table index sync.
+    b. sine wave, Dn-FT mod sine, mod depth of $3F, mod period
+       of $265. This compares against previous wave.
+    c. sine wave, modtable_data_mod_reset, mod depth of $10, mod
+       period of $020. This checks for mod counter reset.
+    d. sine wave, modtable_data_mod_overflow, mod depth of $10, mod
+       period of $020
+    e. sine wave, modtable_data_mod_underflow, mod depth of $10, mod
+       period of $020
+    f. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period
+       of $265. In addition to $4085=$20, this will test for $4087.7
+       latch delay.
+12. Modulator envelope test.
+    3 sawtooth wave notes of C (523.15 hz) for 40 frames with
+    different methods of modifying modulator gain.
+    1. manual mod gain write, decreasing mod gain every frame
+    2. hardware mod sweep decrease, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed)
+    3. hardware mod sweep increase, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed)
+    (value $0A to $4080).
+    Each note decreases master volume (00, 01, 10, 11).
+    TODO: measure exact envelope length by writing to $4080 and
+    counting cycles
+13. Repeat sync pulses
+
+to find out:
+- [ ] is the wave and mod unit ticked on the same M2 cycle?
+- [ ] is it possible to determine wave unit M2 alignment?
+- [ ] is it possible to determine mod unit M2 alignment?
+- [ ] is it feasible to align test start with wave/mod unit?
+- [ ] does mod unit envelopes also wait for wavepos==0 latch (like wave unit envelopes)?

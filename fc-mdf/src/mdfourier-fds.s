@@ -1,16 +1,17 @@
 .include "nes.inc"
 .include "global.inc"
 .import silence_10_ticks, silence_20_ticks, silence_a_ticks, wait_a_ticks
-.import mdfourier_push_regs
+.import mdfourier_push_regs, load_pattern_y
 .import apu_addressbuf, apu_databuf
 .importzp test_section, test_row, test_ticksleft
 .importzp test_subtype
 .export mdfourier_push_apu, mdfourier_init_apu
+.export pattern_y_data
 
 ; first 4 are defined in mdfourier_common.s
 test_ticksleft2  = test_state+5
 test_lastpulsehi = test_state+6
-test_waveptr     = test_state+7
+test_tableptr    = test_state+7
 
 fds_wavebuf = $0140 + FDS_OFFSET
 
@@ -92,26 +93,14 @@ fds_wavebuf = $0140 + FDS_OFFSET
   rts
 .endproc
 
-.align 32
-; fills the FDS wavetable with value in y
-; clobbers a
-.proc fill_wavebuf_y
-  ldx #$40
-  tya
-    fds_loop:
-      sta fds_wavebuf-1,x   ; 5
-      dex                   ; 2
-      bne fds_loop          ; 3
-  rts
-.endproc
-
 .proc mdfourier_run
   jsr pattern_sync
   inc test_section
 
   ; Pattern being tested goes here
-  ; jsr pattern_modulation_test
-  ; rts
+  jsr pattern_modulation_envelopes
+  jmp pattern_sync
+  rts
 
   ; Column 1
   lda #$00  ; sine
@@ -146,40 +135,23 @@ fds_wavebuf = $0140 + FDS_OFFSET
   jsr pattern_2a03_phase_dac
   inc test_section
   lda #$00
-  jsr pattern_envelope_mastervol_A
+  jsr pattern_mastervol_A
   inc test_section
   lda #$01
-  jsr pattern_envelope_mastervol_A
+  jsr pattern_mastervol_A
   inc test_section
   lda #$02
-  jsr pattern_envelope_mastervol_A
+  jsr pattern_mastervol_A
   inc test_section
   lda #$03
-  jsr pattern_envelope_mastervol_A
+  jsr pattern_mastervol_A
+  inc test_section
+  jsr pattern_volume_envelopes
   inc test_section
   jsr pattern_modulation_test
   inc test_section
-
-  ; Column 2
-  ; jsr pattern_dmc_pops
-  ; inc test_section
-  ; jsr pattern_dmc_scale
-  ; inc test_section
-  ; jsr pattern_phase_resets
-  ; inc test_section
-  ; lda #$04
-  ; jsr long_slide_channel_A
-  ; lda #$08
-  ; jsr long_slide_channel_A
-  ; inc test_section
-  ; lda #60
-  ; jsr wait_a_ticks
-  ; inc test_section
-  ; jsr pattern_pulse_volume_ramp
-  ; jsr pattern_noise_volume_ramp
-  ; inc test_section
-  ; jsr pattern_dmc_fading
-  ; inc test_section
+  jsr pattern_modulation_envelopes
+  inc test_section
 
   ; fall through
 skip_all:
@@ -218,24 +190,7 @@ mdfourier_ready_tone = pattern_sync
   sta fds_wavebuf+0
   jsr silence_modulator
   ldy #silence_data - pattern_y_data
-  ; fall through to load_pattern_y
-.endproc
-.proc load_pattern_y
-  ldx #0
-  beq current_x
-  loadloop:
-    iny
-    lda pattern_y_data,y
-    sta apu_databuf,x
-    iny
-    inx
-  current_x:
-    lda pattern_y_data,y
-    sta apu_addressbuf,x
-    cmp #$FF
-    bne loadloop
-  loaded:
-  rts
+  jmp load_pattern_y
 .endproc
 
 .proc chromatic_scale_subtype_A
@@ -244,12 +199,12 @@ mdfourier_ready_tone = pattern_sync
   lda #0
   sta test_row
   lda wavetable_table_lo,y
-  sta test_waveptr
+  sta test_tableptr
   lda wavetable_table_hi,y
-  sta test_waveptr+1
+  sta test_tableptr+1
   ldy #$40
   waveloop:
-    lda (test_waveptr),y
+    lda (test_tableptr),y
     sta fds_wavebuf-1,y
     dey
     bne waveloop
@@ -357,13 +312,13 @@ mdfourier_ready_tone = pattern_sync
   sta test_subtype
   tay
   lda wavetable_table_lo,y
-  sta test_waveptr
+  sta test_tableptr
   lda wavetable_table_hi,y
-  sta test_waveptr+1
+  sta test_tableptr+1
 
   ldy #$40
   waveloop:
-    lda (test_waveptr),y
+    lda (test_tableptr),y
     sta fds_wavebuf-1,y
     dey
     bne waveloop
@@ -521,8 +476,7 @@ mdfourier_ready_tone = pattern_sync
   jmp silence_10_ticks
 .endproc
 
-.proc pattern_envelope_mastervol_A
-  sta test_subtype
+.proc pattern_volume_envelopes
   ; load saw waveform
   ldx #$40
   waveloop:
@@ -532,7 +486,138 @@ mdfourier_ready_tone = pattern_sync
     bne waveloop
 
   ; manual volume fade
-  ldy #fds_disabled_env_master_data - pattern_y_data
+  ldy #fds_vol_env_disabled_master_data - pattern_y_data
+  jsr load_pattern_y
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+
+  lda #32
+  sta test_ticksleft
+  volumeloop:
+    lda test_ticksleft
+    ora #$80
+    sta apu_databuf+0
+    jsr mdfourier_present
+    lda #$80 ; reset
+    sta apu_addressbuf+0
+    dec test_ticksleft
+    bne volumeloop
+  lda #8
+  jsr silence_a_ticks
+
+  ; hardware volume fade decrease
+  ldy #fds_vol_env_decrease_master_data - pattern_y_data
+  jsr load_pattern_y
+  
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+
+  lda #37
+  jsr wait_a_ticks
+  lda #3
+  jsr silence_a_ticks
+
+  ; hardware volume fade increase
+  ldy #fds_vol_env_increase_master_data - pattern_y_data
+  jsr load_pattern_y
+  
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+
+  lda #34
+  jsr wait_a_ticks
+  lda #5
+  jsr silence_a_ticks
+
+  ; DC offset master vol
+  ; master volume
+  lda #$89
+  sta apu_addressbuf+0
+  lda test_subtype
+  and #3
+  sta apu_databuf+0
+  ; write enable wavetable
+  lda #$89
+  sta apu_addressbuf+1
+  lda #$80
+  sta apu_databuf+1
+  ; write single byte of waveform
+  lda #$40
+  sta apu_addressbuf+2
+  lda #$3F
+  sta apu_databuf+2
+  ; write protect wavetable
+  lda #$89
+  sta apu_addressbuf+3
+  lda #$00
+  sta apu_databuf+3
+  ; reset phase
+  lda #$83
+  sta apu_addressbuf+4
+  lda #$00
+  sta apu_databuf+4
+  ; volume 0, waveform halted
+  lda #$80
+  sta apu_addressbuf+5
+  lda #$80
+  sta apu_databuf+5
+  lda #$83
+  sta apu_addressbuf+6
+  lda #$00
+  sta apu_databuf+6
+  lda #$FF
+  sta apu_addressbuf+7
+
+  jsr mdfourier_present
+
+  ; volume 32, waveform halted
+  lda #$80
+  sta apu_addressbuf+0
+  lda #$A0
+  sta apu_databuf+0
+  lda #$83
+  sta apu_addressbuf+1
+  lda #$00
+  sta apu_databuf+1
+  lda #$FF
+  sta apu_addressbuf+2
+
+  lda #32
+  sta test_ticksleft
+  volumeloop2:
+    lda test_ticksleft
+    ora #$80
+    sta apu_databuf+0
+    jsr mdfourier_present
+    lda #$80 ; reset
+    sta apu_addressbuf+0
+    dec test_ticksleft
+    bne volumeloop2
+
+  lda #8
+  jmp silence_a_ticks
+.endproc
+
+.proc pattern_mastervol_A
+  sta test_subtype
+  ; load saw waveform
+  ldx #$40
+  waveloop:
+    lda waveform_data_saw-1,x
+    sta fds_wavebuf-1,x
+    dex
+    bne waveloop
+
+  ldy #fds_vol_env_disabled_master_data - pattern_y_data
   jsr load_pattern_y
   ldx #72
   lda fdsPeriodTableLo,x
@@ -554,158 +639,128 @@ mdfourier_ready_tone = pattern_sync
     sta apu_addressbuf+0
     dec test_ticksleft
     bne volumeloop
+
   lda #8
   jmp silence_a_ticks
-
-  ; todo: add this to the test
-  ldy #fds_env_decrease_master_data - pattern_y_data
-  jsr load_pattern_y
-  
-  ldx #72
-  lda fdsPeriodTableLo,x
-  sta apu_databuf+3
-  lda fdsPeriodTableHi,x
-  sta apu_databuf+4
-  lda test_subtype
-  and #3
-  sta apu_databuf+5
-
-  lda #40
-  jmp wait_a_ticks
 .endproc
 
 .proc pattern_modulation_test
-  ; todo: mod envelope tests
-  ; a. sine wave, Dn-FT mod sine, mod depth of $01, mod period of $004
-  ; load waveform
-  ldy #0
-  lda wavetable_table_lo,y
-  sta test_waveptr
-  lda wavetable_table_hi,y
-  sta test_waveptr+1
-  ldy #$40
+  ldx #$40
   waveloop:
-    lda (test_waveptr),y
-    sta fds_wavebuf-1,y
-    dey
+    lda waveform_data_sine-1,x
+    sta fds_wavebuf-1,x
+    dex
     bne waveloop
 
-  ; write to modulation table
-  ldy #0
-  lda modtable_table_lo,y
-  sta test_waveptr
-  lda modtable_table_hi,y
-  sta test_waveptr+1
-  ldy #$20
-  modloop:
-    lda (test_waveptr),y
-    sta apu_databuf-1,y
-    dey
-    bne modloop
-  jsr mdfourier_push_fds_modtable
-
-  ldy #fds_note_data_mod - pattern_y_data
-  jsr load_pattern_y
-  ldy #60
-  lda fdsPeriodTableLo,y
-  sta apu_databuf+1
-  lda fdsPeriodTableHi,y
-  sta apu_databuf+2
-  
-  ; modulation depth
-  lda #$01
-  ora apu_databuf+4
-  sta apu_databuf+4
-  ; modulation period
-  lda #$04
-  sta apu_databuf+5
-  lda #$00
-  sta apu_databuf+6
-
-  lda #70
-  jsr wait_a_ticks
-  jsr silence_10_ticks
-
-  ; b. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period of $265
-  ; c. sine wave, Dn-FT mod sine, mod depth of $3F, mod period of $265
+  ; a. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period
+  ;    of $265. This checks for mod table index sync.
+  ; b. sine wave, Dn-FT mod sine, mod depth of $3F, mod period
+  ;    of $265. This checks against previous wave.
   lda #2
   sta test_ticksleft2
   loop:
-      ; write to modulation table
-      ldx test_ticksleft2
-      dex
-      txa
-      tay
-      lda modtable_table_lo,y
-      sta test_waveptr
-      lda modtable_table_hi,y
-      sta test_waveptr+1
-      ldy #$20
-      modloop2:
-        lda (test_waveptr),y
-        sta apu_databuf-1,y
-        dey
-        bne modloop2
-      jsr mdfourier_push_fds_modtable
+    dec test_ticksleft2
+    ; write to modulation table
+    ldy test_ticksleft2
+    lda modtable_table_lo+0,y
+    sta test_tableptr+0
+    lda modtable_table_hi+0,y
+    sta test_tableptr+1
+    ldy #$20
+    modloop:
+      lda (test_tableptr),y
+      sta apu_databuf-1,y
+      dey
+      bne modloop
+    jsr mdfourier_push_fds_modtable
 
-      ldy #fds_note_data_mod - pattern_y_data
-      jsr load_pattern_y
-      ldy #60
-      lda fdsPeriodTableLo,y
-      sta apu_databuf+1
-      lda fdsPeriodTableHi,y
-      sta apu_databuf+2
-      
-      ; modulation depth
-      lda #$3F
-      ora apu_databuf+4
-      sta apu_databuf+4
-      ; modulation period
-      ldy #60
-      lda fdsPeriodTableLo,y
-      sta apu_databuf+5
-      lda fdsPeriodTableHi,y
-      sta apu_databuf+6
+    ldy #fds_note_data_mod - pattern_y_data
+    jsr load_pattern_y
+    ldy #60
+    lda fdsPeriodTableLo,y
+    sta apu_databuf+1
+    lda fdsPeriodTableHi,y
+    sta apu_databuf+2
+        
+    ; modulation depth
+    lda #$3F
+    ora apu_databuf+4
+    sta apu_databuf+4
+    ; modulation period
+    ldy #60
+    lda fdsPeriodTableLo,y
+    sta apu_databuf+5
+    lda fdsPeriodTableHi,y
+    sta apu_databuf+6
 
-      lda #70
-      jsr wait_a_ticks
-      jsr silence_10_ticks
+    lda #30
+    jsr wait_a_ticks
+    jsr silence_10_ticks
+    lda test_ticksleft2
+    bne loop
 
-      dec test_ticksleft2
-      lda test_ticksleft2
-      bne loop
+  ; c. sine wave, modtable_data_mod_reset, mod depth of $10, mod period of $010.
+  ;    This checks for mod counter reset.
+  ; d. sine wave, modtable_data_mod_overflow, mod depth of $10, mod period of $010
+  ; e. sine wave, modtable_data_mod_underflow, mod depth of $10, mod period of $010
 
-  ; d. saw wave, Dn-FT mod sine, mod depth of $3F, mod period of $04D
-  ; load waveform
-  ldy #2
-  lda wavetable_table_lo,y
-  sta test_waveptr
-  lda wavetable_table_hi,y
-  sta test_waveptr+1
-  ldy #$40
-  waveloop2:
-    lda (test_waveptr),y
-    sta fds_wavebuf-1,y
-    dey
-    bne waveloop2
+  lda #3
+  sta test_ticksleft2
+  loop2:
+    dec test_ticksleft2
+    ; write to modulation table
+    ldy test_ticksleft2
+    lda modtable_table_lo+2,y
+    sta test_tableptr+0
+    lda modtable_table_hi+2,y
+    sta test_tableptr+1
+    ldy #$20
+    modloop2:
+      lda (test_tableptr),y
+      sta apu_databuf-1,y
+      dey
+      bne modloop2
+    jsr mdfourier_push_fds_modtable
 
+    ldy #fds_note_data_mod - pattern_y_data
+    jsr load_pattern_y
+    ldy #60
+    lda fdsPeriodTableLo,y
+    sta apu_databuf+1
+    lda fdsPeriodTableHi,y
+    sta apu_databuf+2
+        
+    ; modulation depth
+    lda #$10
+    ora apu_databuf+4
+    sta apu_databuf+4
+    ; modulation period
+    ldy #60
+    lda #$20
+    sta apu_databuf+5
+    lda #$00
+    sta apu_databuf+6
+
+    lda #30
+    jsr wait_a_ticks
+    jsr silence_10_ticks
+    lda test_ticksleft2
+    bne loop2
+
+  ; f. sine wave, modtable_data_mod_halt, mod depth of $10, mod period of $010.
+  ;    in addition to $4085=$20, this will check for $4087.7 latch delay
   ; write to modulation table
-  ldy #0
-  lda modtable_table_lo,y
-  sta test_waveptr
-  lda modtable_table_hi,y
-  sta test_waveptr+1
-  ldy #$20
+  ldx #$20
   modloop3:
-    lda (test_waveptr),y
-    sta apu_databuf-1,y
-    dey
+    lda modtable_data_sine_nezplug-1,x
+    sta apu_databuf-1,x
+    dex
     bne modloop3
   jsr mdfourier_push_fds_modtable
 
-  ldy #fds_note_data_mod - pattern_y_data
+  ldy #fds_note_data_mod_halt - pattern_y_data
   jsr load_pattern_y
-  ldy #48
+  ldy #60
   lda fdsPeriodTableLo,y
   sta apu_databuf+1
   lda fdsPeriodTableHi,y
@@ -716,17 +771,107 @@ mdfourier_ready_tone = pattern_sync
   ora apu_databuf+4
   sta apu_databuf+4
   ; modulation period
-  ldy #24
+  ldy #60
   lda fdsPeriodTableLo,y
   sta apu_databuf+5
   lda fdsPeriodTableHi,y
+  ora apu_databuf+6
   sta apu_databuf+6
 
-  lda #70
+  lda #30
   jsr wait_a_ticks
   jsr silence_modulator
   jmp silence_10_ticks
+.endproc
 
+.proc pattern_modulation_envelopes
+  ; load saw waveform
+  ldx #$40
+  waveloop:
+    lda waveform_data_saw-1,x
+    sta fds_wavebuf-1,x
+    dex
+    bne waveloop
+
+  ldx #$20
+  modtableloop:
+    lda modtable_data_mod_env-1,x
+    sta apu_databuf-1,x
+    dex
+    bne modtableloop
+  jsr mdfourier_push_fds_modtable
+
+  ; manual mod fade
+  ldy #fds_mod_env_disabled_master_data - pattern_y_data
+  jsr load_pattern_y
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+  ; modulation period
+  lda #$20
+  sta apu_databuf+3
+  lda #$00
+  sta apu_databuf+4
+
+  lda #64
+  sta test_ticksleft
+  volumeloop:
+    dec test_ticksleft
+    ; modulation depth
+    lda test_ticksleft
+    ora #$80
+    sta apu_databuf+5
+    jsr mdfourier_present
+    lda #$80 ; reset
+    sta apu_addressbuf+0
+    lda test_ticksleft
+    bne volumeloop
+  lda #6
+  jsr wait_a_ticks
+  lda #10
+  jsr silence_a_ticks
+
+  ; hardware mod fade decrease
+  ldy #fds_mod_env_decrease_master_data - pattern_y_data
+  jsr load_pattern_y
+  
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+  ; modulation period
+  lda #$20
+  sta apu_databuf+3
+  lda #$00
+  sta apu_databuf+4
+
+  lda #70
+  jsr wait_a_ticks
+  lda #10
+  jsr silence_a_ticks
+
+  ; hardware mod fade increase
+  ldy #fds_mod_env_increase_master_data - pattern_y_data
+  jsr load_pattern_y
+  
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+  ; modulation period
+  lda #$20
+  sta apu_databuf+3
+  lda #$00
+  sta apu_databuf+4
+
+  lda #70
+  jsr wait_a_ticks
+  lda #10
+  jmp silence_a_ticks
 .endproc
 
 .ifdef FDSHEADER
@@ -734,6 +879,99 @@ mdfourier_ready_tone = pattern_sync
 .else
 .rodata
 .endif
+
+pattern_y_data:
+silence_data:
+  ; Silence pulses, reset their phase, and disable sweep
+  .dbyt $00B0, $04B0, $0108, $0508, $0200, $0600, $0300, $0700
+  ; Silence triangle and noise
+  .dbyt $0800, $0CB0
+  ; Silence DPCM, set highest pitch and default level,
+  ; and enable other channels (which were just set silent)
+  .dbyt $100F, $1100, $150F
+  ; Reset APU length counter
+  .dbyt $1780
+  ; init 
+  .dbyt $2300, $2383
+  ; Disable FDS volume envelope and silence volume
+  .dbyt $8080
+  ; Clear FDS frequency, halt waveform
+  ; and disable volume and sweep envelopes
+  .dbyt $8300, $8200, $83C0
+  ; Init FDS envelope speed
+  .dbyt $8AFF
+  ; Disable modulation
+  .dbyt $8600, $8700, $8400
+  .byte $FF
+
+syncon_data:
+  ; 1 kHz 8x square wave
+  .dbyt $80A0, $83C0, $8227, $8309
+  .byte $FF
+
+syncoff_data:
+  ; 1 kHz 8x square wave, phase reset
+  .dbyt $8080, $83C0, $8200, $8300
+  .byte $FF
+
+phase_reset_data:
+  .dbyt $80A0, $83C0, $8200, $8300
+  .byte $FF
+
+fds_note_data:
+  .dbyt $80A0, $8200, $8300
+  .byte $FF
+
+; volume gain 32, wave frequency, mod speed of 7, mod gain of x, mod freq
+fds_note_data_mod:
+  .dbyt $80A0, $8200, $8300, $8407, $8480, $8600, $8700
+  .byte $FF
+
+; volume gain 32, wave frequency, mod speed of 7, mod gain of x,
+; mod freq with mod table counter update halt
+fds_note_data_mod_halt:
+  .dbyt $80A0, $8200, $8300, $8407, $8480, $8600, $8780, $8520
+  .byte $FF
+
+; volume gain 32, enable decreasing volume envelope, reset phase, pitch, vol
+; envelope speed and master env speed chosen to match NTSC frame rate
+fds_vol_env_decrease_master_data:
+  .dbyt $8A48, $8200, $8300, $80A0, $8032
+  .byte $FF
+
+; volume gain 32, enable increasing volume envelope, reset phase, pitch, vol
+; envelope speed and master env speed chosen to match NTSC frame rate
+fds_vol_env_increase_master_data:
+  .dbyt $8A48, $8200, $8300, $8080, $8072
+  .byte $FF
+
+; volume gain 32, disabled volume envelope, pitch, master vol
+fds_vol_env_disabled_master_data:
+  .dbyt $80A0, $8200, $8300, $8900
+  .byte $FF
+
+; volume gain 32, enable decreasing mod envelope, reset phase, pitch, mod 
+; envelope speed and master env speed chosen to match NTSC frame rate
+fds_mod_env_decrease_master_data:
+  .dbyt $80A0, $8200, $8300, $8600, $8700, $8A48, $84BF, $8432
+  .byte $FF
+
+; volume gain 32, enable increasing mod envelope, reset phase, pitch, mod
+; envelope speed and master env speed chosen to match NTSC frame rate
+fds_mod_env_increase_master_data:
+  .dbyt $80A0, $8200, $8300, $8600, $8700, $8A48, $84C0, $8472
+  .byte $FF
+
+; volume gain 32, wave freq, disabled mod envelope
+fds_mod_env_disabled_master_data:
+  .dbyt $80A0, $8200, $8300, $8600, $8700, $8480
+  .byte $FF
+
+db_fds_2A03_data:
+  .dbyt $00BF, $0200, $0300
+  .byte $FF
+
+.out .sprintf("%d of 256 pattern_y_data bytes used", * - pattern_y_data)
 
 ; decremented pointer location for faster loop index
 wavetable_table_lo:
@@ -752,11 +990,21 @@ wavetable_table_hi:
   .byte >(waveform_data_sync      -1)
 
 modtable_table_lo:
-  .byte <(modtable_data_sine        -1)
-  .byte <(modtable_data_sine_nezplug-1)
+  .byte <(modtable_data_sine         -1)
+  .byte <(modtable_data_sine_nezplug -1)
+  .byte <(modtable_data_mod_underflow-1)
+  .byte <(modtable_data_mod_overflow -1)
+  .byte <(modtable_data_mod_reset    -1)
+  .byte <(modtable_data_mod_halt     -1)
+  .byte <(modtable_data_mod_env      -1)
 modtable_table_hi:
-  .byte >(modtable_data_sine        -1)
-  .byte >(modtable_data_sine_nezplug-1)
+  .byte >(modtable_data_sine         -1)
+  .byte >(modtable_data_sine_nezplug -1)
+  .byte >(modtable_data_mod_underflow-1)
+  .byte >(modtable_data_mod_overflow -1)
+  .byte >(modtable_data_mod_reset    -1)
+  .byte >(modtable_data_mod_halt     -1)
+  .byte >(modtable_data_mod_env      -1)
 
 waveform_data_sine:
   .byte $21, $24, $27, $2A, $2D, $30, $32, $35, $37, $39, $3B, $3C, $3D, $3E, $3F, $3F
@@ -798,73 +1046,31 @@ modtable_data_sine:
   .byte 4, 7, 7, 7, 7, 7, 7, 0, 0, 0, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 0, 0, 0, 7, 7, 7, 7, 7, 7
 
 modtable_data_sine_nezplug:
-  .byte 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 7, 7, 7, 7, 7, 7 
+  .byte 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 7, 7, 7, 7, 7, 7
 
-pattern_y_data:
-silence_data:
-  ; Silence pulses, reset their phase, and disable sweep
-  .dbyt $00B0, $04B0, $0108, $0508, $0200, $0600, $0300, $0700
-  ; Silence triangle and noise
-  .dbyt $0800, $0CB0
-  ; Silence DPCM, set highest pitch and default level,
-  ; and enable other channels (which were just set silent)
-  .dbyt $100F, $1100, $150F
-  ; Reset APU length counter
-  .dbyt $1780
-  ; init 
-  .dbyt $2300, $2383
-  ; Disable FDS volume envelope and silence volume
-  .dbyt $8080
-  ; Clear FDS frequency, reset phase
-  .dbyt $8200, $8380, $8300
-  ; Init FDS envelope speed
-  .dbyt $8AFF
-  ; Disable modulation
-  .dbyt $8600, $8700, $8400
-  .byte $FF
+modtable_data_mod_overflow:
+  .repeat 32
+    .byte 1
+  .endrepeat
 
-syncon_data:
-  ; 1 kHz 8x square wave
-  .dbyt $80A0, $8227, $8309
-  .byte $FF
+modtable_data_mod_underflow:
+  .repeat 32
+    .byte 7
+  .endrepeat
 
-syncoff_data:
-  ; 1 kHz 8x square wave
-  .dbyt $8080
-  .byte $FF
+modtable_data_mod_reset:
+  .byte 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
-phase_reset_data:
-  .dbyt $80A0, $8380, $8200, $8300
-  .byte $FF
+modtable_data_mod_halt:
+  .repeat 32
+    .byte 5
+  .endrepeat
 
-fds_note_data:
-  .dbyt $80A0, $8200, $8300
-  .byte $FF
+modtable_data_mod_env:
+  .repeat 16
+  .byte 4, 3
+  .endrepeat
 
-fds_note_data_mod:
-  .dbyt $80A0, $8200, $8300, $8407, $8480, $8600, $8700
-  .byte $FF
-
-; enable decreasing envelope, reset phase, pitch, master vol
-fds_env_decrease_master_data:
-  .dbyt $80A0, $800A, $8380, $8200, $8300, $8900
-  .byte $FF
-
-; enable increasing envelope, reset phase, pitch, master vol
-fds_env_increase_master_data:
-  .dbyt $8080, $804A, $8380, $8200, $8300, $8900
-  .byte $FF
-
-; disabled envelope, reset phase, pitch, master vol
-fds_disabled_env_master_data:
-  .dbyt $80A0, $8200, $8300, $8900
-  .byte $FF
-
-db_fds_2A03_data:
-  .dbyt $00BF, $0200, $0300
-  .byte $FF
-
-.out .sprintf("%d of 256 pattern_y_data bytes used", * - pattern_y_data)
 
 .ifdef FDSHEADER
 .segment "FILE0_DAT"
