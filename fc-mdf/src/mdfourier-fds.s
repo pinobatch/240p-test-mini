@@ -98,9 +98,8 @@ fds_wavebuf = $0140 + FDS_OFFSET
   inc test_section
 
   ; Pattern being tested goes here
-  jsr pattern_modulation_envelopes
-  jmp pattern_sync
-  rts
+  ; jsr pattern_modulation_envelopes
+  ; rts
 
   ; Column 1
   lda #$00  ; sine
@@ -148,6 +147,9 @@ fds_wavebuf = $0140 + FDS_OFFSET
   inc test_section
   jsr pattern_volume_envelopes
   inc test_section
+
+  ; these tests require initializing the mod table
+  jsr silence_modulator
   jsr pattern_modulation_test
   inc test_section
   jsr pattern_modulation_envelopes
@@ -188,7 +190,6 @@ mdfourier_ready_tone = pattern_sync
 .proc mdfourier_init_apu
   lda #$FF
   sta fds_wavebuf+0
-  jsr silence_modulator
   ldy #silence_data - pattern_y_data
   jmp load_pattern_y
 .endproc
@@ -213,7 +214,6 @@ mdfourier_ready_tone = pattern_sync
   jsr load_pattern_y
 
   loop:
-    ; Writes: volume, period lo, period hi, APU frame reset
     ldx test_row
     lda fdsPeriodTableLo,x
     sta apu_databuf+1
@@ -323,7 +323,7 @@ mdfourier_ready_tone = pattern_sync
     dey
     bne waveloop
 
-  ldy #fds_note_data - pattern_y_data ; pitch gets overwritten anyway
+  ldy #fds_note_data - pattern_y_data
   jsr load_pattern_y
 
   ; use apu_databuf to hold frequency in memory
@@ -343,7 +343,7 @@ mdfourier_ready_tone = pattern_sync
     sta test_ticksleft2
     inner:
       jsr mdfourier_present
-      ; re-set addressbuf
+      ; reset
       lda #$80
       sta apu_addressbuf+0
       jsr addperiod
@@ -354,7 +354,7 @@ mdfourier_ready_tone = pattern_sync
 
   jmp silence_10_ticks
 
-  ; adds $8 to 12-bit period in apu_databuf+0
+  ; adds $8 to 12-bit period in apu_databuf+1
   addperiod:
     clc
     lda apu_databuf+1
@@ -374,14 +374,12 @@ mdfourier_ready_tone = pattern_sync
 .endproc
 
 .proc pattern_db_fds
-  ; load square waveform
   ldx #$40
   waveloop:
     lda waveform_data_square-1,x
     sta fds_wavebuf-1,x
     dex
     bne waveloop
-
 
   ldy #fds_note_data - pattern_y_data
   jsr load_pattern_y
@@ -415,7 +413,6 @@ mdfourier_ready_tone = pattern_sync
 .endproc
 
 .proc pattern_2a03_phase_dac
-  ; load saw waveform
   ldx #$40
   waveloop:
     lda waveform_data_saw-1,x
@@ -453,7 +450,6 @@ mdfourier_ready_tone = pattern_sync
 
   jsr silence_10_ticks
 
-  ; load sorted dac saw waveform
   ldx #$40
   waveloop2:
     lda waveform_data_sortedsaw-1,x
@@ -477,7 +473,6 @@ mdfourier_ready_tone = pattern_sync
 .endproc
 
 .proc pattern_volume_envelopes
-  ; load saw waveform
   ldx #$40
   waveloop:
     lda waveform_data_saw-1,x
@@ -535,7 +530,7 @@ mdfourier_ready_tone = pattern_sync
 
   lda #34
   jsr wait_a_ticks
-  lda #5
+  lda #5 ; tick 1 frame earlier, we need time to reset phase first
   jsr silence_a_ticks
 
   ; DC offset master vol
@@ -609,7 +604,6 @@ mdfourier_ready_tone = pattern_sync
 
 .proc pattern_mastervol_A
   sta test_subtype
-  ; load saw waveform
   ldx #$40
   waveloop:
     lda waveform_data_saw-1,x
@@ -828,10 +822,9 @@ mdfourier_ready_tone = pattern_sync
     sta apu_addressbuf+0
     lda test_ticksleft
     bne volumeloop
-  lda #6
+  lda #70-64
   jsr wait_a_ticks
-  lda #10
-  jsr silence_a_ticks
+  jsr silence_10_ticks
 
   ; hardware mod fade decrease
   ldy #fds_mod_env_decrease_master_data - pattern_y_data
@@ -850,8 +843,7 @@ mdfourier_ready_tone = pattern_sync
 
   lda #70
   jsr wait_a_ticks
-  lda #10
-  jsr silence_a_ticks
+  jsr silence_10_ticks
 
   ; hardware mod fade increase
   ldy #fds_mod_env_increase_master_data - pattern_y_data
@@ -870,8 +862,11 @@ mdfourier_ready_tone = pattern_sync
 
   lda #70
   jsr wait_a_ticks
-  lda #10
-  jmp silence_a_ticks
+  jsr silence_modulator
+  jmp silence_10_ticks
+  
+  ; TODO: measure exact envelope length by writing to $4080 and
+  ; counting cycles
 .endproc
 
 .ifdef FDSHEADER
@@ -897,11 +892,11 @@ silence_data:
   .dbyt $8080
   ; Clear FDS frequency, halt waveform
   ; and disable volume and sweep envelopes
-  .dbyt $8300, $8200, $83C0
+  .dbyt $83C0, $8200
   ; Init FDS envelope speed
   .dbyt $8AFF
   ; Disable modulation
-  .dbyt $8600, $8700, $8400
+  .dbyt $8600, $8780, $8480
   .byte $FF
 
 syncon_data:
