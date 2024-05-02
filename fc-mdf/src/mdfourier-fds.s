@@ -439,7 +439,6 @@ mdfourier_ready_tone = pattern_sync
 
   lda #$7F
   sta apu_databuf+0
-  ldx #3
   lda periodTableLo,x
   sta apu_databuf+1
   lda periodTableHi,x
@@ -470,6 +469,32 @@ mdfourier_ready_tone = pattern_sync
   jsr wait_a_ticks
 
   jmp silence_10_ticks
+.endproc
+
+.proc pattern_mastervol_A
+  sta test_subtype
+  ldx #$40
+  waveloop:
+    lda waveform_data_saw-1,x
+    sta fds_wavebuf-1,x
+    dex
+    bne waveloop
+
+  ldy #fds_vol_env_disabled_master_data - pattern_y_data
+  jsr load_pattern_y
+  lda #$00
+  sta apu_databuf+1
+  lda #$01
+  sta apu_databuf+2
+  lda test_subtype
+  and #3
+  sta apu_databuf+3
+
+  lda #30
+  jsr wait_a_ticks
+
+  lda #10
+  jmp silence_a_ticks
 .endproc
 
 .proc pattern_volume_envelopes
@@ -597,42 +622,6 @@ mdfourier_ready_tone = pattern_sync
     sta apu_addressbuf+0
     dec test_ticksleft
     bne volumeloop2
-
-  lda #8
-  jmp silence_a_ticks
-.endproc
-
-.proc pattern_mastervol_A
-  sta test_subtype
-  ldx #$40
-  waveloop:
-    lda waveform_data_saw-1,x
-    sta fds_wavebuf-1,x
-    dex
-    bne waveloop
-
-  ldy #fds_vol_env_disabled_master_data - pattern_y_data
-  jsr load_pattern_y
-  ldx #72
-  lda fdsPeriodTableLo,x
-  sta apu_databuf+1
-  lda fdsPeriodTableHi,x
-  sta apu_databuf+2
-  lda test_subtype
-  and #3
-  sta apu_databuf+3
-
-  lda #32
-  sta test_ticksleft
-  volumeloop:
-    lda test_ticksleft
-    ora #$80
-    sta apu_databuf+0
-    jsr mdfourier_present
-    lda #$80 ; reset
-    sta apu_addressbuf+0
-    dec test_ticksleft
-    bne volumeloop
 
   lda #8
   jmp silence_a_ticks
