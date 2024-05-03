@@ -107,7 +107,7 @@ Disk System
 8. Nonlinear FDS DAC test. "Sorted" sawtooth wave note at C (65.29 hz)
    for 30 frames. 10 frames silence.
 9. Master volume test. 4 sawtooth wave notes of 109.24 Hz (period
-   $100) for 30 frames. 10 frames silence.
+   $100) for 40 frames. 10 frames silence.
    Each note decreasing in master volume (00, 01, 10, 11).
 10. Envelope test.
     3 sawtooth wave notes of C (523.15 hz) and one DC offset envelope

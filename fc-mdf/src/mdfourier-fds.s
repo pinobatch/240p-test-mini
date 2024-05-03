@@ -98,8 +98,9 @@ fds_wavebuf = $0140 + FDS_OFFSET
   inc test_section
 
   ; Pattern being tested goes here
-  ; jsr pattern_modulation_envelopes
-  ; rts
+  jsr pattern_mastervol
+  inc test_section
+  rts
 
   ; Column 1
   lda #$00  ; sine
@@ -133,17 +134,7 @@ fds_wavebuf = $0140 + FDS_OFFSET
   inc test_section
   jsr pattern_2a03_phase_dac
   inc test_section
-  lda #$00
-  jsr pattern_mastervol_A
-  inc test_section
-  lda #$01
-  jsr pattern_mastervol_A
-  inc test_section
-  lda #$02
-  jsr pattern_mastervol_A
-  inc test_section
-  lda #$03
-  jsr pattern_mastervol_A
+  jsr pattern_mastervol
   inc test_section
   jsr pattern_volume_envelopes
   inc test_section
@@ -471,7 +462,8 @@ mdfourier_ready_tone = pattern_sync
   jmp silence_10_ticks
 .endproc
 
-.proc pattern_mastervol_A
+.proc pattern_mastervol
+  lda #0
   sta test_subtype
   ldx #$40
   waveloop:
@@ -480,18 +472,22 @@ mdfourier_ready_tone = pattern_sync
     dex
     bne waveloop
 
-  ldy #fds_vol_env_disabled_master_data - pattern_y_data
-  jsr load_pattern_y
-  lda #$00
-  sta apu_databuf+1
-  lda #$01
-  sta apu_databuf+2
-  lda test_subtype
-  and #3
-  sta apu_databuf+3
-
-  lda #30
-  jsr wait_a_ticks
+  loop:
+    ldy #fds_vol_env_disabled_master_data - pattern_y_data
+    jsr load_pattern_y
+    lda #$00
+    sta apu_databuf+1
+    lda #$01
+    sta apu_databuf+2
+    lda test_subtype
+    and #3
+    sta apu_databuf+3
+    lda #40
+    jsr wait_a_ticks
+    inc test_subtype
+    lda test_subtype
+    cmp #4
+    bne loop
 
   lda #10
   jmp silence_a_ticks
@@ -712,7 +708,7 @@ mdfourier_ready_tone = pattern_sync
     sta apu_databuf+1
     lda fdsPeriodTableHi,y
     sta apu_databuf+2
-        
+
     ; modulation depth
     lda #$10
     ora apu_databuf+4
@@ -748,7 +744,7 @@ mdfourier_ready_tone = pattern_sync
   sta apu_databuf+1
   lda fdsPeriodTableHi,y
   sta apu_databuf+2
-  
+
   ; modulation depth
   lda #$3F
   ora apu_databuf+4
@@ -1054,29 +1050,3 @@ modtable_data_mod_env:
   .repeat 16
   .byte 4, 3
   .endrepeat
-
-
-.ifdef FDSHEADER
-.segment "FILE0_DAT"
-.else
-.segment "DMC"
-.endif
-.align 64
-
-; there are 63 bytes usable for anything
-volramp_periods:
-  .byte 255, 223, 111, 223, 111
-volramp_addamounts:
-  .byte 0, <-1, <-1, 1, 1
-
-dmc_fading_values:  ; in reverse order
-  .byte $00, $7F, $6F, $5F, $4F, $3F, $2F, $1F, $0F, $00
-
-trash_beep_pitches:
-  .byte 34, 39, 43, 34, 37, 41
-TRASH_BEEP_LEN = * - trash_beep_pitches
-trash_beep_durations:
-  .byte 3, 3, 4, 3, 3, 9
-
-.align 64
-homeposition_dmc: .res 17, $00
