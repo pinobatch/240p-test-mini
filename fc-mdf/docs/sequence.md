@@ -85,7 +85,6 @@ Disk System
    then $00, both at volume 32, phase resetted, and waveform halted.
    Third DC pop silences second DC pop, testing for DC offset.
    10 frames silence
-   TODO: halt waveform instead of setting to highest period
 4. A (440 Hz) for 20 frames, halting and then resuming waveform
    playback. Halting the waveform resets the phase.
    Then, 10 frames silence
@@ -110,14 +109,20 @@ Disk System
    $100) for 40 frames. 10 frames silence.
    Each note decreasing in master volume (00, 01, 10, 11).
 10. Envelope test.
-    3 sawtooth wave notes of C (523.15 hz) and one DC offset envelope
+    5 sawtooth wave notes of C (523.15 hz) and one DC offset envelope
     for 40 frames with different methods of modifying volume.
     1. manual volume gain write, decreasing volume gain every frame
     2. hardware volume sweep decrease, speed chosen to closely match
        video framerate ($32 speed, $48 master envelope speed)
     3. hardware volume sweep increase, speed chosen to closely match
-       video framerate ($32 speed, $48 master envelope speed)
-    4. DC manual volume gain write, decreasing volume gain every frame.
+       video framerate ($32 speed, $48 master envelope speed).
+       20 frames silence.
+    4. manual volume gain write, going from gain 1 to 0. 5 frames.
+    5. hardware volume sweep decrease, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed), going
+       from gain 1 to 0. 5 frames.
+       10 frames silence.
+    6. DC manual volume gain write, decreasing volume gain every frame.
     TODO: measure exact envelope length by writing to $4080 and
     counting cycles
 11. Modulator test.
@@ -157,4 +162,5 @@ to find out:
 - [ ] is it possible to determine wave unit M2 alignment?
 - [ ] is it possible to determine mod unit M2 alignment?
 - [ ] is it feasible to align test start with wave/mod unit?
-- [ ] does mod unit envelopes also wait for wavepos==0 latch (like wave unit envelopes)?
+- [x] does mod unit envelopes also wait for wavepos==0 latch (like wave unit envelopes)?
+  - no

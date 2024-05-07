@@ -98,9 +98,9 @@ fds_wavebuf = $0140 + FDS_OFFSET
   inc test_section
 
   ; Pattern being tested goes here
-  jsr pattern_mastervol
-  inc test_section
-  rts
+  ; jsr pattern_mastervol
+  ; inc test_section
+  ; rts
 
   ; Column 1
   lda #$00  ; sine
@@ -534,7 +534,7 @@ mdfourier_ready_tone = pattern_sync
   lda fdsPeriodTableHi,x
   sta apu_databuf+2
 
-  lda #37
+  lda #40-3
   jsr wait_a_ticks
   lda #3
   jsr silence_a_ticks
@@ -549,9 +549,43 @@ mdfourier_ready_tone = pattern_sync
   lda fdsPeriodTableHi,x
   sta apu_databuf+2
 
-  lda #34
+  lda #40-6
   jsr wait_a_ticks
-  lda #5 ; tick 1 frame earlier, we need time to reset phase first
+  lda #20+6
+  jsr silence_a_ticks
+
+  ; manual volume fade for volume gain 1
+  ldy #fds_vol_env_disabled_master_data - pattern_y_data
+  jsr load_pattern_y
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+  lda #1
+  ora #$80
+  sta apu_databuf+0
+  lda #1
+  jsr wait_a_ticks
+  lda #1+10
+  jsr silence_a_ticks
+
+  ; hardware volume fade decrease for volume gain 1
+  ldy #fds_vol_env_decrease_master_data - pattern_y_data
+  jsr load_pattern_y
+  
+  ldx #72
+  lda fdsPeriodTableLo,x
+  sta apu_databuf+1
+  lda fdsPeriodTableHi,x
+  sta apu_databuf+2
+  lda #1
+  ora #$80
+  sta apu_databuf+3
+
+  lda #2
+  jsr wait_a_ticks
+  lda #10-1 ; tick 1 frame earlier, we need time to reset phase first
   jsr silence_a_ticks
 
   ; DC offset master vol
@@ -1012,8 +1046,8 @@ waveform_data_squarex32:
 
 waveform_data_sortedsaw:
   .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0A, $0B, $0C, $0D, $0E, $10
-  .byte $0F, $11, $12, $13, $14, $15, $16, $18, $17, $19, $1A, $1C, $1B, $20, $1D, $21
-  .byte $1E, $22, $24, $23, $1F, $25, $26, $28, $29, $27, $2A, $2C, $2B, $30, $2D, $2E
+  .byte $0F, $11, $12, $13, $14, $15, $16, $18, $17, $19, $1A, $1B, $1C, $20, $1D, $21
+  .byte $1E, $22, $24, $23, $1F, $25, $26, $28, $27, $29, $2A, $2C, $2B, $30, $2D, $2E
   .byte $31, $32, $2F, $34, $33, $35, $36, $38, $39, $37, $3A, $3C, $3B, $3D, $3E, $3F
 
 waveform_data_sync:
