@@ -29,16 +29,27 @@ it freely, subject to the following restrictions:
 
 #include "4bcanvas.h"
 #include <sys/types.h>
-#include <tonc.h>
 void dma_memset16(void *dst, unsigned int c16, size_t n);
 
 const TileCanvas screen = {
-  .left = 0, .top = 0, .width = 32, .height = 20,
+  .left = 0, .top = 0, .width = SCREEN_WIDTH >> 3, .height = SCREEN_HEIGHT >> 3,
   .chrBase = tile_mem[0][0].data,
   .map = 23,
   .core = 0,
-  .mapTileBase = 0
+  .mapTileBase = 0,
+  .mapBase = se_mat
 };
+
+#ifdef __NDS__
+const TileCanvas screen_sub = {
+  .left = 0, .top = 0, .width = SCREEN_WIDTH >> 3, .height = SCREEN_HEIGHT >> 3,
+  .chrBase = tile_mem_sub[0][0].data,
+  .map = 23,
+  .core = 0,
+  .mapTileBase = 0,
+  .mapBase = se_mat_sub
+};
+#endif
 
 static
 void fillcol(u32 *dst, unsigned int colStride,
@@ -175,11 +186,7 @@ void canvasBlitAligned(const TileCanvas *src, const TileCanvas *dst,
 #endif
 
 void canvasInit(const TileCanvas *w, unsigned int color) {
-#if ARM9
-  SCREENMAT *dst = w->core ? &(se_mat_sub[w->map]) : &(se_mat[w->map]);
-#else
-  SCREENMAT *dst = &(se_mat[w->map]);
-#endif
+  SCREENMAT *dst = &(w->mapBase[w->map]);
 
   int mapTile = w->mapTileBase;
   for (int x = w->left; x < w->left + w->width; ++x) {

@@ -21,11 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define GLOBAL_H
 #include <stdint.h>
 #include <sys/types.h>
-#include <tonc.h>
+#include "cross_compatibility.h"
 #include "helppages.h"
 
 // Size of a statically sized array
 #define count(array) (sizeof((array)) / sizeof((array)[0]))
+
+#define GET_SLICE_X(e, y, x) ((((e) * (x)) + (((y) + 1) / 2)) / (y))
 
 typedef void (*activity_func)(void);
 
@@ -40,7 +42,7 @@ unsigned int read_pad_help_check(helpdoc_kind doc_num);
 // stills.c
 
 typedef struct BarsListEntry {
-  unsigned char l, t, r, b, color;
+  unsigned short l, t, r, b, color;
 } BarsListEntry;
 void draw_barslist(const BarsListEntry *rects);
 
@@ -89,7 +91,22 @@ void activity_shadow_sprite(void);
 void activity_megaton(void);
 
 // soundtest.c
+#ifdef __NDS__
+enum sound_id_e {
+    BEEP_1K_SOUND_ID = 0,
+    TICK_SOUND_ID = 1,
+    PRESS_A_SOUND_ID = 2
+};
+typedef enum sound_id_e sound_id;
+#define NUM_SOUND_IDS 3
+
+void initAllSounds(void);
+void killAllSounds(void);
+void startPlayingSound(sound_id wanted_id);
+void killPlayingSound(sound_id wanted_id);
+#else
 extern const unsigned char waveram_sin2x[16];
+#endif
 void activity_sound_test(void);
 
 // audiosync.c
@@ -127,19 +144,6 @@ const char *vwf8Puts(u32 *restrict dst, const char *restrict s,
 unsigned int vwf8StrWidth(const char *s);
 
 // vwflabels.c
-void vwfDrawLabels(const char *labelset, unsigned int sbb, unsigned int tilenum);
-
-// Shims for the libgba to libtonc port
-// Note: tonc.h uses u32 (unsigned) instead of standard uint32_t
-// (unsigned long) for pointers into video memory
-#define MAP se_mat
-#define BG_WID_32			BG_SIZE0
-#define BG_WID_64			BG_SIZE1
-#define BG_HT_32			BG_SIZE0
-#define BG_HT_64			BG_SIZE2
-// write these as macros instead of static inline to make them constexpr
-#define RGB5(r, g, b) (((r)<<0) | ((g)<<5) | ((b)<<10))
-#define PATRAM4(cbb, tile) (tile_mem[(cbb)][(tile)].data)
-#define SPR_VRAM(tile) (tile_mem_obj[0][(tile)].data)
+void vwfDrawLabelsPositionBased(const char *labels, const char *positions, unsigned int sbb, unsigned int tilenum);
 
 #endif

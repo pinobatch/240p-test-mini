@@ -18,11 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 
 void activity_backlight_zone(void) {
   unsigned inverted = 0, hidden = 0, high_gear = 0, held_keys = 0, sz = 1;
-  unsigned int x = 119, y = 79;
+  unsigned int x = (SCREEN_WIDTH / 2) - 1, y = (SCREEN_HEIGHT / 2) - 1;
 
   load_common_obj_tiles();
   while (1) {
@@ -67,9 +66,9 @@ void activity_backlight_zone(void) {
       }
     }
 
-    unsigned ymax = 160 - (1 << sz);
+    unsigned ymax = SCREEN_HEIGHT - (1 << sz);
     if (y > ymax) y = ymax;
-    unsigned xmax = 240 - (1 << sz);
+    unsigned xmax = SCREEN_WIDTH - (1 << sz);
     if (x > xmax) x = xmax;
 
     // Draw the sprite
@@ -86,7 +85,14 @@ void activity_backlight_zone(void) {
     VBlankIntrWait();
     pal_bg_mem[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     pal_obj_mem[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    pal_bg_mem_sub[0] = inverted ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    pal_obj_mem_sub[1] = inverted ? RGB5(0, 0, 0): RGB5(31, 31, 31);
+    #endif
     ppu_copy_oam();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    #endif
   }
 }

@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 #include "global.h"
-#include <tonc.h>
 #include "posprintf.h"
 
 #define PFMAP 23
@@ -33,21 +32,37 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // The "On" and "Off" labels must come first because they cause
 // text to be allocated with off and on at WORD_OFF and WORD_ON
-static const char megaton_labels[] =
-  "\x83""\x88""off\n"
-  "\x84""\x90""on\n"
-  "\x38""\x78""Press A when reticles align\n"
-  "\x44""\x80""Direction\n"
-  "\x83""\x80""\x1D\x1C\n"  // Left/Right
-  "\xA3""\x80""\x1E\x1F\n"  // Up/Down
-  "\x44""\x88""Randomize\n"
-  "\x44""\x90""Audio";
 
-static void megaton_draw_boolean(unsigned int y, unsigned int value) {
-  MAP[PFMAP][y][15] = value ? CHECKED_TILE : UNCHECKED_TILE;
+static const char megaton_positions[] = {
+    (SCREEN_WIDTH/2) + 11, SCREEN_HEIGHT - 24,
+    (SCREEN_WIDTH/2) + 12, SCREEN_HEIGHT - 16,
+    (SCREEN_WIDTH/2) - 64, SCREEN_HEIGHT - 40,
+    (SCREEN_WIDTH/2) - 52, SCREEN_HEIGHT - 32,
+    (SCREEN_WIDTH/2) + 11, SCREEN_HEIGHT - 32,
+    (SCREEN_WIDTH/2) + 43, SCREEN_HEIGHT - 32,
+    (SCREEN_WIDTH/2) - 52, SCREEN_HEIGHT - 24,
+    (SCREEN_WIDTH/2) - 52, SCREEN_HEIGHT - 16
+};
+
+static const char avg_lag_positions[] = {
+    (SCREEN_WIDTH/2) - 56, SCREEN_HEIGHT - 32
+};
+
+static const char megaton_labels[] =
+  "off\n"
+  "on\n"
+  "Press A when reticles align\n"
+  "Direction\n"
+  "\x1D\x1C\n"  // Left/Right
+  "\x1E\x1F\n"  // Up/Down
+  "Randomize\n"
+  "Audio";
+
+static void megaton_draw_boolean(SCREENMAT *map_address, unsigned int y, unsigned int value) {
+  map_address[PFMAP][y][SCREEN_WIDTH >> 4] = value ? CHECKED_TILE : UNCHECKED_TILE;
   unsigned int onoff = value ? WORD_ON : WORD_OFF;
-  MAP[PFMAP][y][16] = onoff;
-  MAP[PFMAP][y][17] = onoff + 1;
+  map_address[PFMAP][y][(SCREEN_WIDTH >> 4) + 1] = onoff;
+  map_address[PFMAP][y][(SCREEN_WIDTH >> 4) + 2] = onoff + 1;
 }
 
 static void megaton_draw_reticle(unsigned int x, unsigned int y) {
@@ -71,6 +86,43 @@ static void megaton_draw_reticle(unsigned int x, unsigned int y) {
   oam_used = i;
 }
 
+static void megaton_draw_variable_data(SCREENMAT *map_address, unsigned int y, unsigned int dir, unsigned int randomize, unsigned int with_audio) {
+    // Draw the cursor
+    for (unsigned int i = 0; i < 3; ++i) {
+      unsigned int tilenum = (i == y) ? ARROW_TILE : BLANK_TILE;
+      map_address[PFMAP][i + (SCREEN_HEIGHT >> 3) - 4][(SCREEN_WIDTH >> 4) - 8] = tilenum;
+    }
+    map_address[PFMAP][(SCREEN_HEIGHT >> 3) - 4][SCREEN_WIDTH >> 4] = (dir & 0x01) ? CHECKED_TILE : UNCHECKED_TILE;
+    map_address[PFMAP][(SCREEN_HEIGHT >> 3) - 4][(SCREEN_WIDTH >> 4) + 4] = (dir & 0x02) ? CHECKED_TILE : UNCHECKED_TILE;
+    megaton_draw_boolean(map_address, (SCREEN_HEIGHT >> 3) - 3, randomize);
+    megaton_draw_boolean(map_address, (SCREEN_HEIGHT >> 3) - 2, with_audio);
+}
+
+static void megaton_draw_static_reticle(SCREENMAT *map_address) {
+  // Draw stationary reticle
+  for (unsigned int y = 0; y < 2; ++y) {
+    for (unsigned int x = 0; x < 2; ++x) {
+      unsigned int t = 0x0028 + y * 2 + x;
+      map_address[PFMAP][7+y][(SCREEN_WIDTH>>4)-2+x] = t;
+      map_address[PFMAP][7+y][(SCREEN_WIDTH>>4)+1-x] = t ^ 0x400;
+      map_address[PFMAP][10-y][(SCREEN_WIDTH>>4)-2+x] = t ^ 0x800;
+      map_address[PFMAP][10-y][(SCREEN_WIDTH>>4)+1-x] = t ^ 0xC00;
+    }
+  }
+}
+
+static void megaton_print_values(uint32_t *tileaddr, unsigned int value, unsigned int early) {
+  dma_memset16(tileaddr, 0x0000, 32 * 2);
+  if (early) {
+    vwf8PutTile(tileaddr, 'E', 0, 1);
+  }
+  unsigned int tens = value / 10;
+  if (tens) {
+    vwf8PutTile(tileaddr, tens + '0', 6, 1);
+  }
+  vwf8PutTile(tileaddr, (value - tens * 10) + '0', 11, 1);
+}
+
 void activity_megaton() {
   signed char lag[NUM_TRIALS] = {-1};
   unsigned int x = 129, xtarget = 160;
@@ -79,28 +131,31 @@ void activity_megaton() {
 
   load_common_bg_tiles();
   load_common_obj_tiles();
+  #ifdef __NDS__
+  soundEnable();
+  #else
   REG_SOUNDCNT_X = 0x0080;  // 00: reset; 80: run
   REG_SOUNDBIAS = 0xC200;   // C200: 262 kHz PWM (for PSG)
   REG_SOUNDCNT_H = 0x0002;  // PSG/PCM mixing
   REG_SOUNDCNT_L = 0xFF77;  // PSG vol/pan
   REG_SOUND1CNT_L = 0x08;   // no sweep
-  dma_memset16(MAP[PFMAP], BLANK_TILE, 32*20*2);
-  vwfDrawLabels(megaton_labels, PFMAP, 0x44);
+  #endif
 
-  // Draw stationary reticle
-  for (unsigned int y = 0; y < 2; ++y) {
-    for (unsigned int x = 0; x < 2; ++x) {
-      unsigned int t = 0x0028 + y * 2 + x;
-      MAP[PFMAP][7+y][13+x] = t;
-      MAP[PFMAP][7+y][16-x] = t ^ 0x400;
-      MAP[PFMAP][10-y][13+x] = t ^ 0x800;
-      MAP[PFMAP][10-y][16-x] = t ^ 0xC00;
-    }
-  }
-  
+  dma_memset16(se_mat[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT>>3)*2);
+
+  megaton_draw_static_reticle(se_mat);
   // Make space for results
-  dma_memset16(PATRAM4(0, 0x30), 0x0000, 32 * 20);
-  loadMapRowMajor(&(MAP[PFMAP][2][2]), 0x30, 2, 10);
+  dma_memset16(tile_mem[0][0x30].data, 0x0000, 32 * 2 * NUM_TRIALS);
+  loadMapRowMajor(&(se_mat[PFMAP][2][2]), 0x30, 2, NUM_TRIALS);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP], BLANK_TILE, 32*(SCREEN_HEIGHT>>3)*2);
+
+  megaton_draw_static_reticle(se_mat_sub);
+  // Make space for results
+  dma_memset16(tile_mem_sub[0][0x30].data, 0x0000, 32 * 2 * NUM_TRIALS);
+  loadMapRowMajor(&(se_mat_sub[PFMAP][2][2]), 0x30, 2, NUM_TRIALS);
+  #endif
+  vwfDrawLabelsPositionBased(megaton_labels, megaton_positions, PFMAP, 0x44);
 
   do {
     read_pad_help_check(helpsect_timing_and_reflex_test);
@@ -113,20 +168,21 @@ void activity_megaton() {
       if (xtarget < 128) diff = -diff;
       unsigned int early = diff < 0;
       unsigned int value = early ? -diff : diff;
-      u32 *tileaddr = PATRAM4(0, 0x30 + progress * 2);
-      dma_memset16(tileaddr, 0x0000, 32 * 2);
-      if (early) {
-        vwf8PutTile(tileaddr, 'E', 0, 1);
-      }
-      unsigned int tens = value / 10;
-      if (tens) {
-        vwf8PutTile(tileaddr, tens + '0', 6, 1);
-      }
-      vwf8PutTile(tileaddr, (value - tens * 10) + '0', 11, 1);
+      megaton_print_values(tile_mem[0][0x30 + progress * 2].data, value, early);
+      #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+      megaton_print_values(tile_mem_sub[0][0x30 + progress * 2].data, value, early);
+      #endif
       if (!early && value <= 25) lag[progress++] = value;
     }
+    #ifdef __NDS__
+    if((new_keys & KEY_A) && with_audio)
+      startPlayingSound(PRESS_A_SOUND_ID);
+    else
+      killPlayingSound(PRESS_A_SOUND_ID);
+    #else
     REG_SOUND2CNT_L = ((new_keys & KEY_A) && with_audio) ? 0xA080 : 0x0000;
     REG_SOUND2CNT_H = (2048 - 262) | 0x8000;
+    #endif
     if ((new_keys & KEY_UP) && y > 0) {
       --y;
     }
@@ -158,52 +214,71 @@ void activity_megaton() {
 
     oam_used = 0;
     if (dir & 0x01) {
-      megaton_draw_reticle(104 + x - 128, 56);
+      megaton_draw_reticle((SCREEN_WIDTH / 2) - 16 + x - 128, 56);
     }
     if (dir & 0x02) {
-      megaton_draw_reticle(104, 56 + x - 128);
+      megaton_draw_reticle((SCREEN_WIDTH / 2) - 16, 56 + x - 128);
     }
     ppu_clear_oam(oam_used);
 
     VBlankIntrWait();
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ;
-    REG_BGCNT[0] = BG_4BPP|BG_WID_32|BG_HT_32|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_BGCNT[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
     REG_BG_OFS[0].x = REG_BG_OFS[0].y = 0;
     pal_bg_mem[0] = (x == 128 && with_audio) ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
     pal_bg_mem[1] = pal_obj_mem[1] = RGB5(31, 31, 31);
     pal_bg_mem[2] = RGB5(20, 25, 31);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    REG_DISPCNT_SUB = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ_1D | DCNT_OBJ | TILE_1D_MAP | ACTIVATE_SCREEN_HW;
+    REG_BGCNT_SUB[0] = BG_4BPP|BG_SIZE0|BG_CBB(0)|BG_SBB(PFMAP);
+    REG_BG_OFS_SUB[0].x = REG_BG_OFS_SUB[0].y = 0;
+    pal_bg_mem_sub[0] = (x == 128 && with_audio) ? RGB5(31, 31, 31) : RGB5(0, 0, 0);
+    pal_bg_mem_sub[1] = pal_obj_mem_sub[1] = RGB5(31, 31, 31);
+    pal_bg_mem_sub[2] = RGB5(20, 25, 31);
+    #endif
     ppu_copy_oam();
 
-    // Draw the cursor
-    for (unsigned int i = 0; i < 3; ++i) {
-      unsigned int tilenum = (i == y) ? ARROW_TILE : BLANK_TILE;
-      MAP[PFMAP][i + 16][7] = tilenum;
-    }
-    MAP[PFMAP][16][15] = (dir & 0x01) ? CHECKED_TILE : UNCHECKED_TILE;
-    MAP[PFMAP][16][19] = (dir & 0x02) ? CHECKED_TILE : UNCHECKED_TILE;
-    megaton_draw_boolean(17, randomize);
-    megaton_draw_boolean(18, with_audio);
+    megaton_draw_variable_data(se_mat, y, dir, randomize, with_audio);
+    #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+    megaton_draw_variable_data(se_mat_sub, y, dir, randomize, with_audio);
+    #endif
 
     // beep
+    #ifdef __NDS__
+    if(x == 128 && with_audio)
+      startPlayingSound(TICK_SOUND_ID);
+    else
+      killPlayingSound(TICK_SOUND_ID);
+    #else
     REG_SOUND1CNT_H = (x == 128 && with_audio) ? 0xA080 : 0x0000;
     REG_SOUND1CNT_X = (2048 - 131) | 0x8000;
+    #endif
   } while (!(new_keys & KEY_B) && (progress < NUM_TRIALS));
 
   pal_bg_mem[0] = RGB5(0, 0, 0);
+  #ifdef __NDS__
+  killPlayingSound(TICK_SOUND_ID);
+  killPlayingSound(PRESS_A_SOUND_ID);
+  soundDisable();
+  #else
   REG_SOUNDCNT_X = 0;  // reset audio
+  #endif
   if (progress < 10) return;
 
   // Display average: First throw away all labels below Y=120
-  dma_memset16(MAP[PFMAP][15], BLANK_TILE, 32*4*2);
+  dma_memset16(se_mat[PFMAP][(SCREEN_HEIGHT - 40)>> 3], BLANK_TILE, 32*4*2);
+  #if defined (__NDS__) && (SAME_ON_BOTH_SCREENS)
+  dma_memset16(se_mat_sub[PFMAP][(SCREEN_HEIGHT - 40)>> 3], BLANK_TILE, 32*4*2);
+  #endif
 
   unsigned int sum = 0;
   for (unsigned int i = 0; i < NUM_TRIALS; ++i) {
     sum += lag[i];
   }
   unsigned int whole_frames = sum / NUM_TRIALS;
-  posprintf(help_line_buffer, "\x40\x80""Average lag: %d.%d frames",
+  posprintf(help_line_buffer, "Average lag: %d.%d frames",
             whole_frames, sum - whole_frames * NUM_TRIALS);
-  vwfDrawLabels(help_line_buffer, PFMAP, 0x44);
+  vwfDrawLabelsPositionBased(help_line_buffer, avg_lag_positions, PFMAP, 0x44);
 
   // Ignore spurious presses
   for (unsigned int i = 20; i > 0; --i) {
@@ -214,6 +289,4 @@ void activity_megaton() {
     VBlankIntrWait();
     read_pad();
   } while (!new_keys);
-
-  // TODO: Display average lag
 }

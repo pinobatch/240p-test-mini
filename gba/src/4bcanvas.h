@@ -28,7 +28,7 @@ it freely, subject to the following restrictions:
 #define P8_CANVAS_H
 
 #include <stdint.h>
-#include <tonc.h>
+#include "cross_compatibility.h"
 
 typedef struct TileCanvas {
   uint8_t left;    // in 8 pixel units on nametable
@@ -39,9 +39,13 @@ typedef struct TileCanvas {
   uint8_t map;  // in 2 KiB units on VRAM
   uint8_t core;    // 0: main; 1: sub
   uint16_t mapTileBase;
+  SCREENMAT *mapBase;
 } TileCanvas;
 
 extern const TileCanvas screen;
+#ifdef __NDS__
+extern const TileCanvas screen_sub;
+#endif
 
 void canvasClear(const TileCanvas *src, unsigned int color);
 void canvasInit(const TileCanvas *src, unsigned int color);

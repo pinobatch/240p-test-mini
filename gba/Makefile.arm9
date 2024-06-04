@@ -1,0 +1,353 @@
+#!make -f
+
+BLOCKSDS	?= /opt/blocksds/core
+BLOCKSDSEXT	?= /opt/blocksds/external
+
+# User config
+# ===========
+
+NAME			:= 240p_test_suite
+
+GAME_TITLE		:= 240p Test Suite
+GAME_SUBTITLE	:= NDS Port
+GAME_AUTHOR		:= Lorenzooone
+GAME_ICON		:= icon.bmp
+
+# DLDI and internal SD slot of DSi
+# --------------------------------
+
+# Root folder of the SD image
+SDROOT		:= sdroot
+# Name of the generated image it "DSi-1.sd" for no$gba in DSi mode
+SDIMAGE		:= image.bin
+
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# INCLUDES is a list of directories containing extra header files
+# DATA is a list of directories containing binary data
+# GRAPHICS is a list of directories containing files to be processed by grit
+#
+# All directories are specified relative to the project directory where
+# the makefile is found
+#
+#---------------------------------------------------------------------------------
+
+# Source code paths
+# -----------------
+
+SOURCES		:= src
+INCLUDES	:= 
+GRAPHICS	:= ds_tilesets ../common/tilesets
+DATA		:= 
+AUDIODIRS	:= ds_audio
+NITROFATDIR	:=
+
+# Defines passed to all files
+# ---------------------------
+
+DEFINES		:=
+
+# Libraries
+# ---------
+
+LIBS		:= -lmm9 -lnds9 -lc -lagbabi
+LIBDIRS		:= $(BLOCKSDS)/libs/maxmod \
+			$(BLOCKSDS)/libs/libnds \
+			$(LIBAGBABI)
+
+# Build artifacts
+# ---------------
+
+BUILD			:= build_nds
+ELF				:= $(BUILD)/$(NAME).elf
+DUMP			:= $(BUILD)/$(NAME).dump
+NITROFAT_IMG	:= $(BUILD)/nitrofat.bin
+MAP				:= $(BUILD)/$(NAME).map
+SOUNDBANKDIR	:= $(BUILD)/maxmod
+ROM				:= $(NAME).nds
+
+# Tools
+# -----
+
+PREFIX	:= arm-none-eabi-
+CC		:= $(PREFIX)gcc
+CXX		:= $(PREFIX)g++
+OBJDUMP	:= $(PREFIX)objdump
+MKDIR	:= mkdir
+RM		:= rm -rf
+
+# Verbose flag
+# ------------
+
+ifeq ($(VERBOSE),1)
+V		:=
+else
+V		:= @
+endif
+
+# Compiler and linker flags
+# -------------------------
+
+DEFINES		+= -D__NDS__ -DARM9
+
+ARCH		:= -march=armv5te -mtune=arm946e-s
+
+WARNFLAGS	:= -Wall
+
+SOURCES_C	:= $(shell find -L $(SOURCES) -name "*.c")
+SOURCES_CPP	:= $(shell find -L $(SOURCES) -name "*.cpp")
+SOURCES_S	:= $(shell find -L $(SOURCES) -name "*.s")
+SOURCES_BIN	:= $(shell find -L $(AUDIODIRS) -name "*.bin")
+
+ifeq ($(SOURCES_CPP),)
+  LD := $(CC)
+else
+  LD := $(CXX)
+endif
+
+INCLUDEFLAGS	:= $(foreach path,$(INCLUDE),-I$(path)) \
+			$(foreach path,$(LIBDIRS),-I$(path)/include) \
+			-I$(BUILD) -I$(BUILD)/$(AUDIODIRS)
+
+LIBDIRSFLAGS	:= $(foreach path,$(LIBDIRS),-L$(path)/lib)
+
+ASFLAGS		+= -x assembler-with-cpp $(DEFINES) $(ARCH) \
+			-mthumb -mthumb-interwork $(INCLUDEFLAGS) \
+			-ffunction-sections -fdata-sections
+
+CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(DEFINES) $(ARCH) \
+			-mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
+			-Wstrict-overflow=5 -Wextra\
+			-Wpointer-arith -Wpedantic -Wcast-qual -Wswitch-default\
+			-Wstrict-prototypes -Wmissing-prototypes\
+			-Wshadow -Wwrite-strings -masm-syntax-unified\
+			-ffunction-sections -fdata-sections \
+			-fomit-frame-pointer
+
+CXXFLAGS	+= -std=gnu++14 $(WARNFLAGS) $(DEFINES) $(ARCH) \
+			-mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
+			-ffunction-sections -fdata-sections \
+			-fno-exceptions -fno-rtti \
+			-fomit-frame-pointer
+
+LDFLAGS		:= -mthumb -mthumb-interwork $(LIBDIRSFLAGS) \
+			-Wl,-Map,$(MAP) -Wl,--gc-sections -nostdlib \
+			-T$(BLOCKSDS)/sys/crts/ds_arm9.mem \
+			-T$(BLOCKSDS)/sys/crts/ds_arm9.ld \
+			-Wl,--no-warn-rwx-segments \
+			-Wl,--start-group $(LIBS) -lgcc -Wl,--end-group
+
+#---------------------------------------------------------------------------------
+# Python executable name depends on operating system.
+# COMSPEC is present on Windows, not UNIX
+#---------------------------------------------------------------------------------
+ifdef COMSPEC
+  PY := py -3
+else
+  PY := python3
+endif
+
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for different file extensions
+#---------------------------------------------------------------------------------
+
+export OUTPUT	:=	$(CURDIR)/$(TARGET)
+
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+				$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
+				$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
+
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+
+S_H_SFILES	:=	\
+  bggfx_chr.s spritegfx_chr.s monoscope_chr.s sharpness_chr.s \
+  stopwatchface_chr.s stopwatchhand_chr.s stopwatchdigits_chr.s \
+  kikimap_chr.s kikitiles_chr.s greenhillzone_chr.s hepsie_chr.s \
+  Gus_portrait_chr.s convergence_chr.s pluge_shark_6color_chr.s \
+  helpbgtiles_chr.s helpsprites_chr.s Donna_chr.s vwf7.s helppages.s
+
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+  export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+  export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
+
+# Intermediate build files
+# ------------------------
+
+OBJS_ASSETS	:= $(addsuffix .o,$(addprefix $(BUILD)/,$(SOURCES_BIN))) \
+			$(addsuffix .o,$(addprefix $(BUILD)/,$(SOURCES_PNG)))
+
+HEADERS_ASSETS	:= $(patsubst %.bin,%_bin.h,$(addprefix $(BUILD)/,$(SOURCES_BIN))) \
+			$(patsubst %.png,%.h,$(addprefix $(BUILD)/,$(SOURCES_PNG))) \
+			$(patsubst %.s,%.h,$(addprefix $(BUILD)/,$(S_H_SFILES)))
+
+ifneq ($(SOURCES_AUDIO),)
+	OBJS_ASSETS		+= $(SOUNDBANKDIR)/soundbank.c.o
+	HEADERS_ASSETS	+= $(SOUNDBANKDIR)/soundbank.h
+endif
+
+OBJS_SOURCES	:= $(addsuffix .o,$(addprefix $(BUILD)/,$(SOURCES_S))) \
+				$(addsuffix .o,$(addprefix $(BUILD)/,$(SOURCES_C))) \
+				$(addsuffix .o,$(addprefix $(BUILD)/,$(SOURCES_CPP))) \
+				$(addsuffix .o,$(addprefix $(BUILD)/,$(SFILES))) \
+				$(addsuffix .o,$(addprefix $(BUILD)/,$(S_H_SFILES)))
+
+OBJS		:= $(OBJS_ASSETS) $(OBJS_SOURCES)
+
+# Targets
+# -------
+
+.PHONY: all clean dump dldipatch sdimage
+
+all: $(ROM)
+
+ifneq ($(strip $(NITROFATDIR)),)
+# Additional arguments for ndstool
+NDSTOOL_FAT	:= -F $(NITROFAT_IMG)
+
+$(NITROFAT_IMG): $(NITROFATDIR)
+	@echo "  MKFATIMG $@ $(NITROFATDIR)"
+	$(V)$(BLOCKSDS)/tools/mkfatimg/mkfatimg -t $(NITROFATDIR) $@ 0
+
+# Make the NDS ROM depend on the filesystem image only if it is needed
+$(ROM): $(NITROFAT_IMG)
+endif
+
+# Combine the title strings
+ifeq ($(strip $(GAME_SUBTITLE)),)
+  GAME_FULL_TITLE := $(GAME_TITLE);$(GAME_AUTHOR)
+else
+  GAME_FULL_TITLE := $(GAME_TITLE);$(GAME_SUBTITLE);$(GAME_AUTHOR)
+endif
+
+$(ROM): $(ELF)
+	@echo "  NDSTOOL $@"
+	$(V)$(BLOCKSDS)/tools/ndstool/ndstool -c $@ \
+		-7 $(BLOCKSDS)/sys/default_arm7/arm7.elf -9 $(ELF) \
+		-b $(GAME_ICON) "$(GAME_FULL_TITLE)" \
+		$(NDSTOOL_FAT)
+
+$(ELF): $(OBJS)
+	@echo "  LD      $@"
+	$(V)$(LD) -o $@ $(OBJS) $(BLOCKSDS)/sys/crts/ds_arm9_crt0.o $(LDFLAGS)
+
+$(DUMP): $(ELF)
+	@echo "  OBJDUMP   $@"
+	$(V)$(OBJDUMP) -h -C -S $< > $@
+
+dump: $(DUMP)
+
+clean:
+	@echo "  CLEAN"
+	$(V)$(RM) $(ROM) $(DUMP) $(BUILD) $(SDIMAGE)
+
+sdimage:
+	@echo "  MKFATIMG $(SDIMAGE) $(SDROOT)"
+	$(V)$(BLOCKSDS)/tools/mkfatimg/mkfatimg -t $(SDROOT) $(SDIMAGE) 0
+
+dldipatch: $(ROM)
+	@echo "  DLDITOOL $(ROM)"
+	$(V)$(BLOCKSDS)/tools/dlditool/dlditool \
+		$(BLOCKSDS)/tools/dldi/r4tfv2.dldi $(ROM)
+
+# Rules
+# -----
+
+$(BUILD)/%.s.o : %.s
+	@echo "  AS      $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CC) $(ASFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILD)/%.s.o : $(BUILD)/%.s
+	@echo "  AS      $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CC) $(ASFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILD)/vwf7.s.o : $(BUILD)/vwf7.s
+	@echo "  AS      $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CC) $(ASFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILD)/%.c.o : %.c
+	@echo "  CC      $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILD)/%.cpp.o : %.cpp
+	@echo "  CXX     $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILD)/%.bin.o $(BUILD)/%_bin.h : %.bin
+	@echo "  BIN2C   $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $< $(@D)
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(BUILD)/$*.bin.o $(BUILD)/$*_bin.c
+
+$(BUILD)/%.png.o $(BUILD)/%.h : %.png %.grit
+	@echo "  GRIT    $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(BLOCKSDS)/tools/grit/grit $< -ftc -W1 -o$(BUILD)/$*
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(BUILD)/$*.png.o $(BUILD)/$*.c
+	$(V)touch $(BUILD)/$*.png.o $(BUILD)/$*.h
+
+$(SOUNDBANKDIR)/soundbank.h: $(SOURCES_AUDIO)
+	@echo "  MMUTIL  $^"
+	@$(MKDIR) -p $(@D)
+	@$(BLOCKSDS)/tools/mmutil/mmutil $^ -d \
+		-o$(SOUNDBANKDIR)/soundbank.bin -h$(SOUNDBANKDIR)/soundbank.h
+
+$(SOUNDBANKDIR)/soundbank.c.o: $(SOUNDBANKDIR)/soundbank.h
+	@echo "  BIN2C   soundbank.bin"
+	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $(SOUNDBANKDIR)/soundbank.bin \
+		$(SOUNDBANKDIR)
+	@echo "  CC.9    soundbank_bin.c"
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(SOUNDBANKDIR)/soundbank.c.o \
+		$(SOUNDBANKDIR)/soundbank_bin.c
+
+#---------------------------------------------------------------------------------
+# This rule creates assembly source files using grit
+# grit takes an image file and a .grit describing how the file is to be processed
+# add additional rules like this for each image extension
+# you use in the graphics folders 
+#---------------------------------------------------------------------------------
+$(BUILD)/%_chr.s $(BUILD)/%_chr.h	: %.png %.grit
+#---------------------------------------------------------------------------------
+	@$(MKDIR) -p $(BUILD)
+	grit $< -ff$(word 2,$^) -fts -o$(BUILD)/$*_chr
+
+# Convert a proportional font
+$(BUILD)/vwf7.s $(BUILD)/vwf7.h: vwf7_cp144p.png tools/vwfbuild.py $(BUILD)/last-commit
+	@$(MKDIR) -p $(BUILD)
+	$(PY) tools/vwfbuild.py $< $(basename $@).s $(basename $@).h
+
+# Update last-commit if it has changed
+$(BUILD)/last-commit-now:
+	(git describe --tags || echo non-Git) | tr -d '\r\n' > $@
+$(BUILD)/last-commit: $(BUILD)/last-commit-now
+	if test -f $@; then true; else touch $@; fi
+	cmp $< $@ || cp $< $@
+
+# Convert help files
+$(BUILD)/helppages.s $(BUILD)/helppages.h: helppages_ds.txt $(BUILD)/last-commit tools/paginate_help.py 
+	@$(MKDIR) -p $(BUILD)
+	$(PY) tools/paginate_help.py -m 17 -DCOMMIT="$$(cat $(word 2,$^))" $< -o $(basename $@).s -oh $(basename $@).h
+
+# All assets must be built before the source code
+# -----------------------------------------------
+
+$(SOURCES_S) $(SOURCES_C) $(SOURCES_CPP): $(HEADERS_ASSETS)
+
+-include $(DEPSDIR)/*.d

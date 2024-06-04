@@ -43,7 +43,7 @@ endif
 # Defines passed to all files
 # ---------------------------
 
-DEFINES		:=
+DEFINES		:= -D__GBA__
 
 # Libraries
 # ---------
