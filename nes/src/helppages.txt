@@ -143,11 +143,11 @@ color levels.
 A: Toggle bars' brightness
 Select: Play 1 kHz tone
 
-Use blue filters or some TVs'
-blue-only mode to confirm
-color balance. Because of
-shortcuts in the NES PPU's
-composite output stage,
+Use blue filters or some
+TVs' blue-only mode to
+confirm color balance.
+Because of shortcuts in the
+NES PPU's composite output,
 these colors are impure.
 On NTSC, green and magenta
 have correct hues, and

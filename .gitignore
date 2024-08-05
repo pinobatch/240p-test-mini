@@ -43,6 +43,8 @@ __pycache__/
 /gba/*.sav
 /gba/.map
 /gba/compile_commands.json
+/gba/tools/write_bios
+/gba/tools/gba_bios.h
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
 /nes/obj/nes/last-commit*
