@@ -81,11 +81,11 @@ all: $(title).gb
 ctools: ../common/tools/dte$(DOTEXE)
 
 clean:
-	-rm obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
-	-rm obj/gb/*.2bpp obj/gb/*.2bpp16 obj/gb/*.nam obj/gb/*.chr1
-	-rm obj/gb/*.iu obj/gb/*.iuc obj/gb/*.huf obj/gb/*.pal
-	-rm obj/gb/*.border obj/gb/*.chrgb* obj/gb/last-commit*
-	-rm ../common/tools/dte$(DOTEXE)
+	$(RM) obj/gb/*.s obj/gb/*.z80 obj/gb/*.o obj/gb/*.pb16
+	$(RM) obj/gb/*.2bpp obj/gb/*.2bpp16 obj/gb/*.nam obj/gb/*.chr1
+	$(RM) obj/gb/*.iu obj/gb/*.iuc obj/gb/*.huf obj/gb/*.pal
+	$(RM) obj/gb/*.border obj/gb/*.chrgb* obj/gb/last-commit*
+	$(RM) ../common/tools/dte$(DOTEXE)
 
 # Packaging
 
@@ -124,10 +124,10 @@ $(title).gb: $(objlisto)
 #	$(PY) tools/bgrdedent.py -o $@ $<
 
 obj/gb/%.o: src/%.z80 src/gb.inc src/hardware.inc src/global.inc
-	$(RGBASM) -h -o $@ $<
+	$(RGBASM) -o $@ $<
 
 obj/gb/%.o: obj/gb/%.z80
-	$(RGBASM) -h -o $@ $<
+	$(RGBASM) -o $@ $<
 
 # Files that will be included with incbin
 
