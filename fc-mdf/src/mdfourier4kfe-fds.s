@@ -1,21 +1,3 @@
-;
-; Front end for MDFourier tone generator (stand-alone 4K ROM)
-; Copyright 2021, 2023 Damian Yerrick
-;
-; This program is free software; you can redistribute it and/or modify
-; it under the terms of the GNU General Public License as published by
-; the Free Software Foundation; either version 2 of the License, or
-; (at your option) any later version.
-;
-; This program is distributed in the hope that it will be useful,
-; but WITHOUT ANY WARRANTY; without even the implied warranty of
-; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-; GNU General Public License for more details.
-;
-; You should have received a copy of the GNU General Public License along
-; with this program; if not, write to the Free Software Foundation, Inc.,
-; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-;
 .include "nes.inc"
 .include "global.inc"
 
@@ -125,7 +107,7 @@ test_good_phase := test_state+6
   ; block 4
   .byte $04
   .segment "FILE2_DAT"
-  .incbin "obj/nes/mdf4k_chr.chr"
+  .incbin "obj/nes/mdf4k-fds_chr.chr"
 
   ; This block is the last to load, and enables NMI by "loading" the NMI enable value
   ; directly into the PPU control register at $2000.
@@ -218,9 +200,20 @@ test_good_phase := test_state+6
   .else
   .rodata
   .endif
-  chrdata: .incbin "obj/nes/mdf4k_chr.chr"
+  chrdata: .incbin "obj/nes/mdf4k-fds_chr.chr"
   chrdata_end:
 .endif
+
+.ifdef FDSHEADER
+.segment "FILE0_DAT"
+.else
+.rodata
+.endif
+uipalette: .byte $0F, $20, $0F, $20, $0F, $0F, $10, $10
+uipalette_end:
+
+warmbootsig: .byte "MDF", 0
+WARMBOOTSIGLEN = * - warmbootsig
 
 .segment "ZEROPAGE"
 nmis: .res 1
@@ -228,14 +221,11 @@ cur_keys: .res 2
 new_keys: .res 2
 test_state: .res SIZEOF_TEST_STATE
 
-warmbootsig: .byte "MDF", 0
-WARMBOOTSIGLEN = * - warmbootsig
-
 .segment "BSS"
-mdfourier_good_phase: .res 1
 ; Default crt0 clears ZP but not BSS
 ; Currently used only by multicarts
 is_warm_boot:  .res WARMBOOTSIGLEN
+mdfourier_good_phase: .res 1
 
 .ifdef FDSHEADER
 .segment "FILE0_DAT"
@@ -392,14 +382,21 @@ restart:
   ldy #4
   jsr write_4y_of_a
   
-  ; Write copyright notice at very bottom of title safe area
+  ; Write copyright notices at very bottom of title safe area
   ; $2343 = (24, 208)
   lda #$23
   sta PPUADDR
   lda #$43
   sta PPUADDR
   ldx #1
-  ldy #27
+  ldy #26
+  jsr write_x_thru_xpym1
+  lda #$23
+  sta PPUADDR
+  lda #$23
+  sta PPUADDR
+  ldx #$1B
+  ldy #23
   jsr write_x_thru_xpym1
   
   ; Write title
@@ -411,23 +408,13 @@ restart:
   ldy #17
   jsr write_x_thru_xpym1
 
-  ; Write triangle phase
+  ; Write expansion audio type
   lda #$21
   sta PPUADDR
   lda #$43
   sta PPUADDR
-  ldy #2  ; Width of triangle wave icon
-  jsr write_x_thru_xpym1
-  ldy #2  ; Width of "OK" = 2
-  lda mdfourier_good_phase
-  bne have_phase_xy
-  iny  ; Width of "Done" = 3
-  ldx #22
-  lda test_good_phase
-  bne have_phase_xy
-  iny  ; Width of "Trash" = 4
-  ldx #25
-have_phase_xy:
+  ldx #$12
+  ldy #19
   jsr write_x_thru_xpym1
 
   ; Write palette and turn on display
@@ -501,6 +488,11 @@ have_phase_xy:
   bvc no_B_press
     lda mdfourier_good_phase
     sta test_good_phase
+    ; immediately return from jsr mdfourier_run
+    pla
+    pla
+    pla
+    pla
     rts
   no_B_press:
   jsr vsync
@@ -515,11 +507,3 @@ have_phase_xy:
     beq :-
   rts
 .endproc
-
-.ifdef FDSHEADER
-.segment "FILE0_DAT"
-.else
-.rodata
-.endif
-uipalette: .byte $0F, $20, $0F, $20, $0F, $0F, $10, $10
-uipalette_end:

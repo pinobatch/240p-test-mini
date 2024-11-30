@@ -23,6 +23,14 @@ __pycache__/
 /fc-mdf/*map.txt
 /fc-mdf/mdfourier-*.nes
 /fc-mdf/mdfourier.prg
+/fc-mdf/*.dbg
+/fc-mdf/*.fdb
+/fc-mdf/obj/nes/*.s
+/fc-mdf/obj/nes/*.sav
+/fc-mdf/obj/nes/mdfourier*
+/fc-mdf/*.nes
+/fc-mdf/*.nsf
+/fc-mdf/*.fds
 /gameboy/obj/gb/*.z80
 /gameboy/obj/gb/*.nam
 /gameboy/obj/gb/*.iu
@@ -47,6 +55,7 @@ __pycache__/
 /gba/tools/gba_bios.h
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
+/nes/obj/nes/mdfourier*
 /nes/obj/nes/last-commit*
 /nes/*.dbg
 /nes/*.fdb
@@ -57,6 +66,7 @@ __pycache__/
 /nes/mdfourier4k.nes
 /nes/mdfourier4k-chrrom.nes
 /nes/240p-nes-others.7z
+/nes/mdfourier4k-fdsheader.fds
 /common/tools/dte
 /common/tools/dte.exe
 /nes-palpar/palpar.nes
