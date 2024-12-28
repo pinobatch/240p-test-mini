@@ -272,26 +272,26 @@ activity_stopwatch::
 sw_inc_counter:
   lb bc, frames_bcd - hours, low(frames_bcd)
   .loop:
-    ld a, [$FF00+c]
+    ldh a, [c]
     inc a
     daa
-    ld [$FF00+C], a
+    ldh [c], a
     cp $60
     ret c
     ; If increased past 60, clear it and continue to the next digit
     xor a
-    ld [$FF00+C], a
+    ldh [c], a
     dec c
     dec b
     jr nz, .loop
 
-  ld a,[$FF00+C]  ; Hours wrap at 10, not 60
+  ldh a, [c]  ; Hours wrap at 10, not 60
   inc a
   cp 10
   jr c,.not_wrap_hours
     xor a
   .not_wrap_hours:
-  ld [$FF00+C],a
+  ldh [c],a
   ret
 
 digits_label_msg:

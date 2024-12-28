@@ -461,9 +461,9 @@ gradient_push_palette:
     halt
     rept 4
       ld a,l
-      ld [$FF00+c],a
+      ldh [c],a
       ld a,h
-      ld [$FF00+c],a
+      ldh [c],a
       add hl,de
     endr
     dec b

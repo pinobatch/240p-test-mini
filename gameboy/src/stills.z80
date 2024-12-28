@@ -796,7 +796,7 @@ activity_solid_screen::
 
     add low(customred)
     ld c,a
-    ld a,[$FF00+c]
+    ldh a, [c]
     ld e, a  ; E = last value
     bit PADB_RIGHT,b
     jr z,.not_custom_increase
@@ -809,7 +809,7 @@ activity_solid_screen::
     ; if the new value is valid, write it back
     cp 32
     jr nc, .custom_no_change
-      ld [$FF00+c],a
+      ldh [c],a
       xor e  ; set E iff changed
       ldh [lastlcdc], a
     .custom_no_change:
@@ -899,7 +899,7 @@ solid_update_rgb:
 .componentloop:
   push de
   ld c,e
-  ld a,[$FF00+c]
+  ldh a, [c]
   call bcd8bit_ac  ; A: tens; C: ones
   jr z,.lessthanten
     push bc
@@ -1433,22 +1433,22 @@ activity_convergence::
     .gbc_have_bcps:
     ld hl, convergence_gbc_palette
     ld bc, $0400 + low(rBCPS)
-    ld [$FF00+c], a
+    ldh [c], a
     inc c
     .gbcpalloop:
       xor a
-      ld [$FF00+c], a
-      ld [$FF00+c], a
-      ld [$FF00+c], a
-      ld [$FF00+c], a
+      ldh [c], a
+      ldh [c], a
+      ldh [c], a
+      ldh [c], a
       ld a, [hl+]
-      ld [$FF00+c], a
+      ldh [c], a
       ld a, [hl-]
-      ld [$FF00+c], a
+      ldh [c], a
       ld a, [hl+]
-      ld [$FF00+c], a
+      ldh [c], a
       ld a, [hl+]
-      ld [$FF00+c], a
+      ldh [c], a
       dec b
       jr nz, .gbcpalloop
     jr .palette_done

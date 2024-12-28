@@ -274,7 +274,7 @@ activity_megaton_complete:
   ld bc,MAX_TESTS*$100+low(framecounts)
   .sumloop:
     ld d,a
-    ld a,[$FF00+c]
+    ldh a, [c]
     add d
     inc c
     dec b
@@ -431,7 +431,7 @@ grade_press:
   add low(framecounts)
   ld c, a  ; C = where to write result
   ld a, d
-  ld [$FF00+c],a
+  ldh [c],a
   fallthrough draw_result_b
 
 draw_result_b:
@@ -444,7 +444,7 @@ draw_result_b:
   ld a,low(framecounts)
   add b
   ld c,a
-  ld a,[$FF00+C]
+  ldh a, [c]
 
   ; Bit 7: Early
   push af  ; Stack: raw value, which result

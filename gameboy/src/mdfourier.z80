@@ -103,7 +103,7 @@ load_waveram_hl::
   lb bc, 16, _AUD3WAVERAM
   .loop:
     ld a, [hl+]
-    ld [$FF00+c], a
+    ldh [c], a
     inc c
     djnz .loop
   ld a, $80
@@ -134,7 +134,7 @@ mdfourier_push_apubuffer:
   .loop:
     ld c, a
     ld a, [hl+]
-    ld [$FF00+c], a
+    ldh [c], a
   .loopcontinue:
     ld a, [hl+]
     or a
