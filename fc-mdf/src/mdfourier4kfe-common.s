@@ -1,21 +1,3 @@
-;
-; Front end for MDFourier tone generator (stand-alone 4K ROM)
-; Copyright 2021, 2023 Damian Yerrick
-;
-; This program is free software; you can redistribute it and/or modify
-; it under the terms of the GNU General Public License as published by
-; the Free Software Foundation; either version 2 of the License, or
-; (at your option) any later version.
-;
-; This program is distributed in the hope that it will be useful,
-; but WITHOUT ANY WARRANTY; without even the implied warranty of
-; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-; GNU General Public License for more details.
-;
-; You should have received a copy of the GNU General Public License along
-; with this program; if not, write to the Free Software Foundation, Inc.,
-; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-;
 .include "nes.inc"
 .include "global.inc"
 
@@ -222,20 +204,28 @@ test_good_phase := test_state+6
   chrdata_end:
 .endif
 
+.ifdef FDSHEADER
+.segment "FILE0_DAT"
+.else
+.rodata
+.endif
+uipalette: .byte $0F, $20, $0F, $20, $0F, $0F, $10, $10
+uipalette_end:
+
+warmbootsig: .byte "MDF", 0
+WARMBOOTSIGLEN = * - warmbootsig
+
 .segment "ZEROPAGE"
 nmis: .res 1
 cur_keys: .res 2
 new_keys: .res 2
 test_state: .res SIZEOF_TEST_STATE
 
-warmbootsig: .byte "MDF", 0
-WARMBOOTSIGLEN = * - warmbootsig
-
 .segment "BSS"
-mdfourier_good_phase: .res 1
 ; Default crt0 clears ZP but not BSS
 ; Currently used only by multicarts
 is_warm_boot:  .res WARMBOOTSIGLEN
+mdfourier_good_phase: .res 1
 
 .ifdef FDSHEADER
 .segment "FILE0_DAT"
@@ -515,11 +505,3 @@ have_phase_xy:
     beq :-
   rts
 .endproc
-
-.ifdef FDSHEADER
-.segment "FILE0_DAT"
-.else
-.rodata
-.endif
-uipalette: .byte $0F, $20, $0F, $20, $0F, $0F, $10, $10
-uipalette_end:
