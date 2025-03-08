@@ -29,6 +29,7 @@ MDF_PA13_HIGH = 1
 
 test_good_phase := test_state+6
 
+OAM := $0200  ; for synced reads
 
 .segment "INESHDR"
 .if MAPPERNUM = 218
@@ -253,8 +254,8 @@ have_phase_xy:
     rts
   no_B_press:
   jsr vsync
-  jsr mdfourier_push_apu
-  jmp read_pads
+  jsr sync_read_b_button
+  jmp mdfourier_push_apu
 .endproc
 
 .proc vsync

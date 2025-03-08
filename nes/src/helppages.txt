@@ -928,7 +928,7 @@ Program: Damian Yerrick
        peoplemaking.games
 
 © 2011-2016 Artemio Urbina
-© 2015-2023 Damian Yerrick
+© 2015-2025 Damian Yerrick
 This is free software; see the
 source for copying conditions.
 There is NO warranty, not

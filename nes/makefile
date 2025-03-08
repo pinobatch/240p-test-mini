@@ -59,7 +59,7 @@ else
 DOTEXE:=
 PY:=python3
 EMU:=fceux
-DEBUGEMU := ~/.wine/drive_c/Program\ Files\ \(x86\)/FCEUX/fceux.exe
+DEBUGEMU := Mesen
 endif
 DEBUGEMU2 := Mesen.exe
 BMP2 := $(PY) ../common/tools/pilbmp2nes.py

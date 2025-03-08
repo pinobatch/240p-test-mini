@@ -34,7 +34,7 @@ IS_MULTICART = 0
 .globalzp oam_used, nmis, tvSystem
 
 ; pads.s
-.global read_pads, autorepeat
+.global read_pads, sync_read_b_button, autorepeat
 
 ; ppuclear.s
 .global ppu_clear_nt, ppu_clear_oam, ppu_wait_vblank

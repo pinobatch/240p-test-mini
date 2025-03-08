@@ -186,7 +186,6 @@ done:
   lda cur_keys+0
   and #KEY_B
   bne skip_it_all
-  jsr read_pads
   
   ; Good; we have the full screen ready.  Wait for a vertical blank
   ; and set the scroll registers to display it.
@@ -194,18 +193,22 @@ done:
 vw3:
   cmp nmis
   beq vw3
-  
+  lda test_section
+  beq :+
+    jsr sync_read_b_button
+  :
   jsr mdfourier_push_apu
   lda skip_ppu
   bne skip_it_all
     ldx #0
-    stx OAMADDR
-    lda #>OAM
-    sta OAM_DMA
     ldy #0
     lda #VBLANK_NMI|BG_0000|OBJ_0000
     clc  ; no sprites this time
     jsr ppu_screen_on
+    lda test_section
+    bne :+
+      jsr read_pads
+    :
   skip_it_all:
 
   rts

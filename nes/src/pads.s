@@ -14,8 +14,9 @@
 ;          copious comments and made USE_DAS a compile-time option
 ;
 
-.export read_pads
+.export read_pads, sync_read_b_button
 .importzp cur_keys, new_keys
+.import OAM
 
 JOY1      = $4016
 JOY2      = $4017
@@ -121,6 +122,41 @@ read_pads_once:
     cmp #1
     rol thisRead+0
     bcc loop         ; once $01 has been shifted 8 times, we're done
+  rts
+.endproc
+
+;;
+; Read controller 1's B Button while working around interference
+; between controller presses and DMC DMA.
+; Used by MDFourier tone generator while in operation.
+; Must be performed during vblank.
+; Takes a constant number of cycles.
+; Based on https://www.nesdev.org/wiki/Controller_reading_code#DPCM_Safety_using_OAM_DMA
+; Rules (abridged for <428-cycle read routines)
+; 1. Last cycle of STA $4014 is a put, meaning the following cycle
+;    is a get
+; 2. Do not read or write $4000-$401F on put cycles
+.proc sync_read_b_button
+  lda #>OAM
+  sta $4014      ; OAM DMA always ends on a put
+  ldx #1         ; get put          <- strobe code must take an odd number of cycles total
+  stx z:cur_keys ; get put get      <- buttons must be in the zeropage
+  stx $4016      ; put get put GET
+  dex            ; put get
+  stx $4016      ; put get put GET
+  lda $4016      ; put get put GET  <- A Button
+  lda $4016      ; put get put GET  <- B Button
+  and #$03
+  cmp #$01       ; B Button in CF
+  lda #0
+  ror a          ; B Button in bit 7
+  ror a          ; B Button in bit 6
+  ldx cur_keys
+  sta cur_keys
+  txa
+  eor #$FF
+  and cur_keys
+  sta new_keys
   rts
 .endproc
 
