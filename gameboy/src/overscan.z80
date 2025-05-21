@@ -217,8 +217,8 @@ activity_overscan::
 
   jp .loop
 
-def TILE_P equ $1B  ; vertically flipped B
-def TILE_X equ $07
+def TILE_PI equ $1B  ; vertically flipped B
+def TILE_XELS equ $07
 def TILE_RARROW equ $08
 def TILE_RBORDER equ $03
 
@@ -400,7 +400,7 @@ overscan_draw_sprites:
   ld a,d
   sub 8
   ld [hl+],a
-  ld a,TILE_P
+  ld a,TILE_PI
   ld [hl+],a
   ld a, $40  ;vertical flip
   ld [hl+],a
@@ -410,7 +410,7 @@ overscan_draw_sprites:
   inc l
   ld [hl],d
   inc l
-  ld a,TILE_X
+  ld a,TILE_XELS
   ld [hl+],a
   xor a
   ld [hl+],a
