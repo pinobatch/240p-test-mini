@@ -289,7 +289,19 @@ Portrait of Donna by
   pepe_salot
 Hill zone by mikejmoffitt
   & Damian Yerrick
+----
+Got burn-in?
 
+A scratchy power switch
+on a monochrome system
+can cause horizontal
+rows of dots to fade.
+goombobros reported that
+turning the contrast dial
+to black and changing
+background (A+→) for
+a couple minutes can
+revive faint lines.
 == Stopwatch ==
 
 This stopwatch helps
