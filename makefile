@@ -34,8 +34,9 @@ nes/240pee.nes:
 	$(MAKE) -C nes $(notdir $@)
 	
 # These two rules have exactly the same prerequisites and recipe yet
-# cannot be combined lest GNU Make 4.3 emit a fatal error:
+# cannot be combined lest GNU Make 3.82 and newer emit a fatal error:
 # makefile:35: *** mixed implicit and normal rules.  Stop.
+# <https://lists.gnu.org/r/bug-make/2010-08/msg00091.html>
 nes/240pee-%rom.nes: nes/240pee.nes
 	$(MAKE) -C nes $(notdir $@)
 nes/mdfourier.nsf nes/mdfourier4k.nes: nes/240pee.nes
@@ -47,7 +48,7 @@ nes/mdfourier4k-%.nes: nes/mdfourier4k.nes
 gameboy/gb240p.gb:
 	$(MAKE) -C gameboy $(notdir $@)
 gba/240pee_mb.gba:
-	$(MAKE) -C gba $(notdir $@)
+	$(MAKE) -C gba -f dkaMakefile $(notdir $@)
 
 # Packaging
 DOCSRC_RE:=\.xcf$$|\.odg$$|/Gus_sketch_by_.*.png
@@ -58,12 +59,14 @@ $(title)-$(version).zip: zip.in all makefile README.md
 $(title)-docsrc-$(version).zip: docsrc.zip.in makefile
 	zip -9 -u $@ -@ < $<
 
-zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
+zip.in: makefile nes/makefile gameboy/makefile \
+  gba/dkaMakefile gba/wfMakefile
 	git ls-files | grep -Eiv "^\.|$(DOCSRC_RE)" > $@
 	printf '%s\n' $(alltargets) >> $@
 	echo $@ >> $@
 
-docsrc.zip.in: makefile nes/makefile gameboy/makefile gba/Makefile
+docsrc.zip.in: makefile nes/makefile gameboy/makefile \
+  gba/dkaMakefile gba/wfMakefile
 	git ls-files | grep -E "$(DOCSRC_RE)" > $@
 	echo LICENSE >> $@
 	echo $@ >> $@
