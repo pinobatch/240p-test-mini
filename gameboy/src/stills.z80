@@ -193,6 +193,14 @@ add_hl_12:
   add hl,de
   ret
 
+;;
+; Writes a row of 20 increasing tile numbers to the tilemap,
+; optionally looping.
+; @param A first tile ID
+; @param D first tile ID that is not part of the loop
+; @param E length of loop
+; @param HL start of row
+; @return HL at start of next row; B=0, DE=12
 gray_ramp_row_cmp_d_sub_e:
   ld b, 20
   .byteloop:

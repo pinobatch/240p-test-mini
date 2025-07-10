@@ -20,8 +20,9 @@ def bmptowidesb53(infilename, palette, outfilename):
     # Quantize picture to palette
     palette = b''.join(palette[0:1] + palette[i + 1:i + 4]
                        for i in range(0, 16, 4))
-    palettes = [[tuple(savtool.bisqpal[r]) for r in palette[i:i + 4]]
-                 for i in range(0, 16, 4)]
+    palettes = [[tuple(savtool.bisqwit2012[r * 3:r * 3 + 3])
+                 for r in palette[i:i + 4]]
+                for i in range(0, 16, 4)]
     imf, attrs = savtool.colorround(im, palettes)
 
     # Convert to unique tiles

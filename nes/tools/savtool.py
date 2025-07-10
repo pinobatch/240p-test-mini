@@ -8,14 +8,16 @@ by Damian Yerrick
 See versionText for version and copyright information.
 
 """
-from __future__ import with_statement, division, print_function, unicode_literals
-import sys, os, re
+import sys, os, re, argparse
 try:
     from PIL import Image, ImageChops
 except ImportError:
-    print("%s: warning: Pillow (Python Imaging Library) not installed" % os.path.basename(sys.argv[0]),
+    print("%s: warning: Pillow (Python Imaging Library) not installed; functionality is limited" % os.path.basename(sys.argv[0]),
           file=sys.stderr)
     Image = None
+
+assert str is not bytes  # Python 2 is buried
+default_palette = b'\x0F\x00\x10\x30\x0F\x06\x16\x26\x0F\x1A\x2A\x3A\x0F\x02\x12\x22'
 
 # Find common tools (e.g. pilbmp2nes)
 commontoolspath = os.path.normpath(os.path.join(
@@ -23,18 +25,15 @@ commontoolspath = os.path.normpath(os.path.join(
 ))
 sys.path.append(commontoolspath)
 
-
-default_palette = b'\x0F\x00\x10\x30\x0F\x06\x16\x26\x0F\x1A\x2A\x3A\x0F\x02\x12\x22'
-
 # Command line parsing and help #####################################
 #
 # Easy is hard.  It takes a lot of code and a lot of text to make a
 # program self-documenting and resilient to bad input.
 
 usageText = "usage: %prog [options] [-i] INFILE [-o] OUTFILE"
-versionText = """%prog 0.05
+versionText = """savtool 0.07wip
 
-Copyright 2012 Damian Yerrick
+Copyright 2012, 2024 Damian Yerrick
 Copying and distribution of this file, with or without
 modification, are permitted in any medium without royalty provided
 the copyright notice and this notice are preserved in all source
@@ -44,61 +43,86 @@ descriptionText = """
 Image converter for NES graphics editor.
 """
 moreDetailsText = """File formats:
-.bmp: Uncompressed bitmap
+.bmp: Uncompressed or RLE compressed bitmap
 .chr: Tile sheet in the NES's format (4096 bytes)
 .gif: Lossless compressed bitmap (LZW)
 .nam: Map data alone (1024 bytes)
 .png: Lossless compressed bitmap (DEFLATE)
 .ppu: PPU dump (16384 bytes)
 .sav: Saved picture from editor (8192 bytes), containing a
-      tile sheet, a map, and a palette
+    tile sheet, a map, and a palette
 .srm: Synonym for .sav used by some emulators
 
 Supported INFILE/OUTFILE pairs:
 ppu->sav, ppu->bitmap, bitmap<->sav, bitmap<->chr, chr<->sav, sav->sav
 
 OUTFILE is required except in two cases.  If --print-palette or
---show is given without OUTFILE, no file will be written.  If INFILE
-is a .sav file and --show is not specified, changes to the tile sheet
-or palette will be written back to INFILE.
+--show is given without OUTFILE, no file is written.  If INFILE is a
+.sav file and --show is not specified, changes to the tile sheet or
+palette are written back to INFILE.
 
 The behavior of --chr depends on the format of INFILE.
 .ppu: ADDR is the hexadecimal address ($0000 or $1000) of the
-      tile sheet.
+    tile sheet.
 .sav: SHEET is the filename of a tile sheet that replaces the tiles
-      without remapping the nametable.
+    without remapping the nametable.
 .nam: SHEET is the filename of a tile sheet combined with --chr and
-      --palette, both of which are required.
-Bitmap: SHEET is the filename of a tile sheet that savtool will try
-        to use.  Any tiles in the bitmap but not in the tile sheet
-        will replace tiles in the tile sheet: first duplicate tiles,
-        then unused blank then other unused tiles.  To force this
-        behavior with a .sav INFILE, specifying --remap.
+    --palette, both of which are required.
+Bitmap: SHEET is the filename of a tile sheet.  Any tiles from the
+    bitmap that are not in the tile sheet replace tiles in the tile
+    sheet: first duplicate tiles, then unused blank tiles, then
+    other unused tiles.  To force this behavior with a .sav INFILE,
+    specify --remap.
 
 When converting an indexed bitmap image to .sav without --palette,
 the lower 2 bits are used, and the whole picture uses color set 0
 with a grayscale palette.  With --palette, the indexed or truecolor
 image is converted with all four color sets, and the color set that
 best matches each 16x16 pixel area is used.  Using --palette with a
-.ppu or .sav INFILE just replaces it.
+.ppu or .sav INFILE replaces the palette in the output .sav file.
+
+savtool translates NES color codes (00 to 3F) to sRGB colors using
+a color lookup table (CLUT).  The default CLUT was generated with
+Joel Yliluoma's web app.  (Caution: it's a bit desaturated.)
+<https://bisqwit.iki.fi/utils/nespalette.php>
+
+The --nes-clut option loads a different CLUT from the first 192
+bytes of a .pal file or the 64-color indexed palette of a PNG image.
+This allows converting images drawn against a different CLUT.
+
+The --write-swatches option writes the CLUT in several formats:
+
+.bmp, .gif, .png: Write reference image with indexed palette as
+    first 64 colors
+--show: Display reference image using image viewer
+.pal: Write 192-byte palette for use with NES emulators
+.gpl: Write palette in GIMP/Inkscape format
+.txt: Write 64 lines of cc<tab>#rrggbb
+-: Write 64 lines .txt to standard output
 
 Glossary
 Attribute: The color set chosen for each color area
+Backdrop: A color code that can be used throughout a picture
 Bitmap: A picture stored as rows of pixels, which may represent a
-        128 by 128 pixel tile sheet or a larger picture
+    128 by 128 pixel tile sheet or a larger picture
 CHR: Programming term for a tile sheet, especially one in the NES's
-     native tile data format
+    native tile data format
 Color area: A 16 by 16 pixel area on the map to which a color set can
-            be assigned
-Color set: A set of three colors that can be used with the background
-           color in each color area
+    be assigned
+Color code: A number from 0 to 63 (0x00 to 0x3F) giving an index
+    into the CLUT
+Color lookup table (CLUT): The set of 64 colors, not all distinct,
+    that the PPU can generate
+Color set: A set of three color codes that can be used with the
+    backdrop in each color area
 Hex palette: A string of 32 letters and numbers representing the 13
-             colors in a palette
+    color codes in a palette
 Map: A grid of 32 by 30 tile numbers and 16 by 15 attributes
-Nametable: Programming term for a map
-Palette: A background color and four color sets
-PPU dump: A copy of all data visible to the NES's video chip, as
-          written by FCEUX's hex editor
+Nametable: Synonym for map, taken from TMS9918 datasheet
+Palette: A backdrop and four color sets
+Picture Processing Unit (PPU): Video integrated circuit in NES
+PPU dump: A copy of all data visible to the PPU, as written by
+    FCEUX's hex editor
 Tile: An 8 by 8 pixel piece of graphics
 Tile sheet: A collection of 256 tiles
 """
@@ -116,84 +140,91 @@ testpatterns = [
     "savtool.py x.png --chr y.png --palette z.sav -o x.sav",
     'savtool.py "World 1-3.ppu" --chr $1000 -x 16 -y 0 -o treetops.sav',
     "savtool.py x.nam --chr x.chr --palette 0F0010300F0616260F1A2A3A0F021222 -o x.sav",
+    "savtool.py --write-swatches -"
+    "savtool.py --nes-clut Smooth_FBX.pal --write-swatches --show"
 ]
 
-xdigitRE = re.compile('^\$?([0-9a-fA-F]+)$')
+xdigitRE = re.compile(r'^\$?([0-9a-fA-F]+)$')
 infile_exts = {
     'bmp': 'bmp', 'png': 'bmp', 'gif': 'bmp', 'jpg': 'bmp', 'jpeg': 'bmp',
     'sav': 'sav', 'srm': 'sav',
     'ppu': 'ppu', 'chr': 'chr', 'nam': 'nam'
 }
 
-def mkparser():
-    from optparse import OptionParser
-
-    parser = OptionParser(usage=usageText, version=versionText,
-                          description=descriptionText)
-    parser.add_option("--more-help", dest="morehelp",
-                      default=False, action="store_true",
-                      help="show more detailed help and exit",)
-    parser.add_option("-i", dest="infilename",
-                      help="read from INFILE (.bmp, .chr, .nam, .png, .ppu, .sav)",
-                      metavar="INFILE")
-    parser.add_option("-o", dest="outfilename",
-                      help="write output to OUTFILE (.bmp, .chr, .nam, .png, .sav); "
-                           "optional if INFILE is a .sav",
-                      metavar="OUTFILE")
-    parser.add_option("--chr", dest="chrfilename", metavar="SHEET-OR-ADDR",
-                      help="set the hex starting address to ADDR ($0000 or $1000) "
-                           "if INFILE is a PPU dump, or use SHEET as a tile sheet")
-    parser.add_option("--remap", dest="remap",
-                      default=False, action="store_true",
-                      help="instead of replacing a picture's tile sheet with SHEET, remap it to use tiles already in SHEET")
-    parser.add_option("-x", "--scroll-x", dest="xscroll",
-                      help="trim 16*DISTANCE pixels from left side of .ppu (0-31, default 0)",
-                      metavar="DISTANCE", type="int", default=0)
-    parser.add_option("-y", "--scroll-y", dest="yscroll",
-                      help="trim 16*DISTANCE pixels from top of .ppu (0-29, default 0)",
-                      metavar="DISTANCE", type="int", default=0)
-    parser.add_option("--palette", dest="palette",
-                      help="use a 32-character hex palette or the palette from SAVFILE",
-                      metavar="SAVFILE-OR-HEX")
-    parser.add_option("--print-palette", dest="printpalette",
-                      default=False, action="store_true",
-                      help="write image's 32-character hex palette to standard output",)
-    parser.add_option("--show", dest="show",
-                      default=False, action="store_true",
-                      help="display picture")
-    parser.add_option("-P", "--write-chr", metavar="COLORSET", dest="writechr",
-                      help="write tile sheet instead of screen, with colorset COLORSET (0-3)",
-                      default=None, type="int")
-    parser.add_option("--write-swatches", metavar="OUTFILE", dest="swatchfilename",
-                      help="write the entire NES palette to OUTFILE  (.bmp, .chr, .nam, .png, .sav); "
-                      "useful for determining hex values",
-                      default=None)
-    return parser
-
-parser = None
 def parse_argv(argv):
-    global parser
-    parser = parser or mkparser()
+    parser = argparse.ArgumentParser(
+##        usage=usageText,
+        description=descriptionText,
+        fromfile_prefix_chars='@'
+    )
+    parser.add_argument("--more-help", action="store_true",
+                        help="show more detailed help and exit")
+    parser.add_argument("--version", action="store_true",
+                        help="show version and license and exit")
+    parser.add_argument("-i", "--input",
+                        help="read from INFILE (.bmp, .chr, .nam, .png, .ppu, .sav)",
+                        metavar="INFILE")
+    parser.add_argument("-o", "--output",
+                        help="write output to OUTFILE (.bmp, .chr, .nam, .png, .sav); "
+                             "optional if INFILE is a .sav",
+                        metavar="OUTFILE")
+    parser.add_argument("--chr", metavar="SHEET-OR-ADDR",
+                        help="set the hex starting address to ADDR ($0000 or $1000) "
+                             "if INFILE is a PPU dump, or use SHEET as a tile sheet")
+    parser.add_argument("--remap", dest="remap", action="store_true",
+                        help="instead of replacing a picture's tile sheet with SHEET, remap it to use tiles already in SHEET")
+    parser.add_argument("--max-tiles", type=int,
+                        help="reduce unique tiles to this many (e.g. 256)")
+    parser.add_argument("-x", "--scroll-x",
+                        help="trim 16*DISTANCE pixels from left side of .ppu (0-31, default 0)",
+                        metavar="DISTANCE", type=int, default=0)
+    parser.add_argument("-y", "--scroll-y",
+                        help="trim 16*DISTANCE pixels from top of .ppu (0-29, default 0)",
+                        metavar="DISTANCE", type=int, default=0)
+    parser.add_argument("--palette", dest="palette",
+                        help="use a 32-character hex palette or the palette from SAVFILE",
+                        metavar="SAVFILE-OR-HEX")
+    parser.add_argument("--print-palette",
+                        default=False, action="store_true",
+                        help="write image's 32-character hex palette to standard output",)
+    parser.add_argument("--show", dest="show",
+                        default=False, action="store_true",
+                        help="display picture")
+    parser.add_argument("-P", "--write-chr", metavar="COLORSET",
+                        help="write tile sheet instead of screen, with colorset COLORSET (0-3)",
+                        default=None, type=int)
+    parser.add_argument("--nes-clut", metavar="CLUTFILE",
+                        help="use the CLUT from this file (.pal or .png)",
+                        default="bisqwit2012")
+    parser.add_argument("--write-swatches", metavar="OUTFILE", const=True,
+                        help="write the entire CLUT to OUTFILE "
+                        "(.bmp, .png, .pal, .txt, .gpl, or --show); "
+                        "useful for determining hex values",
+                        default=None, nargs='?')
+    parser.add_argument("files", metavar="FILE", nargs='*',
+                        help="specify INFILE and OUTFILE in that order")
 
-    (options, pos) = parser.parse_args(argv[1:])
-
-    if options.morehelp:
+    args = parser.parse_intermixed_args(argv[1:])
+    if args.more_help:
         print(moreDetailsText)
         sys.exit()
+    if args.version:  # bypass "helpful" help formatter
+        print(versionText)
+        sys.exit()
 
-    if options.writechr not in (0, 1, 2, 3, None):
+    if args.write_chr not in (0, 1, 2, 3, None):
         parser.error("color set for tile sheet must be 0 to 3")
-    if options.xscroll < 0 or options.xscroll > 31:
+    if args.scroll_x < 0 or args.scroll_x > 31:
         parser.error("X scroll must be 0 to 31")
-    if options.yscroll < 0 or options.yscroll > 29:
+    if args.scroll_y < 0 or args.scroll_y > 29:
         parser.error("Y scroll must be 0 to 29")
 
     # Fill unfilled roles with positional arguments
-    pos = iter(pos)
+    pos = iter(args.files)
     try:
-        infilename = options.infilename or next(pos)
+        infilename = args.input or next(pos)
     except StopIteration:
-        if options.swatchfilename:
+        if args.write_swatches:
             infilename = None
         else:
             parser.error("no input file; try %s --help"
@@ -209,14 +240,14 @@ def parse_argv(argv):
         intype = None
 
     try:
-        outfilename = options.outfilename or next(pos)
+        outfilename = args.output or next(pos)
     except StopIteration:
-        if options.show:
+        if args.show:
             outtype = 'bmp'
             outfilename = None
         elif infilename and infilename[-4:].lower() in ('.sav', '.srm'):
             outfilename = infilename  # overwrite same file
-        elif options.swatchfilename and not infilename:
+        elif args.write_swatches and not infilename:
             outfilename = None
         else:
             parser.error("no output file")
@@ -236,12 +267,12 @@ def parse_argv(argv):
         parser.error("too many filenames")
 
     # look for mutually conflicting options
-    if options.chrfilename:
-        chrext = os.path.splitext(options.chrfilename)[1].lstrip('.').lower()
+    if args.chr:
+        chrext = os.path.splitext(args.chr)[1].lstrip('.').lower()
         try:
             chrtype = infile_exts[chrext]
         except KeyError:
-            if intype == 'ppu' and xdigitRE.match(options.chrfilename):
+            if intype == 'ppu' and xdigitRE.match(args.chr):
                 chrtype = 'literal'
             else:
                 parser.error("unrecognized extension '%s' for tile sheet" % chrext)
@@ -252,12 +283,12 @@ def parse_argv(argv):
     else:
         chrtype = None
 
-    if options.palette:
-        palext = os.path.splitext(options.palette)[1].lstrip('.').lower()
+    if args.palette:
+        palext = os.path.splitext(args.palette)[1].lstrip('.').lower()
         try:
             paltype = infile_exts[palext]
         except KeyError:
-            if xdigitRE.match(options.palette):
+            if xdigitRE.match(args.palette):
                 paltype = 'literal'
             else:
                 parser.error("unrecognized extension '%s' for palette" % chrext)
@@ -268,22 +299,35 @@ def parse_argv(argv):
     else:
         paltype = None
 
-    if chrtype == 'nam' and not options.chrfilename:
-        parser.error("converting a nametable requires a tile sheet (--chr)")
-    remap = (intype == 'bmp' and options.chrfilename) or options.remap
-    if remap and (not options.chrfilename or chrtype == 'literal'):
-        parser.error("remapping CHR requires a tile sheet (--chr)")
-    if chrtype == 'nam' and (options.writechr or options.remap):
-        parser.error("nametable has no tile sheet")
-    if intype != 'ppu' and (options.xscroll or options.yscroll):
+    if chrtype == 'nam' and not args.chr:
+        parser.error("converting a nametable requires a tile sheet; use --chr")
+    remap = (intype == 'bmp' and args.chr) or args.remap
+    if remap and (not args.chr or chrtype == 'literal'):
+        parser.error("remapping CHR requires a tile sheet; use --chr")
+    if chrtype == 'nam' and args.remap:
+        parser.error("nametable has no tile sheet to remap")
+    if chrtype == 'nam' and args.write_chr:
+        parser.error("nametable has no tile sheet to write")
+    if intype != 'ppu' and (args.scroll_x or args.scroll_y):
         parser.error("only PPU dumps can be scrolled")
-    if options.printpalette and paltype not in ('ppu', 'sav'):
+    if args.print_palette and paltype not in ('ppu', 'sav'):
         parser.error("only PPU dumps and save files have an NES palette")
+    if args.max_tiles is not None and not 2 <= args.max_tiles <= 256:
+        parser.error("max-tiles not in 2 to 256")
 
-    return (infilename, outfilename, options.chrfilename,
-            options.xscroll, options.yscroll,
-            options.palette, options.printpalette, options.writechr,
-            options.show, remap, options.swatchfilename)
+    write_swatches = args.write_swatches
+    if write_swatches is True:
+        if args.show:
+            write_swatches = '--show'
+        else:
+            parser.error("--write-swatches requires a filename, "
+                         "- for standard output, or --show for the display")
+
+    return (infilename, outfilename, args.chr,
+            args.scroll_x, args.scroll_y,
+            args.palette, args.print_palette, args.write_chr,
+            args.show, remap, write_swatches, args.max_tiles,
+            args.nes_clut)
 
 def test_argv():
     from shlex import split as strtoargs
@@ -401,15 +445,19 @@ def load_nam(filename):
 
 # Bitmap image loading ##############################################
 
-def bitmap_to_sav(im):
+def bitmap_to_sav(im, max_tiles=None):
     """Convert a PIL bitmap without remapping the colors."""
     from pilbmp2nes import pilbmp2chr
     from chnutils import dedupe_chr
     (w, h) = im.size
     im = pilbmp2chr(im, 8, 8)
 
-    namdata = bytearray([0xFF] * 960)
-    namdata.extend([0x00] * 64)
+    if max_tiles is not None:
+        from jrtilevq import reduce_tiles
+        im = reduce_tiles(im, max_tiles)
+
+    namdata = bytearray([0xFF]) * 960
+    namdata.extend(bytes(64))
     # If smaller than 16384 pixels, output as a tile sheet
     # with a blank nametable
     if len(im) > 256:
@@ -446,15 +494,19 @@ def ensure_pil():
               file=sys.stderr)
         sys.exit(1)
 
-def load_bitmap(filename):
+def load_bitmap(filename, max_tiles=None):
     """Load a BMP, GIF, or PNG image without remapping the colors."""
     ensure_pil()
-    return bitmap_to_sav(Image.open(filename))
+    return bitmap_to_sav(Image.open(filename), max_tiles)
 
 # Rendering .sav file to bitmap #####################################
 
-# Bisqwit's palette
-bisqpal = bytes.fromhex(
+# Palette generated in 2012 with Bisqwit's NTSC NES palette generator
+# <https://bisqwit.iki.fi/utils/nespalette.php>
+# The settings have since been lost but were close to
+#     hue 0, sat 1.2, contrast 1.0, brightness 1.0, gamma 2.2
+# it was later clarified that sat 2 is closer to standard
+bisqwit2012 = bytes.fromhex(
     '656565002d69131f7f3c137c600b62730a37710f075a1a00'
     '3428000b3400003c00003d10003840000000000000000000'
     'aeaeae0f63b34051d07841cca736a9c03470bd3c309f4a00'
@@ -464,8 +516,10 @@ bisqpal = bytes.fromhex(
     'fefeffbcdfffd1d8ffe8d1fffbcdfdffcce5ffcfcaf8d5b4'
     'e4dca8cce3a9b9e8b8aee8d0afe5eab6b6b6000000000000'
 )
-bisqpal = [bisqpal[i:i + 3]
-          for i in range(0, len(bisqpal), 3)]
+
+known_cluts = {
+    'bisqwit2012': bisqwit2012,
+}
 
 def sliver_to_texels(lo, hi):
     return [((lo >> i) & 1) | (((hi >> i) & 1) << 1)
@@ -483,13 +537,20 @@ def chrbank_to_texels(chrdata):
     _ttt = tile_to_texels
     return [_ttt(chrdata[i:i + 16]) for i in range(0, len(chrdata), 16)]
 
-def texels_to_pil(texels, tile_width=16):
+def texels_to_pil(texels, tile_width=16, row_height=1):
     ensure_pil()
-    r8 = range(8)
-    texels = [texels[i:i + tile_width]
-              for i in range(0, len(texels), tile_width)]
+    row_length = tile_width * row_height
+    tilerows = [
+        texels[j:j + row_length:row_height]
+        for i in range(0, len(texels), row_length)
+        for j in range(i, i + row_height)
+    ]
+    emptytile = [bytes(8)] * 8
+    for row in tilerows:
+        if len(row) < tile_width:
+            row.extend([emptytile] * (tile_width - len(tilerows[-1])))
     texels = [bytes(c for tile in row for c in tile[y])
-              for row in texels for y in range(8)]
+              for row in tilerows for y in range(8)]
     im = Image.frombytes('P', (8 * tile_width, len(texels)), b''.join(texels))
     im.putpalette(b'\x00\x00\x00\x66\x66\x66\xb2\xb2\xb2\xff\xff\xff'*64)
     return im
@@ -508,10 +569,15 @@ def decode_attribute_table(attrs):
              for row in attrs for subrow in row]
     return attrs[:15]
 
-def render_bitmap(sav):
+def render_bitmap(sav, clut):
+    """Render a background in a save file to an indexed image.
+
+sav -- save file from which to pull the CHR, tilemap, and palette
+clut -- a list of 64 tuples
+"""
     chrdata = sav[0x0000:0x1000]
     palette = sav[0x1F00:0x1F20]
-    rgbpalette = [bisqpal[c & 0x3F] for c in palette]
+    rgbpalette = [clut[c & 0x3F] for c in palette]
     tiles = chrbank_to_texels(chrdata)
     nam = sav[0x1800:0x1C00]
     attrs = decode_attribute_table(nam[0x3C0:])
@@ -525,10 +591,16 @@ def render_bitmap(sav):
     im.putpalette(b''.join(rgbpalette) * 8)
     return im
 
-def render_tilesheet(sav, colorset):
+def render_tilesheet(sav, colorset, clut):
+    """Render a CHR sheet to an indexed image.
+
+sav -- save file from which to pull the CHR sheet and palette
+colorset -- which subpalette to use (0 to 7)
+clut -- a list of 64 tuples
+"""
     chrdata = sav[0x0000:0x1000]
     palette = sav[0x1F00:0x1F20]
-    rgbpalette = [bisqpal[c & 0x3F] for c in palette]
+    rgbpalette = [clut[c & 0x3F] for c in palette]
     tiles = texels_to_pil(chrbank_to_texels(chrdata))
     subpal = rgbpalette[0:1] + rgbpalette[colorset*4+1:colorset*4+4]
     tiles.putpalette(b''.join(subpal) * 64)
@@ -582,6 +654,38 @@ def remap_sav_to_chr(srcsav, dstsheet):
     newnam = bytearray(dstseen[srctiles[i]] for i in srcsav[0x1800:0x1BC0])
     return b''.join((b''.join(dsttiles),
                     srcsav[0x1000:0x1800], newnam, srcsav[0x1BC0:]))
+
+def sav_reduce_tiles(sav, max_tiles):
+    from jrtilevq import reduce_tiles
+
+    # Reconstitute image from tile set and tile map
+    chrdata = [sav[i:i + 16] for i in range(0, 0x1000, 0x10)]
+    chrdata = [chrdata[i] for i in sav[0x1800:0x1BC0]]
+
+    # Reduce tiles
+    chrdata = reduce_tiles(chrdata, max_tiles)
+    print(len(chrdata), max_tiles)
+
+    # Form the new tilemap
+    nt = bytearray()
+    tiletoid = {}
+    for tile in chrdata:
+        tiletoid.setdefault(tile, len(tiletoid))
+        nt.append(tiletoid[tile])
+    newchrdata = [b''] * len(tiletoid)
+    for t, n in tiletoid.items():
+        newchrdata[n] = t
+    assert(len(nt) == 960)
+    assert(len(newchrdata) <= max_tiles)
+
+    # And put it in a new sav file
+    newsav = bytearray(b''.join(newchrdata))
+    newsav.extend(bytes(0x1000 - len(newsav)))
+    newsav.extend(sav[0x1000:0x1800])
+    newsav.extend(nt)
+    newsav.extend(sav[0x1BC0:])
+    assert(len(newsav) == 8192)
+    return bytes(newsav)
 
 # Rounding a bitmap toward a given palette ##########################
 
@@ -651,13 +755,12 @@ def colorround(im, palettes):
     attrs = [attrs[i:i + attrw] for i in range(0, len(attrs), attrw)]
     return (imf, attrs)
 
-def load_bitmap_with_palette(filename, palette):
+def load_bitmap_with_palette(filename, palette, clut, max_tiles=None):
     ensure_pil()
     from pilbmp2nes import pilbmp2chr
-    from chnutils import dedupe_chr
     im = Image.open(filename)
     (w, h) = im.size
-    palettes = [tuple(bisqpal[i]) for i in palette]
+    palettes = [tuple(clut[i]) for i in palette]
     palettes = [[palettes[0]] + palettes[i + 1:i + 4]
                 for i in range(0, 16, 4)]
 
@@ -679,24 +782,119 @@ def load_bitmap_with_palette(filename, palette):
 
 # Saving the NES palette that this converter uses ###################
 
-def save_swatches(filename=None):
-    from PIL import ImageFont, ImageDraw
+hexfont = [
+    0x6999960, 0x2622220, 0x69168f0, 0x6161960,
+    0x359f110, 0x78e1960, 0x68e9960, 0xf122440,
+    0x6969960, 0x6997160, 0x0617970, 0x8e999e0,
+    0x0698960, 0x1799970, 0x069f870, 0x34e4440,
+]
+HEXFONT_HT = 8
+HEXFONT_ADVANCE = 5
 
+def write_hex_digits(im, xy, value, length, fill):
+    left, top = xy
+    width, height = im.size
+    px = im.load()
+    for placevalue in reversed(range(length)):
+        glyph = hexfont[(value >> (placevalue * 4)) & 0x0F]
+        for y in range(HEXFONT_HT):
+            sliver_y = top + y
+            glyphrow = (glyph >> ((HEXFONT_HT - y - 1) * 4)) & 0x0F
+            if glyphrow == 0 or not 0 <= sliver_y < height: continue
+            for x in range(left, min(width, left + 4)):
+                if glyphrow & 0x08 and 0 <= x:
+                    px[x, sliver_y] = fill
+                glyphrow <<= 1
+        left += HEXFONT_ADVANCE
+
+def colorname(colorid):
+    colorid &= 0x3F
+    if colorid == 0x0F: return "Black"
+    row, column = colorid >> 4, colorid & 0x0F
+    if column >= 0x0E: return "Duplicate black"
+    if column == 0x00:
+        levels = ['Dark gray', 'Light gray', 'White', 'Overbright white']
+        return levels[row]
+    if column == 0x0D:
+        levels = ['Blacker than black', 'Tintable black', 'Darker gray', 'Duplicate light gray']
+        return levels[row]
+    hues = [
+        "aquamarine", "blue", "indigo", "magenta",
+        "pink", "red", "orange", "olive",
+        "chartreuse", "green", "sea green", "turquoise"
+    ]
+    levels = ["Dark", "Medium", "Light", "Pale"]
+    return " ".join((levels[row], hues[column - 1]))
+
+def save_swatches(clut, clutname, filename=None):
+    from PIL import ImageFont, ImageDraw
+    assert len(clut) == 64
+
+    # stdout or .txt is 64 lines as follows:
+    # 0C<tab>#003840
+    if filename is None or filename.lower().endswith(".txt"):
+        lines = "".join(
+            "%02x\t#%s\n" % (i, b.hex())
+            for i, b in enumerate(clut)
+        )
+        if filename is None:
+            sys.stdout.write(lines)
+        else:
+            with open(filename, "w", encoding="utf-8") as outfp:
+                outfp.write(lines)
+        return
+
+    # .gpl is a header then 64 lines as follows:
+    #   0  56  64     $0c
+    # This can be placed somewhere like
+    # /home/pino/.gimp-2.8/palettes
+    if filename.lower().endswith(".gpl"):
+        lines = ["""GIMP Palette
+Name: %s
+Columns: 16
+#
+""" % clutname]
+        lines.extend(
+            "%3d%4d%4d\t$%02x %s\n" % (b[0], b[1], b[2], i, colorname(i))
+            for i, b in enumerate(clut)
+        )
+        with open(filename, "w", encoding="utf-8") as outfp:
+            outfp.writelines(lines)
+        return
+
+    # .pal files for use with emulators is just a 192 byte
+    # binary dump (RGBRGBRGB...)
+    # This can be placed somewhere like
+    # /home/pino/.local/share/fceux/palettes
+    # C:\Program Files (x86)\FCEUX\palettes
+    if filename.lower().endswith(".pal"):
+        with open(filename, "wb") as outfp:
+            outfp.writelines(clut)
+        return
+
+    # Otherwise, it's an image (.bmp, .gif, .png)
     cellw, cellh = 24, 24
     im = Image.new('P', (16*cellw, 5*cellh), 0x0F)
-    im.putpalette(b''.join(bisqpal) + b'\xff\x00\xff'*192)
+    im.putpalette(b''.join(clut) + b"\xff\x00\xff" * (256 - len(clut)))
     fnt = ImageFont.load_default()
     dc = ImageDraw.Draw(im)
-    captiontxt = "savtool's NES palette"
-    tw, th = dc.textsize(captiontxt, font=fnt)
-    captionpos = ((cellw * 16 - tw) // 2, (cellh - th) // 2)
-    dc.text(captionpos, captiontxt, font=fnt, fill=0x20)
+    headerh = cellh
+    captionpos = (cellw * 16 // 2, headerh // 2)
+    dc.text(captionpos, clutname, font=fnt, fill=0x20, anchor="mm")
     for row in range(4):
-        y = (row + 1) * cellh
+        y = row * cellh + headerh
         for col in range(16):
             x = col * cellw
             colornumber = row * 16 + col
             dc.rectangle((x, y, x + cellw, y + cellh), fill=colornumber)
+
+            if colornumber == 0x0D:
+                # Draw no-no color marker
+                dc.ellipse((x, y, x + cellw - 1, y + cellh - 1),
+                           width=4, outline=0x16)
+                dc.line((x + cellw // 6, y + cellh // 6,
+                         x + 5 * cellw // 6, y + 5 * cellh // 6),
+                        width=3, fill=0x16)
 
             # draw caption
             graylevel = (row + 1 if col < 1
@@ -704,26 +902,41 @@ def save_swatches(filename=None):
                          else row - 1 if col < 14
                          else 0)
             captioncolor = 0x20 if graylevel < 2 else 0x0F
-            captiontxt = '%02x' % colornumber
-            tw, th = dc.textsize(captiontxt, font=fnt)
-            captionpos = (x + cellw - tw, y + cellh - th)
-            dc.text(captionpos, captiontxt, font=fnt, fill=captioncolor)
-    if filename:
+            captionpos = (x + cellw - 2 * HEXFONT_ADVANCE,
+                          y + cellh - HEXFONT_HT)
+            write_hex_digits(im, captionpos, colornumber, 2, captioncolor)
+    if filename and filename != '--show':
         im.save(filename)
     else:
-        im.show()
+        im.convert("RGB").show()
 
-# Let's see if we can do main() now. ################################
+# CLI front end #####################################################
 
 def main(argv=None):
     args = parse_argv(argv or sys.argv)
     (infilename, outfilename, chrfilename,
      xscroll, yscroll, palette, printpalette, writechr,
-     show, remap, swatchfilename) = args
+     show, remap, swatchfilename, max_tiles, clutname) = args
     progname = os.path.basename(sys.argv[0])
+    try:
+        clut = known_cluts[clutname]
+    except KeyError:
+        if clutname[-4:].lower() == '.png':
+            with Image.open(clutname) as im:
+                if im.mode != 'P':
+                    print("savtool.py: %s: palette image must be mode P (indexed), not mode %s"
+                          % (clutname, im.mode))
+                    sys.exit(1)
+                clut = im.getpalette()
+        else:
+            with open(clutname, "rb") as infp:
+                clut = infp.read(192)
+        clutname = os.path.basename(clutname)
+    clut = [bytes(clut[i:i + 3]) for i in range(0, 192, 3)]
 
     if swatchfilename:
-        save_swatches(swatchfilename if swatchfilename != '-' else None)
+        save_swatches(clut, clutname,
+                      swatchfilename if swatchfilename != '-' else None)
         if not infilename:
             return
 
@@ -761,16 +974,23 @@ def main(argv=None):
     elif intype == 'sav':
         sav = load_sav(infilename)
     elif intype == 'bmp':
+        # max_tiles has to be passed to bitmap loaders because
+        # otherwise they can 
         if palette:
-            sav = load_bitmap_with_palette(infilename, palette)
+            sav = load_bitmap_with_palette(infilename, palette, clut, max_tiles)
         else:
-            sav = load_bitmap(infilename)
+            sav = load_bitmap(infilename, max_tiles)
     elif intype == 'nam':
         sav = load_nam(infilename)
     else:
         print("%s: %s input type not yet implemented" % (progname, intype),
               file=sys.stderr)
         sys.exit(1)
+
+    ntuniques = len(set(sav[0x1800:0x1BC0]))
+    if max_tiles is not None and max_tiles < ntuniques:
+        print("Reducing", ntuniques, "uniques to", max_tiles)
+        sav = sav_reduce_tiles(sav, max_tiles)
 
     changed = False
     if paltype == 'literal':
@@ -781,22 +1001,29 @@ def main(argv=None):
     if chrtype in ('ppu', 'sav', 'chr'):
         chrdata = load_chr(chrfilename)
     elif chrtype == 'bmp':
-        chrdata = load_bitmap(chrfilename)
+        from pilbmp2nes import pilbmp2chr
+        with Image.open(chrfilename) as chrim:
+            chrdata = pilbmp2chr(chrim, 8, 8)
+        chrdata.extend(chrdata[:1] * (256 - len(chrdata)))
+        chrdata = b''.join(chrdata)
     elif chrtype:
         print("%s: %s tile sheet type not yet implemented" % (progname, chrtype),
               file=sys.stderr)
         sys.exit(1)
     if chrdata:
-        assert len(chrdata) >= 4096
         if remap:
+            assert len(chrdata) <= 4096
             sav = remap_sav_to_chr(sav, chrdata)
         else:
+            assert len(chrdata) >= 4096
             sav = chrdata[:4096] + sav[4096:]
         changed = True
 
     im = None
     if show or outtype == 'bmp':
-        im = render_tilesheet(sav, writechr) if writechr is not None else render_bitmap(sav)
+        im = (render_tilesheet(sav, writechr, clut)
+              if writechr is not None
+              else render_bitmap(sav, clut))
     if outtype == 'bmp':
         im.save(outfilename)
     elif outtype == 'chr':
@@ -813,7 +1040,7 @@ def main(argv=None):
               file=sys.stderr)
         sys.exit(1)
     if show:
-        im.show()
+        im.convert("RGB").show()
     if printpalette:
         print(''.join('%02x' % b for b in sav[0x1F00:0x1F10]))
 
@@ -857,5 +1084,7 @@ def test_suite():
 look correct.""")
 
 if __name__=='__main__':
-##    test_suite()
-    main()
+    if 'idlelib' in sys.modules:
+        test_suite()
+    else:
+        main()
