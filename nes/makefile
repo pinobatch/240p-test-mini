@@ -25,8 +25,8 @@ objlist:=vwf7 zappertest overclock paldetect vwf_draw init \
 objlistnsf := mdfouriernsf mdfourier ntscPeriods
 objlistmdf4k := mdfourier4kfe mdfourier padsnodas ntscPeriods
 objlistmdf4kchr := mdfourier4kfe-chrrom mdfourier padsnodas ntscPeriods
-objlistmdf4kauto := mdfourier4kfe-autostart mdfourier padsnodas ntscPeriods
-objlistmdf4kchrauto := mdfourier4kfe-chrrom-autostart mdfourier padsnodas ntscPeriods
+objlistmdf4kauto := mdfourier4kfe-autostart mdfourier ntscPeriods
+objlistmdf4kchrauto := mdfourier4kfe-chrrom-autostart mdfourier ntscPeriods
 
 AS65:=ca65
 LD65:=ld65

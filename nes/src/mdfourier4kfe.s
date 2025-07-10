@@ -23,6 +23,8 @@
 ; and can affect noise
 MDF_PA13_HIGH = 1
 
+MDF4K_AUTOSTART_DELAY = 60
+
 test_good_phase := test_state+6
 
 OAM := $0200  ; for synced reads
@@ -111,15 +113,58 @@ irq_handler:
   sta mdfourier_good_phase
   lda #VBLANK_NMI
   sta PPUCTRL
-  .ifdef ::MDF4K_AUTOSTART
-    jmp autostart_entry_point
-  .else
+  .ifndef ::MDF4K_AUTOSTART
     jsr mdfourier_ready_tone
   .endif
   
 restart:
   jsr mdfourier_init_apu
   jsr mdfourier_push_apu
+  jsr mdf4k_draw_title
+
+  .ifdef ::MDF4K_AUTOSTART
+    ldy #MDF4K_AUTOSTART_DELAY
+    titlewait:
+      jsr vsync
+      dey
+      bne titlewait
+  .else
+    ; Wait for A press
+    keywait:
+      jsr read_pads
+      jsr vsync
+      lda new_keys
+      bpl keywait
+  .endif
+
+autostart_entry_point:
+  ; reduce interference from the PPU as far as we possibly can
+  ldy #$3F
+  lda #$00
+  ldx #$0D
+  sta PPUMASK
+  sty PPUADDR
+  sta PPUADDR
+  stx PPUDATA
+  sta PPUADDR
+  sta PPUADDR
+
+  .if ::MDF_PA13_HIGH
+    ldx #$20
+    stx PPUADDR
+    sta PPUADDR
+  .endif
+  jsr mdfourier_run
+
+  .ifdef ::MDF4K_AUTOSTART
+    jsr mdf4k_draw_title
+  forever: jmp forever
+  .else
+    jmp restart
+  .endif
+.endproc
+
+.proc mdf4k_draw_title
   lda #VBLANK_NMI
   sta PPUCTRL
   asl a
@@ -212,33 +257,7 @@ have_phase_xy:
   sta PPUSCROLL
   lda #BG_ON
   sta PPUMASK
-
-  ; Wait for A press
-  keywait:
-    jsr read_pads
-    jsr vsync
-    lda new_keys
-    bpl keywait
-
-autostart_entry_point:
-  ; reduce interference from the PPU as far as we possibly can
-  ldy #$3F
-  lda #$00
-  ldx #$0D
-  sta PPUMASK
-  sty PPUADDR
-  sta PPUADDR
-  stx PPUDATA
-  sta PPUADDR
-  sta PPUADDR
-
-  .if ::MDF_PA13_HIGH
-    ldx #$20
-    stx PPUADDR
-    sta PPUADDR
-  .endif
-  jsr mdfourier_run
-  jmp restart
+  rts
 .endproc
 
 .proc write_4y_of_a
@@ -261,14 +280,21 @@ autostart_entry_point:
 .endproc
 
 .proc mdfourier_present
-  bit new_keys
-  bvc no_B_press
-    lda mdfourier_good_phase
-    sta test_good_phase
-    rts
-  no_B_press:
-  jsr vsync
-  jsr sync_read_b_button
+  .ifdef ::MDF4K_AUTOSTART
+    jsr vsync
+    lda #0
+    sta new_keys
+    sta cur_keys
+  .else
+    bit new_keys
+    bvc no_B_press
+      lda mdfourier_good_phase
+      sta test_good_phase
+      rts
+    no_B_press:
+    jsr vsync
+    jsr sync_read_b_button
+  .endif
   jmp mdfourier_push_apu
 .endproc
 
