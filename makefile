@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 #
 # Makefile for 240p test suite outer packaging
-# Copyright 2021 Damian Yerrick
+# Copyright 2021-2025 Damian Yerrick
 #
 # Copying and distribution of this file, with or without
 # modification, are permitted in any medium without royalty
@@ -20,6 +20,7 @@ endif
 alltargets:=\
   nes/240pee.nes nes/240pee-bnrom.nes nes/240pee-tgrom.nes \
   nes/mdfourier.nsf nes/mdfourier4k.nes nes/mdfourier4k-chrrom.nes \
+  nes/mdfourier4k-autostart.nes nes/mdfourier4k-chrrom-autostart.nes \
   gameboy/gb240p.gb gba/240pee_mb.gba nes/240pee-sgrom.nes
 
 .PHONY: all dist clean $(alltargets)
@@ -28,17 +29,21 @@ dist: $(title)-docsrc-$(version).zip $(title)-$(version).zip
 
 # Try to minimize the harm of recursive make.
 # 240pee-bnrom.nes depends on 240pee.nes so that parallel make (-j2)
-# doesn't try double-building compiling each file in both
+# doesn't try double-building each file in both
 nes/240pee.nes:
 	$(MAKE) -C nes $(notdir $@)
-nes/240pee-bnrom.nes nes/mdfourier.nsf nes/mdfourier4k.nes \
-nes/mdfourier4k-chrrom.nes: \
-  nes/240pee.nes
+	
+# These two rules have exactly the same prerequisites and recipe yet
+# cannot be combined lest GNU Make 4.3 emit a fatal error:
+# makefile:35: *** mixed implicit and normal rules.  Stop.
+nes/240pee-%rom.nes: nes/240pee.nes
 	$(MAKE) -C nes $(notdir $@)
-nes/240pee-sgrom.s: 240pee-bnrom.nes
+nes/mdfourier.nsf nes/mdfourier4k.nes: nes/240pee.nes
 	$(MAKE) -C nes $(notdir $@)
-nes/240pee-tgrom.s: 240pee-sgrom.nes
+
+nes/mdfourier4k-%.nes: nes/mdfourier4k.nes
 	$(MAKE) -C nes $(notdir $@)
+
 gameboy/gb240p.gb:
 	$(MAKE) -C gameboy $(notdir $@)
 gba/240pee_mb.gba:

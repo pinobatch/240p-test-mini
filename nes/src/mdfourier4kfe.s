@@ -19,10 +19,6 @@
 .include "nes.inc"
 .include "global.inc"
 
-; Aims to support use with mapper 0, 1, 2, 4, 7, or 218
-; Mapper 7 is the most emulator compatible
-MAPPERNUM = 7
-
 ; Rumor has it that PPU A13 passes through the audio inverter
 ; and can affect noise
 MDF_PA13_HIGH = 1
@@ -31,20 +27,34 @@ test_good_phase := test_state+6
 
 OAM := $0200  ; for synced reads
 
-.segment "INESHDR"
-.if MAPPERNUM = 218
+; Aims to support use with mapper 0, 1, 2, 4, 7, or 218.
+; For broadest emulator compatibility, use mapper 7 for CHR RAM
+; or mapper 0 for CHR ROM.
+.ifdef MDF4K_CHRROM
+  CHRBANKS = 1
+  .ifndef MDF4K_MAPPERNUM
+    ; Everything supports NROM
+    MDF4K_MAPPERNUM = 0
+  .endif
+.else
+  CHRBANKS = 0
+  .ifndef MDF4K_MAPPERNUM
+    ; AxROM single screen mirroring most closely represents the
+    ; minimalist mapper 218 dev cart for which MDF 4K was first made
+    MDF4K_MAPPERNUM = 7
+  .endif
+.endif
+
+.if MDF4K_MAPPERNUM = 218
   MIRRORING = 9
 .else
   MIRRORING = 1
 .endif
-.ifdef CHRROM
-  CHRBANKS = 1
-.else
-  CHRBANKS = 0
-.endif
+
+.segment "INESHDR"
 .byte "NES", $1A, 1, CHRBANKS
-.byte (MAPPERNUM << 4) & $F0 | MIRRORING
-.byte MAPPERNUM & $F0
+.byte (MDF4K_MAPPERNUM << 4) & $F0 | MIRRORING
+.byte MDF4K_MAPPERNUM & $F0
 
 ; Space for you to patch in whatever initialization your mapper needs
 .segment "STUB15"
@@ -101,8 +111,12 @@ irq_handler:
   sta mdfourier_good_phase
   lda #VBLANK_NMI
   sta PPUCTRL
-  jsr mdfourier_ready_tone
-  ; fall through
+  .ifdef ::MDF4K_AUTOSTART
+    jmp autostart_entry_point
+  .else
+    jsr mdfourier_ready_tone
+  .endif
+  
 restart:
   jsr mdfourier_init_apu
   jsr mdfourier_push_apu
@@ -112,7 +126,7 @@ restart:
   tay
   sta PPUMASK
 
-.ifndef CHRROM
+.ifndef ::MDF4K_CHRROM
   ; Copy tiles to CHR RAM
   sty PPUADDR
   sty PPUADDR
@@ -206,6 +220,7 @@ have_phase_xy:
     lda new_keys
     bpl keywait
 
+autostart_entry_point:
   ; reduce interference from the PPU as far as we possibly can
   ldy #$3F
   lda #$00
@@ -222,7 +237,6 @@ have_phase_xy:
     stx PPUADDR
     sta PPUADDR
   .endif
-
   jsr mdfourier_run
   jmp restart
 .endproc
@@ -266,7 +280,7 @@ have_phase_xy:
   rts
 .endproc
 
-.ifdef CHRROM
+.ifdef MDF4K_CHRROM
 .segment "CHR"
 .else
 .rodata
