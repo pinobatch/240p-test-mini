@@ -1,4 +1,4 @@
-The following instructions for making a cartridge of 240p test suite
+The following instructions for making a cartridge of 240p Test Suite
 for NES are based on instructions in [Ice Man's post] on NESdev BBS.
 
 The suite uses the [UNROM board] (iNES mapper 2) with horizontal
@@ -10,8 +10,8 @@ Or you can buy a [discrete repro board] from RetroStage and
 populate it with the necessary discrete parts and key CIC.
 
 NES ROM images contain a 16-byte header, starting with `4E 45 53 1A`.
-This describes the game's intended circuit board to an emulator.  But
-because you have an actual circuit board, you'll want to chop off the
+This describes the game's intended circuit board to an emulator.
+Because you have an actual circuit board, you'll want to chop off the
 first 16 bytes in a hex editor, resulting in a binary image 65,536
 bytes in size.  And if you're using a memory larger than a 27C512,
 you'll need to double up the ROM to fill it.  The `nestobin.py`
@@ -27,8 +27,8 @@ or the CHR RAM.  Clean the holes.
 
 After you've burned the binary to your EPROM using an EPROM
 programmer, solder it into the PCB.  The pinout for RetroStage
-reproduction boards should match that of an EPROM.  But if you
-use a Nintendo donor board, you'll need to rearrange a few pins
+reproduction boards should match that of an EPROM.  If you use
+a Nintendo donor board, you'll need to rearrange a few pins
 slightly using short pieces of wire.
 
 For 28-pin EPROMs (27C512, 29F512):
@@ -61,28 +61,35 @@ memory.  See the [CrackOut prototype] for an example.
 
 Finally, set the nametable arrangement to horizontal.  On Nintendo
 donor boards, make sure H is closed with solder and V is open.
-The majority of UNROM games have H closed, but a few have V closed,
-so you'll need to resolder the pads.  RetroStage boards use the
-"mirroring" convention, so close VERT and leave HORIZ open.
+The majority of UNROM games have H closed; for the few with V
+closed, you'll need to resolder the pads.  RetroStage boards use the
+opposite "mirroring" convention, so close VERT and leave HORIZ open.
 
-Versions 0.13 and later of the suite include distinct executables for
-UNROM and BNROM boards.  (This replaces the mapper hack included with
-0.08 through 0.12, which relied on their use of only 48K out of 64K.)
-Why BNROM when only _Deadly Towers_ uses it?
+The full package also includes executables for BNROM (since 0.13),
+SGROM/SNROM (since 0.23), and TGROM/TNROM (since 0.23) cartridge
+boards.  Why BNROM when only _Deadly Towers_ uses it?
 
-1. _Deadly Towers_ is a piece of crap.  Turning them into 240p
-   carts will make the world a better place.
+1. _Deadly Towers_ is a fairly common yet poorly received game.
+   Turning them into 240p carts will make the world a better place.
 2. AMROM, ANROM, and AOROM boards can be modified to behave as
    BNROM by cutting the trace from the 74161 to VRAM A10 and
-   connecting PPU A10 in its place.  For example, you could
-   tear up _A Nightmare on Elm Street_ or some other LJN turd
-   that Rare was unlucky enough to be involved in.
-3. Repro boards for BNROM don't need the 74HC32.  Save money!
+   connecting PPU A10 in its place.  For example, you could upcycle
+   _A Nightmare on Elm Street_ or some other poorly received
+   LJN game that Rare was unlucky enough to be involved in.
+3. Reproduction boards for BNROM don't need the 74HC32.  Save money!
 
-If you are including 240p Test Suite in an [Action 53] compilation,
+SGROM and TGROM are there for two reasons.  One is to run on MMC1 or
+MMC3 donor cartridges for FamicomBox, a console variant installed in
+hotels.  Its cartridges have a special CIC that hasn't been cloned
+the way NES CIC has.  The other is multicarts using MMC3 clones.
+
+The stand-alone MDFourier tone generator ROM can run on a mapper 218
+cartridge, which has only a PRG ROM and no CHR ROM or mapper.
+
+When including 240p Test Suite in an [Action 53] compilation,
 do this to ensure accuracy of MDFourier results:
 
-1. In `nes/src/global.inc`, set `IS_MULTICART` to nonzero
+1. In `nes/src/global.inc`, set `IS_MULTICART` to nonzero and rebuild
 2. In your compilation's `a53.cfg`, set `exitmethod=none` for the
    240p Test Suite ROM so that Start+Reset can work.
 

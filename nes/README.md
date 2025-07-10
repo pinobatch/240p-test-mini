@@ -66,6 +66,11 @@ CPU speeds and frame rates among the console's regional variants
 and has been tested on authentic NTSC and PAL NES consoles and on a
 Dendy (PAL famiclone).
 
+The stand-alone MDFourier ROMs boot straight into the tone generator.
+The autostart version lacks the buzzing side effect from controller
+reading and may be easier to use with a disassembled console or an
+emulator's automated test harness.
+
 Artemio Urbina maintains the upstream suite on five platforms:
 
 * It was first developed in C for the Sega Genesis using the SGDK,
