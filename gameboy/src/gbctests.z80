@@ -726,7 +726,11 @@ smpte_bars_engine:
   ldh a,[new_keys]
   ld b,a
   bit PADB_B,b
-  ret nz
+  jr z, .not_quit
+    xor a
+    ldh [rNR52], a
+    ret
+  .not_quit:
 
   ; 0: NTSC setup, 75%
   ; 1: no setup, 75%
