@@ -285,13 +285,13 @@ activity_megaton_complete:
   ld a, b
   and $03
   jr z,.no_tens
-    or "0"
+    or '0'
     ld [hl+],a
   .no_tens:
   ld a, c
   swap a
   call putnibble
-  ld a,"."
+  ld a, '.'
   ld [hl+],a
   ld a,c
   call putnibble
@@ -450,7 +450,7 @@ draw_result_b:
   push af  ; Stack: raw value, which result
   rla
   jr nc,.not_early
-    ld a,"E"
+    ld a, 'E'
     ld b,0
     call vwfPutTile
   .not_early:
@@ -462,12 +462,12 @@ draw_result_b:
   jr z,.no_tens
     push bc  ; Stack: ones, index of result
     ld b,6
-    or "0"
+    or '0'
     call vwfPutTile
     pop bc
   .no_tens:
   ld a,c
-  or "0"
+  or '0'
   ld b,11
   call vwfPutTile
 

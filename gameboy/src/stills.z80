@@ -879,13 +879,13 @@ calc_custom_color:
 solid_update_rgb:
   ; Draw labels for Red, Green, and Blue
   call vwfClearBuf
-  ld a,"R"
+  ld a, 'R'
   ld b,6+24*0
   call vwfPutTile
-  ld a,"G"
+  ld a, 'G'
   ld b,6+24*1
   call vwfPutTile
-  ld a,"B"
+  ld a, 'B'
   ld b,6+24*2
   call vwfPutTile
 
@@ -899,7 +899,7 @@ solid_update_rgb:
   scf
   adc a  ; A=component*24+1
   ld b,a
-  ld a,">"
+  ld a, '>'
   call vwfPutTile
 
   ; Draw red, green, and blue values
@@ -911,7 +911,7 @@ solid_update_rgb:
   call bcd8bit_ac  ; A: tens; C: ones
   jr z,.lessthanten
     push bc
-    add "0"
+    add '0'
     ld l,a
     ld a,d
     sub 5
@@ -923,7 +923,7 @@ solid_update_rgb:
     push de
   .lessthanten:
   ld a,c
-  add "0"
+  add '0'
   ld b,d
   call vwfPutTile
   pop de

@@ -1014,13 +1014,13 @@ help_draw_status_line:
     ld [hl+],a
     ld a,[help_cur_page]
     sub d
-    add "1"
+    add '1'
     ld [hl+],a
-    ld a,"/"
+    ld a, '/'
     ld [hl+],a
     ld a,e
     sub d
-    add "0"
+    add '0'
     ld [hl+],a
     ld a,GL_RIGHT
     ld [hl+],a

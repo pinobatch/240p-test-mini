@@ -199,13 +199,13 @@ draw_bg:
   ld hl,help_line_buffer
   push hl
   ld a,[initial_a]
-  ld b,"A"
+  ld b, 'A'
   call lettercolonhex
   ld a,[initial_b]
-  ld b,"B"
+  ld b, 'B'
   call spacelettercolonhex
   ldh a,[hw_capability]
-  ld b,"C"
+  ld b, 'C'
   call spacelettercolonhex
   ld [hl],0
 
@@ -236,18 +236,18 @@ draw_bg:
   call srand
   ld c,4
   ld hl,help_line_buffer
-  ld a,"r"
+  ld a, 'r'
   ld [hl+],a
-  ld a,"a"
+  ld a, 'a'
   ld [hl+],a
-  ld a,"n"
+  ld a, 'n'
   ld [hl+],a
-  ld a,"d"
+  ld a, 'd'
   ld [hl+],a
-  ld a,":"
+  ld a, ':'
   ld [hl+],a
 .randloop:
-  ld a," "
+  ld a, ' '
   ld [hl+],a
   push bc
   push hl
@@ -318,14 +318,17 @@ bg_draw_one_block:
   ldh [rVBK],a
   ret
 
+;;
+; Writes a space, the character in B, a colon, and the hex value
+; in A at [HL+].
 spacelettercolonhex:
-  ld [hl]," "
+  ld [hl], ' '
   inc hl
   fallthrough lettercolonhex
 lettercolonhex:
   ld [hl],b
   inc hl
-  ld [hl],":"
+  ld [hl], ':'
   inc hl
   fallthrough puthex
 
@@ -347,9 +350,9 @@ putnibble::
   and $0F
   cp $0A
   jr c,.not_letter
-  add ("A"-"9"-1)
+  add ('A'-'9'-1)
 .not_letter:
-  add "0"
+  add '0'
   ld [hl+],a
   ret
 
