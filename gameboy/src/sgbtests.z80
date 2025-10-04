@@ -800,13 +800,13 @@ sgb_sound_draw_values:
   call .do3rows
   dec hl
 .do3rows:
-  ld a, [$FF00+c]
+  ldh a, [c]
   inc c
   call puthex_raw
   add hl, de
   call .do1row
 .do1row:
-  ld a, [$FF00+c]
+  ldh a, [c]
   inc c
   call putnibble_raw
   add hl, de

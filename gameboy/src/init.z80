@@ -77,9 +77,12 @@ reset_handler::
 
   ; While carry is set for GBC or clear otherwise, initialize
   ; controller reading now because SGB detection uses it.
+  ; Must preserve carry across this whole block.
   ld a,P1F_GET_NONE
   ldh [rP1],a
-  ld a, 0  ; preserve carry
+  ld a, 1
+  ld [rROMB0], a  ; bug #61: some buggy flash carts don't init ROM bank to 1
+  dec a
   ldh [cur_keys],a
   ld hl, das_keys
   ld [hl+], a  ; clear das_keys

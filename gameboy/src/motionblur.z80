@@ -227,7 +227,7 @@ motionblur_handle_dpad::
   ; Ranges differ between mono and GBC
   ld a,[help_cursor_y]
   call de_index_a  ; Valid values are L <= x < H
-  ld a,[$FF00+c]
+  ldh a, [c]
 
   ; Left/Right: Change value on this row.  D = old value
   ld d, a
@@ -245,7 +245,7 @@ motionblur_handle_dpad::
   cp h
   ret nc
   add l
-  ld [$FF00+c],a
+  ldh [c],a
   ret
 
 
@@ -291,7 +291,7 @@ make_help_vram:
   ld bc,5*256+low(back_shade)
   ld hl,help_line_buffer
   .loop:
-    ld a,[$FF00+c]
+    ldh a, [c]
     push bc
     call bcd8bit_ac
     jr nz,.has_tens
@@ -332,7 +332,7 @@ motionblur_calc_bgp:
     add a
     add low(on_time)
     ld c,a
-    ld a,[$FF00+c]
+    ldh a, [c]
     ldh [frames_left],a
 
     ; And toggle to the other frame
@@ -448,10 +448,10 @@ motionblur_calc_bgp:
   add hl,de
   ; write to 
   ld a,l
-  ld [$FF00+c],a
+  ldh [c],a
   inc c
   ld a,h
-  ld [$FF00+c],a
+  ldh [c],a
   inc c
   ret
 

@@ -1,13 +1,29 @@
+;
+; Front end for MDFourier tone generator (stand-alone 4K ROM)
+; Copyright 2021, 2023 Damian Yerrick
+;
+; This program is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 2 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License along
+; with this program; if not, write to the Free Software Foundation, Inc.,
+; 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+;
 .include "nes.inc"
 .include "global.inc"
-
-; Aims to support use with mapper 0, 1, 2, 4, 7, or 218
-; Mapper 7 is the most emulator compatible
-MAPPERNUM = 7
 
 ; Rumor has it that PPU A13 passes through the audio inverter
 ; and can affect noise
 MDF_PA13_HIGH = 1
+
+MDF4K_AUTOSTART_DELAY = 60
 
 test_good_phase := test_state+6
 
@@ -169,42 +185,49 @@ test_good_phase := test_state+6
 
 .else
 
-  .segment "INESHDR"
-  .if MAPPERNUM = 218
-    MIRRORING = 9
-  .else
-    MIRRORING = 1
-  .endif
-  .ifdef CHRROM
-    CHRBANKS = 1
-  .else
-    CHRBANKS = 0
-  .endif
 
-  .byte "NES", $1A, 1, CHRBANKS
-  .byte (MAPPERNUM << 4) & $F0 | MIRRORING
-  .byte MAPPERNUM & $F0
+OAM := $0200  ; for synced reads
 
-  ; Space for you to patch in whatever initialization your mapper needs
-  .segment "STUB15"
-  stub15start:
-  .repeat 96 - 9
-    nop
-  .endrepeat
-  jmp reset_handler
-  .addr nmi_handler, stub15start, irq_handler
-  .assert *-stub15start = 96, error, "mapper init area not 96 bytes!"
-
-  .ifdef CHRROM
-  .segment "CHR"
-  .else
-  .rodata
+; Aims to support use with mapper 0, 1, 2, 4, 7, or 218.
+; For broadest emulator compatibility, use mapper 7 for CHR RAM
+; or mapper 0 for CHR ROM.
+.ifdef MDF4K_CHRROM
+  CHRBANKS = 1
+  .ifndef MDF4K_MAPPERNUM
+    ; Everything supports NROM
+    MDF4K_MAPPERNUM = 0
   .endif
-  chrdata: .incbin "obj/nes/mdf4k_chr.chr"
-  chrdata_end:
+.else
+  CHRBANKS = 0
+  .ifndef MDF4K_MAPPERNUM
+    ; AxROM single screen mirroring most closely represents the
+    ; minimalist mapper 218 dev cart for which MDF 4K was first made
+    MDF4K_MAPPERNUM = 7
+  .endif
 .endif
 
-.segment "ZEROPAGE"
+.if MDF4K_MAPPERNUM = 218
+  MIRRORING = 9
+.else
+  MIRRORING = 1
+.endif
+
+.segment "INESHDR"
+.byte "NES", $1A, 1, CHRBANKS
+.byte (MDF4K_MAPPERNUM << 4) & $F0 | MIRRORING
+.byte MDF4K_MAPPERNUM & $F0
+
+; Space for you to patch in whatever initialization your mapper needs
+.segment "STUB15"
+stub15start:
+.repeat 96 - 9
+  nop
+.endrepeat
+jmp reset_handler
+.addr nmi_handler, stub15start, irq_handler
+.assert *-stub15start = 96, error, "mapper init area not 96 bytes!"
+
+.zeropage
 nmis: .res 1
 cur_keys: .res 2
 new_keys: .res 2
@@ -333,18 +356,65 @@ irq_handler:
 .endif
   lda #VBLANK_NMI
   sta PPUCTRL
-  jsr mdfourier_ready_tone
-  ; fall through
+  .ifndef ::MDF4K_AUTOSTART
+    jsr mdfourier_ready_tone
+  .endif
+  
 restart:
   jsr mdfourier_init_apu
   jsr mdfourier_push_apu
+  jsr mdf4k_draw_title
+
+  .ifdef ::MDF4K_AUTOSTART
+    ldy #MDF4K_AUTOSTART_DELAY
+    titlewait:
+      jsr vsync
+      dey
+      bne titlewait
+  .else
+    ; Wait for A press
+    keywait:
+      jsr read_pads
+      jsr vsync
+      lda new_keys
+      bpl keywait
+  .endif
+
+autostart_entry_point:
+  ; reduce interference from the PPU as far as we possibly can
+  ldy #$3F
+  lda #$00
+  ldx #$0D
+  sta PPUMASK
+  sty PPUADDR
+  sta PPUADDR
+  stx PPUDATA
+  sta PPUADDR
+  sta PPUADDR
+
+  .if ::MDF_PA13_HIGH
+    ldx #$20
+    stx PPUADDR
+    sta PPUADDR
+  .endif
+  jsr mdfourier_run
+
+  .ifdef ::MDF4K_AUTOSTART
+    jsr mdf4k_draw_title
+  forever: jmp forever
+  .else
+    jmp restart
+  .endif
+.endproc
+
+.proc mdf4k_draw_title
   lda #VBLANK_NMI
   sta PPUCTRL
   asl a
   tay
   sta PPUMASK
 
-.if .not(.defined(CHRROM) .or .defined(FDSHEADER))
+.if .not(.defined(::MDF4K_CHRROM) .or .defined(::FDSHEADER))
   ; Copy tiles to CHR RAM
   sty PPUADDR
   sty PPUADDR
@@ -430,33 +500,7 @@ have_phase_xy:
   sta PPUSCROLL
   lda #BG_ON
   sta PPUMASK
-
-  ; Wait for A press
-  keywait:
-    jsr read_pads
-    jsr vsync
-    lda new_keys
-    bpl keywait
-
-  ; reduce interference from the PPU as far as we possibly can
-  ldy #$3F
-  lda #$00
-  ldx #$0D
-  sta PPUMASK
-  sty PPUADDR
-  sta PPUADDR
-  stx PPUDATA
-  sta PPUADDR
-  sta PPUADDR
-
-  .if ::MDF_PA13_HIGH
-    ldx #$20
-    stx PPUADDR
-    sta PPUADDR
-  .endif
-
-  jsr mdfourier_run
-  jmp restart
+  rts
 .endproc
 
 .proc write_4y_of_a
@@ -479,15 +523,22 @@ have_phase_xy:
 .endproc
 
 .proc mdfourier_present
-  bit new_keys
-  bvc no_B_press
-    lda mdfourier_good_phase
-    sta test_good_phase
-    rts
-  no_B_press:
-  jsr vsync
-  jsr mdfourier_push_apu
-  jmp read_pads
+  .ifdef ::MDF4K_AUTOSTART
+    jsr vsync
+    lda #0
+    sta new_keys
+    sta cur_keys
+  .else
+    bit new_keys
+    bvc no_B_press
+      lda mdfourier_good_phase
+      sta test_good_phase
+      rts
+    no_B_press:
+    jsr vsync
+    jsr sync_read_b_button
+  .endif
+  jmp mdfourier_push_apu
 .endproc
 
 .proc vsync
@@ -498,8 +549,10 @@ have_phase_xy:
   rts
 .endproc
 
-.ifdef FDSHEADER
+.if .defined(FDSHEADER)
 .segment "FILE0_DAT"
+.elseif .defined(MDF4K_CHRROM)
+.segment "CHR"
 .else
 .rodata
 .endif

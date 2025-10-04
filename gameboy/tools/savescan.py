@@ -348,7 +348,8 @@ Call this before setting or clearing a toplabel.
 Return (label part, remainder part, True if exported)
 """
         colonsplit = line.split(':', 1)
-        if '"' in colonsplit[0]: return None, line, False  # ld a, ":"
+        if '"' in colonsplit[0] or "'" in colonsplit[0]:
+            return None, line, False  # ld a, ':'
         if len(colonsplit) == 1 and line.startswith('.'):
             # local labels can be terminated by whitespace instead of colon
             colonsplit = line.split(None, 1)

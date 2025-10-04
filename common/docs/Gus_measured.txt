@@ -1,0 +1,20 @@
+Vertical dimensions: ratio close to 1.5
+- top of cap to chin: in-game 41, 2006 sketch 61
+- chin to elbow: in-game 41, 2006 sketch about 56
+- chin to hem of shirt: in-game 57, 2006 sketch 80
+- chin to bottom: in-game 77, 2006 sketch 106
+
+Horizontal dimensions: ratio close to 1.8
+- crown of cap: in-game 34, 2006 sketch 59
+- head excluding ears: in-game 22, 2006 sketch 47
+- neck: in-game 14, 2006 sketch 26
+- vest at shoulder: in-game 40, 2006 sketch 54
+- vest between arm holes: in-game 34, 2006 sketch 49
+- hips: in-game 46, 2006 sketch 73
+
+Tilt values in 2006 sketch
+- head: 6 degrees
+- body: 0 degrees
+
+That's why I'll apply a 10:9 stretch (either 111% horizontally OR 90%
+vertically) to the pixel art of Gus on the front cover of the manual.

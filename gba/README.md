@@ -117,6 +117,26 @@ or macOS, once you have installed `gba-dev` using pacman, type these:
     source /etc/profile.d/devkit-env.sh
     make
 
+In 2024, unreliability of devkitPro's download servers led the team
+to investigate replacing devkitARM with [Wonderful Toolchain].
+
+Some GBA emulators, such as Mesen, do not ship with a free
+reimplementation of Game Boy Advance BIOS.  GBA owners can
+[dump the authentic BIOS] using a GBA flash cartridge.
+Emulator-only users can use [Cult of GBA's reimplementation], either
+using a GNU binutils distribution (such as devkitARM or Wonderful)
+to build it from source code or using the `tools/get_bios.sh`
+script with a native C compiler to retrieve and unpack the copy of
+Cult of GBA BIOS distributed with [SkyEmu].  **Careful:** As of
+August 2024, Cult of GBA BIOS works only with the devkitARM build,
+not the Wonderful build.  (This has been filed as [issue #14].)
+
+[Wonderful Toolchain]: https://wonderful.asie.pl/
+[dump the authentic BIOS]: https://glazedbelmont.github.io/gbabiosdump/
+[Cult of GBA's reimplementation]: https://github.com/Cult-of-GBA/BIOS
+[SkyEmu]: https://github.com/skylersaleh/SkyEmu
+[issue #14]: https://github.com/Cult-of-GBA/BIOS/issues/14
+
 Contributors
 ------------
 * Concept: Artemio Urbina [@Artemio]

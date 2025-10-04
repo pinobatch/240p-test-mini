@@ -51,6 +51,8 @@ __pycache__/
 /gba/*.sav
 /gba/.map
 /gba/compile_commands.json
+/gba/tools/write_bios
+/gba/tools/gba_bios.h
 /nes/obj/nes/*.s
 /nes/obj/nes/*.sav
 /nes/obj/nes/mdfourier*
@@ -62,7 +64,7 @@ __pycache__/
 /nes/240pee.nes
 /nes/mdfourier.nsf
 /nes/mdfourier4k.nes
-/nes/mdfourier4k-chrrom.nes
+/nes/mdfourier4k-*.nes
 /nes/240p-nes-others.7z
 /nes/mdfourier4k-fdsheader.fds
 /common/tools/dte

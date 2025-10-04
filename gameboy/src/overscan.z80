@@ -138,7 +138,7 @@ activity_overscan::
     ; Regs at this point:
     ; C: HRAM pointer to border position
     ; B: Direction (0: decrease; 1: increase; 2: Nothing)
-    ld a,[$FF00+c]
+    ldh a, [c]
     srl b  ; direction in carry, z true if valid
     jr nz,.a_done
     jr c,.dir_is_increase
@@ -151,7 +151,7 @@ activity_overscan::
     ; Regs: C is HRAM pointer; A is new value to write if valid
     cp 25
     jr nc,.a_done
-    ld [$FF00+c],a
+    ldh [c],a
   .a_done:
   
   call overscan_draw_sprites
@@ -217,8 +217,8 @@ activity_overscan::
 
   jp .loop
 
-def TILE_P equ $1B  ; vertically flipped B
-def TILE_X equ $07
+def TILE_PI equ $1B  ; vertically flipped B
+def TILE_XELS equ $07
 def TILE_RARROW equ $08
 def TILE_RBORDER equ $03
 
@@ -244,7 +244,7 @@ overscan_draw_sprites:
   ld a,low(right_border)
   add b
   ld c,a
-  ld a,[$FF00+c]
+  ldh a, [c]
   ld c,a  ; C = size of this border
 
   ; Regmap:
@@ -400,7 +400,7 @@ overscan_draw_sprites:
   ld a,d
   sub 8
   ld [hl+],a
-  ld a,TILE_P
+  ld a,TILE_PI
   ld [hl+],a
   ld a, $40  ;vertical flip
   ld [hl+],a
@@ -410,7 +410,7 @@ overscan_draw_sprites:
   inc l
   ld [hl],d
   inc l
-  ld a,TILE_X
+  ld a,TILE_XELS
   ld [hl+],a
   xor a
   ld [hl+],a

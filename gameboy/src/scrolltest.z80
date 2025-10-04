@@ -781,11 +781,11 @@ load_kiki_bg:
       rla   ; A=1 if alternate palette else 0
       ld d,a
       ld a,b
-      ld [$FF00+c],a
+      ldh [c],a
       ld a,d
       ld [hl+],a
       xor a
-      ld [$FF00+c],a
+      ldh [c],a
       ld a,h
       cp high(_SCRN1)
       jr c,.attrloop

@@ -182,7 +182,7 @@ vwfPuts::
   ld c,a
   push hl
   push bc
-  cp " "  ; Optimization: Don't draw glyph for space character
+  cp ' '  ; Optimization: Don't draw glyph for space character
   call nz, vwfPutTile
   pop bc
   pop hl

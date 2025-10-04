@@ -32,7 +32,7 @@ canohuff_decode_symbol:
 .loop:
   ; 4 Fetch number of codes of this length
   inc c
-  ld a, [$ff00 + c]
+  ldh a, [c]
   ld d, a  ; D: ncodesofthislength
 
   ; 2 Set range_end to the total number of codes seen so far,
@@ -97,7 +97,7 @@ canohuff_read_lengths:
   ld a, [hl+]
   swap a
   and $0F
-  ld [$FF00 + c], a
+  ldh [c], a
   inc c
   cp $0F
   jr c, .headerloop
@@ -226,7 +226,7 @@ walk_huff_tree:
   push de
   ld c, low(hTree)
   ; Read initial literal bits from tree header
-  ld a, [$FF00 + c]
+  ldh a, [c]
   and $0C  ; only initial literal bits matter
 .get_next_node:
   ; A.1-0: offset to next node
@@ -237,7 +237,7 @@ walk_huff_tree:
   add c
   ld c, a
   inc c
-  ld a, [$FF00 + c]
+  ldh a, [c]
 
   ; A: next node
   ; 10 Handle next bit

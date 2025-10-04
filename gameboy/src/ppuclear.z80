@@ -133,11 +133,11 @@ SECTION "load_gbc_palette", ROM0
 ; @param HL data source
 ; @return HL at end, C increased by 1, B = 0, DE unchanged
 set_gbc_palette::
-  ld [$FF00+c],a
+  ldh [c],a
   inc c
 .loop:
   ld a,[hl+]
-  ld [$FF00+c],a
+  ldh [c],a
   dec b
   jr nz,.loop
   ret
@@ -208,7 +208,7 @@ set_gbc_mono_palette::
   rlca
   ld e,a
   ld a,b  ; Regmap now: E=BGP<<1, A=palette offset, C=address port
-  ld [$FF00+c],a
+  ldh [c],a
   inc c   ; C=data port
   ld b,4  ; color count
   ld h,high(gbmonopalette)
@@ -220,9 +220,9 @@ set_gbc_mono_palette::
     or low(gbmonopalette)
     ld l,a  ; now L points to this color so stuff it into the palette
     ld a,[hl+]
-    ld [$FF00+c],a
+    ldh [c],a
     ld a,[hl-]
-    ld [$FF00+c],a
+    ldh [c],a
     ld a, e  ; move to next bitfield of BGP
     rrca
     rrca

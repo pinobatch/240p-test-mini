@@ -193,6 +193,14 @@ add_hl_12:
   add hl,de
   ret
 
+;;
+; Writes a row of 20 increasing tile numbers to the tilemap,
+; optionally looping.
+; @param A first tile ID
+; @param D first tile ID that is not part of the loop
+; @param E length of loop
+; @param HL start of row
+; @return HL at start of next row; B=0, DE=12
 gray_ramp_row_cmp_d_sub_e:
   ld b, 20
   .byteloop:
@@ -796,7 +804,7 @@ activity_solid_screen::
 
     add low(customred)
     ld c,a
-    ld a,[$FF00+c]
+    ldh a, [c]
     ld e, a  ; E = last value
     bit PADB_RIGHT,b
     jr z,.not_custom_increase
@@ -809,7 +817,7 @@ activity_solid_screen::
     ; if the new value is valid, write it back
     cp 32
     jr nc, .custom_no_change
-      ld [$FF00+c],a
+      ldh [c],a
       xor e  ; set E iff changed
       ldh [lastlcdc], a
     .custom_no_change:
@@ -871,13 +879,13 @@ calc_custom_color:
 solid_update_rgb:
   ; Draw labels for Red, Green, and Blue
   call vwfClearBuf
-  ld a,"R"
+  ld a, 'R'
   ld b,6+24*0
   call vwfPutTile
-  ld a,"G"
+  ld a, 'G'
   ld b,6+24*1
   call vwfPutTile
-  ld a,"B"
+  ld a, 'B'
   ld b,6+24*2
   call vwfPutTile
 
@@ -891,7 +899,7 @@ solid_update_rgb:
   scf
   adc a  ; A=component*24+1
   ld b,a
-  ld a,">"
+  ld a, '>'
   call vwfPutTile
 
   ; Draw red, green, and blue values
@@ -899,11 +907,11 @@ solid_update_rgb:
 .componentloop:
   push de
   ld c,e
-  ld a,[$FF00+c]
+  ldh a, [c]
   call bcd8bit_ac  ; A: tens; C: ones
   jr z,.lessthanten
     push bc
-    add "0"
+    add '0'
     ld l,a
     ld a,d
     sub 5
@@ -915,7 +923,7 @@ solid_update_rgb:
     push de
   .lessthanten:
   ld a,c
-  add "0"
+  add '0'
   ld b,d
   call vwfPutTile
   pop de
@@ -1433,22 +1441,22 @@ activity_convergence::
     .gbc_have_bcps:
     ld hl, convergence_gbc_palette
     ld bc, $0400 + low(rBCPS)
-    ld [$FF00+c], a
+    ldh [c], a
     inc c
     .gbcpalloop:
       xor a
-      ld [$FF00+c], a
-      ld [$FF00+c], a
-      ld [$FF00+c], a
-      ld [$FF00+c], a
+      ldh [c], a
+      ldh [c], a
+      ldh [c], a
+      ldh [c], a
       ld a, [hl+]
-      ld [$FF00+c], a
+      ldh [c], a
       ld a, [hl-]
-      ld [$FF00+c], a
+      ldh [c], a
       ld a, [hl+]
-      ld [$FF00+c], a
+      ldh [c], a
       ld a, [hl+]
-      ld [$FF00+c], a
+      ldh [c], a
       dec b
       jr nz, .gbcpalloop
     jr .palette_done
