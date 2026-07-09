@@ -197,10 +197,24 @@ loop:
   sta PPUDATA
   lda #$16
   sta PPUDATA
+  lda #$2A
+  sta PPUDATA
+  bit PPUDATA
+  bit PPUDATA
+  lda #$14
+  sta PPUDATA
+  lda #$2C
+  sta PPUDATA
 
-  lda #VBLANK_NMI
   clc
-  jsr ppu_screen_on_xy0
+  ldx #0
+  ldy #0
+  lda tvSystem
+  bne :+
+    ldy #232
+  :
+  lda #VBLANK_NMI
+  jsr ppu_screen_on
 
   lda #helpsect_monoscope
   jsr read_pads_helpcheck

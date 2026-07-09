@@ -249,7 +249,7 @@ $(objdir)/%16.chr: $(imgdir)/%.png
 $(objdir)/%gray.sav: $(imgdir)/%.png
 	$(PY) tools/savtool.py --palette 0f0010200f1616160f1616160f161616 $< $@
 $(objdir)/monoscope%.sav: $(imgdir)/monoscope%.png
-	$(PY) tools/savtool.py --palette 0f2026240f2424240f2424240f242424 $< $@
+	$(PY) tools/savtool.py --palette 0f20162A0f20142C0f2424240f242424 $< $@
 $(objdir)/%.sb53: $(objdir)/%.sav
 	$(PY) tools/sav2sb53.py $< $@
 $(objdir)/%.pb53: $(objdir)/%

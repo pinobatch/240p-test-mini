@@ -242,17 +242,28 @@ magnets to adjust corner
 purity and geometry.
 
 Size and aspect ratio:
-After setting horizontal
-size, use a tape measure to
-adjust vertical size until
-the red squares in the
-pattern are perfect squares.
-
+At 60 Hz, the white pattern
+occupies 90% of full frame,
+the green border 91%. Check
+your TV model for overscan
+specs. Set this where the
+arrows point. Double-check
+that the red box is a
+perfect square.
+----
 Linearity:
 The squares in each corner
 should get you started.
 Confirm your adjustment
 using the scroll tests.
+
+TVL:
+If the small white dots across
+the center of the pattern are
+clear, you have at least 210
+TVL of horizontal resolution.
+(This means 210 pixels across
+a width equal to the height.)
 
 Pattern by khmr33
 
@@ -928,7 +939,7 @@ Program: Damian Yerrick
        peoplemaking.games
 
 © 2011-2016 Artemio Urbina
-© 2015-2025 Damian Yerrick
+© 2015-2026 Damian Yerrick
 This is free software; see the
 source for copying conditions.
 There is NO warranty, not
@@ -951,6 +962,6 @@ and spreading the word about
 the project.
 
 Interested? Apply at
-  goo.gl/XF8ef6
+  pineight.com/u/240bbs
 Support us:
   patreon.com/pineight
