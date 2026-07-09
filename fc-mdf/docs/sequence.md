@@ -1,4 +1,4 @@
-Test sequences
+ Test sequences
 ==============
 
 Mapper detection
@@ -74,5 +74,93 @@ inspiration from that.
 
 Disk System
 -----------
-Pending.  Will need a whole different link script, as well as a way
-to obtain a lawfully made copy of the BIOS with which to test.
+1. Sync pulses (20 frames silence, 10 loops of 1 frame 1 kHz 8x
+   square wave and 1 frame silence, 20 frames silence)
+2. 94-note chromatic scale, beginning at lowest
+   C (8.11 Hz) and ascending to out-of-tune A 7 octaves up
+   (1747.40 Hz) at 10 frames per note, followed by 10 frames silence.
+   Repeat for waveforms sine, square, and 32x square at volume 32.
+   TODO: increase silence before next test
+3. Three DC offset pops for 20 frames, first with wave value $3F,
+   then $00, both at volume 32, phase resetted, and waveform halted.
+   Third DC pop silences second DC pop, testing for DC offset.
+   10 frames silence
+4. A (440 Hz) for 20 frames, halting and then resuming waveform
+   playback. Halting the waveform resets the phase.
+   Then, 10 frames silence
+5. Pitch Slide from C (8.11 Hz) up at 8 period unit per frame
+   for 560 frames, then 10 frames silence. Repeat for sine, square,
+   sawtooth, and 32x square. 32x square tests aliasing and ultrasound
+   response, while the rest tests for general frequency response.
+   TODO: shorten length and add silence
+6. db_fds, from rainwarrior's nes-audio-tests.
+   Loudest FDS square at A (439.94 Hz) for two seconds (12 frames).
+   Then 1 second of silence (6 frames).
+   Then loudest 2A03 pulse square at A (440.40 Hz) for two seconds (12
+   frames).
+   Then 1 second of silence (6 frames).
+7. Relative phase test. Sawtooth wave note at C (65.29 hz) for 30
+   frames. 10 frames silence.
+   2A03 25% pulse note at C (65.42 Hz) for 30 frames.
+   10 frames silence.
+8. Nonlinear FDS DAC test. "Sorted" sawtooth wave note at C (65.29 hz)
+   for 30 frames. 10 frames silence.
+9. Master volume test. 4 sawtooth wave notes of 109.24 Hz (period
+   $100) for 40 frames. 10 frames silence.
+   Each note decreasing in master volume (00, 01, 10, 11).
+10. Envelope test.
+    5 sawtooth wave notes of C (523.15 hz) and one DC offset envelope
+    for 40 frames with different methods of modifying volume.
+    1. manual volume gain write, decreasing volume gain every frame
+    2. hardware volume sweep decrease, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed)
+    3. hardware volume sweep increase, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed).
+       20 frames silence.
+    4. manual volume gain write, going from gain 1 to 0. 5 frames.
+    5. hardware volume sweep decrease, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed), going
+       from gain 1 to 0. 5 frames.
+       10 frames silence.
+    6. DC manual volume gain write, decreasing volume gain every frame.
+    TODO: measure exact envelope length by writing to $4080 and
+    counting cycles
+11. Modulator test.
+    TODO: mod envelope tests
+    TODO: mod overflow/underflow tests
+    6 notes of C (261.58 Hz) for 40 frames, each with varying
+    modulator and modulator table properties.
+    a. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period
+       of $265. This checks for mod table index sync.
+    b. sine wave, Dn-FT mod sine, mod depth of $3F, mod period
+       of $265. This compares against previous wave.
+    c. sine wave, modtable_data_mod_reset, mod depth of $10, mod
+       period of $020. This checks for mod counter reset.
+    d. sine wave, modtable_data_mod_overflow, mod depth of $10, mod
+       period of $020
+    e. sine wave, modtable_data_mod_underflow, mod depth of $10, mod
+       period of $020
+    f. sine wave, FT "NEZPlug" mod sine, mod depth of $3F, mod period
+       of $265. In addition to $4085=$20, this will test for $4087.7
+       latch delay.
+12. Modulator envelope test.
+    3 sawtooth wave notes of C (523.15 hz) for 40 frames with
+    different methods of modifying modulator gain.
+    1. manual mod gain write, decreasing mod gain every frame
+    2. hardware mod sweep decrease, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed)
+    3. hardware mod sweep increase, speed chosen to closely match
+       video framerate ($32 speed, $48 master envelope speed)
+    (value $0A to $4080).
+    Each note decreases master volume (00, 01, 10, 11).
+    TODO: measure exact envelope length by writing to $4080 and
+    counting cycles
+13. Repeat sync pulses
+
+to find out:
+- [ ] is the wave and mod unit ticked on the same M2 cycle?
+- [ ] is it possible to determine wave unit M2 alignment?
+- [ ] is it possible to determine mod unit M2 alignment?
+- [ ] is it feasible to align test start with wave/mod unit?
+- [x] does mod unit envelopes also wait for wavepos==0 latch (like wave unit envelopes)?
+  - no
