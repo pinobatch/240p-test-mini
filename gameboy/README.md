@@ -71,7 +71,7 @@ its inverted counterpart can look like interlace.
 (See "[LCD monitor technology and tests]" by W. Andrew Steer.)
 
 Though the NES version of 240p Test Suite uses about 40 KiB of ROM
-data, the [Catskull cartridge] is limited to 32 KiB.  Fortunately,
+data, a mapperless cartridge is limited to 32 KiB.  Fortunately,
 the graphics for several tests are smaller than on a 240p platform,
 which makes the menu, Linearity, Sharpness, Drop Shadow, and Scroll
 Test smaller.  I managed to make some tests' help text more concise.

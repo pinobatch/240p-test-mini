@@ -169,9 +169,9 @@ def get_pink(lfsr):
     for i, (pk, wh) in enumerate(zip(lfsr, np.flip(lfsr))):
         channel = min((i ^ (i - 1)).bit_length() - 1, len(pinkchannels) - 1)
         level -= pinkchannels[channel]
-        pinkchannels[channel] = pk
+        pinkchannels[channel] = pk = int(pk)
         level += pk
-        out[i] = (level + wh // 2) // 8
+        out[i] = (level + int(wh) // 2) // 8
     return out
 
 def get_fade(length, halfperiod):

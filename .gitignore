@@ -62,6 +62,7 @@ __pycache__/
 /nes-palpar/palpar.nes
 /nes-palpar/obj/nes/*.sav
 /nes-palpar/obj/nes/*.nam
+mdfourier-dac-*.wav
 
 # this is NES and Game Boy homebrew, not DSiWare
 *.DS_Store
